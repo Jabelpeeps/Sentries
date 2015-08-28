@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import net.aufdemrand.sentry.SentryInstance.Status;
 import net.citizensnpcs.api.exception.NPCLoadException;
@@ -37,70 +38,53 @@ public class SentryTrait extends Trait implements Toggleable {
 
 		isToggled = key.getBoolean( "toggled", isToggled() );
 		
-		// TODO consider replacing the repeated uses of 'plugin.getConfig()' with a local variable
+		// replaced the repeated uses of 'plugin.getConfig()' with a local variable
+		FileConfiguration cfg = plugin.getConfig();
+		
 		thisInstance.Retaliate	= key.getBoolean( "Retaliate"
-							, plugin.getConfig()
-								.getBoolean( "DefaultOptions.Retaliate", true ) );
+							, cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
 		thisInstance.Invincible	= key.getBoolean( "Invincinble"
-							, plugin.getConfig()
-								.getBoolean( "DefaultOptions.Invincible", false ) );
+							, cfg.getBoolean( "DefaultOptions.Invincible", false ) );
 		thisInstance.DropInventory = key.getBoolean( "DropInventory"
-							   , plugin.getConfig()
-							   	   .getBoolean( "DefaultOptions.Drops", false ) );
+							   , cfg.getBoolean( "DefaultOptions.Drops", false ) );
 		thisInstance.LuckyHits 	= key.getBoolean( "CriticalHits"
-							, plugin.getConfig()
-								.getBoolean( "DefaultOptions.Criticals", true ) );
-		thisInstance.sentryHealth = key.getDouble( "Health", plugin.getConfig()
-									   .getInt( "DefaultStats.Health", 20 ) );
-		thisInstance.sentryRange = key.getInt( "Range", plugin.getConfig()
-								      .getInt( "DefaultStats.Range", 10 ) );
+							, cfg.getBoolean( "DefaultOptions.Criticals", true ) );
+		thisInstance.sentryHealth = key.getDouble( "Health", cfg.getInt( "DefaultStats.Health", 20 ) );
+		thisInstance.sentryRange = key.getInt( "Range", cfg.getInt( "DefaultStats.Range", 10 ) );
 		thisInstance.RespawnDelaySeconds = key.getInt( "RespawnDelay"
-								, plugin.getConfig()
-									.getInt( "DefaultStats.Respawn", 10 ) );
+								, cfg.getInt( "DefaultStats.Respawn", 10 ) );
 		thisInstance.sentrySpeed = (float) key.getDouble( "Speed"
-								, plugin.getConfig()
-									.getDouble( "DefaultStats.Speed", 1.0 ) );
+								, cfg.getDouble( "DefaultStats.Speed", 1.0 ) );
 		thisInstance.sentryWeight = key.getDouble( "Weight"
-							 , plugin.getConfig()
-							 	 .getDouble( "DefaultStats.Weight", 1.0 ) );
-		thisInstance.Armor 	= key.getInt( "Armor", plugin.getConfig().getInt( "DefaultStats.Armor", 0 ) );
+							 , cfg.getDouble( "DefaultStats.Weight", 1.0 ) );
+		thisInstance.Armor 	= key.getInt( "Armor", cfg.getInt( "DefaultStats.Armor", 0 ) );
 		thisInstance.Strength	= key.getInt( "Strength"
-							, plugin.getConfig().getInt( "DefaultStats.Strength", 1 ) );
+							, cfg.getInt( "DefaultStats.Strength", 1 ) );
 		thisInstance.FollowDistance = key.getInt( "FollowDistance"
-							, plugin.getConfig()
-								.getInt( "DefaultStats.FollowDistance", 4 ) );
+							, cfg.getInt( "DefaultStats.FollowDistance", 4 ) );
 		thisInstance.guardTarget = key.getString( "GuardTarget", null );
-		thisInstance.GreetingMessage = key.getString( "Greeting", plugin.getConfig()
-										.getString( 
+		thisInstance.GreetingMessage = key.getString( "Greeting", cfg.getString( 
 			"DefaultTexts.Greeting", "'" + ChatColor.COLOR_CHAR + "b<NPC> says Welcome, <PLAYER>'") );
 			
-		thisInstance.WarningMessage = key.getString( "Warning", plugin.getConfig()
-									      .getString(
+		thisInstance.WarningMessage = key.getString( "Warning", cfg.getString(
 			"DefaultTexts.Warning", "'" + ChatColor.COLOR_CHAR + "c<NPC> says Halt! Come no closer!'") );
 		
 		thisInstance.WarningRange = key.getInt( "WarningRange"
-							, plugin.getConfig()
-								.getInt( "DefaultStats.WarningRange", 0 ) );
+							, cfg.getInt( "DefaultStats.WarningRange", 0 ) );
 		thisInstance.AttackRateSeconds = key.getDouble( "AttackRate"
-							       , plugin.getConfig()
-								       .getDouble( "DefaultStats.AttackRate", 2.0) );
+							       , cfg.getDouble( "DefaultStats.AttackRate", 2.0) );
 		thisInstance.HealRate = key.getDouble( "HealRate"
-							, plugin.getConfig()
-								.getDouble( "DefaultStats.HealRate", 0.0 ) );
+							, cfg.getDouble( "DefaultStats.HealRate", 0.0 ) );
 		thisInstance.NightVision = key.getInt( "NightVision"
-							, plugin.getConfig()
-								.getInt( "DefaultStats.NightVision", 16 ) );
+							, cfg.getInt( "DefaultStats.NightVision", 16 ) );
 		thisInstance.KillsDropInventory = key.getBoolean( "KillDrops"
-								, plugin.getConfig()
-									.getBoolean( "DefaultOptions.KillDrops"
+								, cfg.getBoolean( "DefaultOptions.KillDrops"
 											, true ) );
         	thisInstance.IgnoreLOS = key.getBoolean( "IgnoreLOS"
-        						, plugin.getConfig()
-        							.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
+        						, cfg.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
 		thisInstance.MountID = key.getInt( "MountID", (int) -1 );
 		thisInstance.Targetable = key.getBoolean( "Targetable"
-							, plugin.getConfig()
-								.getBoolean( "DefaultOptions.Targetable", true ) );
+							, cfg.getBoolean( "DefaultOptions.Targetable", true ) );
 
 		if ( key.keyExists( "Spawn" ) ){
 			try {
