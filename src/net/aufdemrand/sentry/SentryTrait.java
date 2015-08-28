@@ -18,10 +18,11 @@ import net.citizensnpcs.trait.Toggleable;
 public class SentryTrait extends Trait implements Toggleable {
 
 	private Sentry plugin = null;
-	private SentryInstance thisInstance;
+	private SentryInstance inst;
 	private boolean isToggled = true;
 
 	public SentryTrait() {
+		// super-constructor sets private final String 'name' with argument given.
 		super( "sentry" );
 		plugin = (Sentry) Bukkit.getServer().getPluginManager().getPlugin( "Sentry" );
 	}
@@ -29,8 +30,8 @@ public class SentryTrait extends Trait implements Toggleable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void load( DataKey key ) throws NPCLoadException {
+		// plugin.debug( npc.getName() + " Load" );
 		
-		plugin.debug( npc.getName() + " Load" );
 		ensureInst();
 
 		if ( key.keyExists( "traits" ) ) 
@@ -41,54 +42,58 @@ public class SentryTrait extends Trait implements Toggleable {
 		// replaced the repeated uses of 'plugin.getConfig()' with a local variable
 		FileConfiguration cfg = plugin.getConfig();
 		
-		thisInstance.Retaliate	= key.getBoolean( "Retaliate"
-							, cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
-		thisInstance.Invincible	= key.getBoolean( "Invincinble"
-							, cfg.getBoolean( "DefaultOptions.Invincible", false ) );
-		thisInstance.DropInventory = key.getBoolean( "DropInventory"
-							   , cfg.getBoolean( "DefaultOptions.Drops", false ) );
-		thisInstance.LuckyHits 	= key.getBoolean( "CriticalHits"
-							, cfg.getBoolean( "DefaultOptions.Criticals", true ) );
-		thisInstance.sentryHealth = key.getDouble( "Health", cfg.getInt( "DefaultStats.Health", 20 ) );
-		thisInstance.sentryRange = key.getInt( "Range", cfg.getInt( "DefaultStats.Range", 10 ) );
-		thisInstance.RespawnDelaySeconds = key.getInt( "RespawnDelay"
-								, cfg.getInt( "DefaultStats.Respawn", 10 ) );
-		thisInstance.sentrySpeed = (float) key.getDouble( "Speed"
-								, cfg.getDouble( "DefaultStats.Speed", 1.0 ) );
-		thisInstance.sentryWeight = key.getDouble( "Weight"
-							 , cfg.getDouble( "DefaultStats.Weight", 1.0 ) );
-		thisInstance.Armor 	= key.getInt( "Armor", cfg.getInt( "DefaultStats.Armor", 0 ) );
-		thisInstance.Strength	= key.getInt( "Strength"
-							, cfg.getInt( "DefaultStats.Strength", 1 ) );
-		thisInstance.FollowDistance = key.getInt( "FollowDistance"
-							, cfg.getInt( "DefaultStats.FollowDistance", 4 ) );
-		thisInstance.guardTarget = key.getString( "GuardTarget", null );
-		thisInstance.GreetingMessage = key.getString( "Greeting", cfg.getString( 
+		inst.Retaliate	= key.getBoolean( "Retaliate"
+						, cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
+		inst.Invincible	= key.getBoolean( "Invincinble"
+						, cfg.getBoolean( "DefaultOptions.Invincible", false ) );
+		inst.DropInventory = key.getBoolean( "DropInventory"
+						   , cfg.getBoolean( "DefaultOptions.Drops", false ) );
+		inst.LuckyHits 	= key.getBoolean( "CriticalHits"
+						, cfg.getBoolean( "DefaultOptions.Criticals", true ) );
+						
+		inst.sentryHealth = key.getDouble( "Health", cfg.getInt( "DefaultStats.Health", 20 ) );
+		inst.sentryRange = key.getInt( "Range", cfg.getInt( "DefaultStats.Range", 10 ) );
+		
+		inst.RespawnDelaySeconds = key.getInt( "RespawnDelay"
+						     , cfg.getInt( "DefaultStats.Respawn", 10 ) );
+		inst.sentrySpeed = (float) key.getDouble( "Speed"
+							, cfg.getDouble( "DefaultStats.Speed", 1.0 ) );
+		inst.sentryWeight = key.getDouble( "Weight"
+						 , cfg.getDouble( "DefaultStats.Weight", 1.0 ) );
+						 
+		inst.Armor 	= key.getInt( "Armor", cfg.getInt( "DefaultStats.Armor", 0 ) );
+		inst.Strength	= key.getInt( "Strength"
+					    , cfg.getInt( "DefaultStats.Strength", 1 ) );
+		inst.FollowDistance = key.getInt( "FollowDistance"
+						, cfg.getInt( "DefaultStats.FollowDistance", 4 ) );
+		inst.guardTarget = key.getString( "GuardTarget", null );
+		
+		inst.GreetingMessage = key.getString( "Greeting", cfg.getString( 
 			"DefaultTexts.Greeting", "'" + ChatColor.COLOR_CHAR + "b<NPC> says Welcome, <PLAYER>'") );
 			
-		thisInstance.WarningMessage = key.getString( "Warning", cfg.getString(
+		inst.WarningMessage = key.getString( "Warning", cfg.getString(
 			"DefaultTexts.Warning", "'" + ChatColor.COLOR_CHAR + "c<NPC> says Halt! Come no closer!'") );
 		
-		thisInstance.WarningRange = key.getInt( "WarningRange"
-							, cfg.getInt( "DefaultStats.WarningRange", 0 ) );
-		thisInstance.AttackRateSeconds = key.getDouble( "AttackRate"
-							       , cfg.getDouble( "DefaultStats.AttackRate", 2.0) );
-		thisInstance.HealRate = key.getDouble( "HealRate"
-							, cfg.getDouble( "DefaultStats.HealRate", 0.0 ) );
-		thisInstance.NightVision = key.getInt( "NightVision"
-							, cfg.getInt( "DefaultStats.NightVision", 16 ) );
-		thisInstance.KillsDropInventory = key.getBoolean( "KillDrops"
-								, cfg.getBoolean( "DefaultOptions.KillDrops"
-											, true ) );
-        	thisInstance.IgnoreLOS = key.getBoolean( "IgnoreLOS"
-        						, cfg.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
-		thisInstance.MountID = key.getInt( "MountID", (int) -1 );
-		thisInstance.Targetable = key.getBoolean( "Targetable"
-							, cfg.getBoolean( "DefaultOptions.Targetable", true ) );
+		inst.WarningRange = key.getInt( "WarningRange"
+					      , cfg.getInt( "DefaultStats.WarningRange", 0 ) );
+		inst.AttackRateSeconds = key.getDouble( "AttackRate"
+						       , cfg.getDouble( "DefaultStats.AttackRate", 2.0) );
+		inst.HealRate 	= key.getDouble( "HealRate"
+						, cfg.getDouble( "DefaultStats.HealRate", 0.0 ) );
+		inst.NightVision = key.getInt( "NightVision"
+					     , cfg.getInt( "DefaultStats.NightVision", 16 ) );
+		inst.KillsDropInventory = key.getBoolean( "KillDrops"
+							, cfg.getBoolean( "DefaultOptions.KillDrops", true ) );
+        	inst.IgnoreLOS 	= key.getBoolean( "IgnoreLOS"
+        					, cfg.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
+        					
+		inst.MountID 	= key.getInt( "MountID", (int) -1 );
+		inst.Targetable = key.getBoolean( "Targetable"
+						, cfg.getBoolean( "DefaultOptions.Targetable", true ) );
 
 		if ( key.keyExists( "Spawn" ) ){
 			try {
-				thisInstance.Spawn = new Location( 
+				inst.Spawn = new Location( 
 							plugin.getServer().getWorld( key.getString( "Spawn.world" ) )
 							, key.getDouble( "Spawn.x" )
 							, key.getDouble( "Spawn.y" )
@@ -97,13 +102,13 @@ public class SentryTrait extends Trait implements Toggleable {
 							, (float) key.getDouble("Spawn.pitch") );
 			} catch (Exception e) {
 				e.printStackTrace();
-				thisInstance.Spawn = null;
+				inst.Spawn = null;
 			}
-			if ( thisInstance.Spawn.getWorld() == null ) 
-				thisInstance.Spawn = null;
+			if ( inst.Spawn.getWorld() == null ) 
+				inst.Spawn = null;
 		}
-		if ( thisInstance.guardTarget != null && thisInstance.guardTarget.isEmpty() ) 
-			thisInstance.guardTarget = null;
+		if ( inst.guardTarget != null && inst.guardTarget.isEmpty() ) 
+			inst.guardTarget = null;
 		
 		// TODO consider why we are allocating new objects here, when they are going to be immediately 
 		// replaced in the following if...else... blocks; the new'ed lists will be left for GC.
@@ -122,22 +127,22 @@ public class SentryTrait extends Trait implements Toggleable {
 
 		// TODO find out why these checks are needed.  i.e. why aren't the targets lists using Sets?
 		for ( String string : targettemp ) {
-			if( !thisInstance.validTargets.contains( string.toUpperCase() ) ){
-				thisInstance.validTargets.add( string.toUpperCase() );
+			if( !inst.validTargets.contains( string.toUpperCase() ) ){
+				inst.validTargets.add( string.toUpperCase() );
 			}
 		}
 		for ( String string : ignoretemp ) {
-			if( !thisInstance.ignoreTargets.contains( string.toUpperCase() ) ){
-				thisInstance.ignoreTargets.add( string.toUpperCase() );
+			if( !inst.ignoreTargets.contains( string.toUpperCase() ) ){
+				inst.ignoreTargets.add( string.toUpperCase() );
 			}
 		}
 		
-		thisInstance.loaded = true;
-		thisInstance.processTargets();
+		inst.loaded = true;
+		inst.processTargets();
 	}
 
 	public SentryInstance getInstance(){
-		return thisInstance;
+		return inst;
 	}
 
 	@Override
@@ -145,9 +150,10 @@ public class SentryTrait extends Trait implements Toggleable {
 		plugin.debug( npc.getName() + ":" + npc.getId() + " onSpawn" );
 		ensureInst();
 
-		if ( !thisInstance.loaded ){
+		if ( !inst.loaded ){
 			try {
-				plugin.debug( npc.getName() + " onSpawn call load" );
+				//  plugin.debug( npc.getName() + " onSpawn call load" );
+				
 				load( new net.citizensnpcs.api.util.MemoryDataKey() );
 			} catch (NPCLoadException e) {
 			}
@@ -155,14 +161,14 @@ public class SentryTrait extends Trait implements Toggleable {
 
 		if ( !plugin.GroupsChecked ) plugin.doGroups(); // lazy checking for lazy vault.
 
-		thisInstance.initialize();
+		inst.initialize();
 	}
 
 	private void ensureInst(){
-		if ( thisInstance == null ) {
-			thisInstance = new SentryInstance( plugin );
-			thisInstance.myNPC = npc;
-			thisInstance.myTrait = this;
+		if ( inst == null ) {
+			inst = new SentryInstance( plugin );
+			inst.myNPC = npc;
+			inst.myTrait = this;
 		}
 	}
 
@@ -171,14 +177,14 @@ public class SentryTrait extends Trait implements Toggleable {
 
 		//	plugin = (Sentry) Bukkit.getPluginManager().getPlugin("Sentry");
 
-		if ( thisInstance != null ){
+		if ( inst != null ){
 			//	plugin.getServer().broadcastMessage("onRemove");
-			thisInstance.cancelRunnable();
+			inst.cancelRunnable();
 		}
 
 		plugin.debug( npc.getName() + " onRemove" );
 
-		thisInstance = null;
+		inst = null;
 		isToggled = false;
 	}
 
@@ -191,72 +197,72 @@ public class SentryTrait extends Trait implements Toggleable {
 	@Override
 	public void onDespawn() {
 		plugin.debug( npc.getName() + ":" + npc.getId() + " onDespawn" );
-		if( thisInstance != null ){
-			thisInstance.isRespawnable = System.currentTimeMillis() 
-							+ thisInstance.RespawnDelaySeconds * 1000;
-			thisInstance.sentryStatus = Status.isDEAD;
-			thisInstance.dismount();
+		if( inst != null ){
+			inst.isRespawnable = System.currentTimeMillis() 
+							+ inst.RespawnDelaySeconds * 1000;
+			inst.sentryStatus = Status.isDEAD;
+			inst.dismount();
 		}
 	}
 
 	@Override
 	public void save( DataKey key ) {
 		
-		if ( thisInstance == null ) return;
+		if ( inst == null ) return;
 		
 		key.setBoolean( "toggled", isToggled );
-		key.setBoolean( "Retaliate", thisInstance.Retaliate );
-		key.setBoolean( "Invincinble", thisInstance.Invincible );
-		key.setBoolean( "DropInventory", thisInstance.DropInventory );
-		key.setBoolean( "KillDrops", thisInstance.KillsDropInventory );
-		key.setBoolean( "Targetable", thisInstance.Targetable );
+		key.setBoolean( "Retaliate", inst.Retaliate );
+		key.setBoolean( "Invincinble", inst.Invincible );
+		key.setBoolean( "DropInventory", inst.DropInventory );
+		key.setBoolean( "KillDrops", inst.KillsDropInventory );
+		key.setBoolean( "Targetable", inst.Targetable );
 
-		key.setInt( "MountID", thisInstance.MountID );
+		key.setInt( "MountID", inst.MountID );
 
-		key.setBoolean( "CriticalHits", thisInstance.LuckyHits );
-        	key.setBoolean( "IgnoreLOS", thisInstance.IgnoreLOS );
-		key.setRaw( "Targets", thisInstance.validTargets );
-		key.setRaw( "Ignores", thisInstance.ignoreTargets );
+		key.setBoolean( "CriticalHits", inst.LuckyHits );
+        	key.setBoolean( "IgnoreLOS", inst.IgnoreLOS );
+		key.setRaw( "Targets", inst.validTargets );
+		key.setRaw( "Ignores", inst.ignoreTargets );
 
-		if ( thisInstance.Spawn != null ){
-			key.setDouble( "Spawn.x", thisInstance.Spawn.getX() );
-			key.setDouble( "Spawn.y", thisInstance.Spawn.getY() );
-			key.setDouble( "Spawn.z", thisInstance.Spawn.getZ() );
-			key.setString( "Spawn.world", thisInstance.Spawn.getWorld().getName() );
-			key.setDouble( "Spawn.yaw", thisInstance.Spawn.getYaw() );
-			key.setDouble( "Spawn.pitch", thisInstance.Spawn.getPitch() );
+		if ( inst.Spawn != null ){
+			key.setDouble( "Spawn.x", inst.Spawn.getX() );
+			key.setDouble( "Spawn.y", inst.Spawn.getY() );
+			key.setDouble( "Spawn.z", inst.Spawn.getZ() );
+			key.setString( "Spawn.world", inst.Spawn.getWorld().getName() );
+			key.setDouble( "Spawn.yaw", inst.Spawn.getYaw() );
+			key.setDouble( "Spawn.pitch", inst.Spawn.getPitch() );
 		}
 
-		key.setDouble( "Health", thisInstance.sentryHealth );
-		key.setInt( "Range", thisInstance.sentryRange );
-		key.setInt( "RespawnDelay", thisInstance.RespawnDelaySeconds );
-		key.setDouble( "Speed", (double) thisInstance.sentrySpeed );
-		key.setDouble( "Weight", thisInstance.sentryWeight );
-		key.setDouble( "HealRate", thisInstance.HealRate );
-		key.setInt( "Armor", thisInstance.Armor );
-		key.setInt( "Strength", thisInstance.Strength );
-		key.setInt( "WarningRange", thisInstance.WarningRange );
-		key.setDouble( "AttackRate", thisInstance.AttackRateSeconds );
-		key.setInt( "NightVision", thisInstance.NightVision );
-		key.setInt( "FollowDistance", thisInstance.FollowDistance );
+		key.setDouble( "Health", inst.sentryHealth );
+		key.setInt( "Range", inst.sentryRange );
+		key.setInt( "RespawnDelay", inst.RespawnDelaySeconds );
+		key.setDouble( "Speed", (double) inst.sentrySpeed );
+		key.setDouble( "Weight", inst.sentryWeight );
+		key.setDouble( "HealRate", inst.HealRate );
+		key.setInt( "Armor", inst.Armor );
+		key.setInt( "Strength", inst.Strength );
+		key.setInt( "WarningRange", inst.WarningRange );
+		key.setDouble( "AttackRate", inst.AttackRateSeconds );
+		key.setInt( "NightVision", inst.NightVision );
+		key.setInt( "FollowDistance", inst.FollowDistance );
 
-		if ( thisInstance.guardTarget != null ) key.setString( "GuardTarget", thisInstance.guardTarget );
+		if ( inst.guardTarget != null ) key.setString( "GuardTarget", inst.guardTarget );
 		else if ( key.keyExists( "GuardTarget" ) ) key.removeKey( "GuardTarget" );
 
-		key.setString( "Warning",thisInstance.WarningMessage );
-		key.setString( "Greeting",thisInstance.GreetingMessage );
+		key.setString( "Warning",inst.WarningMessage );
+		key.setString( "Greeting",inst.GreetingMessage );
 	}
 
 	@Override
 	public void onCopy() {
 		plugin.debug( npc.getName() + ":" + npc.getId() + " onCopy" );
 		
-		if ( thisInstance != null ){
+		if ( inst != null ){
 			// name given to annonymous runnable for clarity, and to prevent possible memory leaks.
 			final Runnable cloneInstance = new Runnable(){
 				//the new npc is not in the new location immediately.
 				@Override public void run(){
-					thisInstance.Spawn = npc.getEntity().getLocation().clone();
+					inst.Spawn = npc.getEntity().getLocation().clone();
 				}
 			};
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask( plugin, cloneInstance, 10 );
