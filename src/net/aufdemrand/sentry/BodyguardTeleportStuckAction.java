@@ -34,28 +34,42 @@ public class BodyguardTeleportStuckAction implements StuckAction {
 		       || !Util.CanWarp( inst.guardEntity, npc ) ) 
 			        // do nothing, next logic tick will clear the entity.
 			        return true; 
-			
-		Block block = base.getBlock();
 		
 		int i = 0;
-		while ( !block.isEmpty() ) {
-			block = block.getRelative( BlockFace.UP );
-			if ( ++i >= MAX_ITERATIONS && !block.isEmpty() )
+		// get block that npc is standing on currently.
+		Block block = base.getBlock();
+		do {
+			// break out of loop after MAX_INTERATIONS
+			if ( i++ >= MAX_INTERATIONS ) {
 				block = base.getBlock();
-			break;
-		}
+				break;	
+			}
+			// move referenced block up 1 block
+			block = block.getRelative( BlockFace.UP );	
+		// continue looping until an empty block is found	
+		} while ( !block.isEmpty() );
+
+// old code for comparison		
+//		while ( !block.isEmpty() ) {
+//			block = block.getRelative( BlockFace.UP );
+//			if ( ++i >= MAX_ITERATIONS && !block.isEmpty() )
+//				block = base.getBlock();
+//			break;
+//		}
 
 		final Location loc = block.getLocation();
 		
+		// defining runnable separately for clarity of code (as well as preventing small chance of memory leaks)
 		final Runnable tpEvent = new Runnable(){
 
 			@Override public void run() {
 				npc.teleport( loc, org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN );	
 			}
 		}
-
+		// send runnable to execute on main game loop
 		plugin.getServer().getScheduler().scheduleSyncDelayedTask( plugin, tpEvent, 2 );
 
+		// TODO find out why we are returning false here - surely the event has been dealt with?
 		return false;
 	}
 }
