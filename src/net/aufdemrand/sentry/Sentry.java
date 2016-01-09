@@ -1,21 +1,13 @@
 package net.aufdemrand.sentry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-
 import java.util.logging.Level;
-
-
-import net.citizensnpcs.Citizens;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.trait.TraitInfo;
-import net.citizensnpcs.api.trait.trait.Equipment;
-import net.citizensnpcs.api.trait.trait.Owner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,153 +15,182 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Team;
 
+import com.palmergames.bukkit.towny.object.Nation;
+import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownBlock;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
+
+import net.citizensnpcs.Citizens;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.TraitInfo;
+import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.api.trait.trait.Owner;
+import net.milkbowl.vault.permission.Permission;
+import net.sacredlabyrinth.phaed.simpleclans.Clan;
+import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
 
 public class Sentry extends JavaPlugin {
 
-	public  int archer = -1;
-	public Map<Integer, Double> ArmorBuffs = new HashMap<Integer, Double>();
-	public Queue<Projectile> arrows = new LinkedList<Projectile>(); 
-	public String BlockMessage = "";
-	public  int bombardier = -1;
-	public List<Integer> Boots  = new LinkedList<Integer>( java.util.Arrays.asList(301,305,309,313,317));
-
-	public List<Integer> Chestplates  =  new LinkedList<Integer>(java.util.Arrays.asList(299,303,307,311,315));
-	//SimpleClans sSuport
-	boolean ClansActive = false;
-	public int Crit1Chance;
-	public String Crit1Message = "";
-	public int Crit2Chance;
-	public String Crit2Message = "";
-	public int Crit3Chance;
-	public String Crit3Message = "";
 	public boolean debug = false;
-	//***Denizen Hook
+	
+	public Map<Integer, Double> ArmorBuffs = new HashMap<Integer, Double>();
+	public Map<Integer, Double> SpeedBuffs = new HashMap<Integer, Double>();
+	public Map<Integer, Double> StrengthBuffs = new HashMap<Integer, Double>();
+	public Map<Integer, List<PotionEffect>> WeaponEffects = new HashMap<Integer, List<PotionEffect>>();
+
 	public boolean DieLikePlayers = false;
 
 	public boolean BodyguardsObeyProtection = true;
 
 	public boolean IgnoreListInvincibility = true;
 
+	public Permission perms = null;
+	
+	public boolean GroupsChecked = false;
+	
 	//FactionsSuport
 	static boolean FactionsActive = false;
+	//TownySupport
+	boolean TownyActive = false;
+	//War sSuport
+	boolean WarActive = false;
+	//SimpleClans sSuport
+	boolean ClansActive = false;
+	
+	public int Crit1Chance;
+	public String Crit1Message = "";
+	public int Crit2Chance;
+	public String Crit2Message = "";
+	public int Crit3Chance;
+	public String Crit3Message = "";
 	public int GlanceChance;
 	public String GlanceMessage = "";
-	public boolean GroupsChecked = false;
-	public List<Integer> Helmets = new LinkedList<Integer>(java.util.Arrays.asList(298,302,306,310,314,91,86));
-
 	public String HitMessage = "";
-
-	public List<Integer> Leggings  = new LinkedList<Integer>( java.util.Arrays.asList(300,304,308,312,316));
-
-	public int LogicTicks = 10;
-
-	public  int magi = -1;
-
 	public int MissChance;
-
 	public String MissMessage = "";
+	public String BlockMessage = "";
+	
+	public List<Integer> Boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
+	public List<Integer> Chestplates = new LinkedList<Integer>( Arrays.asList(299,303,307,311,315) );
+	public List<Integer> Helmets = new LinkedList<Integer>( Arrays.asList(298,302,306,310,314,91,86) );
+	public List<Integer> Leggings = new LinkedList<Integer>( Arrays.asList(300,304,308,312,316) );
 
-	public net.milkbowl.vault.permission.Permission perms = null;
-
+	public  int bombardier = -1;
+	public  int archer = -1;
+	public  int magi = -1;
 	public  int pyro1 = -1;
-
 	public  int pyro2 = -1;
 	public  int pyro3 = -1;
 	public  int sc1 = -1;
 	public  int sc2 = -1;
 	public int sc3 = -1;
-	public int SentryEXP = 5;
-	public Map<Integer, Double> SpeedBuffs = new HashMap<Integer, Double>();
-	public Map<Integer, Double> StrengthBuffs = new HashMap<Integer, Double>();
-	//TownySupport
-	boolean TownyActive = false;
-	//War sSuport
-	boolean WarActive = false;
 	public int warlock1 = -1;
 	public int warlock2 = -1;
 	public int warlock3 = -1;
-	public Map<Integer, List<PotionEffect>> WeaponEffects = new HashMap<Integer, List<PotionEffect>>();
 	public  int witchdoctor = -1;
 
-	boolean checkPlugin(String name){
-		if(getServer().getPluginManager().getPlugin(name) != null){
-			if(getServer().getPluginManager().getPlugin(name).isEnabled() == true) {
+	public int LogicTicks = 10;	
+	public int SentryEXP = 5;
+	
+	public Queue<Projectile> arrows = new LinkedList<Projectile>(); 
+	
+	// saved in variable, as the combination of calls was repeatedly called.
+	private PluginManager pluginManager = getServer().getPluginManager();
+	/**
+	 * Check if a plugin is loaded and enabled.
+	 * @param name - the name of the plugin.
+	 * @return - true if it is loaded and enabled.
+	 */
+	boolean checkPlugin( String name ) {
+		if ( pluginManager.getPlugin( name ) != null 
+		  && pluginManager.getPlugin( name ).isEnabled() == true ) {
 				return true;
-			}	
 		}
 		return false;
 	}
 
-	public void debug(String s){
-		if(debug) this.getServer().getLogger().info(s);
+	/**
+	 * Sends a message to the server primary logger - after checking the value of boolean 'debug' (false = don't send).
+	 * The primary logger does not automatically add the plugin name.
+	 * @param s - the message to log.
+	 */
+	public void debug( String s ){
+		if ( debug ) this.getServer().getLogger().info( s );
 	}
 
-	public void doGroups(){
-		if (!setupPermissions()) getLogger().log(Level.WARNING,"Could not register with Vault!  the GROUP target will not function.");
-		else{
+	public void doGroups() {
+		if ( !setupPermissions() ) 
+			getLogger().log( Level.WARNING,"Could not register with Vault!  the GROUP target will not function." );
+		else {
 			try {
 				String[] Gr = perms.getGroups();
-				if (Gr.length == 0){
-					getLogger().log(Level.WARNING,"No permission groups found.  the GROUP target will not function.");
+				if ( Gr.length == 0 ) {
+					getLogger().log( Level.WARNING,"No permission groups found.  the GROUP target will not function.");
 					perms = null;
 				}
-				else getLogger().log(Level.INFO,"Registered sucessfully with Vault: " + Gr.length + " groups found. The GROUP: target will function" );
+				else getLogger().log( Level.INFO,"Registered sucessfully with Vault: " + Gr.length + " groups found. The GROUP: target will function" );
 
-			} catch (Exception e) {
-				getLogger().log(Level.WARNING,"Error getting groups.  the GROUP target will not function.");
+			} catch ( Exception e ) {
+				getLogger().log( Level.WARNING,"Error getting groups.  the GROUP target will not function.");
 				perms = null;
 			}	
 		}
-
 		GroupsChecked = true;
-
 	}
 
-	public boolean equip(NPC npc, ItemStack hand) {
-		Equipment trait = npc.getTrait(Equipment.class);
-		if (trait == null) return false;
+	// TODO this method also needed updating to use Materials.
+	@SuppressWarnings("deprecation")
+	public boolean equip( NPC npc, ItemStack inHand ) {
+		
+		Equipment equipment = npc.getTrait( Equipment.class );
+		if ( equipment == null ) return false;
+		
 		int slot = 0;
-		Material type = hand == null ? Material.AIR : hand.getType();
+		Material type = ( inHand == null ) ? Material.AIR 
+										   : inHand.getType();
+		
 		// First, determine the slot to edit
-
-		if (Helmets.contains(type.getId())) slot = 1;
-		else if (Chestplates.contains(type.getId())) slot = 2;
-		else if (Leggings.contains(type.getId())) slot = 3;
-		else if (Boots.contains(type.getId())) slot = 4;
+		if ( 	  Helmets.contains( type.getId() ) ) slot = 1;
+		else if ( Chestplates.contains( type.getId() ) ) slot = 2;
+		else if ( Leggings.contains( type.getId() ) ) slot = 3;
+		else if ( Boots.contains( type.getId() ) ) slot = 4;
 
 		// Now edit the equipment based on the slot
 		// Set the proper slot with one of the item
-
-		if(type == Material.AIR){
-			for (int i = 0; i < 5; i++) {
-				if (trait.get(i) != null && trait.get(i).getType() != Material.AIR) {
+		if ( type == Material.AIR ) {
+			for ( int i = 0; i < 5; i++ ) {
+				if ( equipment.get( i ) != null 
+				  && equipment.get( i ).getType() != Material.AIR ) {
 					try {
-						trait.set(i, null);
-					} catch (Exception e) {
-					}   
+						equipment.set( i, null );
+					} catch ( Exception e ) { }   
 				}
 			}
 			return true;
 		}
 		else{
-			ItemStack clone = hand.clone();
-			clone.setAmount(1);
+			@SuppressWarnings("null")
+			ItemStack clone = inHand.clone();
+			clone.setAmount( 1 );
 
 			try {
-				trait.set(slot, clone);
-			} catch (Exception e) {
+				equipment.set( slot, clone );
+			} catch ( Exception e ) {
 				return false;
 			}
 			return true;	
@@ -177,270 +198,220 @@ public class Sentry extends JavaPlugin {
 
 	}
 
-
-	public  String getClan(Player player) {
-		if (ClansActive == false)return null;
+	public  String getClan( Player player ) {
+		if ( ClansActive == false ) return null;
 		try {
-			net.sacredlabyrinth.phaed.simpleclans.Clan c =	net.sacredlabyrinth.phaed.simpleclans.SimpleClans.getInstance().getClanManager().getClanByPlayerName(player.getName());
-			if(c!=null) return c.getName();
-		} catch (Exception e) {
-			getLogger().info("Error getting Clan " + e.getMessage());
+			Clan c = SimpleClans.getInstance().getClanManager().getClanByPlayerName( player.getName() );
+			if ( c != null ) return c.getName();
+		} catch ( Exception e ) {
+			getLogger().info( "Error getting Clan " + e.getMessage() );
 			return null;
 		}
 		return null;
 	}
 
-	private int GetMat(String S){
+	// TODO convert the Material getting to use non-deprecated calls.
+	private int GetMat( String S ) {
+		
 		int item = -1;
-
-		if (S == null) return item;
+		if ( S == null ) return item;
 
 		String[] args = S.toUpperCase().split(":");
 
+		Material M = Material.getMaterial( args[0] );
 
-		org.bukkit.Material M = org.bukkit.Material.getMaterial(args[0]);
-
-		if (item == -1) {	
+		if ( item == -1 ) {	
 			try {
-				item = Integer.parseInt(S.split(":")[0]);
-			} catch (Exception e) {
-			}
+				item = Integer.parseInt( args[0] );
+			} catch ( Exception e ) { }
 		}
 
-		if (M!=null){		
-			item=M.getId();
+		if ( M != null ) {		
+			item = M.getId();
 		}
-
 		return item;
 	}
 
-
-	public String getNationNameForLocation(Location l) {
-		if (TownyActive == false)return null;
+	public String getNationNameForLocation( Location loc ) {
+		if ( TownyActive == false ) return null;
 		try {
-			TownBlock tb = com.palmergames.bukkit.towny.object.TownyUniverse.getTownBlock(l);
-			if (tb !=null){
-				if (tb.getTown().hasNation()) return tb.getTown().getNation().getName();
+			TownBlock tb = TownyUniverse.getTownBlock( loc );
+			
+			if ( tb != null 
+			  && tb.getTown().hasNation() ) {
+				
+				return tb.getTown().getNation().getName();
 			}
-		} catch (Exception e) {
-			return null;
-		}
+			
+		} catch ( Exception e ) { }
+		
 		return null;
 	}
 
-
-	private PotionEffect getpot(String S){
-		if (S == null) return null;
+	private PotionEffect getpot( String S ) {
+		if ( S == null ) return null;
 		String[] args = S.trim().split(":");
-
-		PotionEffectType type = null;
 
 		int dur = 10;
 		int amp = 1;
 
-		type = PotionEffectType.getByName((args[0].toUpperCase()));
+		PotionEffectType type = PotionEffectType.getByName( args[0] ); // .toUpperCase() );
 
-		if (type == null) {
+		if ( type == null ) {
 			try {
-				type = PotionEffectType.getById(Integer.parseInt(args[0]));
-			} catch (Exception e) {
-			}
+				// this method appears to be using the deprecated method as a backup, let see if it's needed.
+				getLogger().info( "getByName() in Sentry.getpot() returned null trying getById" );
+				type = PotionEffectType.getById( Integer.parseInt( args[0] ) );
+			} catch ( Exception e ) { }
+		}
+		if ( type == null ) return null;
+		// a second message to record the successful finding of a PotionEffectType.
+		else getLogger().info( type.toString() + " found, watch out!" );
+
+		if ( args.length > 1 ) {
+			try {
+				dur = Integer.parseInt( args[1] );
+			} catch (Exception e) { }
 		}
 
-		if (type==null) return null;
-
-		if (args.length > 1){
+		if ( args.length > 2 ) {
 			try {
-				dur =	Integer.parseInt(args[1]);
-			} catch (Exception e) {
-			}
+				amp = Integer.parseInt( args[2] );
+			} catch ( Exception e ) { }
 		}
-
-		if (args.length > 2){
-			try {
-				amp =	Integer.parseInt(args[2]);
-			} catch (Exception e) {
-			}
-		}
-
-		return new PotionEffect(type,dur,amp);
+		return new PotionEffect( type, dur, amp );
 	}
 
-	public String[] getResidentTownyInfo(Player player) {
-		String[] info = {null,null};
+	public String[] getResidentTownyInfo( Player player ) {
+		String[] info = { null, null };
 
-		if (TownyActive == false)return info;
+		if ( TownyActive == false )return info;
 
-		com.palmergames.bukkit.towny.object.Resident resident;
+		Resident resident;
 		try {
-			resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(player.getName());
-			if(resident.hasTown()) {
+			resident = TownyUniverse.getDataSource().getResident( player.getName() );
+			if ( resident.hasTown() ) {
 				info[1] = resident.getTown().getName();
-				if( resident.getTown().hasNation()){
-					info[0] =resident.getTown().getNation().getName();
+				if ( resident.getTown().hasNation() ) {
+					info[0] = resident.getTown().getNation().getName();
 				}
-
 			}			
-		} catch (Exception e) {
+		} catch ( Exception e ) {
 			return info;
 		}
-
 		return info;
 	}
 
-
-	public SentryInstance getSentry(Entity ent){
-		if( ent == null) return null;
-		if(!(ent instanceof org.bukkit.entity.LivingEntity)) return null;
-		NPC npc = net.citizensnpcs.api.CitizensAPI.getNPCRegistry().getNPC(ent);
-		if (npc !=null && npc.hasTrait(SentryTrait.class)){
-			return npc.getTrait(SentryTrait.class).getInstance();
-		}
-
-		return null;
-	}
-
-	public SentryInstance getSentry(NPC npc){
-		if (npc !=null && npc.hasTrait(SentryTrait.class)){
-			return npc.getTrait(SentryTrait.class).getInstance();
+	public SentryInstance getSentry( Entity ent ) {
+		if ( ent == null ) return null;
+		if ( !( ent instanceof LivingEntity ) ) return null;
+		
+		NPC npc = CitizensAPI.getNPCRegistry().getNPC( ent );
+		
+		if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
+			
+			return npc.getTrait( SentryTrait.class ).getInstance();
 		}
 		return null;
 	}
-	public  String getWarTeam(Player player) {
-		if (WarActive == false)return null;
+
+	public SentryInstance getSentry( NPC npc ) {
+		if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
+			return npc.getTrait( SentryTrait.class ).getInstance();
+		}
+		return null;
+	}
+	
+	public String getWarTeam( Player player ) {
+		if ( WarActive == false ) return null;
 		try {
-			com.tommytony.war.Team t =com.tommytony.war.Team.getTeamByPlayerName(player.getName());
-			if (t!=null) return t.getName();
-		} catch (Exception e) {
-			getLogger().info("Error getting Team " + e.getMessage());
+			com.tommytony.war.Team t = com.tommytony.war.Team.getTeamByPlayerName( player.getName() );
+			if ( t != null ) 
+				return t.getName();
+		} catch ( Exception e ) {
+			getLogger().info( "Error getting Team " + e.getMessage() );
 			return null;
 		}
 		return null;
 	}
 
-	public String getMCTeamName(Player player){
-		Team t = getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
-		if (t != null){
+	public String getMCTeamName( Player player ) {
+		Team t = getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam( player );
+		if ( t != null ) {
 			return t.getName();
 		}
 		return null;
 	}
 
-	boolean isNationEnemy(String Nation1, String Nation2) {
-		if (TownyActive == false)return false;
-		if (Nation1.equalsIgnoreCase(Nation2)) return false;
+	boolean isNationEnemy( String Nation1, String Nation2 ) {
+		if ( TownyActive == false ) return false;
+		if ( Nation1.equalsIgnoreCase( Nation2 ) ) return false;
 		try {
+			if ( !TownyUniverse.getDataSource().hasNation( Nation1 ) 
+			  || !TownyUniverse.getDataSource().hasNation( Nation2 ) ) return false;
 
-			if (!com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().hasNation(Nation1) || !com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().hasNation(Nation2)) return false;
+			Nation theNation1 = TownyUniverse.getDataSource().getNation( Nation1 );
+			Nation theNation2 = TownyUniverse.getDataSource().getNation( Nation2 );
 
-			com.palmergames.bukkit.towny.object.Nation theNation1 = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getNation(Nation1);
-			com.palmergames.bukkit.towny.object.Nation theNation2 = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getNation(Nation2);
+			if ( theNation1.hasEnemy( theNation2 ) || theNation2.hasEnemy( theNation1 ) ) return true;
 
-			if(theNation1.hasEnemy(theNation2) ||theNation2.hasEnemy(theNation1) ) return true;
-
-		} catch (Exception e) {
+		} catch ( Exception e ) {
 			return false;
 		}
-
+		return false;
+	}
+	
+	/**
+	 * Convenience method to check perms on Command usage.
+	 * The method includes informing the player if they lack the required perms.
+	 * @param command - The perm node to be checked.
+	 * @param player - The sender of the command.
+	 * @return true - if the player has the required permission.
+	 */
+	private boolean checkCommandPerm(String command, CommandSender player) {
+		
+		if ( player.hasPermission( command ) ) 
+			return true;
+		else 
+			player.sendMessage( ChatColor.RED + "You do not have permissions for that command." );
 		return false;
 	}
 
-
-	public void loaditemlist(String key, List<Integer> list){
-		List<String> strs = getConfig().getStringList(key);
-
-		if (strs.size() > 0) list.clear();
-
-		for(String s: getConfig().getStringList(key)){
-			int	item = GetMat(s.trim());
-			list.add(item);
-		}
-
-	}
-
-
-	private void loadmap(String node, Map<Integer, Double> map){
-		map.clear();
-		for(String s: getConfig().getStringList(node)){
-			String[] args = s.trim().split(" ");
-			if(args.length != 2) continue;
-
-			double val = 0;
-
-			try {
-				val = Double.parseDouble(args[1]);
-			} catch (Exception e) {
-			}
-
-			int	item = GetMat(args[0]);
-
-			if(item > 0 && val !=0 && !map.containsKey(item)){
-				map.put(item, val);
-			}
-		}
-	}
-	private void loadpots(String node, Map<Integer, List<PotionEffect>> map){
-		map.clear();
-		for(String s: getConfig().getStringList(node)){
-			String[] args = s.trim().split(" ");
-
-			if (args.length < 2) continue;
-
-
-			int item  = GetMat(args[0]);
-
-			List<PotionEffect> list = new ArrayList<PotionEffect>();
-
-			for(int i = 1;i< args.length;i++){
-				PotionEffect val = getpot(args[i]);
-				if(val !=null) list.add(val);
-
-			}
-
-			if(item >0 && list.isEmpty() == false)	map.put(item, list);
-
-
-		}
-	}
-
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String cmdLabel, String[] inargs) {
+	public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
 
-		if (inargs.length < 1) {
-			sender.sendMessage(ChatColor.RED + "Use /sentry help for command reference.");
+		if ( inargs.length < 1 ) {
+			player.sendMessage( ChatColor.RED + "Use /sentry help for command reference." );
 			return true;
 		}
-
-		CommandSender player = (CommandSender) sender;
-
+			
 		int npcid = -1;
 		int i = 0;
 
-		//did player specify a id?
-		if (tryParseInt(inargs[0])) {
-			npcid = Integer.parseInt(inargs[0]);
+		// did player specify a id?
+		if ( tryParseInt( inargs[0] ) ) {
+			npcid = Integer.parseInt( inargs[0] );
 			i = 1;
 		}
 
-		String[] args = new String[inargs.length-i];
+		String[] args = new String[ inargs.length - i ];
 
-		for (int j = i; j < inargs.length; j++) {
-			args[j-i] = inargs[j];
+		for ( int j = i; j < inargs.length; j++ ) {
+			args[ j - i ] = inargs[ j ];
 		}
 
 
-		if (args.length < 1) {
-			sender.sendMessage(ChatColor.RED + "Use /sentry help for command reference.");
+		if ( args.length < 1 ) {
+			player.sendMessage(ChatColor.RED + "Use /sentry help for command reference.");
 			return true;
 		}
 
 
 		Boolean set = null;
-		if (args.length == 2){
-			if (args[1].equalsIgnoreCase("true")) set = true;
-			else if (args[1].equalsIgnoreCase("false")) set = false;
+		if ( args.length == 2 ) {
+			if ( args[1].equalsIgnoreCase( "true" ) ) set = true;
+			else if (args[1].equalsIgnoreCase( "false" ) ) set = false;
 		}
-
 
 		if (args[0].equalsIgnoreCase("help")) {
 
@@ -503,87 +474,82 @@ public class Sentry extends JavaPlugin {
 			player.sendMessage(ChatColor.GOLD + "  Change the greeting text. <NPC> and <PLAYER> can be used as placeholders");
 			return true;
 		}
-		else if (args[0].equalsIgnoreCase("debug")) {
+		//---------------------------------------------------------- Debug Command -------------
+		else if ( args[0].equalsIgnoreCase( "debug" ) ) {
+			// TODO make sure this perm node exists in plugin.yml
+			if ( !checkCommandPerm( "sentry.debug", player) ) return true;
 
 			debug = !debug;
 
-			player.sendMessage(ChatColor.GREEN + "Debug now: " + debug);
+			player.sendMessage( ChatColor.GREEN + "Debug now: " + debug );
 			return true;
 		}
-		else if (args[0].equalsIgnoreCase("reload")) {
-			if(!player.hasPermission("sentry.reload")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+		//---------------------------------------------------------- Reload Command ------------
+		else if ( args[0].equalsIgnoreCase( "reload" ) ) {
+			if ( !checkCommandPerm( "sentry.reload", player) ) return true;
 
 			this.reloadMyConfig();
 			player.sendMessage(ChatColor.GREEN + "reloaded Sentry/config.yml");
 			return true;
 		}
+		//-----------------------------------------------------------------------
+		// remaining commands deal with npc's so lets check whether we have one selected, and
+		// that we have permission to modify it.
 		NPC ThisNPC;
-
-		if (npcid == -1){
-
-			ThisNPC =	((Citizens)	this.getServer().getPluginManager().getPlugin("Citizens")).getNPCSelector().getSelected(sender);
-
-			if(ThisNPC != null ){
-				// Gets NPC Selected
+		// check to see if user specified an npcid in command args.
+		if ( npcid == -1 ) {
+			// as no npcid, use selected npc (if any).
+			ThisNPC = ( (Citizens) pluginManager.getPlugin( "Citizens" ) ).getNPCSelector()
+																		  .getSelected( player );
+			if ( ThisNPC != null ) {
 				npcid = ThisNPC.getId();
 			}
-
-			else{
-				player.sendMessage(ChatColor.RED + "You must have a NPC selected to use this command");
+			else {
+				player.sendMessage( ChatColor.RED + "You must have a NPC selected to use this command" );
 				return true;
 			}			
-		}
-
-
-		ThisNPC = CitizensAPI.getNPCRegistry().getById(npcid); 
-
-		if (ThisNPC == null) {
-			player.sendMessage(ChatColor.RED + "NPC with id " + npcid + " not found");
-			return true;
-		}
-
-
-		if (!ThisNPC.hasTrait(SentryTrait.class)) {
-			player.sendMessage(ChatColor.RED + "That command must be performed on a Sentry!");
-			return true;
-		}
-
-
-		if (sender instanceof Player && !CitizensAPI.getNPCRegistry().isNPC((Entity) sender)){
-
-			if (ThisNPC.getTrait(Owner.class).getOwner().equalsIgnoreCase(player.getName())) {
-				//OK!
+		} 
+		else {
+			// If there was an attempt to use an npcid.
+			ThisNPC = CitizensAPI.getNPCRegistry().getById( npcid ); 
+	
+			if ( ThisNPC == null ) {
+				player.sendMessage( ChatColor.RED + "NPC with id " + npcid + " not found" );
+				return true;
 			}
-			else {
-				//not player is owner
-				if (((Player)sender).hasPermission("citizens.admin") == false){
-					//no c2 admin.
-					player.sendMessage(ChatColor.RED + "You must be the owner of this Sentry to execute commands.");
+		}
+        // check that the specified npc has the sentry trait.
+		if ( !ThisNPC.hasTrait( SentryTrait.class ) ) {
+			player.sendMessage( ChatColor.RED + "That command must be performed on a Sentry!" );
+			return true;
+		}
+
+		if ( player instanceof Player 
+		  && !CitizensAPI.getNPCRegistry().isNPC( (Entity) player) ) {
+
+			if ( !ThisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( player.getName() ) ) {
+				// player is not owner of npc
+				if ( ( (Player) player ).hasPermission( "citizens.admin" ) == false ) {
+					// player is not an admin either.
+					player.sendMessage( ChatColor.RED + "You must be the owner of this Sentry to execute commands.");
 					return true;
 				}
-				else{
-					//has citizens.admin
-					if (!ThisNPC.getTrait(Owner.class).getOwner().equalsIgnoreCase("server")) {
-						//not server-owned NPC
-						player.sendMessage(ChatColor.RED + "You, or the server, must be the owner of this Sentry to execute commands.");
+				else {	// player is an admin
+					if ( !ThisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
+						// not server-owned NPC
+						player.sendMessage( ChatColor.RED + "You, or the server, must be the owner of this Sentry to execute commands.");
 						return true;
 					}
 				}
 			}
+			// player is either the owner, or an admin with a server-owned npc.
 		}
 
-		// Commands
-
-		SentryInstance inst =	ThisNPC.getTrait(SentryTrait.class).getInstance();
+		SentryInstance inst =	ThisNPC.getTrait( SentryTrait.class ).getInstance();
 
 		if (args[0].equalsIgnoreCase("spawn")) {
-			if(!player.hasPermission("sentry.spawn")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.spawn", player) ) return true;
+			
 			if (ThisNPC.getEntity() == null) {
 				player.sendMessage(ChatColor.RED + "Cannot set spawn while " +  ThisNPC.getName()  + " is dead.");
 				return true;
@@ -593,44 +559,9 @@ public class Sentry extends JavaPlugin {
 			return true;
 
 		}
-		//		if (args[0].equalsIgnoreCase("derp")) {
-		//			org.bukkit.inventory.PlayerInventory inv = ((Player)sender).getInventory();
-		//
-		//			for (org.bukkit.inventory.ItemStack ii:inv.getContents()){
-		//				if (ii ==null) {
-		//					player.sendMessage("item null");
-		//					continue;
-		//				}
-		//				player.sendMessage(ii.getTypeId() + ":" + ii.getData());   // Talk to the player.
-		//
-		//			}
-		//
-		//			org.bukkit.inventory.ItemStack is = new org.bukkit.inventory.ItemStack(358,1,(short)0,(byte)2);
-		//			player.sendMessage(is.getData().toString()); 
-		//			//Prints MAP(2), OK!
-		//
-		//			org.bukkit.inventory.ItemStack is2 = new org.bukkit.inventory.ItemStack(358);
-		//			is2.setDurability((short)2);
-		//			player.sendMessage(is2.getData().toString()); 
-		//			//Prints MAP(2), OK!
-		//
-		//			org.bukkit.inventory.ItemStack is3 = new org.bukkit.inventory.ItemStack(358);
-		//			is3.setData(new org.bukkit.material.MaterialData(358,(byte)2));
-		//			player.sendMessage(is3.getData().toString()); 
-		//			//Prints MAP(0), WHY???
-		//
-		//
-		//			HashMap<Integer, ItemStack> poop = inv.removeItem(is);
-		//
-		//			return true;
-		//
-		//		}
 
 		else if (args[0].equalsIgnoreCase("invincible")) {
-			if(!player.hasPermission("sentry.options.invincible")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.options.invincible", player) ) return true;
 
 			inst.Invincible = set ==null ?  !inst.Invincible: set;
 
@@ -641,32 +572,25 @@ public class Sentry extends JavaPlugin {
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " now INVINCIBLE.");   // Talk to the player.
 			}
 
-
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("retaliate")) {
-			if(!player.hasPermission("sentry.options.retaliate")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.options.retaliate", player) ) return true;
 
-			inst.Retaliate = set ==null ?  !inst.Retaliate: set;
+			inst.iWillRetaliate = set ==null ?  !inst.iWillRetaliate: set;
 
-			if (!inst.Retaliate) {
+			if (!inst.iWillRetaliate) {
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " will not retaliate.");   // Talk to the player.
 			}
 			else{
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " will retalitate against all attackers.");   // Talk to the player.
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("criticals")) {
-			if(!player.hasPermission("sentry.options.criticals")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.options.criticals", player) ) return true;
 
 			inst.LuckyHits = set ==null ?  !inst.LuckyHits: set;
 
@@ -676,15 +600,11 @@ public class Sentry extends JavaPlugin {
 			else{
 				player.sendMessage(ChatColor.GREEN +ThisNPC.getName() + " will take critical hits.");   // Talk to the player.
 			}
-
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("drops")) {
-			if(!player.hasPermission("sentry.options.drops")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.options.drops", player) ) return true;
 
 			inst.DropInventory = set ==null ?  !inst.DropInventory: set;
 
@@ -694,14 +614,11 @@ public class Sentry extends JavaPlugin {
 			else{
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " will not drop items.");   // Talk to the player.
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("killdrops")) {
-			if(!player.hasPermission("sentry.options.killdrops")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.options.killdrops", player) ) return true;
 
 			inst.KillsDropInventory = set ==null ?  !inst.KillsDropInventory: set;
 
@@ -711,14 +628,11 @@ public class Sentry extends JavaPlugin {
 			else{
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + "'s kills will not drop items or exp.");   // Talk to the player.
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("targetable")) {
-			if(!player.hasPermission("sentry.options.targetable")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.options.targetable", player) ) return true;
 
 			inst.Targetable = set ==null ?  !inst.Targetable: set;
 			ThisNPC.data().set(NPC.TARGETABLE_METADATA, inst.Targetable);
@@ -729,16 +643,13 @@ public class Sentry extends JavaPlugin {
 			else{
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " will not be targeted by mobs");   // Talk to the player.
 			}
-
 			return true;
-		}	else if (args[0].equalsIgnoreCase("mount")) {
-			if(!player.hasPermission("sentry.options.mount")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+		}	
+		
+		else if (args[0].equalsIgnoreCase("mount")) {
+			if ( !checkCommandPerm( "sentry.options.mount", player) ) return true;
 
 			set = set ==null? !inst.isMounted() : set;
-
 
 			if (set){
 				player.sendMessage(ChatColor.GREEN +  ThisNPC.getName() + " is now Mounted");   // Talk to the player.
@@ -750,19 +661,15 @@ public class Sentry extends JavaPlugin {
 				if(inst.isMounted()) Util.removeMount(inst.MountID);	
 				inst.MountID = -1;
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("guard")) {
-			if(!player.hasPermission("sentry.guard")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}		
-
+			if ( !checkCommandPerm( "sentry.guard", player) ) return true;
+			
 			boolean localonly = false;
 			boolean playersonly = false;
 			int start = 1;
-
 
 			if (args.length > 1) {
 
@@ -800,9 +707,7 @@ public class Sentry extends JavaPlugin {
 				}
 				
 			}
-
-			else
-			{
+			else {
 				if (inst.guardTarget == null){
 					player.sendMessage(ChatColor.RED +  ThisNPC.getName() + " is already set to guard its immediate area" );   // Talk to the player.	
 				}
@@ -816,40 +721,32 @@ public class Sentry extends JavaPlugin {
 		}
 
 		else if (args[0].equalsIgnoreCase("follow")) {
-			if(!player.hasPermission("sentry.stats.follow")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.follow", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Follow Distance is " + inst.FollowDistance);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry follow [#]. Default is 4. ");
 			}
 			else {
-
 				int HPs = Integer.valueOf(args[1]);
 				if (HPs > 32) HPs = 32;
 				if (HPs <0)  HPs =0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " follow distance set to " + HPs + ".");   // Talk to the player.
 				inst.FollowDistance = HPs * HPs;
-
 			}
-
 			return true;
 		}
 
 		else if (args[0].equalsIgnoreCase("health")) {
-			if(!player.hasPermission("sentry.stats.health")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.health", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Health is " + inst.sentryHealth);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry health [#]   note: Typically players");
 				player.sendMessage(ChatColor.GOLD + "  have 20 HPs when fully healed");
 			}
 			else {
-
 				int HPs = Integer.valueOf(args[1]);
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <1)  HPs =1;
@@ -858,84 +755,68 @@ public class Sentry extends JavaPlugin {
 				inst.sentryHealth = HPs;
 				inst.setHealth(HPs);
 			}
-
 			return true;
 		}
 
 		else if (args[0].equalsIgnoreCase("armor")) {
-			if(!player.hasPermission("sentry.stats.armor")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.armor", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Armor is " + inst.Armor);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry armor [#] ");
 			}
 			else {
-
 				int HPs = Integer.valueOf(args[1]);
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <0)  HPs =0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " armor set to " + HPs + ".");   // Talk to the player.
 				inst.Armor = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("strength")) {
-			if(!player.hasPermission("sentry.stats.strength")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.strength", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Strength is " + inst.Strength);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry strength # ");
 				player.sendMessage(ChatColor.GOLD + "Note: At Strength 0 the Sentry will do no damamge. ");
 			}
 			else {
-
 				int HPs = Integer.valueOf(args[1]);
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <0)  HPs =0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " strength set to " + HPs+ ".");   // Talk to the player.
 				inst.Strength = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("nightvision")) {
-			if(!player.hasPermission("sentry.stats.nightvision")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.nightvision", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Night Vision is " + inst.NightVision);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry nightvision [0-16] ");
 				player.sendMessage(ChatColor.GOLD + "Usage: 0 = See nothing, 16 = See everything. ");
 			}
 			else {
-
 				int HPs = Integer.valueOf(args[1]);
 				if (HPs > 16) HPs = 16;
 				if (HPs <0)  HPs =0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " Night Vision set to " + HPs+ ".");   // Talk to the player.
 				inst.NightVision = HPs;
-
 			}
-
 			return true;
 		}
 
 		else if (args[0].equalsIgnoreCase("respawn")) {
-			if(!player.hasPermission("sentry.stats.respawn")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.respawn", player) ) return true;
+
 			if (args.length <= 1) {
 				if(inst.RespawnDelaySeconds == 0  ) player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + " will not automatically respawn.");
 				if(inst.RespawnDelaySeconds == -1 ) player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + " will be deleted upon death");
@@ -946,146 +827,114 @@ public class Sentry extends JavaPlugin {
 				player.sendMessage(ChatColor.GOLD + "Usage: set to -1 to *permanently* delete the Sentry on death.");
 			}
 			else {
-
 				int HPs = Integer.valueOf(args[1]);
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <-1)  HPs =-1;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " now respawns after " + HPs+ "s.");   // Talk to the player.
 				inst.RespawnDelaySeconds = HPs;
-
 			}
 			return true;
 		}
 
 		else if (args[0].equalsIgnoreCase("speed")) {
-			if(!player.hasPermission("sentry.stats.speed")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.speed", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Speed is " + inst.sentrySpeed);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry speed [0.0 - 2.0]");
 			}
 			else {
-
 				Float HPs = Float.valueOf(args[1]);
 				if (HPs > 2.0) HPs = 2.0f;
 				if (HPs <0.0)  HPs =0f;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " speed set to " + HPs + ".");   // Talk to the player.
 				inst.sentrySpeed = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("attackrate")) {
-			if(!player.hasPermission("sentry.stats.attackrate")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.attackrate", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Projectile Attack Rate is " + inst.AttackRateSeconds + "s between shots." );
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry attackrate [0.0 - 30.0]");
 			}
 			else {
-
 				Double HPs = Double.valueOf(args[1]);
 				if (HPs > 30.0) HPs = 30.0;
 				if (HPs < 0.0)  HPs = 0.0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " Projectile Attack Rate set to " + HPs + ".");   // Talk to the player.
 				inst.AttackRateSeconds = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("healrate")) {
-			if(!player.hasPermission("sentry.stats.healrate")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.healrate", player) ) return true;
+
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Heal Rate is " + inst.HealRate + "s" );
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry healrate [0.0 - 300.0]");
 				player.sendMessage(ChatColor.GOLD + "Usage: Set to 0 to disable healing");
 			}
 			else {
-
 				Double HPs = Double.valueOf(args[1]);
 				if (HPs > 300.0) HPs = 300.0;
 				if (HPs < 0.0)  HPs = 0.0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " Heal Rate set to " + HPs + ".");   // Talk to the player.
 				inst.HealRate = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("range")) {
-			if(!player.hasPermission("sentry.stats.range")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.range", player) ) return true;
 
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Range is " + inst.sentryRange);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry range [1 - 100]");
 			}
-
 			else {
-
 				Integer HPs = Integer.valueOf(args[1]);
 				if (HPs > 100) HPs = 100;
 				if (HPs <1)  HPs =1;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " range set to " + HPs + ".");   // Talk to the player.
 				inst.sentryRange = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("warningrange")) {
-			if(!player.hasPermission("sentry.stats.warningrange")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.stats.warningrange", player) ) return true;
 
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.GOLD + ThisNPC.getName() + "'s Warning Range is " + inst.WarningRange);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry warningrangee [0 - 50]");
 			}
-
 			else {
-
 				Integer HPs = Integer.valueOf(args[1]);
 				if (HPs > 50) HPs = 50;
 				if (HPs <0)  HPs =0;
 
 				player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " warning range set to " + HPs + ".");   // Talk to the player.
 				inst.WarningRange = HPs;
-
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("equip")) {
-			if(!player.hasPermission("sentry.equip")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.equip", player) ) return true;
 
 			if (args.length <= 1) {
 				player.sendMessage(ChatColor.RED + "You must specify a Item ID or Name. or specify 'none' to remove all equipment.");
 			}
-
 			else {
-
-
 				if(ThisNPC.getEntity().getType() == org.bukkit.entity.EntityType.ENDERMAN || ThisNPC.getEntity().getType() == org.bukkit.entity.EntityType.PLAYER){
 					if(args[1].equalsIgnoreCase("none")){
 						//remove equipment
@@ -1108,14 +957,12 @@ public class Sentry extends JavaPlugin {
 				}
 				else player.sendMessage(ChatColor.RED +" Could not equip: must be Player or Enderman type");
 			}
-
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("warning")) {
-			if(!player.hasPermission("sentry.warning")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.warning", player) ) return true;
+
 			if (args.length >=2) {
 				String arg = "";
 				for (i=1;i<args.length;i++){
@@ -1133,12 +980,10 @@ public class Sentry extends JavaPlugin {
 			}
 			return true;
 		}
+		
 		else if (args[0].equalsIgnoreCase("greeting")) {
-			if(!player.hasPermission("sentry.greeting")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
-
+			if ( !checkCommandPerm( "sentry.greeting", player) ) return true;
+			
 			if (args.length >=2) {
 
 				String arg = "";
@@ -1159,16 +1004,15 @@ public class Sentry extends JavaPlugin {
 		}
 
 		else if (args[0].equalsIgnoreCase("info")) {
-			if(!player.hasPermission("sentry.info")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.info", player) ) return true;
+
 			player.sendMessage(ChatColor.GOLD + "------- Sentry Info for (" +ThisNPC.getId() + ") " +  ThisNPC.getName() + "------");
 			player.sendMessage(ChatColor.GREEN + inst.getStats());
-			player.sendMessage(ChatColor.GREEN + "Invincible: " + inst.Invincible + "  Retaliate: " + inst.Retaliate);
+			player.sendMessage(ChatColor.GREEN + "Invincible: " + inst.Invincible + "  Retaliate: " + inst.iWillRetaliate);
 			player.sendMessage(ChatColor.GREEN + "Drops Items: " + inst.DropInventory+ "  Critical Hits: " + inst.LuckyHits);
 			player.sendMessage(ChatColor.GREEN + "Kills Drop Items: "+ inst.KillsDropInventory + "  Respawn Delay: " + inst.RespawnDelaySeconds + "s");
 			player.sendMessage(ChatColor.BLUE + "Status: " + inst.sentryStatus);
+			
 			if (inst.meleeTarget == null){
 				if(inst.projectileTarget ==null) player.sendMessage(ChatColor.BLUE + "Target: Nothing");
 				else	player.sendMessage(ChatColor.BLUE + "Target: " + inst.projectileTarget.toString());
@@ -1182,10 +1026,7 @@ public class Sentry extends JavaPlugin {
 		}
 
 		else if (args[0].equalsIgnoreCase("target")) {
-			if(!player.hasPermission("sentry.target")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.target", player) ) return true;
 
 			if (args.length<2 ){
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target add [entity:Name] or [player:Name] or [group:Name] or [entity:monster] or [entity:player]");
@@ -1194,15 +1035,12 @@ public class Sentry extends JavaPlugin {
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target list");
 				return true;
 			}
-
 			else {
-
 				String arg = "";
 				for (i=2;i<args.length;i++){
 					arg += " " + args[i];
 				}
 				arg = arg.trim();
-
 
 				if(arg.equalsIgnoreCase("nationenemies") && inst.myNPC.isSpawned()){
 					String natname = getNationNameForLocation(inst.myNPC.getEntity().getLocation());
@@ -1216,7 +1054,6 @@ public class Sentry extends JavaPlugin {
 				}
 
 				if (args[1].equals("add") && arg.length() > 0 && arg.split(":").length>1) {
-
 
 					if (!inst.containsTarget(arg.toUpperCase())) inst.validTargets.add(arg.toUpperCase());
 					inst.processTargets();
@@ -1236,13 +1073,13 @@ public class Sentry extends JavaPlugin {
 
 				else if (args[1].equals("clear")) {
 
-
 					inst.validTargets.clear();
 					inst.processTargets();
 					inst.setTarget(null, false);
 					player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " Targets cleared.");
 					return true;
 				}
+				
 				else if (args[1].equals("list")) {
 					player.sendMessage(ChatColor.GREEN + "Targets: " + 	inst.validTargets.toString());
 					return true;
@@ -1255,17 +1092,13 @@ public class Sentry extends JavaPlugin {
 					player.sendMessage(ChatColor.GOLD + "Usage: /sentry target remove type:name");
 					player.sendMessage(ChatColor.GOLD + "type:name can be any of the following: entity:MobName entity:monster entity:player entity:all player:PlayerName group:GroupName town:TownName nation:NationName faction:FactionName");
 
-
 					return true;
 				}
 			}
 		}
 
 		else if (args[0].equalsIgnoreCase("ignore")) {
-			if(!player.hasPermission("sentry.ignore")) {
-				player.sendMessage(ChatColor.RED + "You do not have permissions for that command.");
-				return true;
-			}
+			if ( !checkCommandPerm( "sentry.ignore", player) ) return true;
 
 			if (args.length<2 ){
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore list");
@@ -1276,7 +1109,6 @@ public class Sentry extends JavaPlugin {
 
 				return true;
 			}
-
 			else {
 
 				String arg = "";
@@ -1310,6 +1142,7 @@ public class Sentry extends JavaPlugin {
 					player.sendMessage(ChatColor.GREEN + ThisNPC.getName() + " Ignore cleared.");
 					return true;
 				}
+				
 				else if (args[1].equals("list")) {
 
 					player.sendMessage(ChatColor.GREEN + "Ignores: " + inst.ignoreTargets.toString());
@@ -1328,186 +1161,243 @@ public class Sentry extends JavaPlugin {
 		}
 		return false;
 	}
+	
 	@Override
 	public void onDisable() {
 
-		getLogger().log(Level.INFO, " v" + getDescription().getVersion() + " disabled.");
-		Bukkit.getServer().getScheduler().cancelTasks(this);
-
+		getLogger().log( Level.INFO, " v" + getDescription().getVersion() + " disabled." );
+		Bukkit.getServer().getScheduler().cancelTasks( this );
 	}
-
 
 	boolean DenizenActive = false;
 
 	@Override
 	public void onEnable() {
 
-		if(getServer().getPluginManager().getPlugin("Citizens") == null || getServer().getPluginManager().getPlugin("Citizens").isEnabled() == false) {
-			getLogger().log(Level.SEVERE, "Citizens 2.0 not found or not enabled");
-			getServer().getPluginManager().disablePlugin(this);	
+		if ( !checkPlugin( "Citizens" ) ) {			
+			getLogger().log( Level.SEVERE, "Citizens 2.0 not found or not enabled" );
+			pluginManager.disablePlugin( this );	
 			return;
 		}	
 
 		try {
-
-			if  (checkPlugin("Denizen")){	
-				String vers = getServer().getPluginManager().getPlugin("Denizen").getDescription().getVersion();
-				if(vers.startsWith("0.7") || vers.startsWith("0.8")) {
-					getLogger().log(Level.WARNING, "Sentry is not compatible with Denizen .7 or .8");
+			if ( checkPlugin( "Denizen" ) ) {
+				
+				String vers = pluginManager.getPlugin( "Denizen" ).getDescription().getVersion();
+				if ( vers.startsWith( "0.7" ) || vers.startsWith( "0.8" ) ) {
+					getLogger().log( Level.WARNING, "Sentry is not compatible with Denizen .7 or .8" );
 				}
-				else if(vers.startsWith("0.9")){
+				else if (  vers.startsWith("0.9" ) ) {
 					DenizenHook.SentryPlugin = this;
-					DenizenHook.DenizenPlugin = getServer().getPluginManager().getPlugin("Denizen");
+					DenizenHook.DenizenPlugin = pluginManager.getPlugin("Denizen");
 					DenizenHook.setupDenizenHook();
 					DenizenActive = true;
+					getLogger().log( Level.INFO, "NPCDeath Triggers and DIE/LIVE command registered sucessfully with Denizen" );
 				}
 				else {
-					getLogger().log(Level.WARNING, "Unknown version of Denizen");
+					getLogger().log( Level.WARNING, "Unknown version of Denizen, Sentry was unable to register with it." );
 				}
 			}
+		} catch ( NoClassDefFoundError e ) {
+			getLogger().log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
+		} catch ( Exception e ) {
+			getLogger().log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
 		}
-		catch(NoClassDefFoundError e){
-			getLogger().log(Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage());
-		} catch (Exception e) {
-			getLogger().log(Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage());
-		}
 
-		if (DenizenActive)	getLogger().log(Level.INFO,"NPCDeath Triggers and DIE/LIVE command registered sucessfully with Denizen");
-		else getLogger().log(Level.INFO,"Could not register with Denizen");
-
-
-		if (checkPlugin("Towny")) {
-			getLogger().log(Level.INFO,"Registered with Towny sucessfully. the TOWN: and NATION: targets will function" );
+		if ( checkPlugin( "Towny" ) ) {
+			getLogger().log( Level.INFO, "Registered with Towny sucessfully. the TOWN: and NATION: targets will function" );
 			TownyActive = true;
 		}
-		else getLogger().log(Level.INFO,"Could not find or register with Towny" );
+		else getLogger().log( Level.INFO, "Could not find or register with Towny" );
 
-		if (checkPlugin("Factions")){
-			getLogger().log(Level.INFO,"Registered with Factions sucessfully. the FACTION: target will function" );
+		if ( checkPlugin( "Factions" ) ) {
+			getLogger().log( Level.INFO, "Registered with Factions sucessfully. the FACTION: target will function" );
 			FactionsActive = true;
 		}
-		else getLogger().log(Level.INFO,"Could not find or register with Factions." );
+		else getLogger().log( Level.INFO,"Could not find or register with Factions." );
 
-		if (checkPlugin("War")){
-			getLogger().log(Level.INFO,"Registered with War sucessfully. The TEAM: target will function" );
+		if ( checkPlugin( "War" ) ) {
+			getLogger().log( Level.INFO, "Registered with War sucessfully. The TEAM: target will function" );
 			WarActive = true;
 		}
-		else getLogger().log(Level.INFO,"Could not find or register with War. " );
+		else getLogger().log( Level.INFO,"Could not find or register with War. " );
 
-		if (checkPlugin("SimpleClans")){
-			getLogger().log(Level.INFO,"Registered with SimpleClans sucessfully. The CLAN: target will function" );
+		if ( checkPlugin( "SimpleClans" ) ) {
+			getLogger().log( Level.INFO,"Registered with SimpleClans sucessfully. The CLAN: target will function" );
 			ClansActive = true;
 		}
-		else getLogger().log(Level.INFO,"Could not find or register with SimpleClans. " );
+		else getLogger().log( Level.INFO, "Could not find or register with SimpleClans. " );
 
-		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(SentryTrait.class).withName("sentry"));
+		CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
-		this.getServer().getPluginManager().registerEvents(new SentryListener(this), this);
+		pluginManager.registerEvents( new SentryListener( this ), this);
 
-
-		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-			public void run() {
-				//Unloaded chunk arrow cleanup
-				while (arrows.size() > 200) {
-					Projectile a = arrows.remove();
-					if (a!=null ){
-						a.remove();
-						//	x++;
+		final Runnable removeArrows = new Runnable() {
+				@Override
+				public void run() {
+					while ( arrows.size() > 200 ) {
+						Projectile a = arrows.remove();
+						
+						if ( a != null ){
+							a.remove();
+						}
 					}
 				}
-			}
-		}, 40,  20*120);
+		};
+		
+		getServer().getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40,  20 * 120 );
 
 		reloadMyConfig();
 	}
-	private void reloadMyConfig(){
-		this.saveDefaultConfig();
-		this.reloadConfig();
-		loadmap("ArmorBuffs", ArmorBuffs);
-		loadmap("StrengthBuffs", StrengthBuffs);
-		loadmap("SpeedBuffs", SpeedBuffs);
-		loadpots("WeaponEffects",WeaponEffects);
-		loaditemlist("Helmets", Helmets);
-		loaditemlist("Chestplates",Chestplates);
-		loaditemlist("Leggings", Leggings);
-		loaditemlist("Boots", Boots);
-		archer = GetMat(getConfig().getString("AttackTypes.Archer",null));
-		pyro1 = GetMat(getConfig().getString("AttackTypes.Pyro1",null));
-		pyro2 = GetMat(getConfig().getString("AttackTypes.Pyro2",null));
-		pyro3 = GetMat(getConfig().getString("AttackTypes.Pyro3",null));
-		bombardier = GetMat(getConfig().getString("AttackTypes.Bombardier",null));
-		sc1 = GetMat(getConfig().getString("AttackTypes.StormCaller1",null));
-		sc2 = GetMat(getConfig().getString("AttackTypes.StormCaller2",null));
-		witchdoctor = GetMat(getConfig().getString("AttackTypes.WitchDoctor",null));
-		magi = GetMat(getConfig().getString("AttackTypes.IceMagi",null));
-		sc3 = GetMat(getConfig().getString("AttackTypes.StormCaller3",null));
-		warlock1 = GetMat(getConfig().getString("AttackTypes.Warlock1",null));
-		warlock2 = GetMat(getConfig().getString("AttackTypes.Warlock2",null));
-		warlock3 = GetMat(getConfig().getString("AttackTypes.Warlock3",null));
-		DieLikePlayers = getConfig().getBoolean("Server.DieLikePlayers",false);
-		BodyguardsObeyProtection = getConfig().getBoolean("Server.BodyguardsObeyProtection",true);
-		IgnoreListInvincibility =  getConfig().getBoolean("Server.IgnoreListInvincibility",true);
-		LogicTicks = getConfig().getInt("Server.LogicTicks",10);
-		SentryEXP = getConfig().getInt("Server.ExpValue",5);
-		MissMessage = getConfig().getString("GlobalTexts.Miss", null);
-		HitMessage = getConfig().getString("GlobalTexts.Hit", null);
-		BlockMessage = getConfig().getString("GlobalTexts.Block", null);
-		Crit1Message = getConfig().getString("GlobalTexts.Crit1", null);
-		Crit2Message = getConfig().getString("GlobalTexts.Crit2", null);
-		Crit3Message = getConfig().getString("GlobalTexts.Crit3", null);
-		GlanceMessage = getConfig().getString("GlobalTexts.Glance", null);
-		MissChance = getConfig().getInt("HitChances.Miss",0);
-		GlanceChance = getConfig().getInt("HitChances.Glance",0);
-		Crit1Chance = getConfig().getInt("HitChances.Crit1",0);
-		Crit2Chance = getConfig().getInt("HitChances.Crit2",0);
-		Crit3Chance = getConfig().getInt("HitChances.Crit3",0);
-
-
+	
+	private void reloadMyConfig() {
+		
+		saveDefaultConfig();
+		reloadConfig();
+		
+		loadmap( "ArmorBuffs", ArmorBuffs );
+		loadmap( "StrengthBuffs", StrengthBuffs );
+		loadmap( "SpeedBuffs", SpeedBuffs );
+		loadpots( "WeaponEffects", WeaponEffects );
+		
+		loaditemlist( "Helmets", Helmets );
+		loaditemlist( "Chestplates", Chestplates );
+		loaditemlist( "Leggings", Leggings );
+		loaditemlist( "Boots", Boots );
+		
+		FileConfiguration config = getConfig();
+		
+		archer = 	GetMat( config.getString( "AttackTypes.Archer", null ) );
+		pyro1 = 	GetMat( config.getString( "AttackTypes.Pyro1", null ) );
+		pyro2 = 	GetMat( config.getString( "AttackTypes.Pyro2", null ) );
+		pyro3 = 	GetMat( config.getString( "AttackTypes.Pyro3", null ) );
+		bombardier = GetMat( config.getString( "AttackTypes.Bombardier", null ) );
+		sc1 = 		GetMat( config.getString( "AttackTypes.StormCaller1", null ) );
+		sc2 = 		GetMat( config.getString( "AttackTypes.StormCaller2", null ) );
+		witchdoctor = GetMat( config.getString( "AttackTypes.WitchDoctor", null ) );
+		magi = 		GetMat( config.getString( "AttackTypes.IceMagi", null ) );
+		sc3 = 		GetMat( config.getString( "AttackTypes.StormCaller3", null ) );
+		warlock1 = 	GetMat( config.getString( "AttackTypes.Warlock1", null ) );
+		warlock2 = 	GetMat( config.getString( "AttackTypes.Warlock2", null ) );
+		warlock3 = 	GetMat( config.getString( "AttackTypes.Warlock3", null ) );
+		
+		DieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
+		BodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
+		IgnoreListInvincibility =  config.getBoolean( "Server.IgnoreListInvincibility", true );
+		
+		LogicTicks = 	config.getInt( "Server.LogicTicks", 10 );
+		SentryEXP = 	config.getInt( "Server.ExpValue", 5 );
+		MissMessage = 	config.getString( "GlobalTexts.Miss", null );
+		HitMessage = 	config.getString( "GlobalTexts.Hit", null );
+		BlockMessage = 	config.getString( "GlobalTexts.Block", null );
+		Crit1Message = 	config.getString( "GlobalTexts.Crit1", null );
+		Crit2Message = 	config.getString( "GlobalTexts.Crit2", null );
+		Crit3Message = 	config.getString( "GlobalTexts.Crit3", null );
+		GlanceMessage = config.getString( "GlobalTexts.Glance", null );
+		MissChance = 	config.getInt( "HitChances.Miss", 0 );
+		GlanceChance = 	config.getInt( "HitChances.Glance", 0 );
+		Crit1Chance = 	config.getInt( "HitChances.Crit1", 0 );
+		Crit2Chance = 	config.getInt( "HitChances.Crit2", 0 );
+		Crit3Chance = 	config.getInt( "HitChances.Crit3", 0 );
 	}
 
+	public void loaditemlist( String key, List<Integer> list ) {
+		
+		List<String> strs = getConfig().getStringList( key );
 
+		if ( strs.size() > 0 ) list.clear();
 
+		for ( String s : getConfig().getStringList( key ) ) {
+			int	item = GetMat( s.trim() );
+			list.add( item );
+		}
+	}
 
+	private void loadmap( String node, Map<Integer, Double> map ) {
+		map.clear();
+		
+		for ( String s : getConfig().getStringList( node ) ) {
+			String[] args = s.trim().split(" ");
+			
+			if ( args.length != 2 ) continue;
 
-	private boolean setupPermissions()
-	{
-		try {
+			double val = 0;
 
-			if(getServer().getPluginManager().getPlugin("Vault") == null || getServer().getPluginManager().getPlugin("Vault").isEnabled() == false) {
-				return false ;
-			}	
+			try {
+				val = Double.parseDouble( args[1] );
+			} catch (Exception e) { }
 
-			RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+			int	item = GetMat( args[0] );
 
-			if (permissionProvider != null) {
-				perms = permissionProvider.getProvider();
+			if ( item > 0 
+			  && val != 0 
+			  && !map.containsKey( item ) ) {
+				
+				map.put( item, val );
+			}
+		}
+	}
+	private void loadpots( String node, Map<Integer, List<PotionEffect>> map ) {
+		map.clear();
+		
+		for ( String s : getConfig().getStringList( node ) ) {
+			String[] args = s.trim().split(" ");
+
+			if ( args.length < 2 ) continue;
+
+			int item  = GetMat(args[0]);
+
+			List<PotionEffect> list = new ArrayList<PotionEffect>();
+
+			for ( int i = 1; i < args.length; i++ ) {
+				PotionEffect val = getpot( args[i] );
+				
+				if ( val != null ) list.add( val );
 			}
 
-			return (perms != null);
+			if ( item > 0 
+			  && list.isEmpty() == false ) {
+				
+				map.put( item, list );
+			}
+		}
+	}
 
-		} catch (Exception e) {
+	/**
+	 * returns false if Vault is not enabled, or if an exception if thrown.
+	 * returns true if a permission provider has been stored in 'perms'
+	 */
+	private boolean setupPermissions() {
+		try {
+			if ( !checkPlugin( "Vault" ) ) return false ;
+			
+			RegisteredServiceProvider<Permission> permissionProvider = 
+												getServer().getServicesManager()
+														   .getRegistration( Permission.class );
+			if ( permissionProvider != null ) {
+				perms = permissionProvider.getProvider();
+			}
+			return ( perms != null );
+
+		} catch ( Exception e ) {
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-
-	private	boolean tryParseInt(String value)  
-	{  
-		try  
-		{  
-			Integer.parseInt(value);  
+	/** 
+	 * returns true if supplied String argument can be converted to an Integer.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	private	boolean tryParseInt( String value ) {  
+		try {  
+			Integer.parseInt( value );  
 			return true;  
-		} catch(NumberFormatException nfe)  
-		{  
+		} catch( NumberFormatException nfe ) {  
 			return false;  
 		}  
 	}
-
-
-
-
-
-
 }
 

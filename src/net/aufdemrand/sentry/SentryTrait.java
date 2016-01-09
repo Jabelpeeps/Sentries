@@ -2,14 +2,14 @@ package net.aufdemrand.sentry;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import net.aufdemrand.sentry.SentryInstance.Status;
 import net.citizensnpcs.api.exception.NPCLoadException;
-
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.trait.Toggleable;
@@ -29,7 +29,7 @@ public class SentryTrait extends Trait implements Toggleable {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void load( DataKey key ) throws NPCLoadException {
+	public void load (DataKey key) throws NPCLoadException {
 		// plugin.debug( npc.getName() + " Load" );
 		
 		ensureInst();
@@ -42,54 +42,38 @@ public class SentryTrait extends Trait implements Toggleable {
 		// replaced the repeated uses of 'plugin.getConfig()' with a local variable
 		FileConfiguration cfg = plugin.getConfig();
 		
-		inst.Retaliate	= key.getBoolean( "Retaliate"
-						, cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
-		inst.Invincible	= key.getBoolean( "Invincinble"
-						, cfg.getBoolean( "DefaultOptions.Invincible", false ) );
-		inst.DropInventory = key.getBoolean( "DropInventory"
-						   , cfg.getBoolean( "DefaultOptions.Drops", false ) );
-		inst.LuckyHits 	= key.getBoolean( "CriticalHits"
-						, cfg.getBoolean( "DefaultOptions.Criticals", true ) );
+		inst.iWillRetaliate	= key.getBoolean( "Retaliate", cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
+		inst.Invincible	= key.getBoolean( "Invincinble", cfg.getBoolean( "DefaultOptions.Invincible", false ) );
+		inst.DropInventory = key.getBoolean( "DropInventory", cfg.getBoolean( "DefaultOptions.Drops", false ) );
+		inst.LuckyHits 	= key.getBoolean( "CriticalHits", cfg.getBoolean( "DefaultOptions.Criticals", true ) );
 						
 		inst.sentryHealth = key.getDouble( "Health", cfg.getInt( "DefaultStats.Health", 20 ) );
 		inst.sentryRange = key.getInt( "Range", cfg.getInt( "DefaultStats.Range", 10 ) );
 		
-		inst.RespawnDelaySeconds = key.getInt( "RespawnDelay"
-						     , cfg.getInt( "DefaultStats.Respawn", 10 ) );
-		inst.sentrySpeed = (float) key.getDouble( "Speed"
-							, cfg.getDouble( "DefaultStats.Speed", 1.0 ) );
-		inst.sentryWeight = key.getDouble( "Weight"
-						 , cfg.getDouble( "DefaultStats.Weight", 1.0 ) );
+		inst.RespawnDelaySeconds = key.getInt( "RespawnDelay", cfg.getInt( "DefaultStats.Respawn", 10 ) );
+		inst.sentrySpeed = (float) key.getDouble( "Speed", cfg.getDouble( "DefaultStats.Speed", 1.0 ) );
+		inst.sentryWeight = key.getDouble( "Weight", cfg.getDouble( "DefaultStats.Weight", 1.0 ) );
 						 
 		inst.Armor 	= key.getInt( "Armor", cfg.getInt( "DefaultStats.Armor", 0 ) );
-		inst.Strength	= key.getInt( "Strength"
-					    , cfg.getInt( "DefaultStats.Strength", 1 ) );
-		inst.FollowDistance = key.getInt( "FollowDistance"
-						, cfg.getInt( "DefaultStats.FollowDistance", 4 ) );
+		inst.Strength	= key.getInt( "Strength", cfg.getInt( "DefaultStats.Strength", 1 ) );
+		inst.FollowDistance = key.getInt( "FollowDistance", cfg.getInt( "DefaultStats.FollowDistance", 4 ) );
 		inst.guardTarget = key.getString( "GuardTarget", null );
 		
 		inst.GreetingMessage = key.getString( "Greeting", cfg.getString( 
-			"DefaultTexts.Greeting", "'" + ChatColor.COLOR_CHAR + "b<NPC> says Welcome, <PLAYER>'") );
+				"DefaultTexts.Greeting", "'" + ChatColor.COLOR_CHAR + "b<NPC> says Welcome, <PLAYER>'") );
 			
 		inst.WarningMessage = key.getString( "Warning", cfg.getString(
-			"DefaultTexts.Warning", "'" + ChatColor.COLOR_CHAR + "c<NPC> says Halt! Come no closer!'") );
+				"DefaultTexts.Warning", "'" + ChatColor.COLOR_CHAR + "c<NPC> says Halt! Come no closer!'") );
 		
-		inst.WarningRange = key.getInt( "WarningRange"
-					      , cfg.getInt( "DefaultStats.WarningRange", 0 ) );
-		inst.AttackRateSeconds = key.getDouble( "AttackRate"
-						       , cfg.getDouble( "DefaultStats.AttackRate", 2.0) );
-		inst.HealRate 	= key.getDouble( "HealRate"
-						, cfg.getDouble( "DefaultStats.HealRate", 0.0 ) );
-		inst.NightVision = key.getInt( "NightVision"
-					     , cfg.getInt( "DefaultStats.NightVision", 16 ) );
-		inst.KillsDropInventory = key.getBoolean( "KillDrops"
-							, cfg.getBoolean( "DefaultOptions.KillDrops", true ) );
-        	inst.IgnoreLOS 	= key.getBoolean( "IgnoreLOS"
-        					, cfg.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
+		inst.WarningRange = key.getInt( "WarningRange", cfg.getInt( "DefaultStats.WarningRange", 0 ) );
+		inst.AttackRateSeconds = key.getDouble( "AttackRate", cfg.getDouble( "DefaultStats.AttackRate", 2.0) );
+		inst.HealRate 	= key.getDouble( "HealRate", cfg.getDouble( "DefaultStats.HealRate", 0.0 ) );
+		inst.NightVision = key.getInt( "NightVision", cfg.getInt( "DefaultStats.NightVision", 16 ) );
+		inst.KillsDropInventory = key.getBoolean( "KillDrops", cfg.getBoolean( "DefaultOptions.KillDrops", true ) );
+        	inst.IgnoreLOS 	= key.getBoolean( "IgnoreLOS", cfg.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
         					
-		inst.MountID 	= key.getInt( "MountID", (int) -1 );
-		inst.Targetable = key.getBoolean( "Targetable"
-						, cfg.getBoolean( "DefaultOptions.Targetable", true ) );
+		inst.MountID 	= key.getInt( "MountID", -1 );
+		inst.Targetable = key.getBoolean( "Targetable", cfg.getBoolean( "DefaultOptions.Targetable", true ) );
 
 		if ( key.keyExists( "Spawn" ) ){
 			try {
@@ -211,7 +195,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		if ( inst == null ) return;
 		
 		key.setBoolean( "toggled", isToggled );
-		key.setBoolean( "Retaliate", inst.Retaliate );
+		key.setBoolean( "Retaliate", inst.iWillRetaliate );
 		key.setBoolean( "Invincinble", inst.Invincible );
 		key.setBoolean( "DropInventory", inst.DropInventory );
 		key.setBoolean( "KillDrops", inst.KillsDropInventory );
@@ -236,7 +220,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		key.setDouble( "Health", inst.sentryHealth );
 		key.setInt( "Range", inst.sentryRange );
 		key.setInt( "RespawnDelay", inst.RespawnDelaySeconds );
-		key.setDouble( "Speed", (double) inst.sentrySpeed );
+		key.setDouble( "Speed", inst.sentrySpeed );
 		key.setDouble( "Weight", inst.sentryWeight );
 		key.setDouble( "HealRate", inst.HealRate );
 		key.setInt( "Armor", inst.Armor );

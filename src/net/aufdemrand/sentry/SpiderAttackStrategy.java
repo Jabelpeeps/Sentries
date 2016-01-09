@@ -2,22 +2,22 @@ package net.aufdemrand.sentry;
 
 import java.util.Random;
 
-
-import net.minecraft.server.v1_8_R3.Entity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
+
+import net.minecraft.server.v1_8_R3.Entity;
 
 public class SpiderAttackStrategy implements net.citizensnpcs.api.ai.AttackStrategy {
 	
 	private Random random = new Random();
 	Sentry plugin = null;
 
-	public SpiderAttackStrategy( Sentry plugin ) {
+	public SpiderAttackStrategy (Sentry plugin) {
 		this.plugin = plugin;
 	}
 
 	@Override
-	public boolean handle( LivingEntity arg0, LivingEntity arg1 ) {
+	public boolean handle (LivingEntity arg0, LivingEntity arg1) {
 
 		plugin.debug( "Spider ATTACK!" );
 

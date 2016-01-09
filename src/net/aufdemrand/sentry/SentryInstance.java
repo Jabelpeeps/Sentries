@@ -1,32 +1,24 @@
 package net.aufdemrand.sentry;
 
 import java.text.DecimalFormat;
-import java.util.*;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.trait.trait.MobType;
-import net.citizensnpcs.api.trait.trait.Owner;
-
-//Version Specifics
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityPotion;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutAnimation;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-/////////////////////////
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.command.CommandSender;
-
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+/////////////////////////
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
@@ -46,6 +38,17 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
+
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.trait.MobType;
+import net.citizensnpcs.api.trait.trait.Owner;
+//Version Specifics
+import net.minecraft.server.v1_8_R3.EntityHuman;
+import net.minecraft.server.v1_8_R3.EntityPotion;
+import net.minecraft.server.v1_8_R3.Packet;
+import net.minecraft.server.v1_8_R3.PacketPlayOutAnimation;
 
 
 public class SentryInstance {
@@ -116,7 +119,7 @@ public class SentryInstance {
 	public LivingEntity projectileTarget;
 	Random r = new Random();
 	public Integer RespawnDelaySeconds = 10;
-	public Boolean Retaliate = true;
+	public Boolean iWillRetaliate = true;
 	public double sentryHealth = 20;
     public boolean IgnoreLOS;
 
@@ -547,11 +550,11 @@ public class SentryInstance {
 			//die!
 
 
-			((LivingEntity)getMyEntity()).setHealth(0);
+			getMyEntity().setHealth(0);
 
 		}
 		else{
-			org.bukkit.event.entity.EntityDeathEvent ed = new org.bukkit.event.entity.EntityDeathEvent((LivingEntity) getMyEntity(), items);
+			org.bukkit.event.entity.EntityDeathEvent ed = new org.bukkit.event.entity.EntityDeathEvent(getMyEntity(), items);
 
 			plugin.getServer().getPluginManager().callEvent(ed);
 			//citizens will despawn it.
@@ -591,7 +594,7 @@ public class SentryInstance {
 			yaw = yaw + (Math.abs(180 - yaw) * 2);
 		}
 
-		net.citizensnpcs.util.NMS.look((LivingEntity) from, (float) yaw - 90, (float) pitch);
+		net.citizensnpcs.util.NMS.look(from, (float) yaw - 90, (float) pitch);
 
 	}
 
@@ -601,7 +604,7 @@ public class SentryInstance {
 
 	private void faceAlignWithVehicle(){
 		org.bukkit.entity.Entity v = getMyEntity().getVehicle();
-		net.citizensnpcs.util.NMS.look((LivingEntity) getMyEntity(), v.getLocation().getYaw(), 0);
+		net.citizensnpcs.util.NMS.look(getMyEntity(), v.getLocation().getYaw(), 0);
 	}
 
 	public LivingEntity findTarget(Integer Range) {
@@ -833,11 +836,11 @@ public class SentryInstance {
 			}
 			else if (lightninglevel == 1){
 				to.getWorld().strikeLightningEffect(to);
-				theEntity.damage((double)getStrength(), getMyEntity());
+				theEntity.damage(getStrength(), getMyEntity());
 			}
 			else if (lightninglevel == 3){
 				to.getWorld().strikeLightningEffect(to);
-				theEntity.setHealth((double)0);
+				theEntity.setHealth(0);
 			}
 		}
 		else
@@ -1131,7 +1134,7 @@ public class SentryInstance {
 
 		// can i kill it? lets go kill it.
 		if (attacker != null) {
-			if (this.Retaliate) {
+			if (this.iWillRetaliate) {
 				if ( !(event.getDamager() instanceof Projectile) || (net.citizensnpcs.api.CitizensAPI.getNPCRegistry().getNPC(attacker) == null)) {
 					// only retaliate to players or non-projectlies. Prevents stray sentry arrows from causing retaliation.
 
@@ -1216,7 +1219,7 @@ public class SentryInstance {
 			}
 
 			if(msg!=null && msg.isEmpty() == false){
-				((Player) attacker).sendMessage(Util.format(msg, npc, (CommandSender) attacker, ((Player) attacker).getItemInHand().getTypeId(), finaldamage+""));
+				((Player) attacker).sendMessage(Util.format(msg, npc, attacker, ((Player) attacker).getItemInHand().getTypeId(), finaldamage+""));
 			}
 		}
 
@@ -1238,7 +1241,7 @@ public class SentryInstance {
 
 	Random R = new Random();
 
-	public void onEnvironmentDamae(EntityDamageEvent event){
+	public void onEnvironmentDamage(EntityDamageEvent event){
 
 		if(sentryStatus == Status.isDYING) return;
 
@@ -1617,7 +1620,7 @@ public class SentryInstance {
 
 			for (Player player : plugin.getServer().getOnlinePlayers()) {
 				if (player.getName().equals(name)) {
-					guardEntity = (LivingEntity) player;
+					guardEntity = player;
 					guardTarget = player.getName();
 					setTarget(null, false); // clear active hostile target
 					return true;

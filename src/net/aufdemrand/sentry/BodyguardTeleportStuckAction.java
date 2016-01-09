@@ -40,7 +40,7 @@ public class BodyguardTeleportStuckAction implements StuckAction {
 		Block block = base.getBlock();
 		do {
 			// break out of loop after MAX_INTERATIONS
-			if ( i++ >= MAX_INTERATIONS ) {
+			if ( i++ >= MAX_ITERATIONS ) {
 				block = base.getBlock();
 				break;	
 			}
@@ -48,14 +48,6 @@ public class BodyguardTeleportStuckAction implements StuckAction {
 			block = block.getRelative( BlockFace.UP );	
 		// continue looping until an empty block is found	
 		} while ( !block.isEmpty() );
-
-// old code for comparison		
-//		while ( !block.isEmpty() ) {
-//			block = block.getRelative( BlockFace.UP );
-//			if ( ++i >= MAX_ITERATIONS && !block.isEmpty() )
-//				block = base.getBlock();
-//			break;
-//		}
 
 		final Location loc = block.getLocation();
 		
@@ -65,7 +57,7 @@ public class BodyguardTeleportStuckAction implements StuckAction {
 			@Override public void run() {
 				npc.teleport( loc, org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN );	
 			}
-		}
+		};
 		// send runnable to execute on main game loop
 		plugin.getServer().getScheduler().scheduleSyncDelayedTask( plugin, tpEvent, 2 );
 

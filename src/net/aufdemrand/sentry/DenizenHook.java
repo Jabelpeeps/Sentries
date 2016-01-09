@@ -2,23 +2,22 @@ package net.aufdemrand.sentry;
 
 import java.util.Set;
 
-import net.aufdemrand.denizen.BukkitScriptEntryData;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import net.aufdemrand.denizen.BukkitScriptEntryData;
 import net.aufdemrand.denizen.Denizen;
-import net.aufdemrand.denizencore.exceptions.CommandExecutionException;
-import net.aufdemrand.denizencore.exceptions.InvalidArgumentsException;
 import net.aufdemrand.denizen.npc.traits.TriggerTrait;
 import net.aufdemrand.denizen.objects.dNPC;
 import net.aufdemrand.denizen.objects.dPlayer;
+import net.aufdemrand.denizen.scripts.containers.core.InteractScriptContainer;
+import net.aufdemrand.denizen.scripts.triggers.AbstractTrigger;
+import net.aufdemrand.denizen.utilities.debugging.dB;
+import net.aufdemrand.denizencore.exceptions.CommandExecutionException;
+import net.aufdemrand.denizencore.exceptions.InvalidArgumentsException;
 import net.aufdemrand.denizencore.scripts.ScriptEntry;
 import net.aufdemrand.denizencore.scripts.commands.AbstractCommand;
-import net.aufdemrand.denizen.scripts.containers.core.InteractScriptContainer;
-import net.aufdemrand.denizen.utilities.debugging.dB;
-import net.aufdemrand.denizencore.utilities.debugging.dB.DebugElement;
-
 import net.citizensnpcs.api.npc.NPC;
 
 public class DenizenHook {
@@ -164,7 +163,7 @@ public class DenizenHook {
 		}
 	}
 
-	private class NpcdeathTriggerOwner extends net.aufdemrand.denizen.scripts.triggers.AbstractTrigger{
+	private class NpcdeathTriggerOwner extends AbstractTrigger{
 
 		@Override
 		public void onEnable() {
@@ -179,14 +178,14 @@ public class DenizenHook {
 
 			dNPC theDenizen = dNPC.mirrorCitizensNPC( npc );
 
-			dB.echoDebug( DebugElement.Header, "Parsing NPCDeath/Owner Trigger." );
+	//		dB.echoDebug( DebugElement.Header, "Parsing NPCDeath/Owner Trigger." );
 
 			String owner = npc.getTrait( net.citizensnpcs.api.trait.trait.Owner.class ).getOwner();
 
 			dPlayer thePlayer = net.aufdemrand.denizen.objects.dPlayer.valueOf( owner );
 
 			if ( thePlayer == null ) {
-				dB.echoDebug( DebugElement.Header, "Owner not found!" );
+	//			dB.echoDebug( DebugElement.Header, "Owner not found!" );
 				return false;
 			}
 
@@ -211,7 +210,7 @@ public class DenizenHook {
 
 			dNPC theDenizen = dNPC.mirrorCitizensNPC( npc );
 
-			dB.echoDebug( DebugElement.Header, "Parsing NPCDeath/Killers Trigger" );
+	//		dB.echoDebug( DebugElement.Header, "Parsing NPCDeath/Killers Trigger" );
 
 			boolean founone = false;
 
@@ -220,7 +219,7 @@ public class DenizenHook {
 				if ( thePlayer != null 
 				  && thePlayer.getLocation().distance( npc.getEntity().getLocation() ) > 300) {
 				      
-					dB.echoDebug( DebugElement.Header, thePlayer.getName()+ " is to far away." );
+	//				dB.echoDebug( DebugElement.Header, thePlayer.getName()+ " is to far away." );
 					continue;
 				}
 
