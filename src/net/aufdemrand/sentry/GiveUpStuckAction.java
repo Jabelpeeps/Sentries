@@ -8,10 +8,10 @@ import net.citizensnpcs.api.npc.NPC;
 
 public class GiveUpStuckAction implements StuckAction {
 	
-	SentryInstance inst = null;
+	SentryInstance inst;
 	
-	GiveUpStuckAction( SentryInstance inst ){
-		this.inst = inst; 
+	GiveUpStuckAction( SentryInstance _inst ){
+		inst = _inst; 
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class GiveUpStuckAction implements StuckAction {
         
         	if ( base.getWorld() == npc.getEntity().getLocation().getWorld() 
         	  && npc.getEntity().getLocation().distanceSquared( base ) <= 4 ) {
-                	return true;
+                		return true;
         	}	
 		inst.setTarget( null, false );
 		return false;

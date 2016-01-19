@@ -24,7 +24,7 @@ public abstract class Util {
 	 * @param LivingEntity from
 	 * @param LivingEntity to 
 	 */
-	public static Location getFireSource (LivingEntity from, LivingEntity to) {
+	public static Location getFireSource( LivingEntity from, LivingEntity to ) {
 
 		Location loco = from.getEyeLocation();
 		
@@ -32,9 +32,7 @@ public abstract class Util {
 		v = normalizeVector( v );
 		v.multiply( 0.5 );
 
-		Location loc = loco.add( v );
-
-		return loc;
+		return loco.add( v );
 	}
 
 	public static Location leadLocation (Location loc, Vector victor, double t) {
@@ -92,6 +90,7 @@ public abstract class Util {
 	public static String getLocalItemName (int MatId) {
 		if ( MatId == 0 ) 
 		    return  "Hand";
+		
 		if ( MatId < 256 )
 			return getMCBlock( MatId ).getName();
 		else
@@ -160,8 +159,23 @@ public abstract class Util {
 		                        + Math.pow( victor.getY(), 2 ) 
 		                        + Math.pow( victor.getZ(), 2 ) ) ;
 		                        
-		if ( mag != 0 ) return victor.multiply( 1 / mag );
+		if ( mag != 0 ) 
+			return victor.multiply( 1 / mag );
 		
 		return victor.multiply( 0 );
+	}
+	/**
+	 * Convenience method to convert String values to int's.<p>
+	 * It catches any NumberFormatExceptions and returns -1.
+	 * 
+	 * @param value - the string to be converted
+	 * @return the int value represented by the string.
+	 */
+	static int string2Int( String value ) {
+		try {
+			return Integer.parseInt( value );
+		} catch ( NumberFormatException e ) {
+			return -1;
+		}
 	}
 }

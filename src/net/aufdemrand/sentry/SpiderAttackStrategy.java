@@ -10,28 +10,28 @@ import net.minecraft.server.v1_8_R3.Entity;
 public class SpiderAttackStrategy implements net.citizensnpcs.api.ai.AttackStrategy {
 	
 	private Random random = new Random();
-	Sentry plugin = null;
+	Sentry sentry = null;
 
 	public SpiderAttackStrategy (Sentry plugin) {
-		this.plugin = plugin;
+		sentry = plugin;
 	}
 
 	@Override
-	public boolean handle (LivingEntity arg0, LivingEntity arg1) {
+	public boolean handle (LivingEntity attacker, LivingEntity target) {
 
-		plugin.debug( "Spider ATTACK!" );
+		sentry.debug( "Spider ATTACK!" );
 
-		Entity entity = ( (CraftEntity) arg1 ).getHandle();
-		Entity me = ( (CraftEntity) arg0 ).getHandle();
+		Entity entity = ( (CraftEntity) target ).getHandle();
+		Entity me = ( (CraftEntity) attacker ).getHandle();
 
-		if ( this.random.nextInt( 20 ) == 0 ) {
-				double d0 = entity.locX - me.locX;
-				double d1 = entity.locZ - me.locZ;
-				double f2 = Math.sqrt( d0 * d0 + d1 * d1 );
+		if ( random.nextInt( 20 ) == 0 ) {
+				double dX = entity.locX - me.locX;
+				double dZ = entity.locZ - me.locZ;
+				double straightDistance = Math.sqrt( dX * dX + dZ * dZ );
 			// TODO consider pulling out the double values as constants
 			// (at first glance they look like multiple of the same number in any case.)
-				me.motX = d0 /  f2 * 0.5D * 0.800000011920929D + me.motX * 0.20000000298023224D;
-				me.motZ = d1 /  f2 * 0.5D * 0.800000011920929D + me.motZ * 0.20000000298023224D;
+				me.motX = dX / straightDistance * 0.5D * 0.800000011920929D + me.motX * 0.20000000298023224D;
+				me.motZ = dZ / straightDistance * 0.5D * 0.800000011920929D + me.motZ * 0.20000000298023224D;
 				me.motY = 0.4000000059604645D;
 		}
 		return false;
