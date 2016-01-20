@@ -2,6 +2,7 @@ package net.aufdemrand.sentry;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -87,7 +88,17 @@ public abstract class Util {
      * 
      * @param int MatID the ID to be named.
      */
-	public static String getLocalItemName (int MatId) {
+	static String getLocalItemName ( Material mat ) {
+		if ( mat == null || mat == Material.AIR ) 
+		    return  "Hand";
+		
+		if ( mat.isBlock() )
+			return mat.name();
+		else
+		    return LocaleI18n.get( mat.name() + ".name" );
+	}
+	@Deprecated
+	static String getLocalItemName (int MatId) {
 		if ( MatId == 0 ) 
 		    return  "Hand";
 		
@@ -139,7 +150,20 @@ public abstract class Util {
 			return Math.atan( ( v2 - Math.sqrt( v4 - derp ) ) / ( g * dist ) );
 		}
 	}
-
+	public static String format( String input, NPC npc, CommandSender player, Material item, String amount ) {
+	    
+		if ( input == null ) return null;
+		
+		input = input.replace( "<NPC>", npc.getName() );
+		input = input.replace( "<PLAYER>", player == null ? "" : player.getName() );
+		input = input.replace( "<ITEM>", Util.getLocalItemName( item ) );
+		input = input.replace( "<AMOUNT>", amount.toString() );
+		input =	ChatColor.translateAlternateColorCodes( '&', input );
+		
+		return input;
+	}
+	
+	@Deprecated
 	public static String format (String input, NPC npc, CommandSender player, int item, String amount) {
 	    
 		if ( input == null ) return null;

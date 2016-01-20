@@ -1,12 +1,13 @@
 package net.aufdemrand.sentry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,11 +41,6 @@ public class Sentry extends JavaPlugin {
 
 	boolean debug = false;
 	
-	public Map<Integer, Double> armorBuffs = new HashMap<Integer, Double>();
-	public Map<Integer, Double> speedBuffs = new HashMap<Integer, Double>();
-	public Map<Integer, Double> strengthBuffs = new HashMap<Integer, Double>();
-	public Map<Integer, List<PotionEffect>> weaponEffects = new HashMap<Integer, List<PotionEffect>>();
-
 	public boolean dieLikePlayers = false;
 	public boolean bodyguardsObeyProtection = true;
 	public boolean ignoreInvincibility = true;
@@ -75,28 +71,41 @@ public class Sentry extends JavaPlugin {
 	public String blockMessage = "";
 	
 	// Lists of various armour items that will be accepted 
-	// TODO consider replacing with enums.
-	public List<Integer> boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
-	public List<Integer> chestplates = new LinkedList<Integer>( Arrays.asList(299,303,307,311,315) );
-	public List<Integer> helmets = new LinkedList<Integer>( Arrays.asList(298,302,306,310,314,91,86) );
-	public List<Integer> leggings = new LinkedList<Integer>( Arrays.asList(300,304,308,312,316) );
+//	public List<Integer> boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
+	public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, 
+											 Material.CHAINMAIL_BOOTS, 
+											 Material.IRON_BOOTS, 
+											 Material.DIAMOND_BOOTS, 
+											 Material.GOLD_BOOTS );
+	
+//	public List<Integer> chestplates = new LinkedList<Integer>( Arrays.asList(299,303,307,311,315) );
+	public Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, 
+												   Material.CHAINMAIL_CHESTPLATE, 
+												   Material.IRON_CHESTPLATE, 
+												   Material.DIAMOND_CHESTPLATE, 
+												   Material.GOLD_CHESTPLATE );
+	
+//	public List<Integer> helmets = new LinkedList<Integer>( Arrays.asList(298,302,306,310,314,91,86) );
+	public Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET,
+											   Material.CHAINMAIL_HELMET,
+											   Material.IRON_HELMET, 
+											   Material.DIAMOND_HELMET, 
+											   Material.GOLD_HELMET, 
+											   Material.PUMPKIN, 
+											   Material.JACK_O_LANTERN );
+	
+//	public List<Integer> leggings = new LinkedList<Integer>( Arrays.asList(300,304,308,312,316) );
+	public Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, 	
+												Material.CHAINMAIL_LEGGINGS,
+												Material.IRON_LEGGINGS,
+												Material.DIAMOND_LEGGINGS,
+												Material.GOLD_LEGGINGS );
 
-	// numerous fields to record which type of sentry (and therefore attack type) this instance will be.
-	// TODO check whether these are exclusive conditions, and could/should be replace with a single piece of state info
-	//      probably in the form of an enum.
-	public int bombardier = -1;
-	public int archer = -1;
-	public int magi = -1;
-	public int pyro1 = -1;
-	public int pyro2 = -1;
-	public int pyro3 = -1;
-	public int sc1 = -1;
-	public int sc2 = -1;
-	public int sc3 = -1;
-	public int warlock1 = -1;
-	public int warlock2 = -1;
-	public int warlock3 = -1;
-	public int witchdoctor = -1;
+	public Map<Material, Double> armorBuffs = new EnumMap<Material, Double>( Material.class );
+	public Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
+	public Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>( Material.class );
+	public Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>( Material.class );
+
 
 	public int logicTicks = 10;	
 	public int sentryEXP = 5;
@@ -171,12 +180,12 @@ public class Sentry extends JavaPlugin {
 		final Runnable removeArrows = new Runnable() {
 				@Override
 				public void run() {
+					
 					while ( arrows.size() > 200 ) {
+						
 						Projectile arrow = arrows.remove();
 						
-						if ( arrow != null ) {
-							arrow.remove();
-						}
+						if ( arrow != null ) arrow.remove();
 					}
 				}
 		};
@@ -204,20 +213,8 @@ public class Sentry extends JavaPlugin {
 		loadItemList( "Boots", boots );
 		
 		FileConfiguration config = getConfig();
-		
-		archer = 	getMaterial( config.getString( "AttackTypes.Archer", null ) );
-		pyro1 = 	getMaterial( config.getString( "AttackTypes.Pyro1", null ) );
-		pyro2 = 	getMaterial( config.getString( "AttackTypes.Pyro2", null ) );
-		pyro3 = 	getMaterial( config.getString( "AttackTypes.Pyro3", null ) );
-		bombardier = getMaterial( config.getString( "AttackTypes.Bombardier", null ) );
-		sc1 = 		getMaterial( config.getString( "AttackTypes.StormCaller1", null ) );
-		sc2 = 		getMaterial( config.getString( "AttackTypes.StormCaller2", null ) );
-		witchdoctor = getMaterial( config.getString( "AttackTypes.WitchDoctor", null ) );
-		magi = 		getMaterial( config.getString( "AttackTypes.IceMagi", null ) );
-		sc3 = 		getMaterial( config.getString( "AttackTypes.StormCaller3", null ) );
-		warlock1 = 	getMaterial( config.getString( "AttackTypes.Warlock1", null ) );
-		warlock2 = 	getMaterial( config.getString( "AttackTypes.Warlock2", null ) );
-		warlock3 = 	getMaterial( config.getString( "AttackTypes.Warlock3", null ) );
+
+		AttackType.loadWeapons( config );
 		
 		dieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
 		bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
@@ -225,13 +222,13 @@ public class Sentry extends JavaPlugin {
 		
 		logicTicks = 	config.getInt( "Server.LogicTicks", 10 );
 		sentryEXP = 	config.getInt( "Server.ExpValue", 5 );
-		missMessage = 	config.getString( "GlobalTexts.Miss", null );
-		hitMessage = 	config.getString( "GlobalTexts.Hit", null );
-		blockMessage = 	config.getString( "GlobalTexts.Block", null );
-		crit1Message = 	config.getString( "GlobalTexts.Crit1", null );
-		crit2Message = 	config.getString( "GlobalTexts.Crit2", null );
-		crit3Message = 	config.getString( "GlobalTexts.Crit3", null );
-		glanceMessage = config.getString( "GlobalTexts.Glance", null );
+		missMessage = 	config.getString( "GlobalTexts.Miss" );
+		hitMessage = 	config.getString( "GlobalTexts.Hit" );
+		blockMessage = 	config.getString( "GlobalTexts.Block" );
+		crit1Message = 	config.getString( "GlobalTexts.Crit1" );
+		crit2Message = 	config.getString( "GlobalTexts.Crit2" );
+		crit3Message = 	config.getString( "GlobalTexts.Crit3" );
+		glanceMessage = config.getString( "GlobalTexts.Glance" );
 		missChance = 	config.getInt( "HitChances.Miss", 0 );
 		glanceChance = 	config.getInt( "HitChances.Glance", 0 );
 		crit1Chance = 	config.getInt( "HitChances.Crit1", 0 );
@@ -268,48 +265,48 @@ public class Sentry extends JavaPlugin {
 		groupsChecked = true;
 	}
 
-	// TODO this method also needs updating to use Materials.
-	@SuppressWarnings("deprecation")
-	boolean equip( NPC npc, ItemStack inHand ) {
+	boolean equip( NPC npc, ItemStack newEquipment ) {
 		
 		Equipment equipment = npc.getTrait( Equipment.class );
 		if ( equipment == null ) return false;
+				// the npc's entity type does not support equipment.
 		
-		int slot = 0;
-		Material type = ( inHand == null ) ? Material.AIR 
-										   : inHand.getType();
-		
-		// First, determine the slot to edit
-		if ( 	  helmets.contains( type.getId() ) ) slot = 1;
-		else if ( chestplates.contains( type.getId() ) ) slot = 2;
-		else if ( leggings.contains( type.getId() ) ) slot = 3;
-		else if ( boots.contains( type.getId() ) ) slot = 4;
-
-		// Now edit the equipment based on the slot
-		// Set the proper slot with one of the item
-		if ( type == Material.AIR ) {
+		if ( newEquipment == null ) {
+			
 			for ( int i = 0; i < 5; i++ ) {
+				
 				if ( equipment.get( i ) != null 
 				  && equipment.get( i ).getType() != Material.AIR ) {
-					try {
-						equipment.set( i, null );
-					} catch ( Exception e ) { }   
+	//				try {
+						equipment.set( i , null );
+	//				} catch ( Exception e ) { }   
 				}
 			}
 			return true;
 		}
-		else {
-			@SuppressWarnings("null")
-			ItemStack clone = inHand.clone();
-			clone.setAmount( 1 );
+		
+		int slot = 0;
+		Material type = newEquipment.getType();
+		
+		// First, determine the slot to edit
+		if      ( helmets.contains( type ) ) slot = 1;
+		else if ( chestplates.contains( type ) ) slot = 2;
+		else if ( leggings.contains( type ) ) slot = 3;
+		else if ( boots.contains( type ) ) slot = 4;	
+	
+	// Removed as unnecessary, ItemStack defaults to a stack size of 1 
+	//	@SuppressWarnings("null")
+	//	ItemStack clone = newEquipment.clone();
+	//	clone.setAmount( 1 );
 
-			try {
-				equipment.set( slot, clone );
-			} catch ( Exception e ) {
-				return false;
-			}
-			return true;	
-		}
+	//  Why do we have to check for exceptions here? 
+		
+	//	try {
+			equipment.set( slot, newEquipment );
+	//	} catch ( Exception e ) {
+	//		return false;
+	//	}
+		return true;	
 	}
 
 	public  String getClan( Player player ) {
@@ -326,34 +323,22 @@ public class Sentry extends JavaPlugin {
 		}
 		return null;
 	}
-
-	// TODO convert the Material getting to use non-deprecated calls.
-	@SuppressWarnings("deprecation") 
-	int getMaterial( String s ) {
+	
+	/** New method with this name, now re-written to return Material values from the official enum. */
+    static Material getMaterial( String materialName ) {
 		
-		int item = -1;
-		if ( s == null ) 
-			return item;
+		if ( materialName == null ) return null;
 
-		String[] args = s.toUpperCase().split(":");
+		String[] args = materialName.toUpperCase().split( ":" );
 
 		Material material = Material.getMaterial( args[0] );
 
-		// TODO figure out why this unnecessary test is here.
-		if ( item == -1 ) {	
-			try {
-				item = Integer.parseInt( args[0] );
-			} catch ( Exception e ) { }
-		}
-
-		if ( material != null ) {		
-			item = material.getId();
-		}
-		return item;
+		if ( material == null ) 
+			throw new RuntimeException("Invalid Material name:" + materialName + ". Please check config.yml carefully.");
+		
+		return material;
 	}
-
 	
-
 	public SentryInstance getSentry( Entity ent ) {
 		
 		if  (  ent != null 
@@ -372,7 +357,7 @@ public class Sentry extends JavaPlugin {
 		return null;
 	}
 
-	// deprecate call to "getPlayerTeam" replaced
+	// deprecated call to "getPlayerTeam" replaced
 	public String getMCTeamName( Player player ) {
 		
 		Team team = getServer().getScoreboardManager().getMainScoreboard().getEntryTeam( player.getName() );
@@ -395,28 +380,31 @@ public class Sentry extends JavaPlugin {
 		logger.log( Level.INFO, " v" + getDescription().getVersion() + " disabled." );
 		Bukkit.getServer().getScheduler().cancelTasks( this );
 	}
-
 	
-	public void loadItemList( String key, List<Integer> list ) {
+	public void loadItemList( String key, Set<Material> set ) {
 		
-		List<String> strs = getConfig().getStringList( key );
-
-		if ( strs.size() > 0 ) list.clear();
-
-		for ( String s : getConfig().getStringList( key ) ) {
-			int	item = getMaterial( s.trim() );
-			list.add( item );
+		if ( getConfig().getBoolean( "UseCustom" + key ) ) {
+			
+			List<String> strings = getConfig().getStringList( key );
+	
+			if ( strings.size() > 0 ) {
+				
+				set.clear();
+			
+				for ( String each : strings ) {
+					set.add( getMaterial( each.trim() ) );
+				}
+			}
 		}
 	}
 
-	private void loadmap( String node, Map<Integer, Double> map ) {
+	private void loadmap( String node, Map<Material, Double> map ) {
 		map.clear();
 		
-		for ( String s : getConfig().getStringList( node ) ) {
-			String[] args = s.trim().split(" ");
+		for ( String each : getConfig().getStringList( node ) ) {
+			String[] args = each.trim().split(" ");
 			
-			if ( args.length != 2 ) 
-				continue;
+			if ( args.length != 2 ) continue;
 
 			double val = 0;
 
@@ -424,9 +412,9 @@ public class Sentry extends JavaPlugin {
 				val = Double.parseDouble( args[1] );
 			} catch (Exception e) { }
 
-			int	item = getMaterial( args[0] );
+			Material item = getMaterial( args[0] );
 
-			if ( item > 0 
+			if ( item != null 
 			  && val != 0 
 			  && !map.containsKey( item ) ) {
 				
@@ -435,26 +423,27 @@ public class Sentry extends JavaPlugin {
 		}
 	}
 	
-	private void loadPotions( String path, Map<Integer, List<PotionEffect>> map ) {
+	private void loadPotions( String path, Map<Material, List<PotionEffect>> map ) {
 		map.clear();
 		
-		for ( String s : getConfig().getStringList( path ) ) {
-			String[] args = s.trim().split(" ");
+		for ( String each : getConfig().getStringList( path ) ) {
+			String[] args = each.trim().split(" ");
 
 			if ( args.length < 2 ) continue;
 
-			int item  = getMaterial( args[0] );
+			Material item  = getMaterial( args[0] );
+			
+			if ( item == null ) continue;
 
 			List<PotionEffect> list = new ArrayList<PotionEffect>();
 
-			for ( int i = 1; i < args.length; i++ ) {
-				PotionEffect val = getPotionEffect( args[i] );
+			for ( String string : args ) {
+				
+				PotionEffect val = getPotionEffect( string );
 				
 				if ( val != null ) list.add( val );
 			}
-
-			if ( item > 0 
-			  && !list.isEmpty() ) {
+			if ( !list.isEmpty() ) {
 				
 				map.put( item, list );
 			}

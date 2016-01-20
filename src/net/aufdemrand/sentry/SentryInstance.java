@@ -2,8 +2,10 @@ package net.aufdemrand.sentry;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -24,7 +26,6 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Egg;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
@@ -40,7 +41,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.SmallFireball;
-import org.bukkit.entity.Snowball;
 import org.bukkit.entity.Snowman;
 import org.bukkit.entity.Spider;
 import org.bukkit.entity.ThrownPotion;
@@ -77,8 +77,7 @@ public class SentryInstance {
 
 	enum Hittype {
 		block, disembowel, glance, injure, main, miss, normal
-	}
-
+	}	
 	private Set<Player> _myDamamgers = new HashSet<Player>();
 
 	private Location _projTargetLostLoc;
@@ -87,7 +86,7 @@ public class SentryInstance {
 	
 	int strength = 1;
 	int armorValue = 0;
-	int lightningLevel = 0;
+//	int lightningLevel = 0;
 	int epCount = 0;
 	int nightVision = 16;
 	int respawnDelay = 10;
@@ -106,9 +105,9 @@ public class SentryInstance {
 	boolean killsDropInventory = true;
 	boolean dropInventory = false;
 	boolean targetable = true;
-	boolean inciendary = false;
+//	boolean inciendary = false;
 	boolean invincible = false;
-	boolean lightning = false;
+//	boolean lightning = false;
 	boolean loaded = false;
 	boolean luckyHits = true;
 	boolean iWillRetaliate = true;
@@ -134,11 +133,10 @@ public class SentryInstance {
 	public LivingEntity meleeTarget;
 	public NPC myNPC = null;
 	
-	private Class<? extends Projectile> myProjectile;
+//	private Class<? extends Projectile> myProjectile;
 	
-	public SentryTrait myTrait;
 	
-	// TODO why are we saving four instantces of the system time?
+	// TODO why are we saving four instances of the system time?
 	long isRespawnable = System.currentTimeMillis();	
 	long oktoFire = System.currentTimeMillis();
 	long oktoheal = System.currentTimeMillis();
@@ -147,13 +145,14 @@ public class SentryInstance {
 	
 
 	Sentry sentry;
-	public List<PotionEffect> potionEffects = null;
+	public List<PotionEffect> weaponSpecialEffects = null;
 	ItemStack potiontype = null;
 	public LivingEntity projectileTarget;
 	Random random = new Random();
 	
-	public SentryStatus sentryStatus = SentryStatus.isDYING;
-	
+	public SentryStatus myStatus = SentryStatus.isDYING;
+	public AttackType myAttacks;
+	public SentryTrait myTrait;
 
 	private int taskID = 0;
 	private Map<Player, Long> Warnings = new HashMap<Player, Long>();
@@ -168,14 +167,15 @@ public class SentryInstance {
 
 		// check for illegal values
 		if ( sentryWeight <= 0 ) 		sentryWeight = 1.0;
-		if ( attackRate > 30)	attackRate = 30.0;
+		if ( attackRate > 30)			attackRate = 30.0;
 		if ( sentryHealth < 0 )			sentryHealth = 0;
 		if ( sentryRange < 1 )			sentryRange = 1;
 		if ( sentryRange > 200 )		sentryRange = 200;
 		if ( sentryWeight <= 0 )		sentryWeight =  1.0;
-		if ( respawnDelay < -1 )	respawnDelay = -1;
+		if ( respawnDelay < -1 )		respawnDelay = -1;
 		if ( spawnLocation == null ) 	spawnLocation = getMyEntity().getLocation();
 		
+		// Allow Denizen to handle the sentry's health if it is active.
 		if ( Sentry.denizenActive ) {
 			if ( myNPC.hasTrait( HealthTrait.class ) ) myNPC.removeTrait( HealthTrait.class );
 		}
@@ -187,13 +187,13 @@ public class SentryInstance {
 
 		_myDamamgers.clear();
 
-		sentryStatus = SentryStatus.isLOOKING;
+		myStatus = SentryStatus.isLOOKING;
 		faceForward();
 
 		healAnimation = new PacketPlayOutAnimation( ((CraftEntity)getMyEntity()).getHandle(), 6);
 
 		//	Packet derp = new net.minecraft.server.Packet15Place();
-
+		
 		if ( guardTarget == null ) 
 			myNPC.teleport( spawnLocation, TeleportCause.PLUGIN ); //it should be there... but maybe not if the position was saved elsewhere.
 
@@ -547,12 +547,12 @@ public class SentryInstance {
 
 	public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
 		
-		if 	(  sentryStatus == SentryStatus.isDYING 
-			|| sentryStatus == SentryStatus.isDEAD 
+		if 	(  myStatus == SentryStatus.isDYING 
+			|| myStatus == SentryStatus.isDEAD 
 			|| !( getMyEntity() instanceof LivingEntity ) ) 
 					return;
 
-		sentryStatus = SentryStatus.isDYING;
+		myStatus = SentryStatus.isDYING;
 
 		setTarget( null, false );
 		//		myNPC.getTrait(Waypoints.class).getCurrentProvider().setPaused(true);
@@ -602,25 +602,25 @@ public class SentryInstance {
 			}
 		}
 
-		sentryStatus = SentryStatus.isDEAD;
+		myStatus = SentryStatus.isDEAD;
 
 		if ( this.dropInventory )  
 			getMyEntity().getLocation().getWorld()
 									   .spawn( getMyEntity().getLocation(), ExperienceOrb.class )
 									   .setExperience( sentry.sentryEXP );
 
-		List<ItemStack> items = new java.util.LinkedList<ItemStack>();
+		List<ItemStack> items = new LinkedList<ItemStack>();
 
 		if ( getMyEntity() instanceof HumanEntity ) {
 			//get drop inventory.
 			for ( ItemStack is : ( (HumanEntity) getMyEntity()).getInventory().getArmorContents() ) {
-				if ( is.getTypeId() > 0 ) 
+				if ( is.getType() != null ) 
 					items.add( is );
 			}
 
 			ItemStack is = ( (HumanEntity) getMyEntity()).getInventory().getItemInHand();
 			
-			if ( is.getTypeId() > 0 ) items.add( is );
+			if ( is.getType() != null ) items.add( is );
 
 			((HumanEntity) getMyEntity()).getInventory().clear();
 			((HumanEntity) getMyEntity()).getInventory().setArmorContents( null );
@@ -721,7 +721,7 @@ public class SentryInstance {
 					if ( hasLOS( aTarget ) ) {
 
 						if  (  warningRange > 0 
-							&& sentryStatus == SentryStatus.isLOOKING 
+							&& myStatus == SentryStatus.isLOOKING 
 							&& aTarget instanceof Player 
 							&& dist > ( Range - warningRange ) 
 							&& !CitizensAPI.getNPCRegistry().isNPC( aTarget ) 
@@ -747,7 +747,7 @@ public class SentryInstance {
 				}
 			}
 			else if (  warningRange > 0 
-					&& sentryStatus == SentryStatus.isLOOKING 
+					&& myStatus == SentryStatus.isLOOKING 
 					&& aTarget instanceof Player 
 					&& !CitizensAPI.getNPCRegistry().isNPC( aTarget ) 
 					&& !greetingMsg.isEmpty() ) {
@@ -780,20 +780,22 @@ public class SentryInstance {
 	
 	public void Fire(LivingEntity theEntity) {
 		
+		Class<? extends Projectile> projectile = myAttacks.getProjectile();
+		Effect effect = null;
+		
 		double v = 34;
 		double g = 20;
 
-		Effect effect = null;
-
 		boolean ballistics = true;
-
-		if (myProjectile == Arrow.class) {
+		
+		if ( projectile == Arrow.class) {
 			effect = Effect.BOW_FIRE;
-		} else if (myProjectile == SmallFireball.class || myProjectile == Fireball.class || myProjectile == WitherSkull.class) {
+			
+		} else if ( projectile == SmallFireball.class || projectile == Fireball.class || projectile == WitherSkull.class) {
 			effect = Effect.BLAZE_SHOOT;
-			ballistics =false;
+			ballistics = false;
 		}
-		else if (myProjectile == ThrownPotion.class){
+		else if ( projectile == ThrownPotion.class){
 			v = 21;
 			g = 20;
 		}
@@ -802,9 +804,9 @@ public class SentryInstance {
 			g = 13.5;
 		}
 
-		if ( lightning ) {
+		if ( myAttacks.lightning ) {
 			ballistics = false;
-			effect =null;
+			effect = null;
 		}
 
 		// calc shooting spot.
@@ -850,7 +852,7 @@ public class SentryInstance {
 
 			// victor = victor.add(noise);
 
-			if ( myProjectile == Arrow.class || myProjectile == ThrownPotion.class )  
+			if ( projectile == Arrow.class || projectile == ThrownPotion.class )  
 				v = v + ( 1.188 * Math.pow( hangtime, 2 ) );
 			else 
 				v = v + ( 0.5 * Math.pow( hangtime, 2 ) );
@@ -867,23 +869,27 @@ public class SentryInstance {
 		}
 		else if ( dist > sentryRange && clearTargets() ) return;
 
-		if ( lightning ) {
-			if ( lightningLevel == 2 ) {
-				to.getWorld().strikeLightning( to );
-			}
-			else if ( lightningLevel == 1 ) {
-				to.getWorld().strikeLightningEffect( to );
-				theEntity.damage( getStrength(), getMyEntity() );
-			}
-			else if ( lightningLevel == 3 ) {
-				to.getWorld().strikeLightningEffect( to );
-				theEntity.setHealth( 0 );
+		if ( myAttacks.lightning ) {
+			
+			switch ( myAttacks.lightningLevel ) {
+			
+				case ( 1 ):
+					to.getWorld().strikeLightningEffect( to );
+					theEntity.damage( getStrength(), getMyEntity() );
+					break;
+				case ( 2 ):
+					to.getWorld().strikeLightning( to );
+					break;
+				case ( 3 ):
+					to.getWorld().strikeLightningEffect( to );
+					theEntity.setHealth( 0 );
+					break;
 			}
 		}
 		else {
 			Projectile theArrow;
 
-			if ( myProjectile == ThrownPotion.class ) {
+			if ( projectile == ThrownPotion.class ) {
 				net.minecraft.server.v1_8_R3.World nmsWorld = ((CraftWorld)getMyEntity().getWorld()).getHandle();
 				EntityPotion ent = new EntityPotion(nmsWorld
 													, loc.getX()
@@ -893,27 +899,27 @@ public class SentryInstance {
 				nmsWorld.addEntity( ent );
 				theArrow = (Projectile) ent.getBukkitEntity();
 			}
-			else if ( myProjectile == EnderPearl.class ) 
-				theArrow = getMyEntity().launchProjectile( myProjectile );
+			else if ( projectile == EnderPearl.class ) 
+				theArrow = getMyEntity().launchProjectile( projectile );
 			else 
-				theArrow = getMyEntity().getWorld().spawn( loc, myProjectile );
+				theArrow = getMyEntity().getWorld().spawn( loc, projectile );
 
-			if ( myProjectile == Fireball.class || myProjectile == WitherSkull.class ) {
+			if ( projectile == Fireball.class || projectile == WitherSkull.class ) {
 				victor = victor.multiply( 1 / 1000000000 );
 			}
-			else if ( myProjectile == SmallFireball.class ) {
+			else if ( projectile == SmallFireball.class ) {
 				
 				victor = victor.multiply( 1 / 1000000000 );
-				( (SmallFireball) theArrow ).setIsIncendiary( inciendary );
+				( (SmallFireball) theArrow ).setIsIncendiary( myAttacks.incendiary );
 				
-				if ( !inciendary ) {
+				if ( !myAttacks.incendiary ) {
 					( (SmallFireball) theArrow ).setFireTicks( 0 );
 					( (SmallFireball) theArrow ).setYield( 0 );
 				}
 			}
 			
 			//TODO why are we counting enderpearls?
-			else if ( myProjectile == EnderPearl.class ) {
+			else if ( projectile == EnderPearl.class ) {
 				epCount++;
 				if ( epCount > Integer.MAX_VALUE-1 ) 
 					epCount = 0;
@@ -929,7 +935,7 @@ public class SentryInstance {
 		if ( effect != null )
 			getMyEntity().getWorld().playEffect( getMyEntity().getLocation(), effect, null );
 
-		if ( myProjectile == Arrow.class ) {
+		if ( projectile == Arrow.class ) {
 			draw( false );
 		}
 		else if ( getMyEntity() instanceof Player )	{
@@ -942,7 +948,7 @@ public class SentryInstance {
 		double mod = 0;
 		if ( getMyEntity() instanceof Player){
 			for (ItemStack is:((Player)getMyEntity()).getInventory().getArmorContents()){
-				if (sentry.armorBuffs.containsKey(is.getTypeId())) mod += sentry.armorBuffs.get(is.getTypeId());
+				if (sentry.armorBuffs.containsKey(is.getType())) mod += sentry.armorBuffs.get(is.getType());
 			}
 		}
 
@@ -971,8 +977,8 @@ public class SentryInstance {
 		double mod = 0;
 		if ( getMyEntity() instanceof Player ) {
 			for ( ItemStack is : ((Player) getMyEntity()).getInventory().getArmorContents() ) {
-				if ( sentry.speedBuffs.containsKey( is.getTypeId() ) ) 
-					mod += sentry.speedBuffs.get( is.getTypeId() );
+				if ( sentry.speedBuffs.containsKey( is.getType() ) ) 
+					mod += sentry.speedBuffs.get( is.getType() );
 			}
 		}
 		return (float) (sentrySpeed + mod) * ( getMyEntity().isInsideVehicle() ? 2 : 1 );
@@ -1000,9 +1006,9 @@ public class SentryInstance {
 		double mod = 0;
 
 		if  (  getMyEntity() instanceof Player 
-			&& sentry.strengthBuffs.containsKey( ((Player) getMyEntity()).getInventory().getItemInHand().getTypeId() ) ) {
+			&& sentry.strengthBuffs.containsKey( ((Player) getMyEntity()).getInventory().getItemInHand().getType() ) ) {
 				
-				mod += sentry.strengthBuffs.get( ((Player)getMyEntity()).getInventory().getItemInHand().getTypeId() );
+				mod += sentry.strengthBuffs.get( ((Player)getMyEntity()).getInventory().getItemInHand().getType() );
 		}
 		return (int) (strength + mod);
 	}
@@ -1014,38 +1020,40 @@ public class SentryInstance {
 		return ChatColor.translateAlternateColorCodes( '&', str );
 	}
 	
+	static Set<AttackType> pyros = EnumSet.of( AttackType.pyro1, AttackType.pyro2, AttackType.pyro3 );
+	
 	public boolean isPyromancer() {
-		return ( myProjectile == Fireball.class || myProjectile == SmallFireball.class ) ;
+		return pyros.contains( myAttacks );
 	}
 
 	public boolean isPyromancer1() {
-		return ( !inciendary && myProjectile == SmallFireball.class ) ;
+		return ( myAttacks == AttackType.pyro1 ) ;
 	}
 
-	public boolean isPyromancer2() {
-		return ( inciendary && myProjectile == SmallFireball.class ) ;
-	}
+	// unused?
+//	public boolean isPyromancer2() {
+//		return ( inciendary && myProjectile == SmallFireball.class ) ;
+//	}
 
-	public boolean isPyromancer3() {
-		return ( myProjectile == Fireball.class ) ;
-	}
+//	public boolean isPyromancer3() {
+//		return ( myProjectile == Fireball.class ) ;
+//	}
 
 	public boolean isStormcaller() {
-		return ( lightning ) ;
+		return ( myAttacks.lightning ) ;
 	}
 
 	public boolean isWarlock1() {
-		return ( myProjectile == EnderPearl.class ) ;
+		return ( myAttacks == AttackType.warlock1 ) ;
 	}
 
 	public boolean isWitchDoctor() {
-		return ( myProjectile == ThrownPotion.class) ;
+		return ( myAttacks == AttackType.witchdoctor ) ;
 	}
-
 
 	public void onDamage( EntityDamageByEntityEvent event ) {
 
-		if ( sentryStatus == SentryStatus.isDYING ) return;
+		if ( myStatus == SentryStatus.isDYING ) return;
 
 		if ( myNPC == null || !myNPC.isSpawned() ) return;
 
@@ -1168,7 +1176,7 @@ public class SentryInstance {
 			}
 
 			if(msg!=null && msg.isEmpty() == false){
-				((Player) attacker).sendMessage(Util.format(msg, npc, attacker, ((Player) attacker).getItemInHand().getTypeId(), finaldamage+""));
+				((Player) attacker).sendMessage(Util.format(msg, npc, attacker, ((Player) attacker).getItemInHand().getType(), finaldamage+""));
 			}
 		}
 
@@ -1192,7 +1200,7 @@ public class SentryInstance {
 
 	public void onEnvironmentDamage(EntityDamageEvent event){
 
-		if(sentryStatus == SentryStatus.isDYING) return;
+		if(myStatus == SentryStatus.isDYING) return;
 
 		if (!myNPC.isSpawned() || invincible) return;
 
@@ -1329,14 +1337,14 @@ public class SentryInstance {
 		@Override
 		public void run() {
 			// plugin.getServer().broadcastMessage("tick " + (myNPC ==null) +
-			if (getMyEntity() == null ) sentryStatus = SentryStatus.isDEAD; // incase it dies in a way im not handling.....
+			if (getMyEntity() == null ) myStatus = SentryStatus.isDEAD; // incase it dies in a way im not handling.....
 
 			if (UpdateWeapon()){
 				//ranged
 				if(meleeTarget !=null) {
 					sentry.debug(myNPC.getName() + " Switched to ranged");
 					LivingEntity derp = meleeTarget;
-					boolean ret = sentryStatus == SentryStatus.isRETALIATING;
+					boolean ret = myStatus == SentryStatus.isRETALIATING;
 					setTarget(null, false);
 					setTarget(derp, ret);
 				}
@@ -1345,16 +1353,16 @@ public class SentryInstance {
 				//melee
 				if(projectileTarget != null) {
 					sentry.debug(myNPC.getName() + " Switched to melee");
-					boolean ret = ( sentryStatus == SentryStatus.isRETALIATING );
+					boolean ret = ( myStatus == SentryStatus.isRETALIATING );
 					LivingEntity derp = projectileTarget;
 					setTarget(null, false);
 					setTarget(derp, ret);
 				}
 			}
 
-			if (sentryStatus != SentryStatus.isDEAD &&  healRate > 0) {
+			if (myStatus != SentryStatus.isDEAD &&  healRate > 0) {
 				if(System.currentTimeMillis() > oktoheal ){
-					if (getHealth() < sentryHealth && sentryStatus !=  SentryStatus.isDEAD && sentryStatus != SentryStatus.isDYING) {
+					if (getHealth() < sentryHealth && myStatus !=  SentryStatus.isDEAD && myStatus != SentryStatus.isDYING) {
 						double heal = 1;
 						if (healRate <0.5) heal = (0.5 / healRate);
 
@@ -1374,7 +1382,7 @@ public class SentryInstance {
 
 			if(myNPC.isSpawned() && getMyEntity().isInsideVehicle() == false && isMounted() && isMyChunkLoaded()) mount();
 
-			if (sentryStatus == SentryStatus.isDEAD 
+			if (myStatus == SentryStatus.isDEAD 
 					&& System.currentTimeMillis() > isRespawnable 
 					&& respawnDelay > 0 & spawnLocation.getWorld().isChunkLoaded( spawnLocation.getBlockX() >> 4, spawnLocation.getBlockZ()>>4)) {
 				// Respawn
@@ -1389,14 +1397,14 @@ public class SentryInstance {
 				}
 				return;
 			}
-			else if ((sentryStatus == SentryStatus.isHOSTILE || sentryStatus == SentryStatus.isRETALIATING) && myNPC.isSpawned()) {
+			else if ((myStatus == SentryStatus.isHOSTILE || myStatus == SentryStatus.isRETALIATING) && myNPC.isSpawned()) {
 
 				if (!isMyChunkLoaded()){
 					setTarget(null, false);
 					return;
 				}
 
-				if (targets >0 && sentryStatus == SentryStatus.isHOSTILE && System.currentTimeMillis() > oktoreasses) {
+				if (targets >0 && myStatus == SentryStatus.isHOSTILE && System.currentTimeMillis() > oktoreasses) {
 					LivingEntity target = findTarget(sentryRange);
 					setTarget(target, false);
 					oktoreasses = System.currentTimeMillis() + 3000;
@@ -1451,7 +1459,7 @@ public class SentryInstance {
 
 			}
 
-			else if (sentryStatus == SentryStatus.isLOOKING && myNPC.isSpawned()) {
+			else if (myStatus == SentryStatus.isLOOKING && myNPC.isSpawned()) {
 
 				if(getMyEntity().isInsideVehicle() == true) faceAlignWithVehicle(); //sync the rider with the vehicle.
 
@@ -1600,79 +1608,47 @@ public class SentryInstance {
      * @return - true to indicate a ranged attack 
      * <br>    - false for a melee attack */
 	public boolean UpdateWeapon() {
-		int weapon = 0;
+		Material weapon = Material.AIR;
 
 		ItemStack is = null;
 
 		if ( getMyEntity() instanceof HumanEntity ) {
 			is = ((HumanEntity) getMyEntity()).getInventory().getItemInHand();
-			weapon = is.getTypeId();
+			weapon = is.getType();
 			
-			if ( weapon != sentry.witchdoctor ) 
+			myAttacks = AttackType.findType( weapon );
+			
+			if ( myAttacks != AttackType.witchdoctor ) 
 				is.setDurability( (short) 0 );
+			
+		} else if ( getMyEntity() instanceof Skeleton ) {
+			myAttacks = AttackType.archer;
+		}
+		else if ( getMyEntity() instanceof Ghast) {
+			myAttacks = AttackType.pyro3;
+		}
+		else if ( getMyEntity() instanceof Blaze || getMyEntity() instanceof EnderDragon ) {
+			myAttacks = AttackType.pyro2;
+		}
+		else if ( getMyEntity() instanceof Snowman ){
+			myAttacks = AttackType.magi;
+		}
+		else if ( getMyEntity() instanceof Wither ){
+			myAttacks = AttackType.warlock2;
+		}
+		else if ( getMyEntity() instanceof Witch ) {
+			myAttacks = AttackType.witchdoctor;
 		}
 
-		lightning = false;
-		lightningLevel = 0;
-		inciendary = false;
-		potionEffects = sentry.weaponEffects.get( weapon );
-
-		myProjectile = null;
-
-		if ( weapon == sentry.archer || getMyEntity() instanceof Skeleton ) {
-			myProjectile = Arrow.class;
-		}
-		else if ( weapon ==  sentry.pyro3 || getMyEntity() instanceof Ghast) {
-			myProjectile = Fireball.class;
-		}
-		else if ( weapon ==  sentry.pyro2 || getMyEntity() instanceof Blaze || getMyEntity() instanceof EnderDragon ) {
-			myProjectile = SmallFireball.class;
-			inciendary = true;
-		}
-		else if ( weapon ==  sentry.pyro1 ) {
-			myProjectile = SmallFireball.class;
-			inciendary =false;
-		}
-		else if ( weapon == sentry.magi || getMyEntity() instanceof Snowman){
-			myProjectile = Snowball.class;
-		}
-		else if ( weapon == sentry.warlock1 ) {
-			myProjectile = EnderPearl.class;
-		}
-		else if ( weapon == sentry.warlock2 || getMyEntity() instanceof Wither){
-			myProjectile = WitherSkull.class;
-		}
-		else if ( weapon == sentry.warlock3 ) {
-			myProjectile = WitherSkull.class;
-		}
-		else if ( weapon == sentry.bombardier ) {
-			myProjectile = Egg.class;
-		}
-		else if ( weapon == sentry.witchdoctor || getMyEntity() instanceof Witch ) {
+		weaponSpecialEffects = sentry.weaponEffects.get( weapon );
+		
+		if ( myAttacks == AttackType.witchdoctor ) {
 			if ( is == null ) {
-				is = new ItemStack( 373, 1, (short) 16396 );
+				is = new ItemStack( Material.POTION, 1, (short) 16396 );
 			}
-			myProjectile = ThrownPotion.class;
 			potiontype = is;
 		}
-		else if ( weapon == sentry.sc1 ) {
-			myProjectile = ThrownPotion.class;
-			lightning = true;
-			lightningLevel = 1;
-		}
-		else if ( weapon == sentry.sc2 ) {
-			myProjectile = ThrownPotion.class;
-			lightning = true;
-			lightningLevel = 2;
-		}
-		else if ( weapon == sentry.sc3 ) {
-			myProjectile = ThrownPotion.class;
-			lightning = true;
-			lightningLevel = 3;
-		}
-		else return false; //melee
-
-	return true; //ranged
+		return ( myAttacks.getProjectile() != null );
 	}
 	
 	
@@ -1685,7 +1661,7 @@ public class SentryInstance {
 		if ( theEntity == null ) {
 			sentry.debug( myNPC.getName() + "- Set Target Null" );
 			// this gets called while npc is dead, reset things.
-			sentryStatus = SentryStatus.isLOOKING;
+			myStatus = SentryStatus.isLOOKING;
 			projectileTarget = null;
 			meleeTarget = null;
 			_projTargetLostLoc = null;
@@ -1733,9 +1709,9 @@ public class SentryInstance {
 		if ( theEntity == guardEntity )	return; 
 
 		if ( isretaliation ) 
-			sentryStatus = SentryStatus.isRETALIATING;
+			myStatus = SentryStatus.isRETALIATING;
 		else 
-			sentryStatus = SentryStatus.isHOSTILE;
+			myStatus = SentryStatus.isHOSTILE;
 
 
 		if ( !getNavigator().isNavigating() ) 

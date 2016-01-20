@@ -287,9 +287,9 @@ public class SentryListener implements Listener {
 			if ( damager == victim ) event.setCancelled( true );
 
 			// apply potion effects
-			if ( instDamager.potionEffects != null 
+			if ( instDamager.weaponSpecialEffects != null 
 			  && event.isCancelled() == false ) {
-				( (LivingEntity) victim ).addPotionEffects( instDamager.potionEffects );
+				( (LivingEntity) victim ).addPotionEffects( instDamager.weaponSpecialEffects );
 			}
 			
 			// warlock 1 should do no direct damage, except to other sentries which take no fall damage.
@@ -392,7 +392,7 @@ public class SentryListener implements Listener {
 				}
 
 				if ( ( inst.hasTargetType( 16 )  
-				    && inst.sentryStatus == SentryStatus.isLOOKING 
+				    && inst.myStatus == SentryStatus.isLOOKING 
 				    && damager instanceof Player 
 				    && CitizensAPI.getNPCRegistry().isNPC( damager ) == false ) 
 				// is the event within range of the sentry?

@@ -1,6 +1,7 @@
 package net.aufdemrand.sentry;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -618,31 +619,39 @@ public abstract class CommandHandler {
 			return true;
 		}
 		
-		else if (args[0].equalsIgnoreCase("equip")) {
-			if ( !checkCommandPerm( "sentry.equip", player) ) return true;
+		else if ( args[0].equalsIgnoreCase( "equip" ) ) {
+			if ( !checkCommandPerm( "sentry.equip", player ) ) return true;
 
-			if (args.length <= 1) {
-				player.sendMessage(ChatColor.RED + "You must specify a Item ID or Name. or specify 'none' to remove all equipment.");
+			if ( args.length <= 1 ) {
+				player.sendMessage( ChatColor.RED + "You must specify a Item ID or Name. or specify 'none' to remove all equipment." );
 			}
 			else {
-				if(thisNPC.getEntity().getType() == EntityType.ENDERMAN || thisNPC.getEntity().getType() == EntityType.PLAYER){
-					if(args[1].equalsIgnoreCase("none")){
+				if ( thisNPC.getEntity().getType() == EntityType.ENDERMAN || thisNPC.getEntity().getType() == EntityType.PLAYER ) {
+					
+					if ( args[1].equalsIgnoreCase( "none" ) ) {
+						
 						//remove equipment
-						sentry.equip(thisNPC, null);
+						sentry.equip( thisNPC, null );
 						inst.UpdateWeapon();
-						player.sendMessage(ChatColor.YELLOW +thisNPC.getName() + "'s equipment cleared."); 
+						player.sendMessage( ChatColor.YELLOW +thisNPC.getName() + "'s equipment cleared." ); 
 					}
-					else{
-						int mat = sentry.getMaterial(args[1]);
-						if (mat>0){
-							ItemStack is = new ItemStack(mat);
-							if (sentry.equip(thisNPC, is)){
-								inst.UpdateWeapon();
-								player.sendMessage(ChatColor.GREEN +" equipped " + is.getType().toString() + " on "+ thisNPC.getName()); 
-							}
-							else player.sendMessage(ChatColor.RED +" Could not equip: invalid mob type?"); 
+					else {
+						Material mat = Sentry.getMaterial( args[1] );
+						
+						if ( mat == null ) {
+							player.sendMessage(ChatColor.RED +" Could not equip: unknown item name"); 
+							return true;
 						}
-						else player.sendMessage(ChatColor.RED +" Could not equip: unknown item name"); 
+						
+						ItemStack is = new ItemStack(mat);
+						
+						if ( sentry.equip( thisNPC, is ) ) {
+							inst.UpdateWeapon();
+							player.sendMessage(ChatColor.GREEN +" equipped " + mat.toString() + " on "+ thisNPC.getName()); 
+						}
+						else player.sendMessage(ChatColor.RED +" Could not equip: invalid mob type?"); 
+						
+						
 					}
 				}
 				else player.sendMessage(ChatColor.RED +" Could not equip: must be Player or Enderman type");
@@ -701,7 +710,7 @@ public abstract class CommandHandler {
 			player.sendMessage(ChatColor.GREEN + "Invincible: " + inst.invincible + "  Retaliate: " + inst.iWillRetaliate);
 			player.sendMessage(ChatColor.GREEN + "Drops Items: " + inst.dropInventory+ "  Critical Hits: " + inst.luckyHits);
 			player.sendMessage(ChatColor.GREEN + "Kills Drop Items: "+ inst.killsDropInventory + "  Respawn Delay: " + inst.respawnDelay + "s");
-			player.sendMessage(ChatColor.BLUE + "Status: " + inst.sentryStatus);
+			player.sendMessage(ChatColor.BLUE + "Status: " + inst.myStatus);
 			
 			if (inst.meleeTarget == null){
 				if(inst.projectileTarget ==null) player.sendMessage(ChatColor.BLUE + "Target: Nothing");

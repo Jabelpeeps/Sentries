@@ -71,7 +71,8 @@ HitChances:
  Crit2: 4
  Crit3: 2
  
-#Set the item used by each type of Sentry. Use item name or id #. 
+UseCustomWeapons: false 
+#Set the item used by each type of Sentry. Use item name.
 #Remove an entry to disable that attack type. Any other item makes a Brawler.
 AttackTypes:
  Archer: BOW
@@ -106,7 +107,7 @@ SpeedBuffs:
  #- IRON_BOOTS -0.1
 
 #Apply potion effects on hit for various weapon types. Multiple effects allowed. 
-#Use format: [item name/id] [potion name/id:duration in ticks:level] There are 20 ticks in a second. 
+#Use format: [item name] [potion name/id:duration in ticks:level] There are 20 ticks in a second. 
 #Duration and Level are optional, default duration is 20, level is 1.
 #Valid potion names: 
 #speed, slow, fast_digging, slow_digging, increase_damage, heal, harm, jump, confusion, 
@@ -117,9 +118,11 @@ WeaponEffects:
  
  
   
-#The lists below control what items are equipped as armor. These should only be changed to disable specific armors or add extended (i.e. Spout) items.
+# The lists below control what items are equipped as armor. These should only be changed to disable specific armors or add extended (i.e. Spout) items.
+# If you are not changing the list from the default, leave the "UseCustom..." values as false. 
  
-#The following items will be equipped as helmets, can use name or id #
+UseCustomHelmets: false 
+# If the value above is changed to true, the following items will be equipped as helmets, you must use the correct Material name.
 Helmets:
    - PUMPKIN
    - JACK_O_LANTERN
@@ -128,16 +131,18 @@ Helmets:
    - GOLD_HELMET
    - IRON_HELMET
    - DIAMOND_HELMET
-   
-#The following items will be equipped as chestplates, can use name or id #.
+
+UseCustomChestplates: false
+# If the value above is changed to true, the following items will be equipped as chestplates, you must use the correct Material name.
 Chestplates:
     - LEATHER_CHESTPLATE
     - CHAINMAIL_CHESTPLATE
     - GOLD_CHESTPLATE
     - IRON_CHESTPLATE
     - DIAMOND_CHESTPLATE
-  
-#The following items will be equipped as leggings, can use name or id #
+
+UseCustomLeggings: false
+# If the value above is changed to true, the following items will be equipped as leggings, you must use the correct Material name.
 Leggings:
     - LEATHER_LEGGINGS
     - CHAINMAIL_LEGGINGS
@@ -145,7 +150,8 @@ Leggings:
     - IRON_LEGGINGS
     - DIAMOND_LEGGINGS
     
-#The following items will be equipped as boots, can use name or id #
+UseCustomBoots: false    
+# If the value above is changed to true, the following items will be equipped as boots, you must use the correct Material name.
 Boots:  
     - LEATHER_BOOTS
     - CHAINMAIL_BOOTS

@@ -185,7 +185,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		
 		if ( inst != null ) {
 			inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
-			inst.sentryStatus = SentryStatus.isDEAD;
+			inst.myStatus = SentryStatus.isDEAD;
 			inst.dismount();
 		}
 	}

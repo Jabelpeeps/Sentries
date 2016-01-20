@@ -133,7 +133,7 @@ public class DenizenHook {
 					dB.log( db );
 
 					if ( inst != null ) {
-						inst.sentryStatus = net.aufdemrand.sentry.SentryStatus.isLOOKING;
+						inst.myStatus = net.aufdemrand.sentry.SentryStatus.isLOOKING;
 						
 						if ( deaggro ) inst.setTarget( null, false );
 					}
