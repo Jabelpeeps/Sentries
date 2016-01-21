@@ -1,21 +1,22 @@
 package net.aufdemrand.sentry;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.Item;
-import net.minecraft.server.v1_8_R3.LocaleI18n;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.minecraft.server.v1_8_R3.Block;
+import net.minecraft.server.v1_8_R3.Item;
+import net.minecraft.server.v1_8_R3.LocaleI18n;
+
 /**
- *  An abstract collection of usefull static methods.
+ *  An abstract collection of useful static methods.
  */
 public abstract class Util {
 	/**
@@ -24,60 +25,58 @@ public abstract class Util {
 	 * @param LivingEntity from
 	 * @param LivingEntity to 
 	 */
-	public static Location getFireSource( LivingEntity from, LivingEntity to ){
+	public static Location getFireSource( LivingEntity from, LivingEntity to ) {
 
-		Location loco =  from.getEyeLocation();
+		Location loco = from.getEyeLocation();
 		
 		Vector v = to.getEyeLocation().subtract( loco ).toVector();
 		v = normalizeVector( v );
 		v.multiply( 0.5 );
 
-		Location loc = loco.add( v );
-
-		return loc;
+		return loco.add( v );
 	}
 
-	public static Location leadLocation( Location loc, Vector victor, double t ){
+	public static Location leadLocation (Location loc, Vector victor, double t) {
 
 		return loc.clone().add( victor.clone().multiply( t ) );
 	}
 
-	public static void removeMount( int npcid ){
+	public static void removeMount (int npcid) {
 		
-		NPC vnpc = CitizensAPI.getNPCRegistry().getById( npcid );
+		NPC npc = CitizensAPI.getNPCRegistry().getById( npcid );
 		
-		if ( vnpc != null ) {
-			if ( vnpc.getEntity() != null ) {
-				vnpc.getEntity().setPassenger( null );
+		if ( npc != null ) {
+			if ( npc.getEntity() != null ) {
+				npc.getEntity().setPassenger( null );
 			}
-			vnpc.destroy();
+			npc.destroy();
 		}
 	}
     /**
      * Strangely named method, as appears to only check permissions for a player (when passed in as
-     * the Entity argument)
+     * the Entity argument) - the sentry.bodyguard.<world-name> permission.
      * 
      * @param Entity entity this is checked to be an instance of Player, and then has perms checked
      * @param NPC bodyguard unused
      * 
-     * @returns true if player as perms in current world.
+     * @returns true if player has permission "sentry.bodyguard" for the current world.
      */ 
-	public static boolean CanWarp( Entity entity, NPC bodyguyard ){
+	public static boolean CanWarp (Entity entity, NPC bodyguyard) {
 
-		if ( entity instanceof Player ){
+		if ( entity instanceof Player ) {
 		    
 		    Player player = (Player) entity;
 
 			if (  player.hasPermission( "sentry.bodyguard.*" ) ) {
 			    // all players have "*" perm by default.
                 if (   player.isPermissionSet( "sentry.bodyguard." + player.getWorld().getName() ) 
-                    && !player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ){
+                    && !player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
 						//denied in this world.
 						return false;
 				}
 				return true;
 			}
-			if ( player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ){
+			if ( player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
 				// no "*"" but specifically allowed this world.
 				return true;
 			}
@@ -89,16 +88,36 @@ public abstract class Util {
      * 
      * @param int MatID the ID to be named.
      */
-	public static String getLocalItemName( int MatId ){
+	static String getLocalItemName ( Material mat ) {
+		if ( mat == null || mat == Material.AIR ) 
+		    return  "Hand";
+		
+		if ( mat.isBlock() )
+			return mat.name();
+		else
+		    return LocaleI18n.get( mat.name() + ".name" );
+	}
+	@Deprecated
+	static String getLocalItemName (int MatId) {
 		if ( MatId == 0 ) 
 		    return  "Hand";
+		
 		if ( MatId < 256 )
 			return getMCBlock( MatId ).getName();
 		else
 		    return LocaleI18n.get( getMCItem( MatId ).getName() + ".name" );
 	}
 
-	public static double hangtime( double launchAngle, double v, double elev, double g ){
+	//check for obfuscation change
+	public static Item getMCItem (int id) {
+		return Item.getById( id );
+	}
+	//check for obfuscation change
+	public static Block getMCBlock (int id) {
+		return Block.getById( id );
+	}
+
+	public static double hangtime (double launchAngle, double v, double elev, double g) {
 
 		double a =  v * Math.sin( launchAngle );
 		double b = -2 * g * elev;
@@ -108,17 +127,8 @@ public abstract class Util {
 		}
 		return ( a + Math.sqrt( Math.pow( a, 2 ) + b ) )  /  g;
 	}
-
-	//check for obfuscation change
-	public static Item getMCItem( int id ) {
-		return Item.getById( id );
-	}
-	//check for obfuscation change
-	public static Block getMCBlock( int id ) {
-		return Block.getById( id );
-	}
-
-	public static Double launchAngle( Location from, Location to, double v, double elev, double g ){
+	
+	public static Double launchAngle (Location from, Location to, double v, double elev, double g) {
 
 		Vector victor = from.clone().subtract( to ).toVector();
 		Double dist =  Math.sqrt( Math.pow( victor.getX(), 2 ) 
@@ -140,8 +150,21 @@ public abstract class Util {
 			return Math.atan( ( v2 - Math.sqrt( v4 - derp ) ) / ( g * dist ) );
 		}
 	}
-
-	public static String format( String input, NPC npc, CommandSender player, int item, String amount ){
+	public static String format( String input, NPC npc, CommandSender player, Material item, String amount ) {
+	    
+		if ( input == null ) return null;
+		
+		input = input.replace( "<NPC>", npc.getName() );
+		input = input.replace( "<PLAYER>", player == null ? "" : player.getName() );
+		input = input.replace( "<ITEM>", Util.getLocalItemName( item ) );
+		input = input.replace( "<AMOUNT>", amount.toString() );
+		input =	ChatColor.translateAlternateColorCodes( '&', input );
+		
+		return input;
+	}
+	
+	@Deprecated
+	public static String format (String input, NPC npc, CommandSender player, int item, String amount) {
 	    
 		if ( input == null ) return null;
 		
@@ -154,14 +177,29 @@ public abstract class Util {
 		return input;
 	}
 
-	public static Vector normalizeVector( Vector victor ){
+	public static Vector normalizeVector (Vector victor) {
 	    
 		double mag = Math.sqrt(   Math.pow( victor.getX(), 2 ) 
 		                        + Math.pow( victor.getY(), 2 ) 
 		                        + Math.pow( victor.getZ(), 2 ) ) ;
 		                        
-		if ( mag != 0 ) return victor.multiply( 1 / mag );
+		if ( mag != 0 ) 
+			return victor.multiply( 1 / mag );
 		
 		return victor.multiply( 0 );
+	}
+	/**
+	 * Convenience method to convert String values to int's.<p>
+	 * It catches any NumberFormatExceptions and returns -1.
+	 * 
+	 * @param value - the string to be converted
+	 * @return the int value represented by the string.
+	 */
+	static int string2Int( String value ) {
+		try {
+			return Integer.parseInt( value );
+		} catch ( NumberFormatException e ) {
+			return -1;
+		}
 	}
 }

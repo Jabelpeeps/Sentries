@@ -1,229 +1,259 @@
 package net.aufdemrand.sentry;
 
-import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
 
-import net.aufdemrand.sentry.SentryInstance.Status;
 import net.citizensnpcs.api.exception.NPCLoadException;
-
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
+import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.trait.Toggleable;
 
 
 public class SentryTrait extends Trait implements Toggleable {
 
-	private Sentry plugin = null;
-
+	private Sentry sentry;
+	SentryInstance inst;
 	private boolean isToggled = true;
 
 	public SentryTrait() {
-		super("sentry");
-		plugin = (Sentry) Bukkit.getServer().getPluginManager().getPlugin("Sentry");
+		// super-constructor sets private final String 'name' with argument given.
+		super( "sentry" );
+		sentry = (Sentry) Bukkit.getServer().getPluginManager().getPlugin( "Sentry" );
 	}
-	private SentryInstance thisInstance;
-
-
+	
+	private void ensureInst() {
+		
+		if ( inst == null ) {
+			inst = new SentryInstance( sentry );
+			inst.myNPC = npc;
+			inst.myTrait = this;
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void load(DataKey key) throws NPCLoadException {
-		plugin.debug(npc.getName() + " Load");
+	public void load( DataKey key ) throws NPCLoadException {
+		
 		ensureInst();
 
-		if(key.keyExists("traits")) key = key.getRelative("traits");
+		if ( key.keyExists( "traits" ) ) 
+			key = key.getRelative( "traits" );
 
-		isToggled=	key.getBoolean("toggled", isToggled());
-		thisInstance.Retaliate=	key.getBoolean("Retaliate", plugin.getConfig().getBoolean("DefaultOptions.Retaliate", true));
-		thisInstance.Invincible=	key.getBoolean("Invincinble", plugin.getConfig().getBoolean("DefaultOptions.Invincible",false));
-		thisInstance.DropInventory=	key.getBoolean("DropInventory", plugin.getConfig().getBoolean("DefaultOptions.Drops",false));
-		thisInstance.LuckyHits=	key.getBoolean("CriticalHits", plugin.getConfig().getBoolean("DefaultOptions.Criticals",true));
-		thisInstance.sentryHealth=	key.getDouble("Health", plugin.getConfig().getInt("DefaultStats.Health", 20));
-		thisInstance.sentryRange=	key.getInt("Range", plugin.getConfig().getInt("DefaultStats.Range", 10));
-		thisInstance.RespawnDelaySeconds=	key.getInt("RespawnDelay", plugin.getConfig().getInt("DefaultStats.Respawn",10));
-		thisInstance.sentrySpeed=	(float) (key.getDouble("Speed", plugin.getConfig().getDouble("DefaultStats.Speed",1.0)));
-		thisInstance.sentryWeight=	 key.getDouble("Weight", plugin.getConfig().getDouble("DefaultStats.Weight",1.0));
-		thisInstance.Armor=		key.getInt("Armor", plugin.getConfig().getInt("DefaultStats.Armor", 0));
-		thisInstance.Strength=		key.getInt("Strength", plugin.getConfig().getInt("DefaultStats.Strength",1));
-		thisInstance.FollowDistance =  key.getInt("FollowDistance", plugin.getConfig().getInt("DefaultStats.FollowDistance", 4));
-		thisInstance.guardTarget = (key.getString("GuardTarget", null));
-		thisInstance.GreetingMessage = (key.getString("Greeting",plugin.getConfig().getString("DefaultTexts.Greeting", "'" + ChatColor.COLOR_CHAR + "b<NPC> says Welcome, <PLAYER>'")));
-		thisInstance.WarningMessage = (key.getString("Warning",plugin.getConfig().getString("DefaultTexts.Warning", "'" + ChatColor.COLOR_CHAR + "c<NPC> says Halt! Come no closer!'")));
-		thisInstance.WarningRange = key.getInt("WarningRange", plugin.getConfig().getInt("DefaultStats.WarningRange",0));
-		thisInstance.AttackRateSeconds =  key.getDouble("AttackRate", plugin.getConfig().getDouble("DefaultStats.AttackRate", 2.0));
-		thisInstance.HealRate =  key.getDouble("HealRate", plugin.getConfig().getDouble("DefaultStats.HealRate",0.0));
-		thisInstance.NightVision = key.getInt("NightVision", plugin.getConfig().getInt("DefaultStats.NightVision", 16));
-		thisInstance.KillsDropInventory = key.getBoolean("KillDrops", plugin.getConfig().getBoolean("DefaultOptions.KillDrops", true));
-        thisInstance.IgnoreLOS = key.getBoolean("IgnoreLOS", plugin.getConfig().getBoolean("DefaultOptions.IgnoreLOS", false));
-		thisInstance.MountID = key.getInt("MountID", (int)-1);
-		thisInstance.Targetable = key.getBoolean("Targetable", plugin.getConfig().getBoolean("DefaultOptions.Targetable",true));
+		isToggled = key.getBoolean( "toggled", isToggled() );
+		
+		// replace the repeated uses of 'plugin.getConfig()' with a local variable
+		FileConfiguration cfg = sentry.getConfig();
+		
+		// TODO change these lines to use the config values that have already been saved in Sentry instance.
+		inst.iWillRetaliate	= key.getBoolean( "Retaliate", cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
+		inst.invincible	= key.getBoolean( "Invincinble", cfg.getBoolean( "DefaultOptions.Invincible", false ) );
+		inst.dropInventory = key.getBoolean( "DropInventory", cfg.getBoolean( "DefaultOptions.Drops", false ) );
+		inst.acceptsCriticals 	= key.getBoolean( "CriticalHits", cfg.getBoolean( "DefaultOptions.Criticals", true ) );
+						
+		inst.sentryHealth = key.getDouble( "Health", cfg.getInt( "DefaultStats.Health", 20 ) );
+		inst.sentryRange = key.getInt( "Range", cfg.getInt( "DefaultStats.Range", 10 ) );
+		
+		inst.respawnDelay = key.getInt( "RespawnDelay", cfg.getInt( "DefaultStats.Respawn", 10 ) );
+		inst.sentrySpeed = (float) key.getDouble( "Speed", cfg.getDouble( "DefaultStats.Speed", 1.0 ) );
+		inst.sentryWeight = key.getDouble( "Weight", cfg.getDouble( "DefaultStats.Weight", 1.0 ) );
+						 
+		inst.armorValue 	= key.getInt( "Armor", cfg.getInt( "DefaultStats.Armor", 0 ) );
+		inst.strength	= key.getInt( "Strength", cfg.getInt( "DefaultStats.Strength", 1 ) );
+		inst.followDistance = key.getInt( "FollowDistance", cfg.getInt( "DefaultStats.FollowDistance", 4 ) );
+		inst.guardTarget = key.getString( "GuardTarget", null );
+		
+		inst.greetingMsg = key.getString( "Greeting", cfg.getString( 
+				"DefaultTexts.Greeting", "'" + ChatColor.COLOR_CHAR + "b<NPC> says Welcome, <PLAYER>'") );
+			
+		inst.warningMsg = key.getString( "Warning", cfg.getString(
+				"DefaultTexts.Warning", "'" + ChatColor.COLOR_CHAR + "c<NPC> says Halt! Come no closer!'") );
+		
+		inst.warningRange = key.getInt( "WarningRange", cfg.getInt( "DefaultStats.WarningRange", 0 ) );
+		inst.attackRate = key.getDouble( "AttackRate", cfg.getDouble( "DefaultStats.AttackRate", 2.0) );
+		inst.healRate 	= key.getDouble( "HealRate", cfg.getDouble( "DefaultStats.HealRate", 0.0 ) );
+		inst.nightVision = key.getInt( "NightVision", cfg.getInt( "DefaultStats.NightVision", 16 ) );
+		inst.killsDropInventory = key.getBoolean( "KillDrops", cfg.getBoolean( "DefaultOptions.KillDrops", true ) );
+        inst.ignoreLOS 	= key.getBoolean( "IgnoreLOS", cfg.getBoolean( "DefaultOptions.IgnoreLOS", false ) );
+        					
+		inst.mountID 	= key.getInt( "MountID", -1 );
+		inst.targetable = key.getBoolean( "Targetable", cfg.getBoolean( "DefaultOptions.Targetable", true ) );
 
-		if( key.keyExists("Spawn")){
+		if ( key.keyExists( "Spawn" ) ) {
 			try {
-				thisInstance.Spawn = new Location(plugin.getServer().getWorld(key.getString("Spawn.world")), key.getDouble("Spawn.x"),key.getDouble("Spawn.y"), key.getDouble("Spawn.z"), (float) key.getDouble("Spawn.yaw"), (float) key.getDouble("Spawn.pitch"));
+				inst.spawnLocation = new Location( 
+							sentry.getServer().getWorld( key.getString( "Spawn.world" ) )
+														, key.getDouble( "Spawn.x" )
+														, key.getDouble( "Spawn.y" )
+														, key.getDouble( "Spawn.z" )
+														, (float) key.getDouble( "Spawn.yaw" )
+														, (float) key.getDouble("Spawn.pitch") );
 			} catch (Exception e) {
 				e.printStackTrace();
-				thisInstance.Spawn = null;
+				inst.spawnLocation = null;
 			}
-
-			if(thisInstance.Spawn.getWorld() == null ) thisInstance.Spawn = null;
+			if ( inst.spawnLocation.getWorld() == null ) 
+				inst.spawnLocation = null;
 		}
+		if ( inst.guardTarget != null && inst.guardTarget.isEmpty() ) 
+			inst.guardTarget = null;
+		
+		// TODO confirm that leaving these fields uninitialised has no bad effects
+		List<String> targettemp; // = new ArrayList<String>();
+		List<String> ignoretemp; // = new ArrayList<String>();
 
-		if (thisInstance.guardTarget != null && thisInstance.guardTarget.isEmpty()) thisInstance.guardTarget = null;
+		if ( key.getRaw( "Targets" ) != null ) 
+			targettemp = (List<String>) key.getRaw( "Targets" );
+		else 
+			targettemp = cfg.getStringList( "DefaultTargets" );
 
-		List<String> targettemp = new ArrayList<String>();
-		List<String> ignoretemp = new ArrayList<String>();
+		if ( key.getRaw( "Ignores" ) != null ) 
+			ignoretemp = (List<String>) key.getRaw( "Ignores" );
+		else 
+			ignoretemp = cfg.getStringList( "DefaultIgnores" );
 
-		Object derp =  key.getRaw("Targets");
-		if (derp !=null) targettemp= (List<String>) key.getRaw("Targets");
-		else targettemp = plugin.getConfig().getStringList("DefaultTargets");
-
-		Object herp =  key.getRaw("Ignores");
-		if (herp !=null) ignoretemp= (List<String>) key.getRaw("Ignores");
-		else ignoretemp= plugin.getConfig().getStringList("DefaultIgnores");
-
-		for (String string : targettemp) {
-			if(!thisInstance.validTargets.contains(string.toUpperCase())){
-				thisInstance.validTargets.add(string.toUpperCase());
-			}
+		// TODO find out why these checks are needed.  i.e. why aren't the targets lists using Sets?
+		for ( String string : targettemp ) {
+			if( !inst.validTargets.contains( string.toUpperCase() ) ) 
+				inst.validTargets.add( string.toUpperCase() );
 		}
-
-		for (String string : ignoretemp) {
-			if(!thisInstance.ignoreTargets.contains(string.toUpperCase())){
-				thisInstance.ignoreTargets.add(string.toUpperCase());
-			}
-
-
+		
+		for ( String string : ignoretemp ) {
+			if( !inst.ignoreTargets.contains( string.toUpperCase() ) ) 
+				inst.ignoreTargets.add( string.toUpperCase() );
 		}
-
-
-		thisInstance.loaded = true;
-
-		thisInstance.processTargets();
-
+		
+		inst.loaded = true;
+		inst.processTargets();
 	}
 
 	public SentryInstance getInstance(){
-		return thisInstance;
+		return inst;
 	}
-
 
 	@Override
 	public void onSpawn() {
-		plugin.debug(npc.getName() + ":" + npc.getId() + " onSpawn");
+//		sentry.debug( npc.getName() + ":" + npc.getId() + " onSpawn" );
+		
 		ensureInst();
 
-		if (!thisInstance.loaded){
+		if ( !inst.loaded ) {
 			try {
-				plugin.debug(npc.getName() + " onSpawn call load");
-				load(new net.citizensnpcs.api.util.MemoryDataKey());
-			} catch (NPCLoadException e) {
-			}
+				//  plugin.debug( npc.getName() + " onSpawn call load" );
+				
+				load( new MemoryDataKey() );
+				
+			} catch ( NPCLoadException e ) {}
 		}
 
-		if (!plugin.GroupsChecked) plugin.doGroups(); // lazy checking for lazy vault.
+		if ( !sentry.groupsChecked ) sentry.doGroups(); // lazy checking for lazy vault.
 
-		thisInstance.initialize();
-
-	}
-
-	private void ensureInst(){
-		if (thisInstance == null ) {
-			thisInstance = new SentryInstance(plugin);
-			thisInstance.myNPC = npc;
-			thisInstance.myTrait = this;
-		}
+		inst.initialize();
 	}
 
 	@Override
 	public void onRemove() {
 
-		//	plugin = (Sentry) Bukkit.getPluginManager().getPlugin("Sentry");
+		// plugin = (Sentry) Bukkit.getPluginManager().getPlugin("Sentry");
 
-		if (thisInstance!=null){
+		if ( inst != null ){
 			//	plugin.getServer().broadcastMessage("onRemove");
-			thisInstance.cancelRunnable();
+			inst.cancelRunnable();
 		}
 
-		plugin.debug(npc.getName() + " onRemove");
+		sentry.debug( npc.getName() + " onRemove" );
 
-		thisInstance = null;
+		inst = null;
 		isToggled = false;
 	}
 
 	@Override
 	public void onAttach() {
-		plugin.debug(npc.getName() + ":" + npc.getId() + " onAttach");
+		
+		sentry.debug( npc.getName() + ":" + npc.getId() + " onAttach" );
 		isToggled = true;
 	}
 
 	@Override
 	public void onDespawn() {
-		plugin.debug(npc.getName() + ":" + npc.getId() + " onDespawn");
-		if(thisInstance != null){
-			thisInstance.isRespawnable = System.currentTimeMillis() + thisInstance.RespawnDelaySeconds * 1000;
-			thisInstance.sentryStatus = Status.isDEAD;
-			thisInstance.dismount();
+		
+		sentry.debug( npc.getName() + ":" + npc.getId() + " onDespawn" );
+		
+		if ( inst != null ) {
+			inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
+			inst.myStatus = SentryStatus.isDEAD;
+			inst.dismount();
 		}
 	}
 
 	@Override
-	public void save(DataKey key) {
-		if (thisInstance==null) return;
-		key.setBoolean("toggled", isToggled);
-		key.setBoolean("Retaliate", thisInstance.Retaliate);
-		key.setBoolean("Invincinble", thisInstance.Invincible);
-		key.setBoolean("DropInventory", thisInstance.DropInventory);
-		key.setBoolean("KillDrops", thisInstance.KillsDropInventory);
-		key.setBoolean("Targetable", thisInstance.Targetable);
+	public void save( DataKey key ) {
+		
+		if ( inst == null ) return;
+		
+		key.setBoolean( "toggled", isToggled );
+		key.setBoolean( "Retaliate", inst.iWillRetaliate );
+		key.setBoolean( "Invincinble", inst.invincible );
+		key.setBoolean( "DropInventory", inst.dropInventory );
+		key.setBoolean( "KillDrops", inst.killsDropInventory );
+		key.setBoolean( "Targetable", inst.targetable );
+		key.setInt( "MountID", inst.mountID );
+		key.setBoolean( "CriticalHits", inst.acceptsCriticals );
+        key.setBoolean( "IgnoreLOS", inst.ignoreLOS );
+		key.setRaw( "Targets", inst.validTargets );
+		key.setRaw( "Ignores", inst.ignoreTargets );
 
-		key.setInt("MountID", thisInstance.MountID);
-
-		key.setBoolean("CriticalHits", thisInstance.LuckyHits);
-        key.setBoolean("IgnoreLOS", thisInstance.IgnoreLOS);
-		key.setRaw("Targets", thisInstance.validTargets);
-		key.setRaw("Ignores", thisInstance.ignoreTargets);
-
-		if (thisInstance.Spawn!=null){
-			key.setDouble("Spawn.x", thisInstance.Spawn.getX());
-			key.setDouble("Spawn.y", thisInstance.Spawn.getY());
-			key.setDouble("Spawn.z", thisInstance.Spawn.getZ());
-			key.setString("Spawn.world", thisInstance.Spawn.getWorld().getName());
-			key.setDouble("Spawn.yaw", thisInstance.Spawn.getYaw());
-			key.setDouble("Spawn.pitch", thisInstance.Spawn.getPitch());
+		if ( inst.spawnLocation != null ){
+			key.setDouble( "Spawn.x", inst.spawnLocation.getX() );
+			key.setDouble( "Spawn.y", inst.spawnLocation.getY() );
+			key.setDouble( "Spawn.z", inst.spawnLocation.getZ() );
+			key.setString( "Spawn.world", inst.spawnLocation.getWorld().getName() );
+			key.setDouble( "Spawn.yaw", inst.spawnLocation.getYaw() );
+			key.setDouble( "Spawn.pitch", inst.spawnLocation.getPitch() );
 		}
 
-		key.setDouble("Health", thisInstance.sentryHealth);
-		key.setInt("Range", thisInstance.sentryRange);
-		key.setInt("RespawnDelay", thisInstance.RespawnDelaySeconds);
-		key.setDouble("Speed", (double) thisInstance.sentrySpeed);
-		key.setDouble("Weight", thisInstance.sentryWeight);
-		key.setDouble("HealRate", thisInstance.HealRate);
-		key.setInt("Armor", thisInstance.Armor);
-		key.setInt("Strength", thisInstance.Strength);
-		key.setInt("WarningRange", thisInstance.WarningRange);
-		key.setDouble("AttackRate", thisInstance.AttackRateSeconds);
-		key.setInt("NightVision", thisInstance.NightVision);
-		key.setInt("FollowDistance", thisInstance.FollowDistance);
+		key.setDouble( "Health", inst.sentryHealth );
+		key.setInt( "Range", inst.sentryRange );
+		key.setInt( "RespawnDelay", inst.respawnDelay );
+		key.setDouble( "Speed", inst.sentrySpeed );
+		key.setDouble( "Weight", inst.sentryWeight );
+		key.setDouble( "HealRate", inst.healRate );
+		key.setInt( "Armor", inst.armorValue );
+		key.setInt( "Strength", inst.strength );
+		key.setInt( "WarningRange", inst.warningRange );
+		key.setDouble( "AttackRate", inst.attackRate );
+		key.setInt( "NightVision", inst.nightVision );
+		key.setInt( "FollowDistance", inst.followDistance );
 
-		if (thisInstance.guardTarget !=null) key.setString("GuardTarget", thisInstance.guardTarget);
-		else if (key.keyExists("GuardTarget")) key.removeKey("GuardTarget");
+		if ( inst.guardTarget != null ) 
+			key.setString( "GuardTarget", inst.guardTarget );
+		
+		else if ( key.keyExists( "GuardTarget" ) ) 
+				key.removeKey( "GuardTarget" );
 
-		key.setString("Warning",thisInstance.WarningMessage);
-		key.setString("Greeting",thisInstance.GreetingMessage);
+		key.setString( "Warning",inst.warningMsg );
+		key.setString( "Greeting",inst.greetingMsg );
 	}
 
 	@Override
 	public void onCopy() {
-		plugin.debug(npc.getName() + ":" + npc.getId() + " onCopy");
-		if(thisInstance != null){
-			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+		// sentry.debug( npc.getName() + ":" + npc.getId() + " onCopy" );
+		
+		if ( inst != null ) {
+			
+			// name given to previously 4anonymous runnable for clarity, and to prevent possible memory leaks.
+			final Runnable cloneInstance = new Runnable() {
+				
 				//the new npc is not in the new location immediately.
-				public void run(){
-					thisInstance.Spawn = npc.getEntity().getLocation().clone();
-				}},10);
+				@Override public void run() {
+					inst.spawnLocation = npc.getEntity().getLocation().clone();
+				}
+			};
+			sentry.getServer().getScheduler().scheduleSyncDelayedTask( sentry, cloneInstance, 10 );
 		}
 	}
 

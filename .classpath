@@ -2,16 +2,20 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Minecraft/plugins/Vault.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/Towny.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/war-1.7.2.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/SimpleClans-2.4.1.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/CitizensAPI.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/plugins/citizens-2.0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/BukkitAPI.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/craftbukkit.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/Factions.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/mcore.jar"/>
-	<classpathentry kind="lib" path="C:/Minecraft/denizen-0.9.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/Users/jabelpeeps/Documents/spigot_builds/spigot_test_boot/spigot-1.8.8.jar" sourcepath="/Users/jabelpeeps/Documents/spigot_builds/Spigot/Spigot-API/src">
+		<attributes>
+			<attribute name="javadoc_location" value="https://hub.spigotmc.org/javadocs/spigot/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/jabelpeeps/sentry_dependencies/denizen-0.9.7-SNAPSHOT.jar" sourcepath="/Users/jabelpeeps/git/Denizen-Core/src"/>
+	<classpathentry kind="lib" path="/Users/jabelpeeps/sentry_dependencies/citizens-2.0.16-SNAPSHOT.jar" sourcepath="/Users/jabelpeeps/git/CitizensAPI/src"/>
+	<classpathentry kind="lib" path="/Users/jabelpeeps/sentry_dependencies/citizensapi-2.0.16-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/Users/jabelpeeps/Documents/spigot_builds/craftbukkit-1.8.8.jar" sourcepath="/Users/jabelpeeps/Documents/spigot_builds/craftbukkit-1.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/Factions.jar"/>
+	<classpathentry kind="lib" path="lib/mcore.jar"/>
+	<classpathentry kind="lib" path="lib/SimpleClans.jar"/>
+	<classpathentry kind="lib" path="lib/Towny.jar"/>
+	<classpathentry kind="lib" path="lib/Vault.jar" sourcepath="/Users/jabelpeeps/git/VaultAPI/src"/>
+	<classpathentry kind="lib" path="lib/War.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

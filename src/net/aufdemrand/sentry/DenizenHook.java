@@ -2,76 +2,96 @@ package net.aufdemrand.sentry;
 
 import java.util.Set;
 
-import net.aufdemrand.denizen.BukkitScriptEntryData;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import net.aufdemrand.denizen.BukkitScriptEntryData;
 import net.aufdemrand.denizen.Denizen;
-import net.aufdemrand.denizencore.exceptions.CommandExecutionException;
-import net.aufdemrand.denizencore.exceptions.InvalidArgumentsException;
 import net.aufdemrand.denizen.npc.traits.TriggerTrait;
 import net.aufdemrand.denizen.objects.dNPC;
 import net.aufdemrand.denizen.objects.dPlayer;
+import net.aufdemrand.denizen.scripts.containers.core.InteractScriptContainer;
+import net.aufdemrand.denizen.scripts.triggers.AbstractTrigger;
+import net.aufdemrand.denizen.utilities.debugging.dB;
+import net.aufdemrand.denizencore.exceptions.CommandExecutionException;
+import net.aufdemrand.denizencore.exceptions.InvalidArgumentsException;
 import net.aufdemrand.denizencore.scripts.ScriptEntry;
 import net.aufdemrand.denizencore.scripts.commands.AbstractCommand;
-import net.aufdemrand.denizen.scripts.containers.core.InteractScriptContainer;
-import net.aufdemrand.denizen.utilities.debugging.dB;
-import net.aufdemrand.denizencore.utilities.debugging.dB.DebugElement;
-
 import net.citizensnpcs.api.npc.NPC;
 
+/**
+ * Class containing:-
+ * <ul>
+ *  <li>static variables<ul>
+ *  	<li>boolean denizenActive</li>
+ *  	<li>Plugin denizenPlugin</li>
+ *  	<li>Sentry sentryPlugin</li>
+ *  </ul></li>
+ *  <li>static methods<ul>
+ *  	<li>void {@link #setupDenizenHook()}</li>
+ *  	<li>boolean {@link #sentryDeath()}</li>
+ *  	<li>void {@link #denizenAction()}</li>
+ *  </ul></li>
+ *  <li>private class definitions<ul>
+ *  	<li>{@link LiveCommand} extends AbstractCommand</li>
+ *  	<li>{@link DieCommand} extends AbstractCommand</li>
+ *  	<li>{@link NpcdeathTriggerOwner} extends AbstractTrigger</li>
+ *  	<li>{@link NpcdeathTrigger} extends AbstractTrigger</li>
+ *  </ul></li>
+ *  </ul>
+ *  TODO add further details to above.
+ */
 public class DenizenHook {
 
-	static boolean DenizenActive = false;
-	static Plugin DenizenPlugin;
-	static Sentry SentryPlugin;
-
-	public static boolean SentryDeath( Set<Player> _myDamamgers, NPC npc ){
-		
-		if ( !DenizenActive ) return false;
-
-		try {
-			if ( npc == null ) return false;
-			
-			net.aufdemrand.denizen.Denizen denizen = (Denizen) DenizenPlugin;
-
-			NpcdeathTrigger npcd = denizen	.getTriggerRegistry()
-							.get( NpcdeathTrigger.class );
-							
-			NpcdeathTriggerOwner npcdo = denizen	.getTriggerRegistry()
-								.get( NpcdeathTriggerOwner.class );
-
-			boolean a = npcd.Die( _myDamamgers, npc );
-			boolean c = npcdo.Die( npc );
-			
-			return ( a || c );
-			
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	static void setupDenizenHook()  {
+	static boolean denizenActive = false;
+	static Plugin denizenPlugin;
+	static Sentry sentryPlugin;
+	
+	@SuppressWarnings({ "synthetic-access" })
+	static void setupDenizenHook() {
 
 		DenizenHook hook = new DenizenHook();
 
 		hook.new NpcdeathTriggerOwner().activate().as( "Npcdeathowner" );
 		hook.new NpcdeathTrigger().activate().as( "Npcdeath" );
 
-		DieCommand dc = hook.new DieCommand();
-		LiveCommand lc = hook.new LiveCommand();
+		hook.new DieCommand().activate().as( "die" ).withOptions( "die", 0 );
+		hook.new LiveCommand().activate().as( "live" ).withOptions( "live", 0 );
 
-		dc.activate().as( "die" ).withOptions( "die", 0 );
-		lc.activate().as( "live" ).withOptions( "live", 0 );
-
-		DenizenActive  =true;
+		denizenActive  = true;
 	}
 
-	public static void DenizenAction( NPC npc, String action, org.bukkit.OfflinePlayer player ){
+	public static boolean sentryDeath( Set<Player> _myDamamgers, NPC npc ) {
+		
+		if ( denizenActive ) {
+
+			try {
+				if ( npc == null ) return false;
+				
+				Denizen denizen = (Denizen) denizenPlugin;
+	
+				NpcdeathTrigger npcd = denizen.getTriggerRegistry()
+											  .get( NpcdeathTrigger.class );
+								
+				NpcdeathTriggerOwner npcdo = denizen.getTriggerRegistry()
+													.get( NpcdeathTriggerOwner.class );
+	
+				boolean a = npcd.die( _myDamamgers, npc );
+				boolean c = npcdo.die( npc );
+				
+				return ( a || c );
+				
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
+	public static void denizenAction( NPC npc, String action, org.bukkit.OfflinePlayer player ) {
 	    
-		if ( DenizenActive ){
+		if ( denizenActive ) {
 		    
 			dNPC dnpc = dNPC.mirrorCitizensNPC( npc );
 			
@@ -89,35 +109,31 @@ public class DenizenHook {
 
 		@Override
 		public void execute( ScriptEntry theEntry ) throws CommandExecutionException {
+			
+		    dNPC npc = ((BukkitScriptEntryData) theEntry.entryData).getNPC();
 		    
-			LivingEntity ent = (LivingEntity) ( (BukkitScriptEntryData) theEntry.entryData ).getNPC()
-			                                                                                .getEntity();
+			LivingEntity ent = (LivingEntity) npc.getEntity();
 
-			SentryInstance inst = ( (BukkitScriptEntryData) theEntry.entryData ).getNPC()
-			                                                                    .getCitizen()
-			                                                                    .getTrait( SentryTrait.class )
-			                                                                    .getInstance();
+			SentryInstance inst = npc.getCitizen().getTrait( SentryTrait.class ).getInstance();
 
-			if ( ent != null ){
+			if ( ent != null ) {
 			    
-				if ( ( (BukkitScriptEntryData) theEntry.entryData ) .getNPC()
-				                                                    .getCitizen()
-				                                                    .hasTrait( SentryTrait.class ) ){
+				if ( npc.getCitizen().hasTrait( SentryTrait.class ) ) {
 					
 					boolean deaggro = false;
 
-					for ( String arg : theEntry.getArguments() ){
-						if ( arg.equalsIgnoreCase( "peace" ) ) deaggro = true;
+					for ( String arg : theEntry.getArguments() ) {
+						if ( arg.equalsIgnoreCase( "peace" ) ) 
+							deaggro = true;
 					}
-
-					String db = "RISE! " + ( (BukkitScriptEntryData) theEntry.entryData ).getNPC().getName() + "!";
+					String db = "RISE! " + npc.getName() + "!";
 					
 					if ( deaggro ) db += " ..And fight no more!";
 					
 					dB.log( db );
 
-					if ( inst != null ){
-						inst.sentryStatus = net.aufdemrand.sentry.SentryInstance.Status.isLOOKING;
+					if ( inst != null ) {
+						inst.myStatus = net.aufdemrand.sentry.SentryStatus.isLOOKING;
 						
 						if ( deaggro ) inst.setTarget( null, false );
 					}
@@ -127,30 +143,25 @@ public class DenizenHook {
 			}
 		}
 		
-		@Override
-		public void parseArgs( ScriptEntry arg0 ) throws InvalidArgumentsException {
-            // TODO Auto-generated method stub
-		}
+		@Override public void parseArgs( ScriptEntry arg0 ) throws InvalidArgumentsException { }
 	}
 
 	private class DieCommand extends AbstractCommand {
 
 		@Override
 		public void execute( ScriptEntry theEntry ) throws CommandExecutionException {
+			
+			dNPC npc = ((BukkitScriptEntryData) theEntry.entryData).getNPC();
 		    
-			LivingEntity ent = (LivingEntity) ( (BukkitScriptEntryData) theEntry.entryData ).getNPC()
-			                                                                                .getEntity();
+			LivingEntity ent = (LivingEntity) npc.getEntity();
 
-			SentryInstance inst = ( (BukkitScriptEntryData) theEntry.entryData ).getNPC()
-					                                                            .getCitizen()
-					                                                            .getTrait( SentryTrait.class )
-					                                                            .getInstance();
+			SentryInstance inst = npc.getCitizen().getTrait( SentryTrait.class ).getInstance();
 
-			if ( inst != null ){
+			if ( inst != null ) {
 				dB.log( "Goodbye, cruel world... " );
 				inst.die( false, org.bukkit.event.entity.EntityDamageEvent.DamageCause.CUSTOM );
 			}
-			else if ( ent != null ){
+			else if ( ent != null ) {
 				ent.remove();
 			}
 			else	{
@@ -158,20 +169,17 @@ public class DenizenHook {
 			}
 		}
 
-		@Override
-		public void parseArgs( ScriptEntry arg0 ) throws InvalidArgumentsException {
-			// TODO Auto-generated method stub
-		}
+		@Override public void parseArgs( ScriptEntry arg0 ) throws InvalidArgumentsException {}
 	}
 
-	private class NpcdeathTriggerOwner extends net.aufdemrand.denizen.scripts.triggers.AbstractTrigger{
+	/**
+	 * Sub-class of AbstractTrigger from Denizen's API.
+	 * <p>
+	 * Contains one method definition:- boolean die( NPC npc )
+	 */
+	private class NpcdeathTriggerOwner extends AbstractTrigger {
 
-		@Override
-		public void onEnable() {
-			// TODO Auto-generated method stub
-		}
-
-		public boolean Die( NPC npc ) {
+		public boolean die( NPC npc ) {
 
 			// Check if NPC has triggers and they are enabled.
 			if ( !npc.hasTrait( TriggerTrait.class ) 
@@ -179,14 +187,11 @@ public class DenizenHook {
 
 			dNPC theDenizen = dNPC.mirrorCitizensNPC( npc );
 
-			dB.echoDebug( DebugElement.Header, "Parsing NPCDeath/Owner Trigger." );
-
 			String owner = npc.getTrait( net.citizensnpcs.api.trait.trait.Owner.class ).getOwner();
 
 			dPlayer thePlayer = net.aufdemrand.denizen.objects.dPlayer.valueOf( owner );
 
 			if ( thePlayer == null ) {
-				dB.echoDebug( DebugElement.Header, "Owner not found!" );
 				return false;
 			}
 
@@ -194,42 +199,43 @@ public class DenizenHook {
 
 			return	parse( theDenizen, thePlayer, script );
 		}
+		
+		@Override public void onEnable() {}
 	}
+	
+	/**
+	 * Sub-class of AbstractTrigger from Denizen's API.
+	 * <p>
+	 * Contains one method definition:- boolean die( Set<Player> _myDamagers, NPC npc )
+	 */
+	private class NpcdeathTrigger extends AbstractTrigger {
 
-	private class NpcdeathTrigger extends net.aufdemrand.denizen.scripts.triggers.AbstractTrigger{
+		public boolean die( Set<Player> _myDamamgers, NPC npc ) {
 
-		@Override
-		public void onEnable() {
-			// TODO Auto-generated method stub
-		}
-
-		public  boolean Die( Set<Player> _myDamamgers, NPC npc ) {
-
-			// Check if NPC has triggers and they are enabled.
-			if ( !npc.hasTrait( TriggerTrait.class ) 
-			  || !npc.getTrait( TriggerTrait.class ).isEnabled( name ) ) return false;
-
+			// Check if NPC has triggers and they are enabled, returning if not.
+			if ( !npc.hasTrait( TriggerTrait.class ) // first check the trait exists to avoid NPE on next line.
+			  || !npc.getTrait( TriggerTrait.class ).isEnabled( name ) ) 
+					return false;
+ 
 			dNPC theDenizen = dNPC.mirrorCitizensNPC( npc );
+			boolean foundOne = false;
 
-			dB.echoDebug( DebugElement.Header, "Parsing NPCDeath/Killers Trigger" );
+			for ( Player thePlayer : _myDamamgers ) {
 
-			boolean founone = false;
-
-			for ( Player thePlayer : _myDamamgers ){
-
+				// jump to next iteration if thePlayer is too far away.
 				if ( thePlayer != null 
-				  && thePlayer.getLocation().distance( npc.getEntity().getLocation() ) > 300) {
-				      
-					dB.echoDebug( DebugElement.Header, thePlayer.getName()+ " is to far away." );
-					continue;
-				}
-
+				  && thePlayer.getLocation().distance( npc.getEntity().getLocation() ) > 300 ) 
+						continue;
+				
 				InteractScriptContainer script = theDenizen.getInteractScriptQuietly( 
 				                                dPlayer.mirrorBukkitPlayer( thePlayer ), this.getClass() );
 
-				if ( parse( theDenizen, dPlayer.mirrorBukkitPlayer( thePlayer ), script) ) founone = true;
+				if ( parse( theDenizen, dPlayer.mirrorBukkitPlayer( thePlayer ), script ) ) 
+						foundOne = true;
 			}
-			return founone;
+			return foundOne;
 		}
+
+		@Override public void onEnable() {}
 	}
 }
