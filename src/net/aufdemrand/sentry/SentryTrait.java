@@ -53,7 +53,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		inst.iWillRetaliate	= key.getBoolean( "Retaliate", cfg.getBoolean( "DefaultOptions.Retaliate", true ) );
 		inst.invincible	= key.getBoolean( "Invincinble", cfg.getBoolean( "DefaultOptions.Invincible", false ) );
 		inst.dropInventory = key.getBoolean( "DropInventory", cfg.getBoolean( "DefaultOptions.Drops", false ) );
-		inst.luckyHits 	= key.getBoolean( "CriticalHits", cfg.getBoolean( "DefaultOptions.Criticals", true ) );
+		inst.acceptsCriticals 	= key.getBoolean( "CriticalHits", cfg.getBoolean( "DefaultOptions.Criticals", true ) );
 						
 		inst.sentryHealth = key.getDouble( "Health", cfg.getInt( "DefaultStats.Health", 20 ) );
 		inst.sentryRange = key.getInt( "Range", cfg.getInt( "DefaultStats.Range", 10 ) );
@@ -202,7 +202,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		key.setBoolean( "KillDrops", inst.killsDropInventory );
 		key.setBoolean( "Targetable", inst.targetable );
 		key.setInt( "MountID", inst.mountID );
-		key.setBoolean( "CriticalHits", inst.luckyHits );
+		key.setBoolean( "CriticalHits", inst.acceptsCriticals );
         key.setBoolean( "IgnoreLOS", inst.ignoreLOS );
 		key.setRaw( "Targets", inst.validTargets );
 		key.setRaw( "Ignores", inst.ignoreTargets );
@@ -245,7 +245,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		
 		if ( inst != null ) {
 			
-			// name given to anonymous runnable for clarity, and to prevent possible memory leaks.
+			// name given to previously 4anonymous runnable for clarity, and to prevent possible memory leaks.
 			final Runnable cloneInstance = new Runnable() {
 				
 				//the new npc is not in the new location immediately.

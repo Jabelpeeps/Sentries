@@ -276,10 +276,10 @@ public abstract class CommandHandler {
 			
 			if ( checkCommandPerm( "sentry.options.criticals", player ) ) {
 
-				inst.luckyHits = ( set == null ) ? !inst.luckyHits
+				inst.acceptsCriticals = ( set == null ) ? !inst.acceptsCriticals
 												 : set;
 	
-				if ( inst.luckyHits ) 
+				if ( inst.acceptsCriticals ) 
 					player.sendMessage( ChatColor.GREEN +thisNPC.getName() + " will take critical hits." );
 				else
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will take normal damage." );
@@ -391,19 +391,19 @@ public abstract class CommandHandler {
 				}
 
 				if (ok) {
-					player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now guarding "+ arg );   // Talk to the player.
+					player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now guarding "+ arg );   
 				}
 				else {
-					player.sendMessage(ChatColor.RED +  thisNPC.getName() + " could not find " + arg + ".");   // Talk to the player.	
+					player.sendMessage(ChatColor.RED +  thisNPC.getName() + " could not find " + arg + ".");   
 				}
 				
 			}
 			else {
 				if (inst.guardTarget == null){
-					player.sendMessage(ChatColor.RED +  thisNPC.getName() + " is already set to guard its immediate area" );   // Talk to the player.	
+					player.sendMessage(ChatColor.RED +  thisNPC.getName() + " is already set to guard its immediate area" );   	
 				}
 				else{
-					player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now guarding its immediate area. " );   // Talk to the player.
+					player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now guarding its immediate area. " );
 				}
 				inst.setGuardTarget(null, false);
 
@@ -423,7 +423,7 @@ public abstract class CommandHandler {
 				if (HPs > 32) HPs = 32;
 				if (HPs <0)  HPs =0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " follow distance set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " follow distance set to " + HPs + ".");   
 				inst.followDistance = HPs * HPs;
 			}
 			return true;
@@ -442,7 +442,7 @@ public abstract class CommandHandler {
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <1)  HPs =1;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " health set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " health set to " + HPs + ".");  
 				inst.sentryHealth = HPs;
 				inst.setHealth(HPs);
 			}
@@ -461,7 +461,7 @@ public abstract class CommandHandler {
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <0)  HPs =0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " armor set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " armor set to " + HPs + ".");   
 				inst.armorValue = HPs;
 			}
 			return true;
@@ -480,7 +480,7 @@ public abstract class CommandHandler {
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <0)  HPs =0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " strength set to " + HPs+ ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " strength set to " + HPs+ ".");  
 				inst.strength = HPs;
 			}
 			return true;
@@ -499,7 +499,7 @@ public abstract class CommandHandler {
 				if (HPs > 16) HPs = 16;
 				if (HPs <0)  HPs =0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Night Vision set to " + HPs+ ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Night Vision set to " + HPs+ ".");   
 				inst.nightVision = HPs;
 			}
 			return true;
@@ -522,7 +522,7 @@ public abstract class CommandHandler {
 				if (HPs > 2000000) HPs = 2000000;
 				if (HPs <-1)  HPs =-1;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " now respawns after " + HPs+ "s.");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " now respawns after " + HPs+ "s.");   
 				inst.respawnDelay = HPs;
 			}
 			return true;
@@ -540,7 +540,7 @@ public abstract class CommandHandler {
 				if (HPs > 2.0) HPs = 2.0f;
 				if (HPs <0.0)  HPs =0f;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " speed set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " speed set to " + HPs + ".");   
 				inst.sentrySpeed = HPs;
 			}
 			return true;
@@ -558,7 +558,7 @@ public abstract class CommandHandler {
 				if (HPs > 30.0) HPs = 30.0;
 				if (HPs < 0.0)  HPs = 0.0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Projectile Attack Rate set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Projectile Attack Rate set to " + HPs + ".");  
 				inst.attackRate = HPs;
 			}
 			return true;
@@ -577,7 +577,7 @@ public abstract class CommandHandler {
 				if (HPs > 300.0) HPs = 300.0;
 				if (HPs < 0.0)  HPs = 0.0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Heal Rate set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Heal Rate set to " + HPs + ".");   
 				inst.healRate = HPs;
 			}
 			return true;
@@ -595,7 +595,7 @@ public abstract class CommandHandler {
 				if (HPs > 100) HPs = 100;
 				if (HPs <1)  HPs =1;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " range set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " range set to " + HPs + ".");   
 				inst.sentryRange = HPs;
 			}
 			return true;
@@ -613,7 +613,7 @@ public abstract class CommandHandler {
 				if (HPs > 50) HPs = 50;
 				if (HPs <0)  HPs =0;
 
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " warning range set to " + HPs + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " warning range set to " + HPs + ".");   
 				inst.warningRange = HPs;
 			}
 			return true;
@@ -670,7 +670,7 @@ public abstract class CommandHandler {
 				arg = arg.trim();
 
 				String str = arg.replaceAll("\"$", "").replaceAll("^\"", "").replaceAll("'$", "").replaceAll("^'", "");
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " warning message set to " + ChatColor.RESET + ChatColor.translateAlternateColorCodes('&',str) + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " warning message set to " + ChatColor.RESET + ChatColor.translateAlternateColorCodes('&',str) + ".");   
 				inst.warningMsg = str;
 			}
 			else{
@@ -692,7 +692,7 @@ public abstract class CommandHandler {
 				arg = arg.trim();
 
 				String str = arg.replaceAll("\"$", "").replaceAll("^\"", "").replaceAll("'$", "").replaceAll("^'", "");
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Greeting message set to "+ ChatColor.RESET  + ChatColor.translateAlternateColorCodes('&',str) + ".");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Greeting message set to "+ ChatColor.RESET  + ChatColor.translateAlternateColorCodes('&',str) + ".");   
 				inst.greetingMsg = str;
 			}
 			else{
@@ -708,7 +708,7 @@ public abstract class CommandHandler {
 			player.sendMessage(ChatColor.GOLD + "------- Sentry Info for (" +thisNPC.getId() + ") " +  thisNPC.getName() + "------");
 			player.sendMessage(ChatColor.GREEN + inst.getStats());
 			player.sendMessage(ChatColor.GREEN + "Invincible: " + inst.invincible + "  Retaliate: " + inst.iWillRetaliate);
-			player.sendMessage(ChatColor.GREEN + "Drops Items: " + inst.dropInventory+ "  Critical Hits: " + inst.luckyHits);
+			player.sendMessage(ChatColor.GREEN + "Drops Items: " + inst.dropInventory+ "  Critical Hits: " + inst.acceptsCriticals);
 			player.sendMessage(ChatColor.GREEN + "Kills Drop Items: "+ inst.killsDropInventory + "  Respawn Delay: " + inst.respawnDelay + "s");
 			player.sendMessage(ChatColor.BLUE + "Status: " + inst.myStatus);
 			

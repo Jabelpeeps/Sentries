@@ -43,7 +43,7 @@ public class Sentry extends JavaPlugin {
 	
 	public boolean dieLikePlayers = false;
 	public boolean bodyguardsObeyProtection = true;
-	public boolean ignoreInvincibility = true;
+	public boolean ignoreListIsInvincible = true;
 
 	static Permission perms = null;
 	
@@ -57,19 +57,12 @@ public class Sentry extends JavaPlugin {
 	static boolean denizenActive = false;
 	
 	// fields to support the critical hits system
-	public int crit1Chance;
-	public String crit1Message = "";
-	public int crit2Chance;
-	public String crit2Message = "";
-	public int crit3Chance;
-	public String crit3Message = "";
-	public int glanceChance;
-	public String glanceMessage = "";
-	public String hitMessage = "";
-	public int missChance;
-	public String missMessage = "";
-	public String blockMessage = "";
-	
+//	public int crit1Chance;
+//	public int crit2Chance;
+//	public int crit3Chance;
+//	public int glanceChance;
+//	public int missChance;
+//	
 	// Lists of various armour items that will be accepted 
 //	public List<Integer> boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
 	public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, 
@@ -105,7 +98,6 @@ public class Sentry extends JavaPlugin {
 	public Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
 	public Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>( Material.class );
 	public Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>( Material.class );
-
 
 	public int logicTicks = 10;	
 	public int sentryEXP = 5;
@@ -205,6 +197,7 @@ public class Sentry extends JavaPlugin {
 		loadmap( "ArmorBuffs", armorBuffs );
 		loadmap( "StrengthBuffs", strengthBuffs );
 		loadmap( "SpeedBuffs", speedBuffs );
+		
 		loadPotions( "WeaponEffects", weaponEffects );
 		
 		loadItemList( "Helmets", helmets );
@@ -218,22 +211,12 @@ public class Sentry extends JavaPlugin {
 		
 		dieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
 		bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
-		ignoreInvincibility =  config.getBoolean( "Server.IgnoreListInvincibility", true );
+		ignoreListIsInvincible =  config.getBoolean( "Server.IgnoreListInvincibility", true );
 		
 		logicTicks = 	config.getInt( "Server.LogicTicks", 10 );
 		sentryEXP = 	config.getInt( "Server.ExpValue", 5 );
-		missMessage = 	config.getString( "GlobalTexts.Miss" );
-		hitMessage = 	config.getString( "GlobalTexts.Hit" );
-		blockMessage = 	config.getString( "GlobalTexts.Block" );
-		crit1Message = 	config.getString( "GlobalTexts.Crit1" );
-		crit2Message = 	config.getString( "GlobalTexts.Crit2" );
-		crit3Message = 	config.getString( "GlobalTexts.Crit3" );
-		glanceMessage = config.getString( "GlobalTexts.Glance" );
-		missChance = 	config.getInt( "HitChances.Miss", 0 );
-		glanceChance = 	config.getInt( "HitChances.Glance", 0 );
-		crit1Chance = 	config.getInt( "HitChances.Crit1", 0 );
-		crit2Chance = 	config.getInt( "HitChances.Crit2", 0 );
-		crit3Chance = 	config.getInt( "HitChances.Crit3", 0 );
+		
+		Hits.loadConfig( config );
 	}
 
 	/**

@@ -76,7 +76,7 @@ public class SentryListener implements Listener {
 		}
 		SentryInstance sentry = plugin.getSentry( killer );
 
-		if ( sentry != null && sentry.killsDropInventory == false ) {
+		if ( sentry != null && !sentry.killsDropInventory ) {
 			event.getDrops().clear();
 			event.setDroppedExp( 0 );
 		}
@@ -188,10 +188,7 @@ public class SentryListener implements Listener {
 
 			event.setCancelled( true );
 	
-			DamageCause cause = event.getCause();
-			//	plugin.getLogger().log(Level.INFO, "Damage " + cause.toString() + " " + event.getDamage());
-	
-			switch ( cause ) {
+			switch ( event.getCause() ) {
 			
 			case CONTACT: 	case DROWNING: 	case LAVA: 	case VOID:	case SUICIDE:
 			case CUSTOM:  	case BLOCK_EXPLOSION: 	 case SUFFOCATION: 	case MAGIC:

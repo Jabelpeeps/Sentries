@@ -52,24 +52,25 @@ DefaultTargets:
 DefaultIgnores:
  #- "entity:owner"
 
-
+UseCustomMessages: false
 #Configurable messages used by all Sentries. You can use <NPC>, <PLAYER>, <ITEM>, and <AMOUNT> as placeholders. Remove a message or set it to "" to prevent it from displaying at all.
 GlobalTexts:
- Miss: "&7*** You MISS <NPC>."
- Hit: "&f*** You hit <NPC> for <AMOUNT> damage."
- Crit1: "&e*** You injure <NPC> for <AMOUNT> damage."
- Crit2: "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage."
- Crit3: "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage."
- Block: "&7*** You fail to penetrate <NPC>'s armor."
- Glance: "&7*** Your blow glances off <NPC> for <AMOUNT> damage."
- 
+ Crit3: "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage"
+ Crit2: "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage"
+ Crit1: "&e*** <NPC> sustains \"a mere flesh wound\" for <AMOUNT> damage"
+ Hit: ""
+ Glance: "&f*** Your paltry blow does <AMOUNT> damage to <NPC>"
+ Block: "&7*** <NPC> skillfully parries your attack!"
+ Miss: "&7*** You MISSED! <NPC> thumbs their nose at you!"
+
+UseCriticalHits: true 
 #These are the percentage chancees of doing a certain damage to a Sentry if Criticals is turned on. Whole numbers only. Remove or Set to 0 to disable a hit type.
 HitChances:
- Miss: 4
- Glance: 4
- Crit1: 6
- Crit2: 4
  Crit3: 2
+ Crit2: 4
+ Crit1: 6
+ Glance: 4
+ Miss: 4
  
 UseCustomWeapons: false 
 #Set the item used by each type of Sentry. Use item name.
@@ -119,7 +120,7 @@ WeaponEffects:
  
   
 # The lists below control what items are equipped as armor. These should only be changed to disable specific armors or add extended (i.e. Spout) items.
-# If you are not changing the list from the default, leave the "UseCustom..." values as false. 
+# If you are not changing the list from the defaults, leave the "UseCustom..." values as false. 
  
 UseCustomHelmets: false 
 # If the value above is changed to true, the following items will be equipped as helmets, you must use the correct Material name.
