@@ -1,5 +1,7 @@
 package net.aufdemrand.sentry;
 
+import java.text.DecimalFormat;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -705,21 +707,37 @@ public abstract class CommandHandler {
 		else if (args[0].equalsIgnoreCase("info")) {
 			if ( !checkCommandPerm( "sentry.info", player) ) return true;
 
-			player.sendMessage(ChatColor.GOLD + "------- Sentry Info for (" +thisNPC.getId() + ") " +  thisNPC.getName() + "------");
-			player.sendMessage(ChatColor.GREEN + inst.getStats());
-			player.sendMessage(ChatColor.GREEN + "Invincible: " + inst.invincible + "  Retaliate: " + inst.iWillRetaliate);
-			player.sendMessage(ChatColor.GREEN + "Drops Items: " + inst.dropInventory+ "  Critical Hits: " + inst.acceptsCriticals);
-			player.sendMessage(ChatColor.GREEN + "Kills Drop Items: "+ inst.killsDropInventory + "  Respawn Delay: " + inst.respawnDelay + "s");
-			player.sendMessage(ChatColor.BLUE + "Status: " + inst.myStatus);
+			player.sendMessage( ChatColor.GOLD + "------- Sentry Info for (" + thisNPC.getId() + ") " 
+																			 + thisNPC.getName() + "------");
+			player.sendMessage( ChatColor.RED + "[HP]:" + ChatColor.WHITE + inst.getHealth() + "/" + inst.sentryHealth + 
+								ChatColor.RED + " [AP]:" + ChatColor.WHITE + inst.getArmor() +
+								ChatColor.RED + " [STR]:" + ChatColor.WHITE + inst.getStrength() + 
+								ChatColor.RED + " [SPD]:" + ChatColor.WHITE + new DecimalFormat( "#.0" ).format( inst.getSpeed() ) +
+								ChatColor.RED + " [RNG]:" + ChatColor.WHITE + inst.sentryRange + 
+								ChatColor.RED + " [ATK]:" + ChatColor.WHITE + inst.attackRate + 
+								ChatColor.RED + " [VIS]:" + ChatColor.WHITE + inst.nightVision +
+								ChatColor.RED + " [HEAL]:" + ChatColor.WHITE + inst.healRate + 
+								ChatColor.RED + " [WARN]:" + ChatColor.WHITE + inst.warningRange + 
+								ChatColor.RED + " [FOL]:" + ChatColor.WHITE + Math.sqrt( inst.followDistance ) );
+			player.sendMessage( ChatColor.GREEN + "Invincible: " + inst.invincible 
+												+ "  Retaliate: " + inst.iWillRetaliate);
+			player.sendMessage( ChatColor.GREEN + "Drops Items: " + inst.dropInventory 
+												+ "  Critical Hits: " + inst.acceptsCriticals);
+			player.sendMessage( ChatColor.GREEN + "Kills Drop Items: "+ inst.killsDropInventory 
+												+ "  Respawn Delay: " + inst.respawnDelay + "s");
+			player.sendMessage( ChatColor.BLUE 	+ "Status: " + inst.myStatus);
 			
-			if (inst.meleeTarget == null){
-				if(inst.projectileTarget ==null) player.sendMessage(ChatColor.BLUE + "Target: Nothing");
-				else	player.sendMessage(ChatColor.BLUE + "Target: " + inst.projectileTarget.toString());
-			}
-			else 		player.sendMessage(ChatColor.BLUE + "Target: " + inst.meleeTarget.toString());
+			if ( inst.meleeTarget != null ) 
+				player.sendMessage( ChatColor.BLUE + "Target: " + inst.meleeTarget.toString() );
+			else if ( inst.projectileTarget != null ) 
+				player.sendMessage( ChatColor.BLUE + "Target: " + inst.projectileTarget.toString() );
+			else 
+				player.sendMessage( ChatColor.BLUE + "Target: Nothing" );
 
-			if (inst.getGuardTarget() == null)	player.sendMessage(ChatColor.BLUE + "Guarding: My Surroundings");
-			else 		player.sendMessage(ChatColor.BLUE + "Guarding: " + inst.getGuardTarget().toString());
+			if ( inst.getGuardTarget() == null )
+				player.sendMessage( ChatColor.BLUE + "Guarding: My Surroundings");
+			else 		
+				player.sendMessage( ChatColor.BLUE + "Guarding: " + inst.getGuardTarget().toString() );
 
 			return true;
 		}

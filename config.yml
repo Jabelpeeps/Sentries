@@ -18,15 +18,18 @@ Server:
 DefaultStats:
  Strength: 1
  Armor: 0
- Speed: 1.0
- Health: 20
- AttackRate: 2.0
- HealRate: 0.0
  NightVision: 16
  Range: 10
  WarningRange: 0
  Respawn: 10
  FollowDistance: 4
+# More default stats...
+DefaultValues:
+ Speed: 1.0
+ Health: 20.0
+ AttackRate: 2.0
+ HealRate: 0.0
+ Weight: 1.0 
  
 #Default options for new Sentries
 DefaultOptions:

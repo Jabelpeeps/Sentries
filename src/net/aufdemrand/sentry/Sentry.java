@@ -3,6 +3,7 @@ package net.aufdemrand.sentry;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +57,6 @@ public class Sentry extends JavaPlugin {
 	static boolean clansActive = false;
 	static boolean denizenActive = false;
 	
-	// fields to support the critical hits system
-//	public int crit1Chance;
-//	public int crit2Chance;
-//	public int crit3Chance;
-//	public int glanceChance;
-//	public int missChance;
-//	
 	// Lists of various armour items that will be accepted 
 //	public List<Integer> boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
 	public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, 
@@ -94,17 +88,22 @@ public class Sentry extends JavaPlugin {
 												Material.DIAMOND_LEGGINGS,
 												Material.GOLD_LEGGINGS );
 
-	public Map<Material, Double> armorBuffs = new EnumMap<Material, Double>( Material.class );
-	public Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
-	public Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>( Material.class );
-	public Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>( Material.class );
+	Map<Material, Double> armorBuffs = new EnumMap<Material, Double>( Material.class );
+	Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
+	Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>( Material.class );
+	Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>( Material.class );
+	
+	Map<String, Boolean> defaultBooleans = new HashMap<String, Boolean>();
+	Map<String, Integer> defaultIntegers = new HashMap<String, Integer>();
+	Map<String, Double> defaultDoubles = new HashMap<String, Double>();
+	String defaultGreeting = "";
+	String defaultWarning = "";
 
 	public int logicTicks = 10;	
 	public int sentryEXP = 5;
 	
 	public Queue<Projectile> arrows = new LinkedList<Projectile>(); 
 	
-	// saved in field for readability as the combination of calls is often called together.
 	PluginManager pluginManager = getServer().getPluginManager();
 	
 	static Logger logger;
@@ -130,7 +129,7 @@ public class Sentry extends JavaPlugin {
 				}
 				else if (  vers.startsWith("0.9" ) ) {
 					DenizenHook.sentryPlugin = this;
-					DenizenHook.denizenPlugin = pluginManager.getPlugin("Denizen");
+					DenizenHook.denizenPlugin = pluginManager.getPlugin( "Denizen" );
 					DenizenHook.setupDenizenHook();
 					denizenActive = true;
 					logger.log( Level.INFO, "NPCDeath Triggers and DIE/LIVE command registered sucessfully with Denizen" );
@@ -167,7 +166,7 @@ public class Sentry extends JavaPlugin {
 
 		CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
-		pluginManager.registerEvents( new SentryListener( this ), this);
+		pluginManager.registerEvents( new SentryListener( this ), this );
 
 		final Runnable removeArrows = new Runnable() {
 				@Override
@@ -194,29 +193,34 @@ public class Sentry extends JavaPlugin {
 		// load the contents of the config.yml from the disk.
 		reloadConfig();
 		
-		loadmap( "ArmorBuffs", armorBuffs );
-		loadmap( "StrengthBuffs", strengthBuffs );
-		loadmap( "SpeedBuffs", speedBuffs );
-		
-		loadPotions( "WeaponEffects", weaponEffects );
-		
-		loadItemList( "Helmets", helmets );
-		loadItemList( "Chestplates", chestplates );
-		loadItemList( "Leggings", leggings );
-		loadItemList( "Boots", boots );
-		
 		FileConfiguration config = getConfig();
-
+		
+		loadIntoMaterialMap( config, "ArmorBuffs", armorBuffs );
+		loadIntoMaterialMap( config, "StrengthBuffs", strengthBuffs );
+		loadIntoMaterialMap( config, "SpeedBuffs", speedBuffs );
+		
+		loadPotions( config, "WeaponEffects", weaponEffects );
+		
+		loadIntoSet( config, "Helmets", helmets );
+		loadIntoSet( config, "Chestplates", chestplates );
+		loadIntoSet( config, "Leggings", leggings );
+		loadIntoSet( config, "Boots", boots );
+		
 		AttackType.loadWeapons( config );
-		
-		dieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
-		bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
-		ignoreListIsInvincible =  config.getBoolean( "Server.IgnoreListInvincibility", true );
-		
-		logicTicks = 	config.getInt( "Server.LogicTicks", 10 );
-		sentryEXP = 	config.getInt( "Server.ExpValue", 5 );
-		
 		Hits.loadConfig( config );
+		
+		dieLikePlayers = config.getBoolean( "Server.DieLikePlayers" );
+		bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
+		ignoreListIsInvincible = config.getBoolean( "Server.IgnoreListInvincibility", true );
+		
+		logicTicks = config.getInt( "Server.LogicTicks", 10 );
+		sentryEXP = config.getInt( "Server.ExpValue", 5 );
+		
+		loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
+		loadIntoStringMap( config, "DefaultStats", defaultIntegers );
+		loadIntoStringMap( config, "DefaultValues", defaultDoubles );
+		defaultWarning = config.getString( "DefaultTexts.Warning" );
+		defaultGreeting = config.getString( "DefaultTexts.Greeting" );
 	}
 
 	/**
@@ -248,6 +252,7 @@ public class Sentry extends JavaPlugin {
 		groupsChecked = true;
 	}
 
+	// only called from CommandHandler.  Maybe it should be moved there.
 	boolean equip( NPC npc, ItemStack newEquipment ) {
 		
 		Equipment equipment = npc.getTrait( Equipment.class );
@@ -364,11 +369,11 @@ public class Sentry extends JavaPlugin {
 		Bukkit.getServer().getScheduler().cancelTasks( this );
 	}
 	
-	public void loadItemList( String key, Set<Material> set ) {
+	public void loadIntoSet( FileConfiguration config, String key, Set<Material> set ) {
 		
-		if ( getConfig().getBoolean( "UseCustom" + key ) ) {
+		if ( config.getBoolean( "UseCustom" + key ) ) {
 			
-			List<String> strings = getConfig().getStringList( key );
+			List<String> strings = config.getStringList( key );
 	
 			if ( strings.size() > 0 ) {
 				
@@ -381,10 +386,10 @@ public class Sentry extends JavaPlugin {
 		}
 	}
 
-	private void loadmap( String node, Map<Material, Double> map ) {
+	private void loadIntoMaterialMap( FileConfiguration config, String node, Map<Material, Double> map ) {
 		map.clear();
 		
-		for ( String each : getConfig().getStringList( node ) ) {
+		for ( String each : config.getStringList( node ) ) {
 			String[] args = each.trim().split(" ");
 			
 			if ( args.length != 2 ) continue;
@@ -405,11 +410,18 @@ public class Sentry extends JavaPlugin {
 			}
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends Object> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
+		
+		map.clear();
+		map.putAll( (Map<String, T>) config.getConfigurationSection( node ).getValues( false ) );
+	}
 	
-	private void loadPotions( String path, Map<Material, List<PotionEffect>> map ) {
+	private void loadPotions( FileConfiguration config, String path, Map<Material, List<PotionEffect>> map ) {
 		map.clear();
 		
-		for ( String each : getConfig().getStringList( path ) ) {
+		for ( String each : config.getStringList( path ) ) {
 			String[] args = each.trim().split(" ");
 
 			if ( args.length < 2 ) continue;
@@ -433,7 +445,6 @@ public class Sentry extends JavaPlugin {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private PotionEffect getPotionEffect( String string ) {
 		if ( string == null ) return null;
 		
@@ -444,36 +455,19 @@ public class Sentry extends JavaPlugin {
 
 		PotionEffectType type = PotionEffectType.getByName( args[0] );
 
-		if ( type == null ) {
-			// TODO this block appears to be using the deprecated method as a backup, let see if it's needed.
-			logger.info( "getByName() in Sentry.getpot() returned null trying getById" );
-			type = PotionEffectType.getById( Util.string2Int( args[0] ) );
-		}
 		if ( type == null ) 
 			return null;
-	//	else 
-	//		getLogger().info( type.toString() + " found, watch out!" );
 
 		if ( args.length > 1 ) {
 			dur = Util.string2Int( args[1] );
 			
 			if ( dur < 0 ) dur = 10;
-			
-	//		try {
-	//			dur = Integer.parseInt( args[1] );
-	//		} catch ( NumberFormatException e ) { }
-			
 		}
 
 		if ( args.length > 2 ) {
 			amp = Util.string2Int( args[2] );
 			
 			if ( amp < 0 ) amp = 1; 
-			
-	//		try {
-	//			amp = Integer.parseInt( args[2] );
-	//		} catch ( NumberFormatException e ) { }
-			
 		}
 		return new PotionEffect( type, dur, amp );
 	}

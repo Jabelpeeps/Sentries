@@ -11,8 +11,6 @@ import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.LocaleI18n;
 
 /**
@@ -28,12 +26,12 @@ public abstract class Util {
 	public static Location getFireSource( LivingEntity from, LivingEntity to ) {
 
 		Location loco = from.getEyeLocation();
+		Vector victor = to.getEyeLocation().subtract( loco ).toVector();
 		
-		Vector v = to.getEyeLocation().subtract( loco ).toVector();
-		v = normalizeVector( v );
-		v.multiply( 0.5 );
+		victor = normalizeVector( victor );
+		victor.multiply( 0.5 );
 
-		return loco.add( v );
+		return loco.add( victor );
 	}
 
 	public static Location leadLocation (Location loc, Vector victor, double t) {
@@ -52,6 +50,7 @@ public abstract class Util {
 			npc.destroy();
 		}
 	}
+	
     /**
      * Strangely named method, as appears to only check permissions for a player (when passed in as
      * the Entity argument) - the sentry.bodyguard.<world-name> permission.
@@ -69,7 +68,8 @@ public abstract class Util {
 
 			if (  player.hasPermission( "sentry.bodyguard.*" ) ) {
 			    // all players have "*" perm by default.
-                if (   player.isPermissionSet( "sentry.bodyguard." + player.getWorld().getName() ) 
+				
+                if  (  player.isPermissionSet( "sentry.bodyguard." + player.getWorld().getName() ) 
                     && !player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
 						//denied in this world.
 						return false;
@@ -89,6 +89,7 @@ public abstract class Util {
      * @param int MatID the ID to be named.
      */
 	static String getLocalItemName ( Material mat ) {
+		
 		if ( mat == null || mat == Material.AIR ) 
 		    return  "Hand";
 		
@@ -97,27 +98,8 @@ public abstract class Util {
 		else
 		    return LocaleI18n.get( mat.name() + ".name" );
 	}
-	@Deprecated
-	static String getLocalItemName (int MatId) {
-		if ( MatId == 0 ) 
-		    return  "Hand";
-		
-		if ( MatId < 256 )
-			return getMCBlock( MatId ).getName();
-		else
-		    return LocaleI18n.get( getMCItem( MatId ).getName() + ".name" );
-	}
 
-	//check for obfuscation change
-	public static Item getMCItem (int id) {
-		return Item.getById( id );
-	}
-	//check for obfuscation change
-	public static Block getMCBlock (int id) {
-		return Block.getById( id );
-	}
-
-	public static double hangtime (double launchAngle, double v, double elev, double g) {
+	public static double hangtime ( double launchAngle, double v, double elev, double g ) {
 
 		double a =  v * Math.sin( launchAngle );
 		double b = -2 * g * elev;
@@ -128,9 +110,10 @@ public abstract class Util {
 		return ( a + Math.sqrt( Math.pow( a, 2 ) + b ) )  /  g;
 	}
 	
-	public static Double launchAngle (Location from, Location to, double v, double elev, double g) {
+	public static Double launchAngle ( Location from, Location to, double v, double elev, double g ) {
 
 		Vector victor = from.clone().subtract( to ).toVector();
+		
 		Double dist =  Math.sqrt( Math.pow( victor.getX(), 2 ) 
 		                        + Math.pow( victor.getZ(), 2 ) );
 
@@ -150,34 +133,36 @@ public abstract class Util {
 			return Math.atan( ( v2 - Math.sqrt( v4 - derp ) ) / ( g * dist ) );
 		}
 	}
+	/** 
+	 * Reformat the supplied String, replacing the tags <NPC>, <PLAYER>, <ITEM>, & <AMOUNT> with the 
+	 * names of the objects supplied as arguments, and translating any colour codes.
+	 * 
+	 * The method will return immediately if 'input' is null, and will remove the tags related to any 
+	 * other arguments that are null objects. 
+	 */
 	public static String format( String input, NPC npc, CommandSender player, Material item, String amount ) {
 	    
 		if ( input == null ) return null;
 		
-		input = input.replace( "<NPC>", npc.getName() );
-		input = input.replace( "<PLAYER>", player == null ? "" : player.getName() );
-		input = input.replace( "<ITEM>", Util.getLocalItemName( item ) );
-		input = input.replace( "<AMOUNT>", amount.toString() );
-		input =	ChatColor.translateAlternateColorCodes( '&', input );
+		input = input.replace( "<NPC>", 
+							 ( npc == null ) ? ""
+									 		 : npc.getName() );
+		input = input.replace( "<PLAYER>", 
+							 ( player == null ) ? "" 
+												: player.getName() );
+		input = input.replace( "<ITEM>", 
+							 ( item == null ) ? ""
+											  : Util.getLocalItemName( item ) );
+		input = input.replace( "<AMOUNT>", 
+							 ( amount == null ) ? ""
+									 			: amount );
 		
-		return input;
-	}
-	
-	@Deprecated
-	public static String format (String input, NPC npc, CommandSender player, int item, String amount) {
-	    
-		if ( input == null ) return null;
-		
-		input = input.replace( "<NPC>", npc.getName() );
-		input = input.replace( "<PLAYER>", player == null ? "" : player.getName() );
-		input = input.replace( "<ITEM>", Util.getLocalItemName( item ) );
-		input = input.replace( "<AMOUNT>", amount.toString() );
 		input =	ChatColor.translateAlternateColorCodes( '&', input );
 		
 		return input;
 	}
 
-	public static Vector normalizeVector (Vector victor) {
+	public static Vector normalizeVector ( Vector victor ) {
 	    
 		double mag = Math.sqrt(   Math.pow( victor.getX(), 2 ) 
 		                        + Math.pow( victor.getY(), 2 ) 

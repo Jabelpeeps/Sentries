@@ -1,6 +1,5 @@
 package net.aufdemrand.sentry;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -96,7 +95,7 @@ public class SentryInstance {
 	double attackRate = 2.0;
 	double healRate = 0.0;
 	double sentryWeight = 1.0;
-	double sentryHealth = 20;
+	double sentryHealth = 20.0;
 
 	boolean killsDropInventory = true;
 	boolean dropInventory = false;
@@ -179,7 +178,7 @@ public class SentryInstance {
 		
 		faceForward();
 
-		healAnimation = new PacketPlayOutAnimation( ((CraftEntity)getMyEntity()).getHandle(), 6);
+		healAnimation = new PacketPlayOutAnimation( ((CraftEntity) getMyEntity()).getHandle(), 6);
 
 		//	Packet derp = new net.minecraft.server.Packet15Place();
 		
@@ -217,7 +216,7 @@ public class SentryInstance {
 			taskID = sentry.getServer().getScheduler()
 									   .scheduleSyncRepeatingTask( sentry, 
 											   					   new SentryLogic(), 
-											   					   40 + this.myNPC.getId(),  
+											   					   40 + myNPC.getId(),  
 											   					   sentry.logicTicks );
 		}
 	}
@@ -990,23 +989,6 @@ public class SentryInstance {
 		return (float) ( sentrySpeed + mod ) * ( myEntity.isInsideVehicle() ? 2 
 																			: 1 );
 	}
-	
-	public String getStats() {
-		
-		DecimalFormat df = new DecimalFormat( "#.0" );
-		double h = getHealth();
-
-		return  ChatColor.RED + "[HP]:" + ChatColor.WHITE + h + "/" + sentryHealth + 
-				ChatColor.RED + " [AP]:" + ChatColor.WHITE + getArmor() +
-				ChatColor.RED + " [STR]:" + ChatColor.WHITE + getStrength() + 
-				ChatColor.RED + " [SPD]:" + ChatColor.WHITE + df.format( getSpeed() ) +
-				ChatColor.RED + " [RNG]:" + ChatColor.WHITE + sentryRange + 
-				ChatColor.RED + " [ATK]:" + ChatColor.WHITE + attackRate + 
-				ChatColor.RED + " [VIS]:" + ChatColor.WHITE + nightVision +
-				ChatColor.RED + " [HEAL]:" + ChatColor.WHITE + healRate + 
-				ChatColor.RED + " [WARN]:" + ChatColor.WHITE + warningRange + 
-				ChatColor.RED + " [FOL]:" + ChatColor.WHITE + Math.sqrt( followDistance );
-	}
 
 	public int getStrength(){
 		
@@ -1036,15 +1018,6 @@ public class SentryInstance {
 	public boolean isPyromancer1() {
 		return ( myAttacks == AttackType.pyro1 ) ;
 	}
-
-	// unused?
-//	public boolean isPyromancer2() {
-//		return ( inciendary && myProjectile == SmallFireball.class ) ;
-//	}
-
-//	public boolean isPyromancer3() {
-//		return ( myProjectile == Fireball.class ) ;
-//	}
 
 	static Set<AttackType> stormCallers = EnumSet.of( AttackType.sc1, AttackType.sc2, AttackType.sc3 );
 	
@@ -1155,7 +1128,7 @@ public class SentryInstance {
 				//set the killer
 				if ( damager instanceof HumanEntity ) 
 					((CraftLivingEntity) getMyEntity()).getHandle().killer 
-								= (EntityHuman) ((CraftLivingEntity) damager).getHandle();
+											= (EntityHuman) ((CraftLivingEntity) damager).getHandle();
 
 				die( true, event.getCause() );
 
@@ -1210,23 +1183,23 @@ public class SentryInstance {
 //  @EventHandler
 //	public void onRightClick(NPCRightClickEvent event) {}
 
-	final int all = 1;
-	final int players = 2;
-	final int npcs = 4;
-	final int monsters = 8;
-	final int events = 16;
-	final int namedentities = 32;
-	final int namedplayers = 64;
-	final int namednpcs = 128;
-	final int faction = 256;
-	final int towny = 512;
-	final int war = 1024;
-	final int permGroups = 2048;
-	final int owner = 4096;
-	final int clans = 8192;
-	final int townyenemies = 16384;
-	final int factionEnemies = 16384*2;
-	final int mcTeams = 16384*4;
+	static final int all = 1;
+	static final int players = 2;
+	static final int npcs = 4;
+	static final int monsters = 8;
+	static final int events = 16;
+	static final int namedentities = 32;
+	static final int namedplayers = 64;
+	static final int namednpcs = 128;
+	static final int faction = 256;
+	static final int towny = 512;
+	static final int war = 1024;
+	static final int permGroups = 2048;
+	static final int owner = 4096;
+	static final int clans = 8192;
+	static final int townyenemies = 16384;
+	static final int factionEnemies = 16384*2;
+	static final int mcTeams = 16384*4;
 
 	private int targets = 0;
 	private int ignores = 0;
@@ -1244,52 +1217,57 @@ public class SentryInstance {
 			NationsEnemies.clear();
 			FactionEnemies.clear();
 
-			for (String target: validTargets){
-				if (target.contains("ENTITY:ALL")) targets |= all;
-				else	if(target.contains("ENTITY:MONSTER")) targets |= monsters;
-				else	if(target.contains("ENTITY:PLAYER")) targets |= players;
-				else	if(target.contains("ENTITY:NPC")) targets |= npcs;
-				else{
-					_validTargets.add(target);
-					if(target.contains("NPC:")) targets |= namednpcs;
-					else if (Sentry.perms!=null && Sentry.perms.isEnabled() && target.contains("GROUP:")) targets |= permGroups;
-					else if (target.contains("EVENT:"))  targets |= events;
-					else	if(target.contains("PLAYER:")) targets |= namedplayers;
-					else	if(target.contains("ENTITY:")) targets |= namedentities;
-					else	if (Sentry.factionsActive && target.contains("FACTION:")) targets |= faction;
-					else	if (Sentry.factionsActive && target.contains("FACTIONENEMIES:")){
-						targets |= factionEnemies;
-						FactionEnemies.add(target.split(":")[1]);
+			for ( String target: validTargets ) {
+				
+				if      ( target.contains( "ENTITY:ALL" ) ) targets |= all;
+				else if ( target.contains( "ENTITY:MONSTER" ) ) targets |= monsters;
+				else if ( target.contains( "ENTITY:PLAYER" ) ) targets |= players;
+				else if ( target.contains( "ENTITY:NPC" ) ) targets |= npcs;
+				else {
+					_validTargets.add( target );
+					if 		( target.contains( "NPC:" ) ) targets |= namednpcs;
+					else if ( Sentry.perms != null && Sentry.perms.isEnabled() && target.contains( "GROUP:" ) ) 
+									targets |= permGroups;
+					else if ( target.contains( "EVENT:" ) ) targets |= events;
+					else if ( target.contains( "PLAYER:" ) ) targets |= namedplayers;
+					else if ( target.contains( "ENTITY:" ) ) targets |= namedentities;
+					else if ( Sentry.factionsActive && target.contains( "FACTION:" ) ) targets |= faction;
+					else if ( Sentry.factionsActive && target.contains( "FACTIONENEMIES:" ) ) {
+									targets |= factionEnemies;
+									FactionEnemies.add( target.split( ":" )[1] );
 					}
-					else	if (Sentry.townyActive && target.contains("TOWN:")) targets |= towny;
-					else	if (Sentry.townyActive && target.contains("NATIONENEMIES:")) {
-						targets |= townyenemies;
-						NationsEnemies.add(target.split(":")[1]);
+					else if ( Sentry.townyActive && target.contains( "TOWN:") ) targets |= towny;
+					else if ( Sentry.townyActive && target.contains( "NATIONENEMIES:") ) {
+									targets |= townyenemies;
+									NationsEnemies.add( target.split( ":" )[1] );
 					}
-					else	if (Sentry.townyActive && target.contains("NATION:"))  targets |= towny;
-					else	if (Sentry.warActive && target.contains("WARTEAM:"))  targets |= war;
-					else	if (target.contains("TEAM:"))  targets |= mcTeams;
-					else	if (Sentry.clansActive && target.contains("CLAN:"))  targets |= clans;
+					else if ( Sentry.townyActive && target.contains( "NATION:" ) )  targets |= towny;
+					else if ( Sentry.warActive && target.contains( "WARTEAM:" ) )  targets |= war;
+					else if ( target.contains("TEAM:") )  targets |= mcTeams;
+					else if ( Sentry.clansActive && target.contains( "CLAN:" ) )  targets |= clans;
 				}
+			// end of 1st for loop
 			}
-			for (String t: ignoreTargets){
-				if(t.contains("ENTITY:ALL")) ignores |= all;
-				else	if(t.contains("ENTITY:MONSTER")) ignores |= monsters;
-				else	if(t.contains("ENTITY:PLAYER")) ignores |= players;
-				else	if(t.contains("ENTITY:NPC")) ignores |= npcs;
-				else	if(t.contains("ENTITY:OWNER")) ignores |= owner;
-				else{
-					_ignoreTargets.add(t);
-					if (Sentry.perms!=null && Sentry.perms.isEnabled() && t.contains("GROUP:")) ignores |= permGroups;
-					else	if(t.contains("NPC:")) ignores |= namednpcs;
-					else	if(t.contains("PLAYER:")) ignores |= namedplayers;
-					else	if(t.contains("ENTITY:")) ignores |= namedentities;
-					else	if (Sentry.factionsActive && t.contains("FACTION:")) ignores |= faction;
-					else	if (Sentry.townyActive && t.contains("TOWN:")) ignores |= towny;
-					else	if (Sentry.townyActive && t.contains("NATION:"))  ignores |= towny;
-					else	if (Sentry.warActive && t.contains("TEAM:"))  ignores |= war;
-					else	if (Sentry.clansActive && t.contains("CLAN:"))  ignores |= clans;
+			for ( String ignore : ignoreTargets ) {
+				if 		( ignore.contains( "ENTITY:ALL" ) ) ignores |= all;
+				else if ( ignore.contains( "ENTITY:MONSTER" ) ) ignores |= monsters;
+				else if ( ignore.contains( "ENTITY:PLAYER" ) ) ignores |= players;
+				else if ( ignore.contains( "ENTITY:NPC" ) ) ignores |= npcs;
+				else if ( ignore.contains( "ENTITY:OWNER" ) ) ignores |= owner;
+				else {
+					_ignoreTargets.add( ignore );
+					if 		( Sentry.perms != null && Sentry.perms.isEnabled() && ignore.contains( "GROUP:" ) ) 
+									ignores |= permGroups;
+					else if ( ignore.contains( "NPC:" ) ) ignores |= namednpcs;
+					else if ( ignore.contains( "PLAYER:" ) ) ignores |= namedplayers;
+					else if ( ignore.contains( "ENTITY:" ) ) ignores |= namedentities;
+					else if ( Sentry.factionsActive && ignore.contains( "FACTION:" ) ) ignores |= faction;
+					else if ( Sentry.townyActive && ignore.contains( "TOWN:" ) ) ignores |= towny;
+					else if ( Sentry.townyActive && ignore.contains( "NATION:" ) ) ignores |= towny;
+					else if ( Sentry.warActive && ignore.contains( "TEAM:" ) )  ignores |= war;
+					else if ( Sentry.clansActive && ignore.contains( "CLAN:" ) )  ignores |= clans;
 				}
+			// end of 2nd for loop
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1306,7 +1284,7 @@ public class SentryInstance {
 			
 			LivingEntity myEntity = getMyEntity();
 			
-			if ( myEntity == null ) myStatus = SentryStatus.isDEAD; // incase it dies in a way im not handling.....
+			if ( myEntity == null ) myStatus = SentryStatus.isDEAD; 
 
 			if ( UpdateWeapon() ) {
 				// ranged weapon equipped
@@ -1352,7 +1330,7 @@ public class SentryInstance {
 			}
 
 			if  (  myNPC.isSpawned() 
-				&& myEntity.isInsideVehicle() == false 
+				&& !myEntity.isInsideVehicle()
 				&& isMounted() 
 				&& isMyChunkLoaded() ) 
 						mount();
