@@ -1,10 +1,14 @@
+
 package net.aufdemrand.sentry;
 
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 import net.aufdemrand.denizen.BukkitScriptEntryData;
 import net.aufdemrand.denizen.Denizen;
@@ -19,6 +23,7 @@ import net.aufdemrand.denizencore.exceptions.InvalidArgumentsException;
 import net.aufdemrand.denizencore.scripts.ScriptEntry;
 import net.aufdemrand.denizencore.scripts.commands.AbstractCommand;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.trait.Owner;
 
 /**
  * Class containing:-
@@ -29,7 +34,7 @@ import net.citizensnpcs.api.npc.NPC;
  *  	<li>Sentry sentryPlugin</li>
  *  </ul></li>
  *  <li>static methods<ul>
- *  	<li>void {@link #setupDenizenHook()}</li>
+ *  	<li>void {@link #setupHooks()}</li>
  *  	<li>boolean {@link #sentryDeath()}</li>
  *  	<li>void {@link #denizenAction()}</li>
  *  </ul></li>
@@ -44,68 +49,86 @@ import net.citizensnpcs.api.npc.NPC;
  */
 public class DenizenHook {
 
-	static boolean denizenActive = false;
-	static Plugin denizenPlugin;
+	static Denizen denizenPlugin;
 	static Sentry sentryPlugin;
+	static boolean npcDeathTriggerActive = false;
+	static boolean npcDeathTriggerOwnerActive = false;
+	static boolean dieCommandActive = false;
+	static boolean liveCommandActive = false;
 	
-	@SuppressWarnings({ "synthetic-access" })
-	static void setupDenizenHook() {
+	DenizenHook() {}
+	
+	DenizenHook( Denizen denizen, Sentry sentry) {
+		denizenPlugin = denizen;
+		sentryPlugin = sentry;
+		
+		setupHooks( this );
+	}
+	
+	static void setupHooks() {
 
 		DenizenHook hook = new DenizenHook();
-
-		hook.new NpcdeathTriggerOwner().activate().as( "Npcdeathowner" );
-		hook.new NpcdeathTrigger().activate().as( "Npcdeath" );
-
-		hook.new DieCommand().activate().as( "die" ).withOptions( "die", 0 );
-		hook.new LiveCommand().activate().as( "live" ).withOptions( "live", 0 );
-
-		denizenActive  = true;
+		setupHooks( hook );
 	}
-
-	public static boolean sentryDeath( Set<Player> _myDamamgers, NPC npc ) {
 		
-		if ( denizenActive ) {
-
-			try {
-				if ( npc == null ) return false;
+	static void setupHooks( DenizenHook hook ) { 
+		
+		ConfigurationSection config = sentryPlugin.getConfig().getConfigurationSection( "DenizenIntegration" );
 				
-				Denizen denizen = (Denizen) denizenPlugin;
-	
-				NpcdeathTrigger npcd = denizen.getTriggerRegistry()
-											  .get( NpcdeathTrigger.class );
-								
-				NpcdeathTriggerOwner npcdo = denizen.getTriggerRegistry()
-													.get( NpcdeathTriggerOwner.class );
-	
-				boolean a = npcd.die( _myDamamgers, npc );
-				boolean c = npcdo.die( npc );
-				
-				return ( a || c );
-				
-			} catch ( Exception e ) {
-				e.printStackTrace();
-			}
+		if ( config.getBoolean( "NpcDeathTrigger", true ) ) {
+			hook.new NpcdeathTrigger().activate().as( "Npcdeath" );
+			Sentry.logger.log( Level.INFO, "NPCDeathTrigger registered sucessfully with Denizen" );
+			npcDeathTriggerActive = true;
 		}
-		return false;
+		if ( config.getBoolean( "NpcDeathTriggerOwner", true ) ) {
+			hook.new NpcdeathTriggerOwner().activate().as( "Npcdeathowner" );
+			Sentry.logger.log( Level.INFO, "NPCDeathTriggerOwner registered sucessfully with Denizen" );
+			npcDeathTriggerOwnerActive = true;
+		}
+		if ( config.getBoolean( "DieCommand", true ) ) {
+			hook.new DieCommand().activate().as( "die" ).withOptions( "die", 0 );
+			Sentry.logger.log( Level.INFO, "DIE command registered sucessfully with Denizen" );
+			dieCommandActive = true;
+		}
+		if ( config.getBoolean( "LiveCommand" ) ) {
+			hook.new LiveCommand().activate().as( "live" ).withOptions( "live", 0 );
+			Sentry.logger.log( Level.INFO, "LIVE command registered sucessfully with Denizen" );
+			liveCommandActive = true;
+		}
 	}
 
-	public static void denizenAction( NPC npc, String action, org.bukkit.OfflinePlayer player ) {
-	    
-		if ( denizenActive ) {
-		    
-			dNPC dnpc = dNPC.mirrorCitizensNPC( npc );
-			
-			if ( dnpc != null ) {
-				try {
-					dnpc.action( action, dPlayer.mirrorBukkitPlayer( player ) );
-				} catch ( Exception e ) {
-				    e.printStackTrace();
-				}
-			}
+	static boolean sentryDeath( Set<Player> _myDamamgers, NPC npc ) {
+		
+		if ( npc == null ) return false;
+		
+		boolean triggerA = false;
+		boolean triggerB = false;
+
+		if ( npcDeathTriggerActive ) {
+				triggerA = denizenPlugin.getTriggerRegistry()
+										.get( NpcdeathTrigger.class )
+										.die( _myDamamgers, npc );	
+		}
+		if ( npcDeathTriggerOwnerActive ) {
+				triggerB = denizenPlugin.getTriggerRegistry()
+						  				.get( NpcdeathTriggerOwner.class )
+						  				.die( npc );	
+		}
+		return ( triggerA || triggerB );	
+	}
+
+	public static void denizenAction( NPC npc, String action, OfflinePlayer player ) {
+	        
+		dNPC dnpc = dNPC.mirrorCitizensNPC( npc );
+		
+		if ( dnpc != null ) {
+				dnpc.action( action, dPlayer.mirrorBukkitPlayer( player ) );
 		}
 	}
 
 	private class LiveCommand extends AbstractCommand {
+
+		public LiveCommand() {}
 
 		@Override
 		public void execute( ScriptEntry theEntry ) throws CommandExecutionException {
@@ -114,11 +137,11 @@ public class DenizenHook {
 		    
 			LivingEntity ent = (LivingEntity) npc.getEntity();
 
-			SentryInstance inst = npc.getCitizen().getTrait( SentryTrait.class ).getInstance();
-
 			if ( ent != null ) {
 			    
 				if ( npc.getCitizen().hasTrait( SentryTrait.class ) ) {
+					
+					SentryInstance inst = npc.getCitizen().getTrait( SentryTrait.class ).getInstance();
 					
 					boolean deaggro = false;
 
@@ -133,7 +156,7 @@ public class DenizenHook {
 					dB.log( db );
 
 					if ( inst != null ) {
-						inst.myStatus = net.aufdemrand.sentry.SentryStatus.isLOOKING;
+						inst.myStatus = SentryStatus.isLOOKING;
 						
 						if ( deaggro ) inst.setTarget( null, false );
 					}
@@ -142,11 +165,12 @@ public class DenizenHook {
 				throw new CommandExecutionException( "Entity not found" );
 			}
 		}
-		
 		@Override public void parseArgs( ScriptEntry arg0 ) throws InvalidArgumentsException { }
 	}
 
 	private class DieCommand extends AbstractCommand {
+
+		public DieCommand() {}
 
 		@Override
 		public void execute( ScriptEntry theEntry ) throws CommandExecutionException {
@@ -159,7 +183,7 @@ public class DenizenHook {
 
 			if ( inst != null ) {
 				dB.log( "Goodbye, cruel world... " );
-				inst.die( false, org.bukkit.event.entity.EntityDamageEvent.DamageCause.CUSTOM );
+				inst.die( false, EntityDamageEvent.DamageCause.CUSTOM );
 			}
 			else if ( ent != null ) {
 				ent.remove();
@@ -168,7 +192,6 @@ public class DenizenHook {
 				throw new CommandExecutionException( "Entity not found" );
 			}
 		}
-
 		@Override public void parseArgs( ScriptEntry arg0 ) throws InvalidArgumentsException {}
 	}
 
@@ -179,27 +202,26 @@ public class DenizenHook {
 	 */
 	private class NpcdeathTriggerOwner extends AbstractTrigger {
 
+		public NpcdeathTriggerOwner() {}
+
 		public boolean die( NPC npc ) {
 
 			// Check if NPC has triggers and they are enabled.
 			if ( !npc.hasTrait( TriggerTrait.class ) 
-			  || !npc.getTrait( TriggerTrait.class ).isEnabled( name ) ) return false;
+			  || !npc.getTrait( TriggerTrait.class ).isEnabled( name ) ) 
+					return false;
+
+			dPlayer thePlayer = dPlayer.valueOf( npc.getTrait( Owner.class ).getOwner() );
+
+			if ( thePlayer == null ) 
+					return false;
 
 			dNPC theDenizen = dNPC.mirrorCitizensNPC( npc );
-
-			String owner = npc.getTrait( net.citizensnpcs.api.trait.trait.Owner.class ).getOwner();
-
-			dPlayer thePlayer = net.aufdemrand.denizen.objects.dPlayer.valueOf( owner );
-
-			if ( thePlayer == null ) {
-				return false;
-			}
 
 			InteractScriptContainer script = theDenizen.getInteractScriptQuietly( thePlayer, this.getClass() );
 
 			return	parse( theDenizen, thePlayer, script );
 		}
-		
 		@Override public void onEnable() {}
 	}
 	
@@ -209,6 +231,8 @@ public class DenizenHook {
 	 * Contains one method definition:- boolean die( Set<Player> _myDamagers, NPC npc )
 	 */
 	private class NpcdeathTrigger extends AbstractTrigger {
+
+		public NpcdeathTrigger() {}
 
 		public boolean die( Set<Player> _myDamamgers, NPC npc ) {
 
@@ -235,7 +259,6 @@ public class DenizenHook {
 			}
 			return foundOne;
 		}
-
 		@Override public void onEnable() {}
 	}
 }

@@ -34,7 +34,7 @@ public abstract class CommandHandler {
 	}
 	
 	/** The main method of this class, that parses the arguments and responds accordingly */
-	static boolean call(CommandSender player, String[] inargs, Sentry sentry ) {
+	static boolean call( CommandSender player, String[] inargs, Sentry sentry ) {
 		
 		// send short help message if no arguments provided.
 		if ( inargs.length < 1 ) {
@@ -345,12 +345,12 @@ public abstract class CommandHandler {
 			set = set ==null? !inst.isMounted() : set;
 
 			if (set){
-				player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now Mounted");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now Mounted");
 				inst.createMount();
 				inst.mount();
 			}
 			else {
-				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " is no longer Mounted");   // Talk to the player.
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " is no longer Mounted");
 				if(inst.isMounted()) Util.removeMount(inst.mountID);	
 				inst.mountID = -1;
 			}
@@ -385,11 +385,11 @@ public abstract class CommandHandler {
 				boolean ok = false;
 
 				if(!playersonly){
-					ok = inst.setGuardTarget(arg, false);
+					ok = inst.findGuardEntity(arg, false);
 				}
 
 				if(!localonly){
-					ok = inst.setGuardTarget(arg, true);
+					ok = inst.findGuardEntity(arg, true);
 				}
 
 				if (ok) {
@@ -407,7 +407,7 @@ public abstract class CommandHandler {
 				else{
 					player.sendMessage(ChatColor.GREEN +  thisNPC.getName() + " is now guarding its immediate area. " );
 				}
-				inst.setGuardTarget(null, false);
+				inst.findGuardEntity(null, false);
 
 			}
 			return true;
@@ -435,7 +435,7 @@ public abstract class CommandHandler {
 			if ( !checkCommandPerm( "sentry.stats.health", player) ) return true;
 
 			if (args.length <= 1) {
-				player.sendMessage(ChatColor.GOLD + thisNPC.getName() + "'s Health is " + inst.sentryHealth);
+				player.sendMessage(ChatColor.GOLD + thisNPC.getName() + "'s Health is " + inst.sentryMaxHealth);
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry health [#]   note: Typically players");
 				player.sendMessage(ChatColor.GOLD + "  have 20 HPs when fully healed");
 			}
@@ -445,7 +445,7 @@ public abstract class CommandHandler {
 				if (HPs <1)  HPs =1;
 
 				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " health set to " + HPs + ".");  
-				inst.sentryHealth = HPs;
+				inst.sentryMaxHealth = HPs;
 				inst.setHealth(HPs);
 			}
 			return true;
@@ -638,7 +638,7 @@ public abstract class CommandHandler {
 						player.sendMessage( ChatColor.YELLOW +thisNPC.getName() + "'s equipment cleared." ); 
 					}
 					else {
-						Material mat = Sentry.getMaterial( args[1] );
+						Material mat = Util.getMaterial( args[1] );
 						
 						if ( mat == null ) {
 							player.sendMessage(ChatColor.RED +" Could not equip: unknown item name"); 
@@ -709,7 +709,7 @@ public abstract class CommandHandler {
 
 			player.sendMessage( ChatColor.GOLD + "------- Sentry Info for (" + thisNPC.getId() + ") " 
 																			 + thisNPC.getName() + "------");
-			player.sendMessage( ChatColor.RED + "[HP]:" + ChatColor.WHITE + inst.getHealth() + "/" + inst.sentryHealth + 
+			player.sendMessage( ChatColor.RED + "[HP]:" + ChatColor.WHITE + inst.getHealth() + "/" + inst.sentryMaxHealth + 
 								ChatColor.RED + " [AP]:" + ChatColor.WHITE + inst.getArmor() +
 								ChatColor.RED + " [STR]:" + ChatColor.WHITE + inst.getStrength() + 
 								ChatColor.RED + " [SPD]:" + ChatColor.WHITE + new DecimalFormat( "#.0" ).format( inst.getSpeed() ) +
@@ -754,50 +754,51 @@ public abstract class CommandHandler {
 			}
 			else {
 				String arg = "";
-				for (i=2;i<args.length;i++){
+				for ( i = 2; i < args.length; i++ ) {
 					arg += " " + args[i];
 				}
 				arg = arg.trim();
 
-				if(arg.equalsIgnoreCase("nationenemies") && inst.myNPC.isSpawned()){
-					String natname = TownyUtil.getNationNameForLocation(inst.myNPC.getEntity().getLocation());
-					if (natname !=null) {
+				if ( arg.equalsIgnoreCase( "nationenemies" ) && inst.myNPC.isSpawned() ) {
+					String natname = TownyBridge.getNationNameForLocation( inst.myNPC.getEntity().getLocation() );
+					if ( natname != null ) {
 						arg += ":" + natname;
 					}
 					else 	{
-						player.sendMessage(ChatColor.RED + "Could not get Nation for this NPC's location");
+						player.sendMessage( ChatColor.RED + "Could not get Nation for this NPC's location" );
 						return true;
 					}
 				}
 
-				if (args[1].equals("add") && arg.length() > 0 && arg.split(":").length>1) {
+				if ( args[1].equals( "add" ) && arg.length() > 0 && arg.split(":").length > 1 ) {
 
-					if (!inst.containsTarget(arg.toUpperCase())) inst.validTargets.add(arg.toUpperCase());
+					if ( !inst.containsTarget( arg.toUpperCase() ) ) 
+							inst.validTargets.add( arg.toUpperCase() );
 					inst.processTargets();
-					inst.setTarget(null, false);
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Target added. Now targeting " + 	inst.validTargets.toString());
+					inst.clearTargets();
+					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Target added. Now targeting " + inst.validTargets.toString());
 					return true;
 				}
 
-				else if (args[1].equals("remove") && arg.length() > 0 && arg.split(":").length>1) {
+				else if ( args[1].equals( "remove" ) && arg.length() > 0 && arg.split(":").length > 1 ) {
 
-					inst.validTargets.remove(arg.toUpperCase());
+					inst.validTargets.remove( arg.toUpperCase() );
 					inst.processTargets();
-					inst.setTarget(null, false);
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets removed. Now targeting " + 	inst.validTargets.toString());
+					inst.clearTargets();
+					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets removed. Now targeting " + inst.validTargets.toString());
 					return true;
 				}
 
-				else if (args[1].equals("clear")) {
+				else if ( args[1].equals( "clear" ) ) {
 
 					inst.validTargets.clear();
 					inst.processTargets();
-					inst.setTarget(null, false);
+					inst.clearTargets();
 					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets cleared.");
 					return true;
 				}
 				
-				else if (args[1].equals("list")) {
+				else if ( args[1].equals( "list" ) ) {
 					player.sendMessage(ChatColor.GREEN + "Targets: " + 	inst.validTargets.toString());
 					return true;
 				}

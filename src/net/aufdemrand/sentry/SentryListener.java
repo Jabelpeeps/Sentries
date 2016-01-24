@@ -74,7 +74,7 @@ public class SentryListener implements Listener {
                     		// (e.g. it is possible killer references a projectile shot by a dispenser.)
 			}
 		}
-		SentryInstance sentry = plugin.getSentry( killer );
+		SentryInstance sentry = plugin.getSentryInstance( killer );
 
 		if ( sentry != null && !sentry.killsDropInventory ) {
 			event.getDrops().clear();
@@ -86,7 +86,7 @@ public class SentryListener implements Listener {
 	public void despawn( NPCDespawnEvent event ) {
 		// don't despawn active bodyguards on chunk unload
 		
-		SentryInstance sentry = plugin.getSentry( event.getNPC() );
+		SentryInstance sentry = plugin.getSentryInstance( event.getNPC() );
 		
 		if ( sentry != null 
 		  && event.getReason() == DespawnReason.CHUNK_UNLOAD 
@@ -98,7 +98,7 @@ public class SentryListener implements Listener {
 	@EventHandler( priority = EventPriority.HIGHEST )
 	public void entteleportevent( EntityTeleportEvent event ) {
 		
-		SentryInstance sentry = plugin.getSentry( event.getEntity() );
+		SentryInstance sentry = plugin.getSentryInstance( event.getEntity() );
 		
 		if ( sentry != null 
 		  && sentry.epCount != 0 
@@ -110,7 +110,7 @@ public class SentryListener implements Listener {
 	@EventHandler( priority = EventPriority.HIGHEST )
 	public void entteleportevent( PlayerTeleportEvent event ) {
 		
-		SentryInstance sentry = plugin.getSentry( event.getPlayer() );
+		SentryInstance sentry = plugin.getSentryInstance( event.getPlayer() );
 		
 		if ( sentry != null 
 		  && sentry.epCount != 0 
@@ -124,36 +124,37 @@ public class SentryListener implements Listener {
 	public void projectilehit( ProjectileHitEvent event ) {
 		
 		Projectile projectile = event.getEntity();
+		Entity shooter = (Entity) projectile.getShooter();
+		SentryInstance sentry = plugin.getSentryInstance( shooter );
 		
 		if ( projectile instanceof EnderPearl 
-		  && projectile.getShooter() instanceof Entity ) {
+		  && shooter instanceof Entity ) {  // why do we need to check for this?
 		  	
-			SentryInstance sentry = plugin.getSentry( (Entity) projectile.getShooter() );
-			
 			if ( sentry != null ) {
 				
 				sentry.epCount--;
 				if ( sentry.epCount < 0 ) sentry.epCount = 0;
 				
 				projectile.getLocation()
-					   .getWorld()
-					   .playEffect( event.getEntity().getLocation()
-				     		      , Effect.ENDER_SIGNAL, 1, 100 );
+					   	  .getWorld()
+					      .playEffect( event.getEntity().getLocation(),
+					    		  	   Effect.ENDER_SIGNAL,
+					    		  	   1, 
+					    		  	   100 );
 				//ender pearl from a sentry
 			}
 			return;
 		}
 		
 		if ( projectile instanceof SmallFireball 
-		  && projectile.getShooter() instanceof Entity ) {
+		  && shooter instanceof Entity ) {   // why do we need to check for this?
 			
-			SentryInstance sentry = plugin.getSentry( (Entity) projectile.getShooter() );
-
 			if ( sentry != null && sentry.isPyromancer1() ) {
 
 				final Block block = projectile.getLocation().getBlock();
 				
 				final Runnable blockDamage = new Runnable() {
+					
 					@Override public void run(){
 						
 						for ( BlockFace face : BlockFace.values() ) {
@@ -182,7 +183,7 @@ public class SentryListener implements Listener {
 
 		if ( event instanceof EntityDamageByEntityEvent ) return;
 
-		SentryInstance inst = plugin.getSentry( event.getEntity() );
+		SentryInstance inst = plugin.getSentryInstance( event.getEntity() );
 		
 		if ( inst != null ) {
 
@@ -197,14 +198,17 @@ public class SentryListener implements Listener {
 			case LIGHTNING:
 				if ( !inst.isStormcaller() ) 
 					inst.onEnvironmentDamage( event );
+				
 				break;
 			case FIRE: 	case FIRE_TICK:
 				if ( !inst.isPyromancer() && !inst.isStormcaller() ) 
 					inst.onEnvironmentDamage( event );
+				
 				break;
 			case POISON:
 				if ( !inst.isWitchDoctor() ) 
 					inst.onEnvironmentDamage( event );
+				
 				break;
 			case FALL:
 				break;
@@ -230,11 +234,11 @@ public class SentryListener implements Listener {
 			ProjectileSource source = ((Projectile) damager).getShooter();
 			
 			if ( source instanceof Entity )
-				damager = (Entity) ((Projectile) damager).getShooter();
+				damager = (Entity) source;
 		}
 
-		SentryInstance instDamager = plugin.getSentry( damager );
-		SentryInstance instVictim = plugin.getSentry( victim );
+		SentryInstance instDamager = plugin.getSentryInstance( damager );
+		SentryInstance instVictim = plugin.getSentryInstance( victim );
 
 		// plugin.debug( "start: from : " + damager + " to " + victim + " cancelled " + event.isCancelled()
 		//			+ " damage " + event.getDamage() + " cause " + event.getCause() );
@@ -271,7 +275,9 @@ public class SentryListener implements Listener {
 
 			// cancel if invulnerable non-sentry npc
 			if ( instVictim == null ) {
+				
 				NPC npc = CitizensAPI.getNPCRegistry().getNPC( victim );
+				
 				if ( npc != null ) {
 					event.setCancelled( npc.data()
 							     		   .get( NPC.DEFAULT_PROTECTED_METADATA, true ) );
@@ -285,22 +291,23 @@ public class SentryListener implements Listener {
 
 			// apply potion effects
 			if ( instDamager.weaponSpecialEffects != null 
-			  && event.isCancelled() == false ) {
-				( (LivingEntity) victim ).addPotionEffects( instDamager.weaponSpecialEffects );
+			  && !event.isCancelled() ) {
+					((LivingEntity) victim).addPotionEffects( instDamager.weaponSpecialEffects );
 			}
 			
 			// warlock 1 should do no direct damage, except to other sentries which take no fall damage.
-			if ( instDamager.isWarlock1() ) {
-				if ( event.isCancelled() == false ) {
-					if ( instVictim == null ) event.setCancelled( true ); 
+			if ( instDamager.isWarlock1() && !event.isCancelled() ) {
+					
+				if ( instVictim == null ) 
+					event.setCancelled( true ); 
 
-					double h = instDamager.getStrength() + 3;
-					double v = 7.7 * Math.sqrt( h ) + 0.2;
-					if ( h <= 3 ) v -= 2;
-					if ( v > 150 ) v = 150;
+				double h = instDamager.getStrength() + 3;
+				double v = 7.7 * Math.sqrt( h ) + 0.2;
+				
+				if ( h <= 3 ) v -= 2;
+				if ( v > 150 ) v = 150;
 
-					victim.setVelocity( new Vector( 0, v / 20, 0 ) );
-				}
+				victim.setVelocity( new Vector( 0, v / 20, 0 ) );
 			}
 		}
 		
@@ -333,7 +340,7 @@ public class SentryListener implements Listener {
 					event.setCancelled( true );
 
 			if ( damager != null ) {
-				NPC npc = net.citizensnpcs.api.CitizensAPI.getNPCRegistry().getNPC( damager );
+				NPC npc = CitizensAPI.getNPCRegistry().getNPC( damager );
 				
 				if ( npc != null 
 				  && npc.hasTrait( SentryTrait.class ) 
@@ -348,7 +355,7 @@ public class SentryListener implements Listener {
 			}
 
 			// process event
-			if ( !event.isCancelled() ){
+			if ( !event.isCancelled() ) {
 				ok = true;
 				instVictim.onDamage( event );
 			}
@@ -358,12 +365,12 @@ public class SentryListener implements Listener {
 		}
 
 		//process this event on each sentry to check for events that need a response.
-		if ( ( event.isCancelled() == false || ok ) 
+		if ( ( !event.isCancelled() || ok ) 
 		  && damager != victim 
-		  && event.getDamage() > 0 ){
+		  && event.getDamage() > 0 ) {
 		  	
 			for ( NPC npc : CitizensAPI.getNPCRegistry() ) {
-				SentryInstance inst = plugin.getSentry( npc );
+				SentryInstance inst = plugin.getSentryInstance( npc );
 
 				if ( inst == null 
 				  || !npc.isSpawned() 
@@ -383,20 +390,21 @@ public class SentryListener implements Listener {
 				  	
 					if ( damager == inst.guardEntity ) 
 						event.setCancelled( true );
-					else if ( inst.iWillRetaliate 
-							&& damager instanceof LivingEntity )  
+					else if ( inst.iWillRetaliate && damager instanceof LivingEntity )  
 						inst.setTarget( (LivingEntity) damager, true );
 				}
 
-				if ( ( inst.hasTargetType( 16 )  
-				    && inst.myStatus == SentryStatus.isLOOKING 
-				    && damager instanceof Player 
-				    && CitizensAPI.getNPCRegistry().isNPC( damager ) == false ) 
+				if ( inst.hasTargetType( 16 )  
+				  && inst.myStatus == SentryStatus.isLOOKING 
+				  && damager instanceof Player 
+				  && !CitizensAPI.getNPCRegistry().isNPC( damager ) 
+						
 				// is the event within range of the sentry?
 				  && ( npc.getEntity().getLocation()
 						  			  .distance( victim.getLocation() ) <= inst.sentryRange 
 				    || npc.getEntity().getLocation()
 					  				  .distance( damager.getLocation() ) <= inst.sentryRange ) 
+				  
 				// is it too dark for the sentry to see?
 				  && ( inst.nightVision >= damager.getLocation()
 								  				  .getBlock()
@@ -404,19 +412,25 @@ public class SentryListener implements Listener {
 				    || inst.nightVision  >= victim.getLocation()
 				    				  			  .getBlock()
 				    				  			  .getLightLevel() ) 
+				  
 				// does the sentry have line-of-sight?
 				  && ( inst.hasLOS( damager ) 
 				    || inst.hasLOS( victim ) )
+				  
 				// does the event correspond to configured triggers?
 				  && ( ( !(victim instanceof Player) 
 				      && inst.containsTarget( "event:pve" ) )
+						  
 				    || ( victim instanceof Player 
-				      && CitizensAPI.getNPCRegistry().isNPC( victim ) == false 
+				      && !CitizensAPI.getNPCRegistry().isNPC( victim )
 				      && inst.containsTarget( "event:pvp" ) ) 
-				    || ( CitizensAPI.getNPCRegistry().isNPC( victim ) == true 
+				    
+				    || ( CitizensAPI.getNPCRegistry().isNPC( victim ) 
 				      && inst.containsTarget( "event:pvnpc" ) ) 
+				    
 				    || ( instVictim != null 
 				      && inst.containsTarget( "event:pvsentry" ) ) )
+				  
 				// is the damager on the sentry's ignore list?
 				  && !inst.isIgnored( (LivingEntity) damager ) ) {
 				  	// phew! we made it! the event is a valid trigger. Attack the aggressor!
@@ -436,7 +450,7 @@ public class SentryListener implements Listener {
 		//if the mount dies carry aggression over.
 		for ( NPC each : CitizensAPI.getNPCRegistry() ) {
 			
-			final SentryInstance inst = plugin.getSentry( each );
+			final SentryInstance inst = plugin.getSentryInstance( each );
 			if ( inst == null 
 			  || !each.isSpawned() 
 			  || !inst.isMounted() ) 
@@ -492,7 +506,7 @@ public class SentryListener implements Listener {
 	public void onNPCRightClick( NPCRightClickEvent event ) {
 		
 		// get a sentry instance if one is attached to the npc.
-		SentryInstance inst = plugin.getSentry( event.getNPC() );
+		SentryInstance inst = plugin.getSentryInstance( event.getNPC() );
 		
 		// stop here if not.
 		if ( inst == null ) return;

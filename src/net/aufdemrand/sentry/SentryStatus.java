@@ -1,57 +1,57 @@
 package net.aufdemrand.sentry;
 
-import org.bukkit.entity.LivingEntity;
+import net.citizensnpcs.api.npc.NPC;
 
 enum SentryStatus {
 	isDEAD {
 		@Override
-		LivingEntity update() {
-			// TODO Auto-generated method stub
-			return null;
+		boolean update( NPC npc ) {
+			// TODO add code to control respawning
+			return false;
 		}
 	},
 	isDYING {
 		@Override
-		LivingEntity update() {
-			// TODO Auto-generated method stub
-			return null;
+		boolean update( NPC npc ) {
+			// TODO add code to manage drops and other cleaning up tasks.
+			return false;
 		}
 	},
 	isHOSTILE {
 		@Override
-		LivingEntity update() {
+		boolean update( NPC npc ) {
 			// TODO Auto-generated method stub
-			return null;
+			return false;
 		}
 	},
 	isLOOKING {
 		@Override
-		LivingEntity update() {
+		boolean update( NPC npc ) {
 			// TODO Auto-generated method stub
-			return null;
+			return false;
 		}
 	},
 	isRETALIATING {
 		@Override
-		LivingEntity update() {
+		boolean update( NPC npc ) {
 			// TODO Auto-generated method stub
-			return null;
+			return false;
 		}
 	},
 	isSTUCK {
 		@Override
-		LivingEntity update() {
+		boolean update( NPC npc ) {
 			// TODO Auto-generated method stub
-			return null;
+			return false;
 		}
 	},
 	isWWAITING {
 		@Override
-		LivingEntity update() {
+		boolean update( NPC npc ) {
 			// TODO Auto-generated method stub
-			return null;
+			return false;
 		}
 	};
 	
-	abstract LivingEntity update();
+	abstract boolean update( NPC npc );
 }

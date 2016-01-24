@@ -1,6 +1,10 @@
 package net.aufdemrand.sentry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
@@ -10,7 +14,34 @@ import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
-public class TownyUtil {
+public class TownyBridge  implements PluginBridge {
+	
+	Map<SentryInstance, String> friends = new HashMap<SentryInstance, String>();
+	Map<SentryInstance, String> enemies = new HashMap<SentryInstance, String>();
+	
+	TownyBridge() {}
+	
+	@Override
+	public String getActivationMessage() {
+		return "Registered with Towny sucessfully, the TOWN: and NATION: targets will function";
+	}
+
+	@Override
+	public boolean isTarget( LivingEntity entity, SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isIgnored( LivingEntity entity, SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void refreshLists() {
+		// TODO Auto-generated method stub
+	}
 	
 	static String[] getResidentTownyInfo( Player player ) {
 		
@@ -36,8 +67,7 @@ public class TownyUtil {
 	
 	static boolean isNationEnemy( String Nation1, String Nation2 ) {
 		
-		if  (  Sentry.townyActive 
-			&& !Nation1.equalsIgnoreCase( Nation2 ) 
+		if  (  !Nation1.equalsIgnoreCase( Nation2 ) 
 			&& TownyUniverse.getDataSource().hasNation( Nation1 )
 			&& TownyUniverse.getDataSource().hasNation( Nation2 ) ) {
 			
@@ -55,18 +85,16 @@ public class TownyUtil {
 	
 	static String getNationNameForLocation( Location loc ) {
 		
-		if ( Sentry.townyActive ) {
-			
-			TownBlock townBlock = TownyUniverse.getTownBlock( loc );
-			
-			try {	
-				if ( townBlock != null 
-				  && townBlock.getTown().hasNation() ) {
-					
-					return townBlock.getTown().getNation().getName();
-				}
-			} catch ( NotRegisteredException e ) { }
-		}
+		TownBlock townBlock = TownyUniverse.getTownBlock( loc );
+		
+		try {	
+			if ( townBlock != null 
+			  && townBlock.getTown().hasNation() ) {
+				
+				return townBlock.getTown().getNation().getName();
+			}
+		} catch ( NotRegisteredException e ) { }
+	
 		return null;
 	}
 }

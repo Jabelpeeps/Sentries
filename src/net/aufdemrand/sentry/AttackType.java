@@ -94,7 +94,7 @@ enum AttackType {
 			for ( AttackType attack : values() ) {
 				if ( attack == brawler ) continue;
 				
-				attack.weapon = Sentry.getMaterial( config.getString( "AttackTypes." + attack.name ) );
+				attack.weapon = Util.getMaterial( config.getString( "AttackTypes." + attack.name ) );
 			}
 			updateMap();
 		}

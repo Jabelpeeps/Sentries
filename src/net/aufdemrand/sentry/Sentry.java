@@ -19,23 +19,21 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.Team;
 
+import net.aufdemrand.denizen.Denizen;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import net.milkbowl.vault.permission.Permission;
-import net.sacredlabyrinth.phaed.simpleclans.Clan;
-import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
 
 public class Sentry extends JavaPlugin {
@@ -48,14 +46,10 @@ public class Sentry extends JavaPlugin {
 
 	static Permission perms = null;
 	
-	public boolean groupsChecked = false;
+//	public boolean groupsChecked = false;
 	
-	// Denizen, Factions, Towny, War & SimpleClans Support
-	static boolean factionsActive = false;
-	static boolean townyActive = false;
-	static boolean warActive = false;
-	static boolean clansActive = false;
 	static boolean denizenActive = false;
+	static Map<String, PluginBridge> activePlugins = new HashMap<String, PluginBridge>();
 	
 	// Lists of various armour items that will be accepted 
 //	public List<Integer> boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
@@ -107,11 +101,15 @@ public class Sentry extends JavaPlugin {
 	PluginManager pluginManager = getServer().getPluginManager();
 	
 	static Logger logger;
-	
+	static Plugin sentryPlugin;
+	static DenizenHook denizenHook;
 	
 	@Override
 	public void onEnable() {
 		
+		if ( sentryPlugin != null ) return;
+		
+		sentryPlugin = this;		
 		logger = getLogger();
 
 		if ( !checkPlugin( "Citizens" ) ) {			
@@ -119,50 +117,83 @@ public class Sentry extends JavaPlugin {
 			pluginManager.disablePlugin( this );	
 			return;
 		}	
-
-		try {
-			if ( checkPlugin( "Denizen" ) ) {
-				
-				String vers = pluginManager.getPlugin( "Denizen" ).getDescription().getVersion();
-				if ( vers.startsWith( "0.7" ) || vers.startsWith( "0.8" ) ) {
-					logger.log( Level.WARNING, "Sentry is not compatible with Denizen .7 or .8" );
-				}
-				else if (  vers.startsWith("0.9" ) ) {
-					DenizenHook.sentryPlugin = this;
-					DenizenHook.denizenPlugin = pluginManager.getPlugin( "Denizen" );
-					DenizenHook.setupDenizenHook();
-					denizenActive = true;
-					logger.log( Level.INFO, "NPCDeath Triggers and DIE/LIVE command registered sucessfully with Denizen" );
-				}
-				else {
-					logger.log( Level.WARNING, "Unknown version of Denizen, Sentry was unable to register with it." );
-				}
+		getServer();
+//		try {
+		
+		if ( checkPlugin( "Denizen" ) ) {
+			
+			String vers = pluginManager.getPlugin( "Denizen" ).getDescription().getVersion();
+			
+			if ( vers.startsWith( "0.7" ) || vers.startsWith( "0.8" ) ) {
+				logger.log( Level.WARNING, "Sentry is not compatible with Denizen .7 or .8" );
 			}
-		} catch ( NoClassDefFoundError e ) {
-			logger.log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
-		} catch ( Exception e ) {
-			logger.log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
-		}
-
-		if ( checkPlugin( "Towny" ) ) {
-			logger.log( Level.INFO, "Registered with Towny sucessfully. the TOWN: and NATION: targets will function" );
-			townyActive = true;
-		}
-
-		if ( checkPlugin( "Factions" ) ) {
-			logger.log( Level.INFO, "Registered with Factions sucessfully. the FACTION: target will function" );
-			factionsActive = true;
+			else if ( vers.startsWith( "0.9" ) ) {
+				
+				denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( "Denizen"), this );
+				
+//					DenizenHook.sentryPlugin = this;
+//					DenizenHook.denizenPlugin = pluginManager.getPlugin( "Denizen" );
+//					DenizenHook.setupHooks();
+				
+				denizenActive = DenizenHook.npcDeathTriggerActive || DenizenHook.npcDeathTriggerOwnerActive
+							 	  || DenizenHook.dieCommandActive || DenizenHook.liveCommandActive;
+			}
+			else {
+				logger.log( Level.WARNING, "Unknown version of Denizen, Sentry was unable to register with it." );
+			}
 		}
 		
-		if ( checkPlugin( "War" ) ) {
-			logger.log( Level.INFO, "Registered with War sucessfully. The TEAM: target will function" );
-			warActive = true;
-		}
+//		} catch ( NoClassDefFoundError e ) {
+//			logger.log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
+//		} catch ( Exception e ) {
+//			logger.log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
+//		}
 
-		if ( checkPlugin( "SimpleClans" ) ) {
-			logger.log( Level.INFO,"Registered with SimpleClans sucessfully. The CLAN: target will function" );
-			clansActive = true;
+		for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
+			
+			if ( !checkPlugin( each ) ) continue;
+			
+			PluginBridge bridge = null;
+			
+			if ( Util.SCORE.equals( each ) ) {
+				bridge = new ScoreboardTeamsBridge();
+			}
+			else {
+				try {
+					@SuppressWarnings("unchecked")
+					Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class.forName( each + "Bridge" );
+					
+					bridge = clazz.newInstance();
+				} 
+				catch ( ClassNotFoundException e ) { e.printStackTrace(); } 
+				catch ( InstantiationException e ) { e.printStackTrace(); } 
+				catch ( IllegalAccessException e ) { e.printStackTrace(); }
+			}
+			if ( bridge == null ) continue;
+			
+			activePlugins.put( each, bridge );
+			logger.log( Level.INFO, bridge.getActivationMessage() );
 		}
+		
+//		if ( checkPlugin( "Towny" ) ) {
+//			logger.log( Level.INFO, "Registered with Towny sucessfully, the TOWN: and NATION: targets will function" );
+//			townyActive = true;
+//		}
+//
+//		if ( checkPlugin( "Factions" ) ) {
+//			logger.log( Level.INFO, "Registered with Factions sucessfully, the FACTION: target will function" );
+//			factionsActive = true;
+//		}
+//		
+//		if ( checkPlugin( "War" ) ) {
+//			logger.log( Level.INFO, "Registered with War sucessfully, The WARTEAM: target will function" );
+//			warActive = true;
+//		}
+//
+//		if ( checkPlugin( "SimpleClans" ) ) {
+//			logger.log( Level.INFO, "Registered with SimpleClans sucessfully, The CLAN: target will function" );
+//			simpleClansActive = true;
+//		}
 
 		CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
@@ -180,8 +211,7 @@ public class Sentry extends JavaPlugin {
 					}
 				}
 		};
-		
-		getServer().getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40,  20 * 120 );
+		getServer().getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
 
 		reloadMyConfig();
 	}
@@ -231,13 +261,16 @@ public class Sentry extends JavaPlugin {
 		if ( debug ) logger.info( s );
 	}
 
-	public void doGroups() {
+	public void registerWithVault() {
+		
 		if ( !setupPermissions() ) 
 			logger.log( Level.WARNING,"Could not register with Vault!  the GROUP target will not function." );
 		else {
 			try {
 				String[] groups = perms.getGroups();
+				
 				if ( groups.length == 0 ) {
+					
 					logger.log( Level.WARNING,"No permission groups found.  the GROUP target will not function.");
 					perms = null;
 				}
@@ -249,7 +282,7 @@ public class Sentry extends JavaPlugin {
 				perms = null;
 			}	
 		}
-		groupsChecked = true;
+//		groupsChecked = true;
 	}
 
 	// only called from CommandHandler.  Maybe it should be moved there.
@@ -265,9 +298,7 @@ public class Sentry extends JavaPlugin {
 				
 				if ( equipment.get( i ) != null 
 				  && equipment.get( i ).getType() != Material.AIR ) {
-	//				try {
 						equipment.set( i , null );
-	//				} catch ( Exception e ) { }   
 				}
 			}
 			return true;
@@ -282,76 +313,25 @@ public class Sentry extends JavaPlugin {
 		else if ( leggings.contains( type ) ) slot = 3;
 		else if ( boots.contains( type ) ) slot = 4;	
 	
-	// Removed as unnecessary, ItemStack defaults to a stack size of 1 
-	//	@SuppressWarnings("null")
-	//	ItemStack clone = newEquipment.clone();
-	//	clone.setAmount( 1 );
+		equipment.set( slot, newEquipment );
 
-	//  Why do we have to check for exceptions here? 
-		
-	//	try {
-			equipment.set( slot, newEquipment );
-	//	} catch ( Exception e ) {
-	//		return false;
-	//	}
 		return true;	
 	}
-
-	public  String getClan( Player player ) {
-		if ( clansActive ) {
-			try {
-				Clan clan = SimpleClans.getInstance().getClanManager().getClanByPlayerName( player.getName() );
-				
-				if ( clan != null ) 
-					return clan.getName();
-				
-			} catch ( Exception e ) {
-				logger.info( "Error getting Clan " + e.getMessage() );
-			}
-		}
-		return null;
-	}
 	
-	/** New method with this name, now re-written to return Material values from the official enum. */
-    static Material getMaterial( String materialName ) {
-		
-		if ( materialName == null ) return null;
-
-		String[] args = materialName.toUpperCase().split( ":" );
-
-		Material material = Material.getMaterial( args[0] );
-
-		if ( material == null ) 
-			throw new RuntimeException("Invalid Material name:" + materialName + ". Please check config.yml carefully.");
-		
-		return material;
-	}
-	
-	public SentryInstance getSentry( Entity ent ) {
+	public SentryInstance getSentryInstance( Entity ent ) {
 		
 		if  (  ent != null 
 			&& ent instanceof LivingEntity ) {
-				return getSentry( CitizensAPI.getNPCRegistry().getNPC( ent ) );
+				return getSentryInstance( CitizensAPI.getNPCRegistry().getNPC( ent ) );
 		}			
 		return null;
 	}
 
-	public SentryInstance getSentry( NPC npc ) {
+	public SentryInstance getSentryInstance( NPC npc ) {
 		
 		if ( npc != null 
 		  && npc.hasTrait( SentryTrait.class ) ) {
 				return npc.getTrait( SentryTrait.class ).getInstance();
-		}
-		return null;
-	}
-
-	// deprecated call to "getPlayerTeam" replaced
-	public String getMCTeamName( Player player ) {
-		
-		Team team = getServer().getScoreboardManager().getMainScoreboard().getEntryTeam( player.getName() );
-		
-		if ( team != null ) {
-			return team.getName();
 		}
 		return null;
 	}
@@ -379,9 +359,8 @@ public class Sentry extends JavaPlugin {
 				
 				set.clear();
 			
-				for ( String each : strings ) {
-					set.add( getMaterial( each.trim() ) );
-				}
+				for ( String each : strings ) 
+					set.add( Util.getMaterial( each.trim() ) );
 			}
 		}
 	}
@@ -400,7 +379,7 @@ public class Sentry extends JavaPlugin {
 				val = Double.parseDouble( args[1] );
 			} catch (Exception e) { }
 
-			Material item = getMaterial( args[0] );
+			Material item = Util.getMaterial( args[0] );
 
 			if ( item != null 
 			  && val != 0 
@@ -412,7 +391,7 @@ public class Sentry extends JavaPlugin {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Object> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
+	private <T> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
 		
 		map.clear();
 		map.putAll( (Map<String, T>) config.getConfigurationSection( node ).getValues( false ) );
@@ -426,7 +405,7 @@ public class Sentry extends JavaPlugin {
 
 			if ( args.length < 2 ) continue;
 
-			Material item  = getMaterial( args[0] );
+			Material item  = Util.getMaterial( args[0] );
 			
 			if ( item == null ) continue;
 
@@ -436,12 +415,11 @@ public class Sentry extends JavaPlugin {
 				
 				PotionEffect val = getPotionEffect( string );
 				
-				if ( val != null ) list.add( val );
+				if ( val != null ) 
+					list.add( val );
 			}
-			if ( !list.isEmpty() ) {
-				
+			if ( !list.isEmpty() )
 				map.put( item, list );
-			}
 		}
 	}
 
@@ -483,7 +461,7 @@ public class Sentry extends JavaPlugin {
 	 */
 	private boolean checkPlugin( String name ) {
 		if 	(  pluginManager.getPlugin( name ) != null 
-			&& pluginManager.getPlugin( name ).isEnabled() == true ) {
+			&& pluginManager.getPlugin( name ).isEnabled() ) {
 				return true;
 		}
 		logger.log( Level.INFO, "Could not find or register with " + name );
@@ -513,6 +491,10 @@ public class Sentry extends JavaPlugin {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public static Plugin getSentry() {
+		return sentryPlugin;
 	}
 }
 

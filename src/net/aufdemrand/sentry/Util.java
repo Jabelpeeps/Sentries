@@ -17,8 +17,15 @@ import net.minecraft.server.v1_8_R3.LocaleI18n;
  *  An abstract collection of useful static methods.
  */
 public abstract class Util {
+	
+	public static final String TOWNY = "Towny";
+	public static final String FACTIONS = "Factions";
+	public static final String WAR = "War";
+	public static final String CLANS = "SimpleClans";
+	public static final String SCORE = "ScoreboardTeams";
+	
 	/**
-	 * This class appears to be tracing the source of a projectile travelling between two LivingEntity objects.
+	 * This method appears to be tracing the source of a projectile travelling between two LivingEntity objects.
 	 * 
 	 * @param LivingEntity from
 	 * @param LivingEntity to 
@@ -33,7 +40,19 @@ public abstract class Util {
 
 		return loco.add( victor );
 	}
-
+	
+	public static Vector normalizeVector ( Vector victor ) {
+	    
+		double mag = Math.sqrt(   Math.pow( victor.getX(), 2 ) 
+		                        + Math.pow( victor.getY(), 2 ) 
+		                        + Math.pow( victor.getZ(), 2 ) ) ;
+		                        
+		if ( mag != 0 ) 
+			return victor.multiply( 1 / mag );
+		
+		return victor.multiply( 0 );
+	}
+	
 	public static Location leadLocation (Location loc, Vector victor, double t) {
 
 		return loc.clone().add( victor.clone().multiply( t ) );
@@ -82,21 +101,6 @@ public abstract class Util {
 			}
 		}
 		return false;
-	}
-    /**
-     * Returns the name of the material or item matching the supplied ID, or "Hand".
-     * 
-     * @param int MatID the ID to be named.
-     */
-	static String getLocalItemName ( Material mat ) {
-		
-		if ( mat == null || mat == Material.AIR ) 
-		    return  "Hand";
-		
-		if ( mat.isBlock() )
-			return mat.name();
-		else
-		    return LocaleI18n.get( mat.name() + ".name" );
 	}
 
 	public static double hangtime ( double launchAngle, double v, double elev, double g ) {
@@ -161,18 +165,22 @@ public abstract class Util {
 		
 		return input;
 	}
-
-	public static Vector normalizeVector ( Vector victor ) {
-	    
-		double mag = Math.sqrt(   Math.pow( victor.getX(), 2 ) 
-		                        + Math.pow( victor.getY(), 2 ) 
-		                        + Math.pow( victor.getZ(), 2 ) ) ;
-		                        
-		if ( mag != 0 ) 
-			return victor.multiply( 1 / mag );
+	/**
+     * Returns the name of the material or item matching the supplied ID, or "Hand".
+     * 
+     * @param int MatID the ID to be named.
+     */
+	static String getLocalItemName ( Material mat ) {
 		
-		return victor.multiply( 0 );
+		if ( mat == null || mat == Material.AIR ) 
+		    return  "Hand";
+		
+		if ( mat.isBlock() )
+			return mat.name();
+		else
+		    return LocaleI18n.get( mat.name() + ".name" );
 	}
+
 	/**
 	 * Convenience method to convert String values to int's.<p>
 	 * It catches any NumberFormatExceptions and returns -1.
@@ -187,4 +195,20 @@ public abstract class Util {
 			return -1;
 		}
 	}
+
+	/** New method with this name, now re-written to return Material values from the official enum. */
+	static Material getMaterial( String materialName ) {
+		
+		if ( materialName == null ) return null;
+	
+		String[] args = materialName.toUpperCase().split( ":" );
+	
+		Material material = Material.getMaterial( args[0] );
+	
+		if ( material == null ) 
+			throw new RuntimeException("Invalid Material name:" + materialName + ". Please check config.yml carefully.");
+		
+		return material;
+	}
+	
 }

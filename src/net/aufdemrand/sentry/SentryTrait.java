@@ -70,7 +70,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		
 		inst.sentrySpeed 	= (float) key.getDouble( "Speed", sentry.defaultDoubles.get( "Speed" ) );
 		inst.sentryWeight 	= key.getDouble( "Weight", sentry.defaultDoubles.get( "Weight" ) );
-		inst.sentryHealth 	= key.getDouble( "Health", sentry.defaultDoubles.get( "Health" ) );
+		inst.sentryMaxHealth 	= key.getDouble( "Health", sentry.defaultDoubles.get( "Health" ) );
 		inst.attackRate 	= key.getDouble( "AttackRate", sentry.defaultDoubles.get( "AttackRate" ) );
 		inst.healRate 		= key.getDouble( "HealRate", sentry.defaultDoubles.get( "HealRate" ) );
 		
@@ -138,13 +138,13 @@ public class SentryTrait extends Trait implements Toggleable {
 
 		if ( !inst.loaded ) {
 			try {
-				
 				load( new MemoryDataKey() );
 				
 			} catch ( NPCLoadException e ) {}
 		}
 
-		if ( !sentry.groupsChecked ) sentry.doGroups(); // lazy checking for lazy vault.
+	// Is it really necessary to have this here?
+	//	if ( !sentry.groupsChecked ) sentry.registerWithVault(); // lazy checking for lazy vault.
 
 		inst.initialize();
 	}
@@ -207,7 +207,7 @@ public class SentryTrait extends Trait implements Toggleable {
 			key.setDouble( "Spawn.pitch", inst.spawnLocation.getPitch() );
 		}
 
-		key.setDouble( "Health", inst.sentryHealth );
+		key.setDouble( "Health", inst.sentryMaxHealth );
 		key.setInt( "Range", inst.sentryRange );
 		key.setInt( "RespawnDelay", inst.respawnDelay );
 		key.setDouble( "Speed", inst.sentrySpeed );
