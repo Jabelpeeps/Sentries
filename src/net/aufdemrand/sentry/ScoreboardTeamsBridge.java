@@ -15,6 +15,11 @@ public class ScoreboardTeamsBridge implements PluginBridge {
 	ScoreboardTeamsBridge() {}
 	
 	@Override
+	public boolean activate() {
+		return true;
+	}
+	
+	@Override
 	public String getActivationMessage() {
 		return "Minecraft scoreboard teams target is active, the TEAM: target will function";
 	}
@@ -32,10 +37,16 @@ public class ScoreboardTeamsBridge implements PluginBridge {
 	}
 	
 	@Override
-	public void refreshLists() {
+	public void refreshAllLists() {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void refreshLists( SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public static String getMCTeamName( Player player ) {
 		
 		Team team = Sentry.getSentry()

@@ -18,11 +18,17 @@ import net.minecraft.server.v1_8_R3.LocaleI18n;
  */
 public abstract class Util {
 	
+	/*
+	 * Some strings to hold the names of external plugins in one location (in case of future changes to the names.)
+	 */
 	public static final String TOWNY = "Towny";
 	public static final String FACTIONS = "Factions";
 	public static final String WAR = "War";
 	public static final String CLANS = "SimpleClans";
 	public static final String SCORE = "ScoreboardTeams";
+	public static final String VAULT = "Vault";
+	public static final String CITIZENS = "Citizens";
+	public static final String DENIZEN = "Denizen";
 	
 	/**
 	 * This method appears to be tracing the source of a projectile travelling between two LivingEntity objects.
@@ -132,10 +138,8 @@ public abstract class Util {
 			// use this to fire at optimal max angle launchAngle = Math.atan( ( 2*g*elev + v2) / (2*g*elev + 2*v2));
 			return null;
 		}
-		else {
-			//calc angle
-			return Math.atan( ( v2 - Math.sqrt( v4 - derp ) ) / ( g * dist ) );
-		}
+		//calc angle
+		return Math.atan( ( v2 - Math.sqrt( v4 - derp ) ) / ( g * dist ) );
 	}
 	/** 
 	 * Reformat the supplied String, replacing the tags <NPC>, <PLAYER>, <ITEM>, & <AMOUNT> with the 
@@ -175,10 +179,9 @@ public abstract class Util {
 		if ( mat == null || mat == Material.AIR ) 
 		    return  "Hand";
 		
-		if ( mat.isBlock() )
-			return mat.name();
-		else
-		    return LocaleI18n.get( mat.name() + ".name" );
+		if ( mat.isBlock() ) return mat.name();
+		
+		return LocaleI18n.get( mat.name() + ".name" );
 	}
 
 	/**

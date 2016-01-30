@@ -419,17 +419,17 @@ public class SentryListener implements Listener {
 				  
 				// does the event correspond to configured triggers?
 				  && ( ( !(victim instanceof Player) 
-				      && inst.containsTarget( "event:pve" ) )
+				      && inst.targetsContain( "event:pve" ) )
 						  
 				    || ( victim instanceof Player 
 				      && !CitizensAPI.getNPCRegistry().isNPC( victim )
-				      && inst.containsTarget( "event:pvp" ) ) 
+				      && inst.targetsContain( "event:pvp" ) ) 
 				    
 				    || ( CitizensAPI.getNPCRegistry().isNPC( victim ) 
-				      && inst.containsTarget( "event:pvnpc" ) ) 
+				      && inst.targetsContain( "event:pvnpc" ) ) 
 				    
 				    || ( instVictim != null 
-				      && inst.containsTarget( "event:pvsentry" ) ) )
+				      && inst.targetsContain( "event:pvsentry" ) ) )
 				  
 				// is the damager on the sentry's ignore list?
 				  && !inst.isIgnored( (LivingEntity) damager ) ) {

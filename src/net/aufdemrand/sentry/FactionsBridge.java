@@ -19,6 +19,11 @@ public class FactionsBridge implements PluginBridge {
 	FactionsBridge() {}
 	
 	@Override
+	public boolean activate() {
+		return true;
+	}
+	
+	@Override
 	public String getActivationMessage() {
 		return "Registered with Factions sucessfully, the FACTION: target will function";
 	}
@@ -36,10 +41,16 @@ public class FactionsBridge implements PluginBridge {
 	}
 	
 	@Override
-	public void refreshLists() {
+	public void refreshAllLists() {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void refreshLists( SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	static boolean isFactionEnemy( String world, String faction1, String faction2 ) {
 		
 		if ( !faction1.equalsIgnoreCase( faction2 ) ) {

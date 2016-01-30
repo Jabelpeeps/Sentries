@@ -22,6 +22,11 @@ public class TownyBridge  implements PluginBridge {
 	TownyBridge() {}
 	
 	@Override
+	public boolean activate() {
+		return true;
+	}
+	
+	@Override
 	public String getActivationMessage() {
 		return "Registered with Towny sucessfully, the TOWN: and NATION: targets will function";
 	}
@@ -39,9 +44,15 @@ public class TownyBridge  implements PluginBridge {
 	}
 
 	@Override
-	public void refreshLists() {
+	public void refreshAllLists() {
 		// TODO Auto-generated method stub
 	}
+
+	@Override
+	public void refreshLists( SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		
+	} 
 	
 	static String[] getResidentTownyInfo( Player player ) {
 		
@@ -89,6 +100,7 @@ public class TownyBridge  implements PluginBridge {
 		
 		try {	
 			if ( townBlock != null 
+			  && townBlock.hasTown()
 			  && townBlock.getTown().hasNation() ) {
 				
 				return townBlock.getTown().getNation().getName();

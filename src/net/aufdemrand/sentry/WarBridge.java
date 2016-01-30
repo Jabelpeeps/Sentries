@@ -14,6 +14,11 @@ public class WarBridge implements PluginBridge {
 	Map<SentryInstance, String> enemies = new HashMap<SentryInstance, String>();
 	
 	WarBridge() {}
+
+	@Override
+	public boolean activate() {
+		return true;
+	}
 	
 	@Override
 	public String getActivationMessage() {
@@ -33,8 +38,14 @@ public class WarBridge implements PluginBridge {
 	}
 
 	@Override
-	public void refreshLists() {
+	public void refreshAllLists() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void refreshLists( SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public static String getWarTeam( Player player ) {
@@ -44,7 +55,7 @@ public class WarBridge implements PluginBridge {
 		if ( warTeam != null ) 
 			return warTeam.getName();
 	
-		Sentry.logger.info( "Error getting Team " );
+		Sentry.logger.info( "Error getting Team" );
 
 		return null;
 	}

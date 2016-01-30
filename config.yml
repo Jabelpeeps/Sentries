@@ -1,20 +1,20 @@
-#Sentry configuration
+# Sentry configuration
 
-#Server-wide options for Sentry
+# Server-wide options for Sentry
 Server:
- #If true Sentries will die like normal mobs, instead of being despawned. Player-type Sentry deaths will be announced in chat.
+ # If true Sentries will die like normal mobs, instead of being despawned. Player-type Sentry deaths will be announced in chat.
  DieLikePlayers: false
- #The amount of EXP sentries drop. Only works if Drops is turned on.
+ # The amount of EXP sentries drop. Only works if Drops is turned on.
  ExpValue: 5
- #This is how often, in ticks, the Sentry performs his interal logic looking for targets, etc. Increasing this value may lighten server load, 
- #but will decrease Sentries responsiveness and maximum rate of fire.
+ # This is how often, in ticks, the Sentry performs his interal logic looking for targets, etc. Increasing this value may lighten
+ # server load, but will decrease Sentries responsiveness and maximum rate of fire.
  LogicTicks: 10
- #Whether or not Sentries in bodyguard mode always deal damage regardless of other protection plugins.
+ # Whether or not Sentries in bodyguard mode always deal damage regardless of other protection plugins.
  BodyguardsObeyProtection: true
- #Whether or not Sentries are immune to damage from entites on their ignore list. Immunity to damage also prevents retaliation.
+ # Whether or not Sentries are immune to damage from entites on their ignore list. Immunity to damage also prevents retaliation.
  IgnoreListInvincibility: true
  
-#Default stats for new Sentries
+# Default stats for new Sentries
 DefaultStats:
  Strength: 1
  Armor: 0
@@ -31,7 +31,7 @@ DefaultValues:
  HealRate: 0.0
  Weight: 1.0 
  
-#Default options for new Sentries
+# Default options for new Sentries
 DefaultOptions:
  Drops: false
  KillDrops: true
@@ -41,17 +41,17 @@ DefaultOptions:
  FriendlyFire: false
  Targetable: true
  
-#Default texts for new Sentries. You can use <NPC> and <PLAYER> as placeholders.
+# Default texts for new Sentries. You can use <NPC> and <PLAYER> as placeholders.
 DefaultTexts:
  Warning: "&c<NPC> says Halt! Come no closer!"
  Greeting: "&a<NPC> says Welcome, <PLAYER>"
  
-#Default target list for new Sentries. 
+# Default target list for new Sentries. 
 DefaultTargets:
  #- "entity:monster"
 
  
-#Default ignore list for new Sentries
+# Default ignore list for new Sentries
 DefaultIgnores:
  #- "entity:owner"
 
@@ -62,7 +62,7 @@ GlobalTexts:
  Crit3: "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage"
  Crit2: "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage"
  Crit1: "&e*** <NPC> sustains \"a mere flesh wound\" for <AMOUNT> damage"
- Hit: ""   # Message for all non-critcal hits, can get a bit spammy in chat, use with caution.
+ Hit: ""       # Message for all non-critcal hits, can get a bit spammy in chat, use with caution.
  Glance: "&f*** Your paltry blow does <AMOUNT> damage to <NPC>"
  Block: "&7*** <NPC> skillfully parries your attack!"
  Miss: "&7*** You MISSED! <NPC> thumbs their nose at you!"
@@ -81,6 +81,7 @@ HitChances:
 # Teams/clan/faction/town/nation of players.  (ScoreboardTeams is the standard MC scoreboard.)
 # To disable an option, remove or comment it out.
 OtherPlugins:
+  - Vault
   - Towny
   - Factions
   - SimpleClans

@@ -23,7 +23,6 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -33,40 +32,32 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
 import net.citizensnpcs.api.trait.trait.Equipment;
-import net.milkbowl.vault.permission.Permission;
 
 
 public class Sentry extends JavaPlugin {
 
-	boolean debug = false;
+	static boolean debug = false;
 	
 	public boolean dieLikePlayers = false;
 	public boolean bodyguardsObeyProtection = true;
 	public boolean ignoreListIsInvincible = true;
 
-	static Permission perms = null;
-	
-//	public boolean groupsChecked = false;
-	
 	static boolean denizenActive = false;
 	static Map<String, PluginBridge> activePlugins = new HashMap<String, PluginBridge>();
-	
+	 
 	// Lists of various armour items that will be accepted 
-//	public List<Integer> boots = new LinkedList<Integer>( Arrays.asList(301,305,309,313,317) );
 	public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, 
 											 Material.CHAINMAIL_BOOTS, 
 											 Material.IRON_BOOTS, 
 											 Material.DIAMOND_BOOTS, 
 											 Material.GOLD_BOOTS );
 	
-//	public List<Integer> chestplates = new LinkedList<Integer>( Arrays.asList(299,303,307,311,315) );
 	public Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, 
 												   Material.CHAINMAIL_CHESTPLATE, 
 												   Material.IRON_CHESTPLATE, 
 												   Material.DIAMOND_CHESTPLATE, 
 												   Material.GOLD_CHESTPLATE );
 	
-//	public List<Integer> helmets = new LinkedList<Integer>( Arrays.asList(298,302,306,310,314,91,86) );
 	public Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET,
 											   Material.CHAINMAIL_HELMET,
 											   Material.IRON_HELMET, 
@@ -75,7 +66,6 @@ public class Sentry extends JavaPlugin {
 											   Material.PUMPKIN, 
 											   Material.JACK_O_LANTERN );
 	
-//	public List<Integer> leggings = new LinkedList<Integer>( Arrays.asList(300,304,308,312,316) );
 	public Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, 	
 												Material.CHAINMAIL_LEGGINGS,
 												Material.IRON_LEGGINGS,
@@ -112,29 +102,22 @@ public class Sentry extends JavaPlugin {
 		sentryPlugin = this;		
 		logger = getLogger();
 
-		if ( !checkPlugin( "Citizens" ) ) {			
+		if ( !checkPlugin( Util.CITIZENS ) ) {			
 			logger.log( Level.SEVERE, "Sentry cannot be loaded without Citizens 2.0. Aborting." );
 			pluginManager.disablePlugin( this );	
 			return;
 		}	
-		getServer();
-//		try {
 		
-		if ( checkPlugin( "Denizen" ) ) {
+		if ( checkPlugin( Util.DENIZEN ) ) {
 			
-			String vers = pluginManager.getPlugin( "Denizen" ).getDescription().getVersion();
+			String vers = pluginManager.getPlugin( Util.DENIZEN ).getDescription().getVersion();
 			
 			if ( vers.startsWith( "0.7" ) || vers.startsWith( "0.8" ) ) {
 				logger.log( Level.WARNING, "Sentry is not compatible with Denizen .7 or .8" );
 			}
 			else if ( vers.startsWith( "0.9" ) ) {
 				
-				denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( "Denizen"), this );
-				
-//					DenizenHook.sentryPlugin = this;
-//					DenizenHook.denizenPlugin = pluginManager.getPlugin( "Denizen" );
-//					DenizenHook.setupHooks();
-				
+				denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( Util.DENIZEN ), this );				
 				denizenActive = DenizenHook.npcDeathTriggerActive || DenizenHook.npcDeathTriggerOwnerActive
 							 	  || DenizenHook.dieCommandActive || DenizenHook.liveCommandActive;
 			}
@@ -142,12 +125,6 @@ public class Sentry extends JavaPlugin {
 				logger.log( Level.WARNING, "Unknown version of Denizen, Sentry was unable to register with it." );
 			}
 		}
-		
-//		} catch ( NoClassDefFoundError e ) {
-//			logger.log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
-//		} catch ( Exception e ) {
-//			logger.log( Level.WARNING, "An error occured attempting to register with Denizen " + e.getMessage() );
-//		}
 
 		for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
 			
@@ -155,46 +132,23 @@ public class Sentry extends JavaPlugin {
 			
 			PluginBridge bridge = null;
 			
-			if ( Util.SCORE.equals( each ) ) {
-				bridge = new ScoreboardTeamsBridge();
-			}
-			else {
-				try {
-					@SuppressWarnings("unchecked")
-					Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class.forName( each + "Bridge" );
-					
-					bridge = clazz.newInstance();
-				} 
-				catch ( ClassNotFoundException e ) { e.printStackTrace(); } 
-				catch ( InstantiationException e ) { e.printStackTrace(); } 
-				catch ( IllegalAccessException e ) { e.printStackTrace(); }
-			}
+			try {
+				@SuppressWarnings("unchecked")
+				Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class.forName( each + "Bridge" );
+				
+				bridge = clazz.newInstance();
+			} 
+			catch ( ClassNotFoundException e ) { e.printStackTrace(); } 
+			catch ( InstantiationException e ) { e.printStackTrace(); } 
+			catch ( IllegalAccessException e ) { e.printStackTrace(); }
+		
 			if ( bridge == null ) continue;
 			
 			activePlugins.put( each, bridge );
+			
 			logger.log( Level.INFO, bridge.getActivationMessage() );
 		}
 		
-//		if ( checkPlugin( "Towny" ) ) {
-//			logger.log( Level.INFO, "Registered with Towny sucessfully, the TOWN: and NATION: targets will function" );
-//			townyActive = true;
-//		}
-//
-//		if ( checkPlugin( "Factions" ) ) {
-//			logger.log( Level.INFO, "Registered with Factions sucessfully, the FACTION: target will function" );
-//			factionsActive = true;
-//		}
-//		
-//		if ( checkPlugin( "War" ) ) {
-//			logger.log( Level.INFO, "Registered with War sucessfully, The WARTEAM: target will function" );
-//			warActive = true;
-//		}
-//
-//		if ( checkPlugin( "SimpleClans" ) ) {
-//			logger.log( Level.INFO, "Registered with SimpleClans sucessfully, The CLAN: target will function" );
-//			simpleClansActive = true;
-//		}
-
 		CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
 		pluginManager.registerEvents( new SentryListener( this ), this );
@@ -218,7 +172,6 @@ public class Sentry extends JavaPlugin {
 	
 	void reloadMyConfig() {
 		
-		// create a default config.yml if it doesn't already exist.
 		saveDefaultConfig();
 		// load the contents of the config.yml from the disk.
 		reloadConfig();
@@ -254,37 +207,17 @@ public class Sentry extends JavaPlugin {
 	}
 
 	/**
-	 * Sends a message to the logger associated with this plugin - after checking the value of boolean 'debug' (false = don't send).
+	 * Sends a message to the logger associated with this plugin.
+	 * <p>
+	 * The caller should check the boolean Sentry.debug is true before calling - to avoid the overhead of compiling
+	 * the String if it is not needed.
+	 * 
 	 * @param s - the message to log.
 	 */
-	public void debug( String s ){
-		if ( debug ) logger.info( s );
+	public static void debugLog( String s ){
+		logger.info( s );
 	}
-
-	public void registerWithVault() {
-		
-		if ( !setupPermissions() ) 
-			logger.log( Level.WARNING,"Could not register with Vault!  the GROUP target will not function." );
-		else {
-			try {
-				String[] groups = perms.getGroups();
-				
-				if ( groups.length == 0 ) {
-					
-					logger.log( Level.WARNING,"No permission groups found.  the GROUP target will not function.");
-					perms = null;
-				}
-				else logger.log( Level.INFO,"Registered sucessfully with Vault: " + groups.length 
-														+ " groups found. The GROUP: target will function" );
-
-			} catch ( Exception e ) {
-				logger.log( Level.WARNING,"Error getting groups.  the GROUP target will not function.");
-				perms = null;
-			}	
-		}
-//		groupsChecked = true;
-	}
-
+	
 	// only called from CommandHandler.  Maybe it should be moved there.
 	boolean equip( NPC npc, ItemStack newEquipment ) {
 		
@@ -460,6 +393,7 @@ public class Sentry extends JavaPlugin {
 	 * @return true - if it is loaded <strong>and</strong> enabled.
 	 */
 	private boolean checkPlugin( String name ) {
+		
 		if 	(  pluginManager.getPlugin( name ) != null 
 			&& pluginManager.getPlugin( name ).isEnabled() ) {
 				return true;
@@ -469,30 +403,9 @@ public class Sentry extends JavaPlugin {
 		return false;
 	}
 
-	/**
-	 * Store reference to the server's current instance of Vault in perms field.
-	 * 
-	 * @return true if a permission provider has been stored in 'perms'. 
-	 * Otherwise (if Vault is not enabled, or if an exception if thrown) returns false.
+	/** 
+	 * @return the current instance of Sentry, for calls that cannot be made statically.
 	 */
-	private boolean setupPermissions() {
-		try {
-			if ( checkPlugin( "Vault" ) ) {
-			
-				RegisteredServiceProvider<Permission> permissionProvider = 
-																getServer().getServicesManager()
-																		   .getRegistration( Permission.class );
-				if ( permissionProvider != null ) {
-					perms = permissionProvider.getProvider();
-					return true;
-				}
-			}
-		} catch ( Exception e ) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
 	public static Plugin getSentry() {
 		return sentryPlugin;
 	}

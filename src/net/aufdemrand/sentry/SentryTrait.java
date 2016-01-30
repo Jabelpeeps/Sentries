@@ -132,7 +132,7 @@ public class SentryTrait extends Trait implements Toggleable {
 
 	@Override
 	public void onSpawn() {
-		sentry.debug( npc.getName() + ":" + npc.getId() + " onSpawn" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onSpawn" );
 		
 		ensureInst();
 
@@ -142,10 +142,6 @@ public class SentryTrait extends Trait implements Toggleable {
 				
 			} catch ( NPCLoadException e ) {}
 		}
-
-	// Is it really necessary to have this here?
-	//	if ( !sentry.groupsChecked ) sentry.registerWithVault(); // lazy checking for lazy vault.
-
 		inst.initialize();
 	}
 
@@ -156,7 +152,7 @@ public class SentryTrait extends Trait implements Toggleable {
 			inst.cancelRunnable();
 		}
 
-		sentry.debug( npc.getName() + " onRemove" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + " onRemove" );
 
 		inst = null;
 		isToggled = false;
@@ -165,14 +161,14 @@ public class SentryTrait extends Trait implements Toggleable {
 	@Override
 	public void onAttach() {
 		
-		sentry.debug( npc.getName() + ":" + npc.getId() + " onAttach" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onAttach" );
 		isToggled = true;
 	}
 
 	@Override
 	public void onDespawn() {
 		
-		sentry.debug( npc.getName() + ":" + npc.getId() + " onDespawn" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onDespawn" );
 		
 		if ( inst != null ) {
 			inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;

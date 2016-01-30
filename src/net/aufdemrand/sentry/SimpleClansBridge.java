@@ -17,6 +17,11 @@ public class SimpleClansBridge implements PluginBridge {
 	SimpleClansBridge() {}
 	
 	@Override
+	public boolean activate() {
+		return true;
+	}
+	
+	@Override
 	public String getActivationMessage() {
 		return "Registered with SimpleClans sucessfully, The CLAN: target will function";
 	}
@@ -34,10 +39,16 @@ public class SimpleClansBridge implements PluginBridge {
 	}
 	
 	@Override
-	public void refreshLists() {
+	public void refreshAllLists() {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void refreshLists( SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public static String getClan( Player player ) {
 		
 		try {

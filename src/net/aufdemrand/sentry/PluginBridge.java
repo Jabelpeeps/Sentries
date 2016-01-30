@@ -5,6 +5,9 @@ import org.bukkit.entity.LivingEntity;
 /** 
  * Defines an interface for Sentry's interactions with other Server plugins.
  * <p>
+ * Sentry currently instantiates PluginBridge implementations via reflection
+ * so be sure to leave a no-argument constructor for it to call.
+ * <p>
  * Implementations need to interface with the plugin they are bridging to, in 
  * order to be able to find out how the plugin groups players, and then decide
  * whether they are friend or foe.
@@ -18,7 +21,23 @@ import org.bukkit.entity.LivingEntity;
 public interface PluginBridge {
 	
 	/**
-	 * @return a string to be used for logging once this bridge is activated.
+	 * Carries out any initialisation that the implementation requires.
+	 * 
+	 * The caller is responsible for checking that the third party plugin
+	 * is installed and active before calling this method, so implementations
+	 * can assum this to be the case.
+	 * 
+	 * @return true - if the activation was successful.
+	 * @return false - if not.
+	 */
+	boolean activate();
+	
+	/**
+	 * Implementations may specify a string to be used for logging once a call 
+	 * has been made to 'activate()'; this can either be a static string, or
+	 * dynamic (e.g. to explain a failure to activate.)
+	 * 
+	 * @return the string.
 	 */
 	String getActivationMessage();
 
@@ -49,11 +68,19 @@ public interface PluginBridge {
 	boolean isIgnored( LivingEntity entity, SentryInstance inst );
 	
 	/**
-	 * Refreshes any cached information held in the PluginBridge implementation.
+	 * Refreshes all cached information held in the PluginBridge implementation.
 	 * <p>
 	 * It is to be expected that this method may take longer to run than 'isTarget()' 
 	 * & 'isIgnore()' and therefore it should not be called at times when performance
 	 * is critical. 
 	 */
-	void refreshLists();
+	void refreshAllLists();
+	
+	/**
+	 * Refreshes the information held in the cache regarding the supplied
+	 * SentryInstance only.
+	 * 
+	 * @param inst - the SentryInstance to re-cache.
+	 */
+	void refreshLists( SentryInstance inst );
 }

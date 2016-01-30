@@ -28,8 +28,8 @@ public abstract class CommandHandler {
 		
 		if ( player.hasPermission( command ) ) 
 			return true;
-		else 
-			player.sendMessage( ChatColor.RED + "You do not have permission for that command." );
+		
+		player.sendMessage( ChatColor.RED + "You do not have permission for that command." );
 		return false;
 	}
 	
@@ -137,8 +137,8 @@ public abstract class CommandHandler {
 			// TODO make sure this perm node exists in plugin.yml
 			if ( checkCommandPerm( "sentry.debug", player) ) {
 
-				sentry.debug = !sentry.debug;
-				player.sendMessage( ChatColor.GREEN + "Debug is now: " + sentry.debug );
+				Sentry.debug = !Sentry.debug;
+				player.sendMessage( ChatColor.GREEN + "Debug is now: " + Sentry.debug );
 			}
 			return true;
 		}
@@ -202,20 +202,17 @@ public abstract class CommandHandler {
 			if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( player.getName() ) ) {
 				// player is not owner of the npc
 				
-				if ( ( (Player) player ).hasPermission( "citizens.admin" ) == false ) {
+				if ( !((Player) player).hasPermission( "citizens.admin" ) ) {
 					// player is not an admin either.
 					
 					player.sendMessage( ChatColor.RED + "You must be the owner of this Sentry to execute commands." );
 					return true;
 				}
-				else {	// player is an admin.
+				if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
+					// not server-owned NPC
 					
-					if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
-						// not server-owned NPC
-						
-						player.sendMessage( ChatColor.RED + "You, or the server, must be the owner of this Sentry to execute commands." );
-						return true;
-					}
+					player.sendMessage( ChatColor.RED + "You, or the server, must be the owner of this Sentry to execute commands." );
+					return true;
 				}
 			}
 		} 
@@ -752,66 +749,64 @@ public abstract class CommandHandler {
 				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target list");
 				return true;
 			}
+			String arg = "";
+			for ( i = 2; i < args.length; i++ ) {
+				arg += " " + args[i];
+			}
+			arg = arg.trim();
+
+			if ( arg.equalsIgnoreCase( "nationenemies" ) && inst.myNPC.isSpawned() ) {
+				String natname = TownyBridge.getNationNameForLocation( inst.myNPC.getEntity().getLocation() );
+				if ( natname != null ) {
+					arg += ":" + natname;
+				}
+				else 	{
+					player.sendMessage( ChatColor.RED + "Could not get Nation for this NPC's location" );
+					return true;
+				}
+			}
+
+			if ( args[1].equals( "add" ) && arg.length() > 0 && arg.split(":").length > 1 ) {
+
+				if ( !inst.targetsContain( arg.toUpperCase() ) ) 
+						inst.validTargets.add( arg.toUpperCase() );
+				inst.processTargets();
+				inst.clearTarget();
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Target added. Now targeting " + inst.validTargets.toString());
+				return true;
+			}
+
+			else if ( args[1].equals( "remove" ) && arg.length() > 0 && arg.split(":").length > 1 ) {
+
+				inst.validTargets.remove( arg.toUpperCase() );
+				inst.processTargets();
+				inst.clearTarget();
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets removed. Now targeting " + inst.validTargets.toString());
+				return true;
+			}
+
+			else if ( args[1].equals( "clear" ) ) {
+
+				inst.validTargets.clear();
+				inst.processTargets();
+				inst.clearTarget();
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets cleared.");
+				return true;
+			}
+			
+			else if ( args[1].equals( "list" ) ) {
+				player.sendMessage(ChatColor.GREEN + "Targets: " + 	inst.validTargets.toString());
+				return true;
+			}
+
 			else {
-				String arg = "";
-				for ( i = 2; i < args.length; i++ ) {
-					arg += " " + args[i];
-				}
-				arg = arg.trim();
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target list");
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target clear");
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target add type:name");
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry target remove type:name");
+				player.sendMessage(ChatColor.GOLD + "type:name can be any of the following: entity:MobName entity:monster entity:player entity:all player:PlayerName group:GroupName town:TownName nation:NationName faction:FactionName");
 
-				if ( arg.equalsIgnoreCase( "nationenemies" ) && inst.myNPC.isSpawned() ) {
-					String natname = TownyBridge.getNationNameForLocation( inst.myNPC.getEntity().getLocation() );
-					if ( natname != null ) {
-						arg += ":" + natname;
-					}
-					else 	{
-						player.sendMessage( ChatColor.RED + "Could not get Nation for this NPC's location" );
-						return true;
-					}
-				}
-
-				if ( args[1].equals( "add" ) && arg.length() > 0 && arg.split(":").length > 1 ) {
-
-					if ( !inst.containsTarget( arg.toUpperCase() ) ) 
-							inst.validTargets.add( arg.toUpperCase() );
-					inst.processTargets();
-					inst.clearTargets();
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Target added. Now targeting " + inst.validTargets.toString());
-					return true;
-				}
-
-				else if ( args[1].equals( "remove" ) && arg.length() > 0 && arg.split(":").length > 1 ) {
-
-					inst.validTargets.remove( arg.toUpperCase() );
-					inst.processTargets();
-					inst.clearTargets();
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets removed. Now targeting " + inst.validTargets.toString());
-					return true;
-				}
-
-				else if ( args[1].equals( "clear" ) ) {
-
-					inst.validTargets.clear();
-					inst.processTargets();
-					inst.clearTargets();
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Targets cleared.");
-					return true;
-				}
-				
-				else if ( args[1].equals( "list" ) ) {
-					player.sendMessage(ChatColor.GREEN + "Targets: " + 	inst.validTargets.toString());
-					return true;
-				}
-
-				else {
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry target list");
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry target clear");
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry target add type:name");
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry target remove type:name");
-					player.sendMessage(ChatColor.GOLD + "type:name can be any of the following: entity:MobName entity:monster entity:player entity:all player:PlayerName group:GroupName town:TownName nation:NationName faction:FactionName");
-
-					return true;
-				}
+				return true;
 			}
 		}
 
@@ -827,54 +822,51 @@ public abstract class CommandHandler {
 
 				return true;
 			}
+			String arg = "";
+			for (i=2;i<args.length;i++){
+				arg += " " + args[i];
+			}
+			arg = arg.trim();
+
+			if (args[1].equals("add") && arg.length() > 0 && arg.split(":").length>1) {
+				if (!inst.ignoresContain(arg.toUpperCase()))	inst.ignoreTargets.add(arg.toUpperCase());
+				inst.processTargets();
+				inst.setTarget(null, false);
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore added. Now ignoring " + inst.ignoreTargets.toString());
+				return true;
+			}
+
+			else if (args[1].equals("remove") && arg.length() > 0 && arg.split(":").length>1) {
+
+				inst.ignoreTargets.remove(arg.toUpperCase());
+				inst.processTargets();
+				inst.setTarget(null, false);
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore removed. Now ignoring " + inst.ignoreTargets.toString());
+				return true;
+			}
+
+			else if (args[1].equals("clear")) {
+
+				inst.ignoreTargets.clear();
+				inst.processTargets();
+				inst.setTarget(null, false);
+				player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore cleared.");
+				return true;
+			}
+			
+			else if (args[1].equals("list")) {
+
+				player.sendMessage(ChatColor.GREEN + "Ignores: " + inst.ignoreTargets.toString());
+				return true;
+			}
+
 			else {
 
-				String arg = "";
-				for (i=2;i<args.length;i++){
-					arg += " " + args[i];
-				}
-				arg = arg.trim();
-
-				if (args[1].equals("add") && arg.length() > 0 && arg.split(":").length>1) {
-					if (!inst.containsIgnore(arg.toUpperCase()))	inst.ignoreTargets.add(arg.toUpperCase());
-					inst.processTargets();
-					inst.setTarget(null, false);
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore added. Now ignoring " + inst.ignoreTargets.toString());
-					return true;
-				}
-
-				else if (args[1].equals("remove") && arg.length() > 0 && arg.split(":").length>1) {
-
-					inst.ignoreTargets.remove(arg.toUpperCase());
-					inst.processTargets();
-					inst.setTarget(null, false);
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore removed. Now ignoring " + inst.ignoreTargets.toString());
-					return true;
-				}
-
-				else if (args[1].equals("clear")) {
-
-					inst.ignoreTargets.clear();
-					inst.processTargets();
-					inst.setTarget(null, false);
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore cleared.");
-					return true;
-				}
-				
-				else if (args[1].equals("list")) {
-
-					player.sendMessage(ChatColor.GREEN + "Ignores: " + inst.ignoreTargets.toString());
-					return true;
-				}
-
-				else {
-
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore add [ENTITY:Name] or [PLAYER:Name] or [GROUP:Name] or [ENTITY:MONSTER]");
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore remove [ENTITY:Name] or [PLAYER:Name] or [GROUP:Name] or [ENTITY:MONSTER]");
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore clear");
-					player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore list");
-					return true;
-				}
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore add [ENTITY:Name] or [PLAYER:Name] or [GROUP:Name] or [ENTITY:MONSTER]");
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore remove [ENTITY:Name] or [PLAYER:Name] or [GROUP:Name] or [ENTITY:MONSTER]");
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore clear");
+				player.sendMessage(ChatColor.GOLD + "Usage: /sentry ignore list");
+				return true;
 			}
 		}
 		return false;
