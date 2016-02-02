@@ -32,6 +32,15 @@ public abstract class CommandHandler {
 		return false;
 	}
 	
+	/**
+	 * Check that the String[] args contains enough arguments, directing the player on
+	 * how to get help if false.
+	 * 
+	 * @param number - the number of required args
+	 * @param args - the argument array
+	 * @param player - the player who entered the command.
+	 * @return true - args.length >= number
+	 */
 	private static boolean enoughArgs( int number, String[] args, CommandSender player ) {
 		
 		if ( args.length >= number ) return true;
@@ -40,6 +49,13 @@ public abstract class CommandHandler {
 		return false;
 	}
 	
+	/**
+	 * Convenience method to send a formatted message to the player regarding the respawn status of the npc.
+	 * 
+	 * @param value - the number of seconds set as the respawn value.
+	 * @param npc - the npc
+	 * @param player - the player who sent the command.
+	 */
 	private static void respawnMessage( int value, NPC npc, CommandSender player ) {
 		
 		if ( value == 0 ) 
@@ -50,23 +66,47 @@ public abstract class CommandHandler {
 			player.sendMessage( ChatColor.GOLD + npc.getName() + " respawns after " + value + "s" );
 	}
 	
+	/**
+	 * Convenience method that removes single and double quotes from the ends of the supplied string.
+	 * 
+	 * @param input - the string to be parsed
+	 * @return - the string without quotes
+	 */
 	private static String sanitiseString( String input ) {
-		return input.replaceAll( "\"$", "" )
-					.replaceAll( "^\"", "" )
-					.replaceAll( "'$", "" )
-					.replaceAll( "^'", "" );
+			return input.replaceAll( "\"$", "" )
+						.replaceAll( "^\"", "" )
+						.replaceAll( "'$", "" )
+						.replaceAll( "^'", "" );
 	}
-	/** The main method of this class, that parses the arguments and responds accordingly */
+	
+	/** 
+	 * Concatenates the supplied String[] starting at the position indicated.
+	 * 
+	 * @param startFrom - the starting position (zero-based)
+	 * @param args - the String[] to be joined
+	 * @return - the resulting String.
+	 */
+	private static String joinArgs( int startFrom, String[] args ) {
+		String out = "";
+
+		for ( int i = startFrom; i < args.length; i++ ) {
+			out += " " + args[i];
+		}
+		return out.trim();
+	}
+//------------------------------------------------------------------------------------	
+//------------------------------------------------------------------------------------
+	/**
+	 * The main method of this class, that parses the arguments and responds accordingly 
+	 * 
+	 * @param player
+	 * @param inargs
+	 * @param sentry
+	 * @return - true if the command has been successfully handled.
+	 */
 	static boolean call( CommandSender player, String[] inargs, Sentry sentry ) {
 		
-		// send short help message if no arguments provided.
 		if ( !enoughArgs( 1, inargs, player ) ) return true;
-		
-//		if ( inargs.length < 1 ) {
-//			player.sendMessage( ChatColor.RED + "Use /sentry help for command reference." );
-//			return true;
-//		}
-		
 
 //----------------------------------------------------- help command -----------------
 		if ( inargs[0].equalsIgnoreCase( "help" ) ) {
@@ -205,48 +245,47 @@ public abstract class CommandHandler {
 		}
 		
 //-------------------------------------------------------------------------------------
+		// the remaining commands all deal with npc's
+		
 		
 		// did player specify an integer as the first argument?  
 		// It will be checked later on to see if it is a valid npc id, for now we just store it and move on.		
 		int npcid = Util.string2Int( inargs[0] );
 		
 		// i is set to 1 only if an int was found above.
-		int i = ( npcid > 0 ) ? 1 : 0;
-
-		// create a new array of args that is re-based according to whether an npc id was found above.
-		String[] args = new String[ inargs.length - i ];
-
-		for ( int j = i; j < inargs.length; j++ ) {
-			args[ j - i ] = inargs[ j ];
-		}
-
-        // send short help message if no other arguments provided.
-		if ( !enoughArgs( 1, args, player ) ) return true;
+//		int i = ( npcid > 0 ) ? 1 : 0;
 		
-//		if ( args.length < 1 ) {
-//			player.sendMessage( ChatColor.RED + "Use /sentry help for command reference." );
-//			return true;
+		int nextArg = ( npcid > 0 ) ? 1 
+									: 0;
+// surely this is unnecessary?
+//		
+//		// create a new array of args that is re-based according to whether an npc id was found above.
+//		String[] args = new String[ inargs.length - i ];
+//
+//		for ( int j = i; j < inargs.length; j++ ) {
+//			args[ j - i ] = inargs[ j ];
 //		}
 
-		// hold the state of the third argument (if present) in a boolean for later use.
+		if ( !enoughArgs( 1 + nextArg, inargs, player ) ) return true;
+
+		// hold the state of the third argument (if it holds a boolean value) in a field for later use.
+		// this is held as an object not a primitive to allow for a third state - 'null'.
 		Boolean set = null;
-		if ( args.length == 2 ) {
-			if ( args[1].equalsIgnoreCase( "true" ) || args[1].equalsIgnoreCase( "on" ) ) set = true;
-			if ( args[1].equalsIgnoreCase( "false" ) || args[1].equalsIgnoreCase( "off" ) ) set = false;
-		}
 		
-		// the remaining commands all deal with npc's so lets check whether we have one selected,
-		// and that we have permission to modify it.
+		if ( inargs.length == 2 + nextArg ) {
+			if ( inargs[1 + nextArg].equalsIgnoreCase( "true" ) || inargs[1 + nextArg].equalsIgnoreCase( "on" ) ) 
+					set = true;
+			if ( inargs[1 + nextArg].equalsIgnoreCase( "false" ) || inargs[1 + nextArg].equalsIgnoreCase( "off" ) ) 
+					set = false;
+		}
 		NPC thisNPC;
 		
-		// check to see whether an integer was provided as the first argument, and therefore was saved earlier.
+		// check to see whether the value saved earlier is an npc ID, and save a reference if so.
 		if ( npcid == -1 ) {
-			// -1 is the unmodified value of npcid, therefore no int argument, lets attempt to use the selected npc (if any).
 			
 			thisNPC = ((Citizens) sentry.pluginManager.getPlugin( "Citizens" ))
 													  .getNPCSelector()
 													  .getSelected( player );
-			// send message and return if null returned above.
 			if ( thisNPC == null ) {
 				player.sendMessage( ChatColor.RED + "You must provide an NPC #id "
 												+ "or have an NPC selected to use this command" );
@@ -255,10 +294,8 @@ public abstract class CommandHandler {
 			npcid = thisNPC.getId();
 		} 
 		else {
-			// an integer argument was provided, its time to see if it is a valid npcid.
 			thisNPC = CitizensAPI.getNPCRegistry().getById( npcid ); 
 	
-			// send message and return if null returned above.
 			if ( thisNPC == null ) {
 				player.sendMessage( ChatColor.RED + "An NPC with #id " + npcid + " was not found" );
 				return true;
@@ -303,7 +340,7 @@ public abstract class CommandHandler {
 		SentryInstance inst = thisNPC.getTrait( SentryTrait.class ).getInstance();
 		
 //------------------------------------------------------------ spawn command --------------		
-		if ( args[0].equalsIgnoreCase( "spawn" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "spawn" ) ) {
 			
 			if ( checkCommandPerm( "sentry.spawn", player ) ) {
 			
@@ -318,11 +355,10 @@ public abstract class CommandHandler {
 		}
 
 //----------------------------------------------------------- invincible command ------------
-		if ( args[0].equalsIgnoreCase( "invincible" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "invincible" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.invincible", player ) ) {
 				
-				// check if the boolean 'set' is null and toggles the state if so, otherwise it uses the value in set.
 				inst.invincible = ( set == null ) ? !inst.invincible 
 											  	  : set;
 				
@@ -335,11 +371,10 @@ public abstract class CommandHandler {
 		}
 
 //------------------------------------------------------------- retaliate command --------------
-		if ( args[0].equalsIgnoreCase( "retaliate" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "retaliate" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.retaliate", player ) ) {
 				
-				// check if the boolean 'set' is null and toggles the state if so, otherwise it uses the value in set.
 				inst.iWillRetaliate = ( set == null ) ? !inst.iWillRetaliate 
 													  : set;
 	
@@ -352,7 +387,7 @@ public abstract class CommandHandler {
 		}
 		
 //--------------------------------------------------------------- criticals command -------------		
-		if ( args[0].equalsIgnoreCase( "criticals" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "criticals" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.criticals", player ) ) {
 
@@ -368,7 +403,7 @@ public abstract class CommandHandler {
 		}
 		
 //-------------------------------------------------------------- drops command ----------------		
-		if ( args[0].equalsIgnoreCase( "drops" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "drops" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.drops", player ) ) {
 				
@@ -384,7 +419,7 @@ public abstract class CommandHandler {
 		}
 		
 //--------------------------------------------------------------- killdrops command -------------
-		if ( args[0].equalsIgnoreCase( "killdrops" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "killdrops" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.killdrops", player ) ) {
 
@@ -400,7 +435,7 @@ public abstract class CommandHandler {
 		}
 		
 //-----------------------------------------------------------------targetable command ------------
-		if ( args[0].equalsIgnoreCase( "targetable" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "targetable" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.targetable", player ) ) {
 
@@ -417,7 +452,7 @@ public abstract class CommandHandler {
 			return true;
 		}	
 //-------------------------------------------------------------------mount command -----------		
-		if ( args[0].equalsIgnoreCase( "mount" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "mount" ) ) {
 			
 			if ( checkCommandPerm( "sentry.options.mount", player ) ) {
 	
@@ -439,32 +474,33 @@ public abstract class CommandHandler {
 //------------------------------------------------------------------guard command -------------	
 		
 		//TODO add help text for this command.
-		if ( args[0].equalsIgnoreCase( "guard" ) ) { 
+		if ( inargs[nextArg].equalsIgnoreCase( "guard" ) ) { 
 			
 			if ( checkCommandPerm( "sentry.guard", player ) ) {
 
-				if ( args.length > 1 ) {
+				if ( inargs.length > 1 + nextArg ) {
 					
 					boolean localonly = false;
 					boolean playersonly = false;
 					int start = 1;
 					boolean ok = false;
 	
-					if ( args[1].equalsIgnoreCase( "-p" ) ) {
+					if ( inargs[nextArg + 1].equalsIgnoreCase( "-p" ) ) {
 						start = 2;
 						playersonly = true;
 					}
 	
-					if ( args[1].equalsIgnoreCase( "-l" ) ) {
+					if ( inargs[nextArg + 1].equalsIgnoreCase( "-l" ) ) {
 						start = 2;
 						localonly = true;
 					}
 	
-					String arg = "";
-					for ( i = start; i < args.length; i++ ) {
-						arg += " " + args[i];
-					}
-					arg = arg.trim();
+					String arg = joinArgs( start + nextArg, inargs );
+//					String arg = "";
+//					for ( int i = start + nextArg; i < inargs.length; i++ ) {
+//						arg += " " + inargs[i];
+//					}
+//					arg = arg.trim();
 	
 					
 					if ( !playersonly ){ 
@@ -492,18 +528,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //---------------------------------------------------------------follow command -------------------
-		if ( args[0].equalsIgnoreCase( "follow" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "follow" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.follow", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Follow Distance is " + inst.followDistance );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry follow [#]. Default is 4. " );
 				}
 				else {
-					int dist = Util.string2Int( args[1] );
+					int dist = Util.string2Int( inargs[nextArg + 1] );
 					if ( dist < 0 ) {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid number." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1]
+														+ "' was not recognised as a valid number." );
 						return true;
 					}
 
@@ -515,19 +552,20 @@ public abstract class CommandHandler {
 			return true;
 		}
 //----------------------------------------------------------------health command -------------------
-		if ( args[0].equalsIgnoreCase( "health" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "health" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.health", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Health is " + inst.sentryMaxHealth );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry health [#]   note: Typically players" );
 					player.sendMessage( ChatColor.GOLD + "  have 20 HPs when fully healed" );
 				}
 				else {
-					int HPs = Util.string2Int( args[1] );
+					int HPs = Util.string2Int( inargs[nextArg + 1] );
 					if ( HPs < 1 )  {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid number." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1]
+														+ "' was not recognised as a valid number." );
 						return true;
 					}
 
@@ -540,18 +578,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //---------------------------------------------------------------armour command-----------------------
-		if ( args[0].equalsIgnoreCase( "armor" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "armor" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.armor", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Armor is " + inst.armorValue );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry armor [#] " );
 				}
 				else {
-					int armour = Util.string2Int( args[1] );
+					int armour = Util.string2Int( inargs[nextArg + 1] );
 					if ( armour < 0 )  {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid number." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1]
+														+ "' was not recognised as a valid number." );
 						return true;
 					}
 
@@ -564,19 +603,20 @@ public abstract class CommandHandler {
 			return true;
 		}
 //----------------------------------------------------------------strength command --------------		
-		if ( args[0].equalsIgnoreCase( "strength" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "strength" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.strength", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Strength is " + inst.strength );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry strength # " );
 					player.sendMessage( ChatColor.GOLD + "Note: At strength 0 the Sentry will do no damamge. " );
 				}
 				else {
-					int strength = Util.string2Int( args[1] );
+					int strength = Util.string2Int( inargs[nextArg + 1] );
 					if ( strength < 0 )  {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid number." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1]
+														+ "' was not recognised as a valid number." );
 						return true;
 					}
 					
@@ -589,19 +629,20 @@ public abstract class CommandHandler {
 		}
 //-----------------------------------------------------------------nightvision command---------		
 		//TODO add help text for this command
-		if ( args[0].equalsIgnoreCase( "nightvision" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "nightvision" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.nightvision", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Night Vision is " + inst.nightVision );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry nightvision [0-16] " );
 					player.sendMessage( ChatColor.GOLD + "Usage: 0 = See nothing, 16 = See everything. " );
 				}
 				else {
-					int vision = Util.string2Int( args[1] );
+					int vision = Util.string2Int( inargs[nextArg + 1] );
 					if ( vision < 0 )  {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid number." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1]
+														+ "' was not recognised as a valid number." );
 						return true;
 					}
 					if ( vision > 16 ) vision = 16;
@@ -613,11 +654,11 @@ public abstract class CommandHandler {
 			return true;
 		}
 //-----------------------------------------------------------respawn command------------------------
-		if ( args[0].equalsIgnoreCase( "respawn" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "respawn" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.respawn", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					respawnMessage( inst.respawnDelay, thisNPC, player );
 					
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry respawn [-1 - 2000000] " );
@@ -625,9 +666,10 @@ public abstract class CommandHandler {
 					player.sendMessage( ChatColor.GOLD + "Usage: set to -1 to *permanently* delete the Sentry on death." );
 				}
 				else {
-					int respawn = Util.string2Int( args[1] );
+					int respawn = Util.string2Int( inargs[nextArg + 1] );
 					if ( respawn < -1 )  {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid value." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1] 
+													+ "' was not recognised as a valid value." );
 						return true;
 					}
 					
@@ -639,18 +681,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //----------------------------------------------------------speed command--------------------------
-		if ( args[0].equalsIgnoreCase( "speed" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "speed" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.speed", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Speed is " + inst.sentrySpeed );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry speed [0.0 - 2.0]" );
 				}
 				else {
-					float speed = Util.string2Float( args[1] );
+					float speed = Util.string2Float( inargs[nextArg + 1] );
 					if ( speed < 0.0 ) {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid value." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1] 
+														+ "' was not recognised as a valid value." );
 						return true;
 					}
 
@@ -662,19 +705,20 @@ public abstract class CommandHandler {
 			return true;
 		}
 //-----------------------------------------------------------attackrate command ---------		
-		if ( args[0].equalsIgnoreCase( "attackrate" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "attackrate" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.attackrate", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Projectile Attack Rate is " 
 																		+ inst.attackRate + "seconds between shots." );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry attackrate [0.0 - 30.0]");
 				}
 				else {
-					double attackrate = Util.string2Double( args[1] );
+					double attackrate = Util.string2Double( inargs[nextArg + 1] );
 					if ( attackrate < 0.0 ) {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid value." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1] 
+														+ "' was not recognised as a valid value." );
 						return true;
 					}
 
@@ -686,19 +730,20 @@ public abstract class CommandHandler {
 			return true;
 		}
 //------------------------------------------------------------------healrate command-----------------
-		if ( args[0].equalsIgnoreCase( "healrate" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "healrate" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.healrate", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Heal Rate is " + inst.healRate + "s" );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry healrate [0.0 - 300.0]" );
 					player.sendMessage( ChatColor.GOLD + "Usage: Set to 0 to disable healing" );
 				}
 				else {
-					double healrate = Util.string2Double( args[1] );
+					double healrate = Util.string2Double( inargs[nextArg + 1] );
 					if ( healrate < 0.0 ) {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid value." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1] 
+														+ "' was not recognised as a valid value." );
 						return true;
 					}
 
@@ -710,18 +755,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //-------------------------------------------------------------------range command-----------------
-		if ( args[0].equalsIgnoreCase( "range" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "range" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.range", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Range is " + inst.sentryRange );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry range [1 - 100]" );
 				}
 				else {
-					int range = Util.string2Int( args[1] );
+					int range = Util.string2Int( inargs[nextArg + 1] );
 					if ( range < 1 ) {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid value." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1] 
+														+ "' was not recognised as a valid value." );
 						return true;
 					}
 
@@ -733,18 +779,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //----------------------------------------------------------------------warningrange command----------
-		if ( args[0].equalsIgnoreCase( "warningrange" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "warningrange" ) ) {
 			
 			if ( checkCommandPerm( "sentry.stats.warningrange", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Warning Range is " + inst.warningRange );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry warningrangee [0 - 50]" );
 				}
 				else {
-					int range = Util.string2Int( args[1] );
+					int range = Util.string2Int( inargs[nextArg + 1] );
 					if ( range < 0 ) {
-						player.sendMessage( ChatColor.RED + "Error: '" + args[1] + "' was not recognised as a valid value." );
+						player.sendMessage( ChatColor.RED + "Error: '" + inargs[nextArg + 1] 
+														+ "' was not recognised as a valid value." );
 						return true;
 					}
 
@@ -756,25 +803,25 @@ public abstract class CommandHandler {
 			return true;
 		}
 //--------------------------------------------------------------------------equip command-------------		
-		if ( args[0].equalsIgnoreCase( "equip" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "equip" ) ) {
 			
 			if ( checkCommandPerm( "sentry.equip", player ) ) {
 
-				if ( args.length <= 1 ) {
+				if ( inargs.length <= 1 + nextArg ) {
 					player.sendMessage( ChatColor.RED + "You must specify a valid Item Name. "
 														+ "Specify 'none' to remove all equipment." );
 				}
 				else if ( thisNPC.getEntity().getType() == EntityType.ENDERMAN 
 							|| thisNPC.getEntity().getType() == EntityType.PLAYER ) {
 						
-					if ( args[1].equalsIgnoreCase( "none" ) ) {
+					if ( inargs[nextArg + 1].equalsIgnoreCase( "none" ) ) {
 						
 						//remove equipment
 						sentry.equip( thisNPC, inst, null );
 						player.sendMessage( ChatColor.YELLOW +thisNPC.getName() + "'s equipment cleared." ); 
 					}
 					else {
-						Material mat = Util.getMaterial( args[1] );
+						Material mat = Util.getMaterial( inargs[nextArg + 1] );
 						
 						if ( mat == null ) {
 							player.sendMessage( ChatColor.RED + " Could not equip: unknown item name" ); 
@@ -794,19 +841,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //--------------------------------------------------------------------warning command-----------		
-		if ( args[0].equalsIgnoreCase( "warning" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "warning" ) ) {
 			
 			if ( checkCommandPerm( "sentry.warning", player ) ) {
 
-				if ( args.length >= 2 ) {
-					String arg = "";
-					for ( i = 1; i < args.length; i++ ) {
-						arg += " " + args[i];
-					}
-					arg = arg.trim();
+				if ( inargs.length >= 2 + nextArg ) {
+					
+//					String arg = "";
+//					for ( int i = 1 + nextArg; i < inargs.length; i++ ) {
+//						arg += " " + inargs[i];
+//					}
+//					arg = arg.trim();
 	
-					String str = sanitiseString( arg );
-				//	String str = arg.replaceAll( "\"$", "" ).replaceAll( "^\"", "" ).replaceAll( "'$", "" ).replaceAll( "^'", "" );
+					String str = sanitiseString( joinArgs( 1 + nextArg, inargs ) );
 					
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " warning message set to " 
 										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', str ) + "." );   
@@ -821,20 +868,19 @@ public abstract class CommandHandler {
 			return true;
 		}
 //--------------------------------------------------------------------greeting command----------
-		if ( args[0].equalsIgnoreCase( "greeting" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "greeting" ) ) {
 			
 			if ( checkCommandPerm( "sentry.greeting", player ) ) {
 			
-				if ( args.length >= 2 ) {
+				if ( inargs.length >= 2 + nextArg ) {
 	
-					String arg = "";
-					for ( i = 1; i < args.length; i++ ) {
-						arg += " " + args[i];
-					}
-					arg = arg.trim();
+//					String arg = "";
+//					for ( int i = 1 + nextArg; i < inargs.length; i++ ) {
+//						arg += " " + inargs[i];
+//					}
+//					arg = arg.trim();
 	
-					String str = sanitiseString( arg );
-				//	String str = arg.replaceAll("\"$", "").replaceAll("^\"", "").replaceAll("'$", "").replaceAll("^'", "");
+					String str = sanitiseString( joinArgs( 1 + nextArg, inargs ) );
 					
 					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Greeting message set to " 
 										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', str ) + "." );   
@@ -849,7 +895,7 @@ public abstract class CommandHandler {
 			return true;
 		}
 //---------------------------------------------------------------------info command-----------
-		if ( args[0].equalsIgnoreCase( "info" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "info" ) ) {
 			
 			if ( checkCommandPerm( "sentry.info", player ) ) {
 
@@ -888,11 +934,11 @@ public abstract class CommandHandler {
 			return true;
 		}
 //----------------------------------------------------------------target command---------
-		if ( args[0].equalsIgnoreCase( "target" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "target" ) ) {
 			
 			if ( checkCommandPerm( "sentry.target", player ) ) {
 
-				if ( args.length < 2 ) {
+				if ( inargs.length < 2 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target add [entity:Name] or [player:Name] or "
 																+ "[group:Name] or [entity:monster] or [entity:player]" );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target remove [target]" );
@@ -901,11 +947,12 @@ public abstract class CommandHandler {
 					return true;
 				}
 				
-				String arg = "";
-				for ( i = 2; i < args.length; i++ ) {
-					arg += " " + args[i];
-				}
-				arg = arg.trim();
+				String arg = joinArgs( 2 + nextArg, inargs );
+//				String arg = "";
+//				for ( int i = 2 + nextArg; i < inargs.length; i++ ) {
+//					arg += " " + inargs[i];
+//				}
+//				arg = arg.trim();
 	
 				if ( arg.equalsIgnoreCase( "nationenemies" ) && inst.myNPC.isSpawned() ) {
 					String natname = TownyBridge.getNationNameForLocation( inst.myNPC.getEntity().getLocation() );
@@ -917,7 +964,7 @@ public abstract class CommandHandler {
 						return true;
 					}
 				}
-				if ( args[1].equals( "add" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
+				if ( inargs[nextArg + 1].equals( "add" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 	
 					inst.validTargets.add( arg.toUpperCase() );
 					inst.processTargets();
@@ -925,7 +972,7 @@ public abstract class CommandHandler {
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Target added. Now targeting " 
 																				+ inst.validTargets.toString() );
 				}
-				else if ( args[1].equals( "remove" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
+				else if ( inargs[nextArg + 1].equals( "remove" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 					
 					inst.validTargets.remove( arg.toUpperCase() );
 					inst.processTargets();
@@ -933,14 +980,14 @@ public abstract class CommandHandler {
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Targets removed. Now targeting " 
 																				+ inst.validTargets.toString() );
 				}
-				else if ( args[1].equals( "clear" ) ) {
+				else if ( inargs[nextArg + 1].equals( "clear" ) ) {
 					
 					inst.validTargets.clear();
 					inst.processTargets();
 					inst.clearTarget();
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Targets cleared." );
 				}
-				else if ( args[1].equals( "list" ) ) {
+				else if ( inargs[nextArg + 1].equals( "list" ) ) {
 					player.sendMessage( ChatColor.GREEN + "Targets: " + inst.validTargets.toString() );
 				}
 				else {
@@ -956,11 +1003,11 @@ public abstract class CommandHandler {
 			return true;
 		}
 //--------------------------------------------------------------------------ignore command-----------
-		if ( args[0].equalsIgnoreCase( "ignore" ) ) {
+		if ( inargs[nextArg].equalsIgnoreCase( "ignore" ) ) {
 			
 			if ( checkCommandPerm( "sentry.ignore", player ) ) {
 
-				if ( args.length < 2 ) {
+				if ( inargs.length < 2 + nextArg ) {
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore list" );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore clear" );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore add type:name" );
@@ -970,13 +1017,14 @@ public abstract class CommandHandler {
 													+ "group:GroupName town:TownName nation:NationName faction:FactionName");
 					return true;
 				}
-				String arg = "";
-				for ( i = 2; i < args.length; i++ ) {
-					arg += " " + args[i];
-				}
-				arg = arg.trim();
+				String arg = joinArgs( 2 + nextArg, inargs );
+//				String arg = "";
+//				for ( int i = 2 + nextArg; i < inargs.length; i++ ) {
+//					arg += " " + inargs[i];
+//				}
+//				arg = arg.trim();
 	
-				if ( args[1].equals( "add" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
+				if ( inargs[nextArg + 1].equals( "add" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 					
 					inst.ignoreTargets.add( arg.toUpperCase() );
 					inst.processTargets();
@@ -984,7 +1032,7 @@ public abstract class CommandHandler {
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Ignore added. Now ignoring " 
 																			+ inst.ignoreTargets.toString() );
 				}
-				else if ( args[1].equals( "remove" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
+				else if ( inargs[nextArg + 1].equals( "remove" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 	
 					inst.ignoreTargets.remove( arg.toUpperCase() );
 					inst.processTargets();
@@ -992,14 +1040,14 @@ public abstract class CommandHandler {
 					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore removed. Now ignoring " 
 																			+ inst.ignoreTargets.toString());
 				}
-				else if ( args[1].equals( "clear" ) ) {
+				else if ( inargs[nextArg + 1].equals( "clear" ) ) {
 	
 					inst.ignoreTargets.clear();
 					inst.processTargets();
 					inst.clearTarget();
 					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Ignore cleared." );
 				}
-				else if ( args[1].equals( "list" ) ) {
+				else if ( inargs[nextArg + 1].equals( "list" ) ) {
 	
 					player.sendMessage( ChatColor.GREEN + "Ignores: " + inst.ignoreTargets.toString() );
 				}

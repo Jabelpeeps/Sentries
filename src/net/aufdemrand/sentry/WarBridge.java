@@ -69,4 +69,15 @@ public class WarBridge extends PluginBridge {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	String getCommandText() {
+		return "WAR";
+	}
+
+	@Override
+	String getCommandHelp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

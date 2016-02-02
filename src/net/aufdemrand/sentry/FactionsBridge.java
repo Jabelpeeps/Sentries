@@ -77,4 +77,15 @@ public class FactionsBridge extends PluginBridge {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	String getCommandText() {
+		return "FACTION";
+	}
+
+	@Override
+	String getCommandHelp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

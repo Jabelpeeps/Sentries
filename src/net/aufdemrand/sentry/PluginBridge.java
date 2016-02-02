@@ -3,7 +3,7 @@ package net.aufdemrand.sentry;
 import org.bukkit.entity.LivingEntity;
 
 /** 
- * An abstract class defining Sentry's interactions with other Server plugins.
+ * An abstract class to act as a bridge between Sentry and other Server plugins.
  * <p>
  * Child classes need to interface with the plugin they are bridging to, in 
  * order to be able to find out how the plugin groups players, and then decide
@@ -19,8 +19,6 @@ public abstract class PluginBridge {
 	
 	final int bitFlag;
 	
-	
-	
 	PluginBridge( int flag ) {
 		bitFlag = flag;
 	}
@@ -28,9 +26,9 @@ public abstract class PluginBridge {
 	/**
 	 * Carries out any initialisation that the implementation requires.
 	 * 
-	 * The caller is responsible for checking that the third party plugin
-	 * is installed and active before calling this method, so implementations
-	 * can assume this to be the case.
+	 * The caller will check that the third party plugin is installed and 
+	 * active before calling this method, so implementations can assume 
+	 * this to be the case.
 	 * 
 	 * @return true - if the activation was successful.
 	 * @return false - if not.
@@ -72,19 +70,46 @@ public abstract class PluginBridge {
 	 */
 	abstract boolean isIgnoring( LivingEntity entity, SentryInstance inst );
 	
+	/**
+	 * Add a target identified by the supplied string for the SentryInstance supplied.
+	 * <p>
+	 * The PluginBridge should achieve this task without modifying the SentryInstance
+	 * (which knows nothing about the third party plugin) but should store relevant references
+	 * in preparation for a call to 'isTarget()'
+	 * 
+	 * @param target - a String identifying the intended target (the exact contents
+	 * can vary, as long as the pluginBridge know how to parse the String).
+	 * @param inst - the SentryInstance instance that will have the target recorded against it.
+	 * @return true - if the target is added successfully.
+	 */
 	abstract boolean addTarget( String target, SentryInstance inst );
 	
+	/**
+	 * Add an entity - identified by the supplied string - to be ignored by the supplied 
+	 * SentryInstance.
+	 * <p>
+	 * The PluginBridge should achieve this task without modifying the SentryInstance
+	 * (which knows nothing about the third party plugin) but should store relevant references
+	 * in preparation for a call to 'isIgnoring()'
+	 * 
+	 * @param target - a String identifying the entity to ignore (the exact contents
+	 * can vary, as long as the pluginBridge know how to parse the String).
+	 * @param inst - the SentryInstance instance that will have the target recorded against it.
+	 * @return true - if the target is added successfully.
+	 */
 	abstract boolean addIgnore( String target, SentryInstance inst );
-
-//  actually, I don't think I'll need this one...
-//	/**
-//	 * Refreshes all cached information held in the PluginBridge implementation.
-//	 * <p>
-//	 * It is to be expected that this method may take longer to run than 'isTarget()' 
-//	 * & 'isIgnore()' and therefore it should not be called at times when performance
-//	 * is critical. 
-//	 */
-//	void refreshAllLists();
+	
+	/**
+	 * @return a string to be used as a command argument to refer to this PluginBridge.
+	 */
+	abstract String getCommandText();
+	
+	/**
+	 * @return the help text describing how to identify targets and ignores for this 
+	 * PluginBridge - so that they will be recognised when parsed by 'addTarget()' and 
+	 * 'addIgnore()'
+	 */
+	abstract String getCommandHelp();
 	
 	/**
 	 * Refreshes the information held in the cache regarding the supplied

@@ -123,5 +123,16 @@ public class VaultBridge extends PluginBridge {
 		}
 		return false;
 	}
+
+	@Override
+	String getCommandText() {
+		return "GROUP";
+	}
+
+	@Override
+	String getCommandHelp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

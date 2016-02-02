@@ -71,4 +71,15 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 		return false;
 	}
 
+	@Override
+	String getCommandText() {
+		return "TEAM";
+	}
+
+	@Override
+	String getCommandHelp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
