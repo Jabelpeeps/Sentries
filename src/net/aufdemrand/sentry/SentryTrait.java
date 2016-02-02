@@ -96,10 +96,9 @@ public class SentryTrait extends Trait implements Toggleable {
 		if ( inst.guardTarget != null && inst.guardTarget.isEmpty() ) 
 			inst.guardTarget = null;
 		
-		// TODO confirm that leaving these fields uninitialised has no bad effects
-		List<String> targettemp; // = new ArrayList<String>();
-		List<String> ignoretemp; // = new ArrayList<String>();
-
+		List<String> targettemp; 
+		List<String> ignoretemp; 
+		
 		FileConfiguration cfg = sentry.getConfig();
 		
 		if ( key.getRaw( "Targets" ) != null ) 
@@ -112,15 +111,12 @@ public class SentryTrait extends Trait implements Toggleable {
 		else 
 			ignoretemp = cfg.getStringList( "DefaultIgnores" );
 
-		// TODO find out why these checks are needed.  i.e. why aren't the targets lists using Sets?
 		for ( String string : targettemp ) {
-			if( !inst.validTargets.contains( string.toUpperCase() ) ) 
-				inst.validTargets.add( string.toUpperCase() );
+			inst.validTargets.add( string.toUpperCase() );
 		}
 		
 		for ( String string : ignoretemp ) {
-			if( !inst.ignoreTargets.contains( string.toUpperCase() ) ) 
-				inst.ignoreTargets.add( string.toUpperCase() );
+			inst.ignoreTargets.add( string.toUpperCase() );
 		}
 		inst.loaded = true;
 		inst.processTargets();

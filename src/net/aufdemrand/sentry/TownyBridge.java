@@ -2,6 +2,7 @@ package net.aufdemrand.sentry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
@@ -14,12 +15,17 @@ import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
-public class TownyBridge  implements PluginBridge {
+public class TownyBridge  extends PluginBridge {
 	
-	Map<SentryInstance, String> friends = new HashMap<SentryInstance, String>();
-	Map<SentryInstance, String> enemies = new HashMap<SentryInstance, String>();
+	Map<SentryInstance, Set<Town>> friendlyTowns = new HashMap<SentryInstance, Set<Town>>();
+	Map<SentryInstance, Set<Town>> rivalTowns = new HashMap<SentryInstance, Set<Town>>();
 	
-	TownyBridge() {}
+	Map<SentryInstance, Set<Nation>> friendlyNations = new HashMap<SentryInstance, Set<Nation>>();
+	Map<SentryInstance, Set<Nation>> rivalNations = new HashMap<SentryInstance, Set<Nation>>();
+	
+	TownyBridge( int flag ) {
+		super( flag );
+	}
 	
 	@Override
 	public boolean activate() {
@@ -38,14 +44,9 @@ public class TownyBridge  implements PluginBridge {
 	}
 
 	@Override
-	public boolean isIgnored( LivingEntity entity, SentryInstance inst ) {
+	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public void refreshAllLists() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -108,5 +109,17 @@ public class TownyBridge  implements PluginBridge {
 		} catch ( NotRegisteredException e ) { }
 	
 		return null;
+	}
+
+	@Override
+	public boolean addTarget( String target, SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addIgnore( String target, SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

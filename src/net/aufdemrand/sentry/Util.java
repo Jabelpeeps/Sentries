@@ -185,7 +185,7 @@ public abstract class Util {
 	}
 
 	/**
-	 * Convenience method to convert String values to int's.<p>
+	 * method to convert String values to int's.<p>
 	 * It catches any NumberFormatExceptions and returns -1.
 	 * 
 	 * @param value - the string to be converted
@@ -194,6 +194,34 @@ public abstract class Util {
 	static int string2Int( String value ) {
 		try {
 			return Integer.parseInt( value );
+		} catch ( NumberFormatException e ) {
+			return -1;
+		}
+	}
+	/**
+	 * method to convert String values to floats.<p>
+	 * It catches any NumberFormatExceptions and returns -1.
+	 * 
+	 * @param value - the string to be converted
+	 * @return the float value represented by the string.
+	 */
+	static float string2Float( String value ) {
+		try {
+			return Float.parseFloat( value );
+		} catch ( NumberFormatException e ) {
+			return -1;
+		}
+	}
+	/**
+	 * method to convert String values to doubles.<p>
+	 * It catches any NumberFormatExceptions and returns -1.
+	 * 
+	 * @param value - the string to be converted
+	 * @return the double value represented by the string.
+	 */
+	static double string2Double( String value ) {
+		try {
+			return Double.parseDouble( value );
 		} catch ( NumberFormatException e ) {
 			return -1;
 		}

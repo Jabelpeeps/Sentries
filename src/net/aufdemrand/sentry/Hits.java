@@ -22,7 +22,7 @@ enum Hits {
 	
 	static boolean useCriticalHits;
 	static Random rand = new Random();
-	static Set<Hits> randomisedHits = EnumSet.of( Hits.Crit3, Hits.Crit2, Hits.Crit1, Hits.Glance, Hits.Miss );
+	private static Set<Hits> randomisedHits = EnumSet.of( Hits.Crit3, Hits.Crit2, Hits.Crit1, Hits.Glance, Hits.Miss );
 	
 	Hits( double mod, int chance, String msg ) {
 		damageModifier = mod;

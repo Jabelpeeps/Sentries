@@ -17,6 +17,7 @@ permissions:
   sentry.*:
     default: op
     children:
+       sentry.debug: true
        sentry.target: true
        sentry.ignore: true
        sentry.stats.*: true
@@ -65,6 +66,8 @@ permissions:
      deafult: op
   sentry.warning:
      deafult: op
+  sentry.debug:
+     default: op
   sentry.reload:
      deafult: op
   sentry.greeting:

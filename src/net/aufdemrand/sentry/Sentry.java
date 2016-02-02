@@ -1,5 +1,7 @@
 package net.aufdemrand.sentry;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -45,7 +47,7 @@ public class Sentry extends JavaPlugin {
 	static boolean denizenActive = false;
 	static Map<String, PluginBridge> activePlugins = new HashMap<String, PluginBridge>();
 	 
-	// Lists of various armour items that will be accepted 
+	// Lists of various armour items that will be accepted, by default.
 	public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, 
 											 Material.CHAINMAIL_BOOTS, 
 											 Material.IRON_BOOTS, 
@@ -126,6 +128,8 @@ public class Sentry extends JavaPlugin {
 			}
 		}
 
+		int targetBitFlag = SentryInstance.bridges;
+		
 		for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
 			
 			if ( !checkPlugin( each ) ) continue;
@@ -135,14 +139,23 @@ public class Sentry extends JavaPlugin {
 			try {
 				@SuppressWarnings("unchecked")
 				Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class.forName( each + "Bridge" );
+				Constructor<? extends PluginBridge> constructor = clazz.getConstructor( int.class );
 				
-				bridge = clazz.newInstance();
+				bridge = constructor.newInstance( targetBitFlag );
 			} 
-			catch ( ClassNotFoundException e ) { e.printStackTrace(); } 
-			catch ( InstantiationException e ) { e.printStackTrace(); } 
-			catch ( IllegalAccessException e ) { e.printStackTrace(); }
+			catch ( ClassNotFoundException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
+			catch ( InstantiationException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
+			catch ( IllegalAccessException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
+			catch ( IllegalArgumentException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
+			catch ( InvocationTargetException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
+			catch ( NoSuchMethodException e ) { helpfulReflectionError( each ); e.printStackTrace(); }  
+			catch ( SecurityException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
 		
-			if ( bridge == null ) continue;
+			if ( bridge == null || !bridge.activate( ) ) continue;
+			
+			logger.log( Level.INFO, each + " activated with bitFlag value of " + bridge.bitFlag );
+			
+			targetBitFlag *= 2;
 			
 			activePlugins.put( each, bridge );
 			
@@ -168,6 +181,11 @@ public class Sentry extends JavaPlugin {
 		getServer().getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
 
 		reloadMyConfig();
+	}
+	
+	private void helpfulReflectionError( String name ) {
+		logger.log( Level.WARNING, "Error loading PluginBridge for the value: '" + name + "' from config.yml. "
+									+ "Check that the PluginBridge is named correctly." );
 	}
 	
 	void reloadMyConfig() {
@@ -218,8 +236,7 @@ public class Sentry extends JavaPlugin {
 		logger.info( s );
 	}
 	
-	// only called from CommandHandler.  Maybe it should be moved there.
-	boolean equip( NPC npc, ItemStack newEquipment ) {
+	boolean equip( NPC npc, SentryInstance inst, ItemStack newEquipment ) {
 		
 		Equipment equipment = npc.getTrait( Equipment.class );
 		if ( equipment == null ) return false;
@@ -247,6 +264,8 @@ public class Sentry extends JavaPlugin {
 		else if ( boots.contains( type ) ) slot = 4;	
 	
 		equipment.set( slot, newEquipment );
+		
+		if ( slot == 0 ) inst.updateWeapon();
 
 		return true;	
 	}

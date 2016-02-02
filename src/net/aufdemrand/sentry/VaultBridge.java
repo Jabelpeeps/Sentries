@@ -1,17 +1,27 @@
 package net.aufdemrand.sentry;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import net.milkbowl.vault.permission.Permission;
 
-public class VaultBridge implements PluginBridge {
+public class VaultBridge extends PluginBridge {
+	
+	Map<SentryInstance, Set<String>> friends = new HashMap<SentryInstance, Set<String>>();
+	Map<SentryInstance, Set<String>> enemies = new HashMap<SentryInstance, Set<String>>();
 	
 	private String activationMsg = ""; 
 	static Permission perms = null;
-	private String[] groups;
 	
-	VaultBridge() {}
+	VaultBridge( int flag ) {
+		super( flag );
+	}
 	
 	@Override
 	public boolean activate() {
@@ -24,7 +34,7 @@ public class VaultBridge implements PluginBridge {
 		
 			if ( perms.hasGroupSupport() ) {
 				
-				groups = perms.getGroups();
+				String[] groups = perms.getGroups();
 				
 				if ( groups.length > 0 ) {
 					activationMsg = "Sucessfully interfaced with Vault: " + groups.length 
@@ -57,15 +67,9 @@ public class VaultBridge implements PluginBridge {
 	}
 
 	@Override
-	public boolean isIgnored( LivingEntity entity, SentryInstance inst ) {
+	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public void refreshAllLists() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -74,4 +78,50 @@ public class VaultBridge implements PluginBridge {
 		
 	}
 
+	@Override
+	public boolean addTarget( String target, SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addIgnore( String target, SentryInstance inst ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	static boolean checkGroups4Targets( World world, OfflinePlayer player, SentryInstance inst ) {
+		
+		// check world permission groups & then global permission groups if needed.
+		return checkGroups4Targets( perms.getPlayerGroups( world.getName(), player ), inst )
+			|| checkGroups4Targets( perms.getPlayerGroups( (String) null, player ), inst );
+	}
+	
+	private static boolean checkGroups4Targets( String[] groups, SentryInstance inst ) {
+		
+		if ( groups != null ) {
+			for ( String each : groups )
+				if ( inst.targetsContain( "GROUP:" + each ) )	
+					return true;
+		}
+		return false;
+	}
+	
+	static boolean checkGroups4Ignores( World world, OfflinePlayer player, SentryInstance inst ) {
+		
+		// check world permission groups & then global permission groups if needed.
+		return checkGroups4Ignores( perms.getPlayerGroups( world.getName(), player ), inst ) 
+			|| checkGroups4Ignores( perms.getPlayerGroups( (String) null, player ), inst );
+	}
+	
+	private static boolean checkGroups4Ignores( String[] groups, SentryInstance inst ) {
+		
+		if ( groups != null ) {
+			for ( String each : groups )
+				if ( inst.ignoresContain( "GROUP:" + each ) )	
+					return true;
+		}
+		return false;
+	}
+	
 }
