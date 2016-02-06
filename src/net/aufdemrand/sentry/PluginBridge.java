@@ -71,33 +71,36 @@ public abstract class PluginBridge {
 	abstract boolean isIgnoring( LivingEntity entity, SentryInstance inst );
 	
 	/**
-	 * Add a target identified by the supplied string for the SentryInstance supplied.
+	 * Adds an entity - identified by the supplied string - as either a target or ignore
+	 * the supplied for the supplied SentryInstance.	 
 	 * <p>
 	 * The PluginBridge should achieve this task without modifying the SentryInstance
 	 * (which knows nothing about the third party plugin) but should store relevant references
-	 * in preparation for a call to 'isTarget()'
+	 * in preparation for a call to 'isTarget()' or 'isIgnoring()'
 	 * 
-	 * @param target - a String identifying the intended target (the exact contents
-	 * can vary, as long as the pluginBridge know how to parse the String).
+	 * @param target - a String identifying the entity to reference (the exact contents
+	 * can vary, as long as the pluginBridge knows how to parse the String).
 	 * @param inst - the SentryInstance instance that will have the target recorded against it.
+	 * @param asTarget - send true to add to the targets list, false to add to ignores.
 	 * @return true - if the target is added successfully.
 	 */
-	abstract boolean addTarget( String target, SentryInstance inst );
+	abstract boolean add( String target, SentryInstance inst, boolean asTarget );
 	
 	/**
-	 * Add an entity - identified by the supplied string - to be ignored by the supplied 
-	 * SentryInstance.
+	 * Removes the entity - identified by the supplied string - as either a target or ignores
+	 * the supplied for the supplied SentryInstance.
 	 * <p>
 	 * The PluginBridge should achieve this task without modifying the SentryInstance
 	 * (which knows nothing about the third party plugin) but should store relevant references
-	 * in preparation for a call to 'isIgnoring()'
+	 * in preparation for a call to 'isTarget()' or 'isIgnoring()'
 	 * 
-	 * @param target - a String identifying the entity to ignore (the exact contents
-	 * can vary, as long as the pluginBridge know how to parse the String).
+	 * @param target - a String identifying the entity to reference (the exact contents
+	 * can vary, as long as the pluginBridge knows how to parse the String).
 	 * @param inst - the SentryInstance instance that will have the target recorded against it.
-	 * @return true - if the target is added successfully.
+	 * @param fromTargets - send true to remove from the targets list, false to remove from ignores.
+	 * @return true - if the entity is removed successfully.
 	 */
-	abstract boolean addIgnore( String target, SentryInstance inst );
+	abstract boolean remove( String entity, SentryInstance inst, boolean fromTargets );
 	
 	/**
 	 * @return a string to be used as a command argument to refer to this PluginBridge.
@@ -110,12 +113,13 @@ public abstract class PluginBridge {
 	 * 'addIgnore()'
 	 */
 	abstract String getCommandHelp();
-	
-	/**
-	 * Refreshes the information held in the cache regarding the supplied
-	 * SentryInstance only.
-	 * 
-	 * @param inst - the SentryInstance to re-cache.
-	 */
-	abstract void refreshLists( SentryInstance inst );
+
+//  I don't think this will be needed now.	
+//	/**
+//	 * Refreshes the information held in the cache regarding the supplied
+//	 * SentryInstance only.
+//	 * 
+//	 * @param inst - the SentryInstance to re-cache.
+//	 */
+//	abstract void refreshLists( SentryInstance inst );
 }

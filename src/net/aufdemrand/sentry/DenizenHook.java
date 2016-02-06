@@ -25,28 +25,7 @@ import net.aufdemrand.denizencore.scripts.commands.AbstractCommand;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
 
-/**
- * Class containing:-
- * <ul>
- *  <li>static variables<ul>
- *  	<li>boolean denizenActive</li>
- *  	<li>Plugin denizenPlugin</li>
- *  	<li>Sentry sentryPlugin</li>
- *  </ul></li>
- *  <li>static methods<ul>
- *  	<li>void {@link #setupHooks()}</li>
- *  	<li>boolean {@link #sentryDeath()}</li>
- *  	<li>void {@link #denizenAction()}</li>
- *  </ul></li>
- *  <li>private class definitions<ul>
- *  	<li>{@link LiveCommand} extends AbstractCommand</li>
- *  	<li>{@link DieCommand} extends AbstractCommand</li>
- *  	<li>{@link NpcdeathTriggerOwner} extends AbstractTrigger</li>
- *  	<li>{@link NpcdeathTrigger} extends AbstractTrigger</li>
- *  </ul></li>
- *  </ul>
- *  TODO add further details to above.
- */
+
 public class DenizenHook {
 
 	static Denizen denizenPlugin;
@@ -158,7 +137,7 @@ public class DenizenHook {
 					if ( inst != null ) {
 						inst.myStatus = SentryStatus.isLOOKING;
 						
-						if ( deaggro ) inst.setTarget( null, false );
+						if ( deaggro ) inst.clearTarget();
 					}
 				}
 			} else {

@@ -17,7 +17,7 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
 
 enum AttackType {
-	// Columns:-"name"			weapon						projectile		incendiary?	lightning level?
+// 	Columns:-	"name"			weapon						projectile		incendiary?	lightning level?
 	bombardier( "Bombardier", 	Material.EGG, 				Egg.class ),
 	archer( 	"Archer", 		Material.BOW, 				Arrow.class ),
 	magi( 		"IceMagi", 		Material.SNOW_BALL,         Snowball.class ),
@@ -31,6 +31,7 @@ enum AttackType {
 	warlock2( 	"Warlock2", 	Material.SKULL_ITEM,		WitherSkull.class ),
 //	warlock3( "Warlock3" ),  	// No default weapon in config.yml so disabled for now.
 	witchdoctor( "WitchDoctor", Material.POTION,			ThrownPotion.class ),
+	
 	brawler( 	"Brawler", 		Material.AIR,				null ) {
 		@Override
 		Material getWeapon( SentryInstance sentry ) {

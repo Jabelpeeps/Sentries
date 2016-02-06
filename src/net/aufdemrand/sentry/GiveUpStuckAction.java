@@ -26,7 +26,7 @@ public class GiveUpStuckAction implements StuckAction {
         	  && npc.getEntity().getLocation().distanceSquared( base ) <= 4 ) {
                 		return true;
         	}	
-		inst.setTarget( null, false );
+		inst.clearTarget();
 		return false;
 	}
 }

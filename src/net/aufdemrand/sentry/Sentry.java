@@ -38,11 +38,11 @@ import net.citizensnpcs.api.trait.trait.Equipment;
 
 public class Sentry extends JavaPlugin {
 
-	static boolean debug = false;
+	static boolean debug = true;
 	
-	public boolean dieLikePlayers = false;
-	public boolean bodyguardsObeyProtection = true;
-	public boolean ignoreListIsInvincible = true;
+	static boolean dieLikePlayers = false;
+	static boolean bodyguardsObeyProtection = true;
+	static boolean ignoreListIsInvincible = true;
 
 	static boolean denizenActive = false;
 	static Map<String, PluginBridge> activePlugins = new HashMap<String, PluginBridge>();
@@ -82,11 +82,13 @@ public class Sentry extends JavaPlugin {
 	Map<String, Boolean> defaultBooleans = new HashMap<String, Boolean>();
 	Map<String, Integer> defaultIntegers = new HashMap<String, Integer>();
 	Map<String, Double> defaultDoubles = new HashMap<String, Double>();
+	List<String> defaultTargets;
+	List<String> defaultIgnores;
 	String defaultGreeting = "";
 	String defaultWarning = "";
 
-	public int logicTicks = 10;	
-	public int sentryEXP = 5;
+	static int logicTicks = 10;	
+	static int sentryEXP = 5;
 	
 	public Queue<Projectile> arrows = new LinkedList<Projectile>(); 
 	
@@ -104,27 +106,24 @@ public class Sentry extends JavaPlugin {
 		sentryPlugin = this;		
 		logger = getLogger();
 
-		if ( !checkPlugin( Util.CITIZENS ) ) {			
-			logger.log( Level.SEVERE, "Sentry cannot be loaded without Citizens 2.0. Aborting." );
+		if ( !checkPlugin( S.CITIZENS ) ) {			
+			logger.log( Level.SEVERE, S.ERROR_NO_CITIZENS );
 			pluginManager.disablePlugin( this );	
 			return;
 		}	
 		
-		if ( checkPlugin( Util.DENIZEN ) ) {
+		if ( checkPlugin( S.DENIZEN ) ) {
 			
-			String vers = pluginManager.getPlugin( Util.DENIZEN ).getDescription().getVersion();
+			String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription().getVersion();
 			
-			if ( vers.startsWith( "0.7" ) || vers.startsWith( "0.8" ) ) {
-				logger.log( Level.WARNING, "Sentry is not compatible with Denizen .7 or .8" );
-			}
-			else if ( vers.startsWith( "0.9" ) ) {
+			if ( vers.startsWith( "0.9" ) ) {
 				
-				denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( Util.DENIZEN ), this );				
+				denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( S.DENIZEN ), this );				
 				denizenActive = DenizenHook.npcDeathTriggerActive || DenizenHook.npcDeathTriggerOwnerActive
 							 	  || DenizenHook.dieCommandActive || DenizenHook.liveCommandActive;
 			}
 			else {
-				logger.log( Level.WARNING, "Unknown version of Denizen, Sentry was unable to register with it." );
+				logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
 			}
 		}
 
@@ -138,8 +137,8 @@ public class Sentry extends JavaPlugin {
 			
 			try {
 				@SuppressWarnings("unchecked")
-				Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class.forName( each + "Bridge" );
-				Constructor<? extends PluginBridge> constructor = clazz.getConstructor( int.class );
+				Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class.forName( S.PACKAGE + each + "Bridge" );
+				Constructor<? extends PluginBridge> constructor = clazz.getDeclaredConstructor( int.class );
 				
 				bridge = constructor.newInstance( targetBitFlag );
 			} 
@@ -153,13 +152,12 @@ public class Sentry extends JavaPlugin {
 		
 			if ( bridge == null || !bridge.activate( ) ) continue;
 			
-			logger.log( Level.INFO, each + " activated with bitFlag value of " + bridge.bitFlag );
+			if ( debug ) logger.log( Level.INFO, each + " activated with bitFlag value of " + bridge.bitFlag );
+			logger.log( Level.INFO, bridge.getActivationMessage() );
 			
 			targetBitFlag *= 2;
 			
 			activePlugins.put( each, bridge );
-			
-			logger.log( Level.INFO, bridge.getActivationMessage() );
 		}
 		
 		CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
@@ -220,6 +218,8 @@ public class Sentry extends JavaPlugin {
 		loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
 		loadIntoStringMap( config, "DefaultStats", defaultIntegers );
 		loadIntoStringMap( config, "DefaultValues", defaultDoubles );
+		defaultTargets = config.getStringList( S.DEFAULT_TARGETS );
+		defaultIgnores = config.getStringList( S.DEFAULT_IGNORES );
 		defaultWarning = config.getString( "DefaultTexts.Warning" );
 		defaultGreeting = config.getString( "DefaultTexts.Greeting" );
 	}
@@ -265,7 +265,7 @@ public class Sentry extends JavaPlugin {
 	
 		equipment.set( slot, newEquipment );
 		
-		if ( slot == 0 ) inst.updateWeapon();
+		if ( slot == 0 ) inst.updateAttackType();
 
 		return true;	
 	}
@@ -308,9 +308,9 @@ public class Sentry extends JavaPlugin {
 			List<String> strings = config.getStringList( key );
 	
 			if ( strings.size() > 0 ) {
-				
+				if ( debug ) debugLog( strings.toString() );
 				set.clear();
-			
+				
 				for ( String each : strings ) 
 					set.add( Util.getMaterial( each.trim() ) );
 			}
@@ -321,6 +321,7 @@ public class Sentry extends JavaPlugin {
 		map.clear();
 		
 		for ( String each : config.getStringList( node ) ) {
+			if ( debug ) debugLog( each );
 			String[] args = each.trim().split(" ");
 			
 			if ( args.length != 2 ) continue;
@@ -413,11 +414,16 @@ public class Sentry extends JavaPlugin {
 	 */
 	private boolean checkPlugin( String name ) {
 		
-		if 	(  pluginManager.getPlugin( name ) != null 
+		if 	(  S.SCORE.equals( name ) ) return true;
+		
+		if  (  pluginManager.getPlugin( name ) != null 
 			&& pluginManager.getPlugin( name ).isEnabled() ) {
+			
+				if ( debug ) debugLog( name + " found by bukkit/spigot." );
+				
 				return true;
 		}
-		logger.log( Level.INFO, "Could not find or register with " + name );
+		logger.log( Level.INFO, S.ERROR_PLUGIN_NOT_FOUND + name );
 		
 		return false;
 	}

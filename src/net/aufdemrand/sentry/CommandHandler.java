@@ -28,7 +28,7 @@ public abstract class CommandHandler {
 		
 		if ( player.hasPermission( command ) ) return true;
 		
-		player.sendMessage( ChatColor.RED + "You do not have permission for that command." );
+		player.sendMessage( S.NO_COMMAND_PERM );
 		return false;
 	}
 	
@@ -45,7 +45,7 @@ public abstract class CommandHandler {
 		
 		if ( args.length >= number ) return true;
 		
-		player.sendMessage( ChatColor.RED + "Use /sentry help for command reference." );
+		player.sendMessage( S.GET_COMMAND_HELP );
 		return false;
 	}
 	
@@ -59,11 +59,11 @@ public abstract class CommandHandler {
 	private static void respawnMessage( int value, NPC npc, CommandSender player ) {
 		
 		if ( value == 0 ) 
-			player.sendMessage( ChatColor.GOLD + npc.getName() + " will not automatically respawn." );
+			player.sendMessage( ChatColor.GOLD + npc.getName() + S.NPC_NO_AUTO_RESPAWN );
 		if ( value == -1 ) 
-			player.sendMessage( ChatColor.GOLD + npc.getName() + " will be deleted upon death" );
+			player.sendMessage( ChatColor.GOLD + npc.getName() + S.NPC_DELETE_ON_DEATH );
 		if ( value > 0 ) 
-			player.sendMessage( ChatColor.GOLD + npc.getName() + " respawns after " + value + "s" );
+			player.sendMessage( ChatColor.GOLD + npc.getName() + S.NPC_RESPAWN_AFTER + value + S.SECONDS );
 	}
 	
 	/**
@@ -94,10 +94,34 @@ public abstract class CommandHandler {
 		}
 		return out.trim();
 	}
+	
+	/**
+	 * sends help about the target command to a player
+	 * @param player - the player who needs help
+	 */
+	private static void targetCommandHelp( CommandSender player ) {
+		player.sendMessage( S.HELP_COMMAND_TARGET_ADD );
+		player.sendMessage( S.HELP_COMMAND_TARGET_REMOVE );
+		player.sendMessage( S.HELP_COMMAND_TARGET_CLEAR );
+		player.sendMessage( S.HELP_COMMAND_TARGET_LIST );
+		player.sendMessage( S.HELP_COMMAND_ADD_REMOVE_TYPES);
+	}
+	
+	/**
+	 * sends help about the ignore command to a player
+	 * @param player - the player who needs help
+	 */
+	private static void ignoreCommandHelp( CommandSender player ) {
+		player.sendMessage( S.HELP_COMMAND_IGNORE_LIST );
+		player.sendMessage( S.HELP_COMMAND_IGNORE_CLEAR );
+		player.sendMessage( S.HELP_COMMAND_IGNORE_ADD );
+		player.sendMessage( S.HELP_COMMAND_IGNORE_REMOVE );
+		player.sendMessage( S.HELP_COMMAND_ADD_REMOVE_TYPES);
+	}
 //------------------------------------------------------------------------------------	
 //------------------------------------------------------------------------------------
 	/**
-	 * The main method of this class, that parses the arguments and responds accordingly 
+	 * The only accessible method of this class. It parses the arguments and responds accordingly.
 	 * 
 	 * @param player
 	 * @param inargs
@@ -109,16 +133,16 @@ public abstract class CommandHandler {
 		if ( !enoughArgs( 1, inargs, player ) ) return true;
 
 //----------------------------------------------------- help command -----------------
-		if ( inargs[0].equalsIgnoreCase( "help" ) ) {
+		if ( inargs[0].equalsIgnoreCase( S.HELP ) ) {
 
 			player.sendMessage(ChatColor.GOLD + "------- Sentry Commands -------");
-			player.sendMessage(ChatColor.GOLD + "You can use /sentry (id) [command] [args] to perform any of these "
-																	+ "commands on a sentry without having it selected.");			
-			player.sendMessage(ChatColor.GOLD + "");
+			player.sendMessage(ChatColor.GOLD + "You can use /sentry (id) [command] [args] to perform commands "
+													+ "on a sentry without having it selected.");			
+			player.sendMessage( "" );
 			
 			if ( checkCommandPerm( "sentry.reload", player ) ) {
 				player.sendMessage(ChatColor.GOLD + "/sentry reload");
-				player.sendMessage(ChatColor.GOLD + "  reload the config.yml");
+				player.sendMessage(ChatColor.GOLD + "  reloads the config file");
 			}
 			if ( checkCommandPerm( "sentry.target", player ) ) {
 				player.sendMessage(ChatColor.GOLD + "/sentry target [add|remove] [target]");
@@ -239,7 +263,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.reload", player ) ) {
 
 				sentry.reloadMyConfig();
-				player.sendMessage( ChatColor.GREEN + "reloaded Sentry/config.yml" );
+				player.sendMessage( ChatColor.GREEN + "reloaded Sentry's config.yml file" );
 			}
 			return true;
 		}
@@ -248,47 +272,24 @@ public abstract class CommandHandler {
 		// the remaining commands all deal with npc's
 		
 		
-		// did player specify an integer as the first argument?  
-		// It will be checked later on to see if it is a valid npc id, for now we just store it and move on.		
+		// did player specify an integer as the first argument?  	
 		int npcid = Util.string2Int( inargs[0] );
-		
-		// i is set to 1 only if an int was found above.
-//		int i = ( npcid > 0 ) ? 1 : 0;
 		
 		int nextArg = ( npcid > 0 ) ? 1 
 									: 0;
-// surely this is unnecessary?
-//		
-//		// create a new array of args that is re-based according to whether an npc id was found above.
-//		String[] args = new String[ inargs.length - i ];
-//
-//		for ( int j = i; j < inargs.length; j++ ) {
-//			args[ j - i ] = inargs[ j ];
-//		}
 
 		if ( !enoughArgs( 1 + nextArg, inargs, player ) ) return true;
 
-		// hold the state of the third argument (if it holds a boolean value) in a field for later use.
-		// this is held as an object not a primitive to allow for a third state - 'null'.
-		Boolean set = null;
-		
-		if ( inargs.length == 2 + nextArg ) {
-			if ( inargs[1 + nextArg].equalsIgnoreCase( "true" ) || inargs[1 + nextArg].equalsIgnoreCase( "on" ) ) 
-					set = true;
-			if ( inargs[1 + nextArg].equalsIgnoreCase( "false" ) || inargs[1 + nextArg].equalsIgnoreCase( "off" ) ) 
-					set = false;
-		}
 		NPC thisNPC;
 		
-		// check to see whether the value saved earlier is an npc ID, and save a reference if so.
+		// check to see whether the value saved is an npc ID, and save a reference if so.
 		if ( npcid == -1 ) {
 			
-			thisNPC = ((Citizens) sentry.pluginManager.getPlugin( "Citizens" ))
+			thisNPC = ((Citizens) sentry.pluginManager.getPlugin( S.CITIZENS ))
 													  .getNPCSelector()
 													  .getSelected( player );
 			if ( thisNPC == null ) {
-				player.sendMessage( ChatColor.RED + "You must provide an NPC #id "
-												+ "or have an NPC selected to use this command" );
+				player.sendMessage( S.ERROR_NO_NPC );
 				return true;
 			}	
 			npcid = thisNPC.getId();
@@ -297,15 +298,13 @@ public abstract class CommandHandler {
 			thisNPC = CitizensAPI.getNPCRegistry().getById( npcid ); 
 	
 			if ( thisNPC == null ) {
-				player.sendMessage( ChatColor.RED + "An NPC with #id " + npcid + " was not found" );
+				player.sendMessage( S.ERROR_ID_INVALID + npcid );
 				return true;
 			}
 		}
-		// We are now sure that thisNPC refers to a valid npc instance, and that npcid contains its id.
-        // lets check that the specified npc has the sentry trait.
-		
+		// We are now sure that thisNPC is valid, and that npcid contains its id. 
 		if ( !thisNPC.hasTrait( SentryTrait.class ) ) {
-			player.sendMessage( ChatColor.RED + "That command can only be used on a Sentry." );
+			player.sendMessage( S.ERROR_NOT_SENTRY );
 			return true;
 		}
 		// OK, we have a sentry to modify.
@@ -338,6 +337,18 @@ public abstract class CommandHandler {
 		// We now know that player is either the owner, or an admin with a server-owned npc.
 		// lets save a reference to the SentryInstance of the npc before continuing.
 		SentryInstance inst = thisNPC.getTrait( SentryTrait.class ).getInstance();
+		String npcName = thisNPC.getName();
+		
+		// hold the state of the third argument (if it holds a boolean value) in a field for later use.
+		// this is held as an object not a primitive to allow for a third state - 'null'.
+		Boolean set = null;
+		
+		if ( inargs.length == 2 + nextArg ) {
+			if ( inargs[1 + nextArg].equalsIgnoreCase( "true" ) || inargs[1 + nextArg].equalsIgnoreCase( "on" ) ) 
+					set = true;
+			if ( inargs[1 + nextArg].equalsIgnoreCase( "false" ) || inargs[1 + nextArg].equalsIgnoreCase( "off" ) ) 
+					set = false;
+		}
 		
 //------------------------------------------------------------ spawn command --------------		
 		if ( inargs[nextArg].equalsIgnoreCase( "spawn" ) ) {
@@ -345,11 +356,11 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.spawn", player ) ) {
 			
 				if ( thisNPC.getEntity() == null ) {
-					player.sendMessage( ChatColor.RED + "Cannot set spawn while " +  thisNPC.getName()  + " is dead." );
+					player.sendMessage( ChatColor.RED + "Cannot set spawn while " + npcName + " is dead." );
 					return true;
 				}
 				inst.spawnLocation = thisNPC.getEntity().getLocation();
-				player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will respawn at its present location." );
+				player.sendMessage( ChatColor.GREEN + npcName + " will respawn at its present location." );
 			}
 			return true;
 		}
@@ -363,9 +374,9 @@ public abstract class CommandHandler {
 											  	  : set;
 				
 				if ( inst.invincible )
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " now INVINCIBLE." );
+					player.sendMessage( ChatColor.GREEN + npcName + " now INVINCIBLE." );
 				else 
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " now takes damage.." );
+					player.sendMessage( ChatColor.GREEN + npcName + " now takes damage.." );
 			}
 			return true;
 		}
@@ -379,9 +390,9 @@ public abstract class CommandHandler {
 													  : set;
 	
 				if ( inst.iWillRetaliate ) 
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will retalitate against all attackers." );
+					player.sendMessage( ChatColor.GREEN + npcName + " will retalitate against all attackers." );
 				else
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will not retaliate." );
+					player.sendMessage( ChatColor.GREEN + npcName + " will not retaliate." );
 			}
 			return true;
 		}
@@ -392,12 +403,12 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.options.criticals", player ) ) {
 
 				inst.acceptsCriticals = ( set == null ) ? !inst.acceptsCriticals
-												 : set;
+												 		: set;
 	
 				if ( inst.acceptsCriticals ) 
-					player.sendMessage( ChatColor.GREEN +thisNPC.getName() + " will take critical hits." );
+					player.sendMessage( ChatColor.GREEN + npcName + " will take critical hits." );
 				else
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will take normal damage." );
+					player.sendMessage( ChatColor.GREEN + npcName + " will take normal damage." );
 			}
 			return true;
 		}
@@ -411,9 +422,9 @@ public abstract class CommandHandler {
 													 : set;
 	
 				if ( inst.dropInventory )
-					player.sendMessage( ChatColor.GREEN +  thisNPC.getName() + " will drop items" ); 
+					player.sendMessage( ChatColor.GREEN + npcName + " will drop items" ); 
 				else
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will not drop items." );
+					player.sendMessage( ChatColor.GREEN + npcName + " will not drop items." );
 			}
 			return true;
 		}
@@ -427,9 +438,9 @@ public abstract class CommandHandler {
 														   : set;
 	
 				if ( inst.killsDropInventory )
-					player.sendMessage( ChatColor.GREEN +  thisNPC.getName() + "'s kills will drop items or exp" );
+					player.sendMessage( ChatColor.GREEN + npcName + "'s kills will drop items or exp" );
 				else
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + "'s kills will not drop items or exp." );
+					player.sendMessage( ChatColor.GREEN + npcName + "'s kills will not drop items or exp." );
 			}
 			return true;
 		}
@@ -445,9 +456,9 @@ public abstract class CommandHandler {
 				thisNPC.data().set( NPC.TARGETABLE_METADATA, inst.targetable );
 	
 				if ( inst.targetable ) 
-					player.sendMessage( ChatColor.GREEN +  thisNPC.getName() + " will be targeted by mobs" );
+					player.sendMessage( ChatColor.GREEN + npcName + " will be targeted by mobs" );
 				else
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " will not be targeted by mobs" );
+					player.sendMessage( ChatColor.GREEN + npcName + " will not be targeted by mobs" );
 			}
 			return true;
 		}	
@@ -459,14 +470,16 @@ public abstract class CommandHandler {
 				set = ( set == null ) ? !inst.isMounted() 
 									  : set;
 				if ( set ) {
-					player.sendMessage( ChatColor.GREEN +  thisNPC.getName() + " is now Mounted" );
 					inst.createMount();
 					inst.mount();
+					player.sendMessage( ChatColor.GREEN + npcName + " is now Mounted" );
 				}
 				else {
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " is no longer Mounted" );
-					if ( inst.isMounted() ) Util.removeMount( inst.mountID );	
+					if ( inst.isMounted() ) 
+						Util.removeMount( inst.mountID );	
+					
 					inst.mountID = -1;
+					player.sendMessage( ChatColor.GREEN + npcName + " is no longer Mounted" );
 				}
 			}
 			return true;
@@ -496,12 +509,6 @@ public abstract class CommandHandler {
 					}
 	
 					String arg = joinArgs( start + nextArg, inargs );
-//					String arg = "";
-//					for ( int i = start + nextArg; i < inargs.length; i++ ) {
-//						arg += " " + inargs[i];
-//					}
-//					arg = arg.trim();
-	
 					
 					if ( !playersonly ){ 
 						ok = inst.findGuardEntity( arg, false );
@@ -512,16 +519,16 @@ public abstract class CommandHandler {
 					}
 	
 					if ( ok )
-						player.sendMessage( ChatColor.GREEN +  thisNPC.getName() + " is now guarding "+ arg );   
+						player.sendMessage( ChatColor.GREEN + npcName + " is now guarding "+ arg );   
 					else 
-						player.sendMessage( ChatColor.RED +  thisNPC.getName() + " could not find " + arg + "." );   
+						player.sendMessage( ChatColor.RED + npcName + " could not find " + arg );   
 					return true;
 				}
 				
 				if ( inst.guardTarget == null )
-					player.sendMessage( ChatColor.RED +  thisNPC.getName() + " is already set to guard its immediate area" );   	
+					player.sendMessage( ChatColor.RED + npcName + " is already set to guard its immediate area" );   	
 				else
-					player.sendMessage( ChatColor.GREEN +  thisNPC.getName() + " is now guarding its immediate area. " );
+					player.sendMessage( ChatColor.GREEN + npcName + " is now guarding its immediate area" );
 				
 				inst.findGuardEntity( null, false );
 			}
@@ -533,7 +540,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.follow", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Follow Distance is " + inst.followDistance );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Follow Distance is " + inst.followDistance );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry follow [#]. Default is 4. " );
 				}
 				else {
@@ -545,7 +552,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( dist > 32 ) dist = 32;
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " follow distance set to " + dist + "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " follow distance set to " + dist );   
 					inst.followDistance = dist * dist;
 				}
 			}
@@ -557,7 +564,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.health", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Health is " + inst.sentryMaxHealth );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Health is " + inst.sentryMaxHealth );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry health [#]   note: Typically players" );
 					player.sendMessage( ChatColor.GOLD + "  have 20 HPs when fully healed" );
 				}
@@ -570,7 +577,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( HPs > 2000000 ) HPs = 2000000;
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " health set to " + HPs + "." );  
+					player.sendMessage( ChatColor.GREEN + npcName + " health set to " + HPs );  
 					inst.sentryMaxHealth = HPs;
 					inst.setHealth( HPs );
 				}
@@ -583,7 +590,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.armor", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Armor is " + inst.armorValue );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Armor is " + inst.armorValue );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry armor [#] " );
 				}
 				else {
@@ -596,7 +603,7 @@ public abstract class CommandHandler {
 
 					if ( armour > 2000000 ) armour = 2000000;
 	
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " armor set to " + armour + "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " armor set to " + armour );   
 					inst.armorValue = armour;
 				}
 			}
@@ -608,7 +615,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.strength", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Strength is " + inst.strength );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Strength is " + inst.strength );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry strength # " );
 					player.sendMessage( ChatColor.GOLD + "Note: At strength 0 the Sentry will do no damamge. " );
 				}
@@ -621,7 +628,7 @@ public abstract class CommandHandler {
 					}
 					
 					if ( strength > 2000000 ) strength = 2000000;	
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " strength set to " + strength+ "." );  
+					player.sendMessage( ChatColor.GREEN + npcName + " strength set to " + strength );  
 					inst.strength = strength;
 				}
 			}
@@ -634,7 +641,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.nightvision", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Night Vision is " + inst.nightVision );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Night Vision is " + inst.nightVision );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry nightvision [0-16] " );
 					player.sendMessage( ChatColor.GOLD + "Usage: 0 = See nothing, 16 = See everything. " );
 				}
@@ -647,7 +654,7 @@ public abstract class CommandHandler {
 					}
 					if ( vision > 16 ) vision = 16;
 	
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Night Vision set to " + vision+ "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " Night Vision set to " + vision );   
 					inst.nightVision = vision;
 				}
 			}
@@ -686,7 +693,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.speed", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Speed is " + inst.sentrySpeed );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Speed is " + inst.sentrySpeed );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry speed [0.0 - 2.0]" );
 				}
 				else {
@@ -698,7 +705,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( speed > 2.0 ) speed = 2.0f;
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " speed set to " + speed + "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " speed set to " + speed );   
 					inst.sentrySpeed = speed;
 				}
 			}
@@ -710,7 +717,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.attackrate", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Projectile Attack Rate is " 
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Projectile Attack Rate is " 
 																		+ inst.attackRate + "seconds between shots." );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry attackrate [0.0 - 30.0]");
 				}
@@ -723,7 +730,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( attackrate > 30.0 ) attackrate = 30.0;
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Projectile Attack Rate set to " + attackrate + "." );  
+					player.sendMessage( ChatColor.GREEN + npcName + " Projectile Attack Rate set to " + attackrate );  
 					inst.attackRate = attackrate;
 				}
 			}
@@ -735,7 +742,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.healrate", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Heal Rate is " + inst.healRate + "s" );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Heal Rate is " + inst.healRate + "s" );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry healrate [0.0 - 300.0]" );
 					player.sendMessage( ChatColor.GOLD + "Usage: Set to 0 to disable healing" );
 				}
@@ -748,7 +755,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( healrate > 300.0 ) healrate = 300.0;
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Heal Rate set to " + healrate + "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " Heal Rate set to " + healrate );   
 					inst.healRate = healrate;
 				}
 			}
@@ -760,7 +767,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.range", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Range is " + inst.sentryRange );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Range is " + inst.sentryRange );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry range [1 - 100]" );
 				}
 				else {
@@ -772,7 +779,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( range > 100 ) range = 100;
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " range set to " + range + "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " range set to " + range );   
 					inst.sentryRange = range;
 				}
 			}
@@ -784,7 +791,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.stats.warningrange", player ) ) {
 
 				if ( inargs.length <= 1 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Warning Range is " + inst.warningRange );
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Warning Range is " + inst.warningRange );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry warningrangee [0 - 50]" );
 				}
 				else {
@@ -796,7 +803,7 @@ public abstract class CommandHandler {
 					}
 
 					if ( range > 50 ) range = 50;
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " warning range set to " + range + ".");   
+					player.sendMessage(ChatColor.GREEN + npcName + " warning range set to " + range );   
 					inst.warningRange = range;
 				}
 			}
@@ -818,7 +825,7 @@ public abstract class CommandHandler {
 						
 						//remove equipment
 						sentry.equip( thisNPC, inst, null );
-						player.sendMessage( ChatColor.YELLOW +thisNPC.getName() + "'s equipment cleared." ); 
+						player.sendMessage( ChatColor.YELLOW + npcName + "'s equipment cleared." ); 
 					}
 					else {
 						Material mat = Util.getMaterial( inargs[nextArg + 1] );
@@ -831,7 +838,7 @@ public abstract class CommandHandler {
 						ItemStack item = new ItemStack( mat );
 						
 						if ( sentry.equip( thisNPC, inst, item ) ) 
-							player.sendMessage( ChatColor.GREEN + " equipped " + mat.toString() + " on " + thisNPC.getName() ); 
+							player.sendMessage( ChatColor.GREEN + " equipped " + mat.toString() + " on " + npcName ); 
 						else 
 							player.sendMessage( ChatColor.RED + " Could not equip: invalid mob type?" ); 
 					}
@@ -846,21 +853,15 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.warning", player ) ) {
 
 				if ( inargs.length >= 2 + nextArg ) {
-					
-//					String arg = "";
-//					for ( int i = 1 + nextArg; i < inargs.length; i++ ) {
-//						arg += " " + inargs[i];
-//					}
-//					arg = arg.trim();
-	
+						
 					String str = sanitiseString( joinArgs( 1 + nextArg, inargs ) );
 					
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " warning message set to " 
-										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', str ) + "." );   
+					player.sendMessage( ChatColor.GREEN + npcName + " warning message set to " 
+										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', str ) );   
 					inst.warningMsg = str;
 				}
 				else {
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Warning Message is: " 
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Warning Message is: " 
 										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', inst.warningMsg ) );
 					player.sendMessage( ChatColor.GOLD + "Usage: /sentry warning 'The Text to use'" );
 				}
@@ -874,22 +875,16 @@ public abstract class CommandHandler {
 			
 				if ( inargs.length >= 2 + nextArg ) {
 	
-//					String arg = "";
-//					for ( int i = 1 + nextArg; i < inargs.length; i++ ) {
-//						arg += " " + inargs[i];
-//					}
-//					arg = arg.trim();
-	
 					String str = sanitiseString( joinArgs( 1 + nextArg, inargs ) );
 					
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Greeting message set to " 
-										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', str ) + "." );   
+					player.sendMessage(ChatColor.GREEN + npcName + " Greeting message set to " 
+										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', str ) );   
 					inst.greetingMsg = str;
 				}
-				else{
-					player.sendMessage( ChatColor.GOLD + thisNPC.getName() + "'s Greeting Message is: " 
+				else {
+					player.sendMessage( ChatColor.GOLD + npcName + "'s Greeting Message is: " 
 										+ ChatColor.RESET + ChatColor.translateAlternateColorCodes( '&', inst.greetingMsg ) );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry greeting 'The Text to use'");
+					player.sendMessage( ChatColor.GOLD + "Usage: /sentry greeting 'The Text to use'" );
 				}
 			}
 			return true;
@@ -900,7 +895,7 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.info", player ) ) {
 
 				player.sendMessage( ChatColor.GOLD + "------- Sentry Info for (" + thisNPC.getId() + ") " 
-																				 + thisNPC.getName() + "------" );
+																				 + npcName + "------" );
 				player.sendMessage( ChatColor.RED + "[HP]:" + ChatColor.WHITE + inst.getHealth() + "/" + inst.sentryMaxHealth + 
 									ChatColor.RED + " [AP]:" + ChatColor.WHITE + inst.getArmor() +
 									ChatColor.RED + " [STR]:" + ChatColor.WHITE + inst.getStrength() + 
@@ -919,10 +914,8 @@ public abstract class CommandHandler {
 													+ "  Respawn Delay: " + inst.respawnDelay + "s" );
 				player.sendMessage( ChatColor.BLUE 	+ "Status: " + inst.myStatus);
 				
-				if ( inst.meleeTarget != null ) 
-					player.sendMessage( ChatColor.BLUE + "Target: " + inst.meleeTarget.toString() );
-				else if ( inst.projectileTarget != null ) 
-					player.sendMessage( ChatColor.BLUE + "Target: " + inst.projectileTarget.toString() );
+				if ( inst.attackTarget != null ) 
+					player.sendMessage( ChatColor.BLUE + "Target: " + inst.attackTarget.toString() );
 				else 
 					player.sendMessage( ChatColor.BLUE + "Target: Nothing" );
 	
@@ -939,20 +932,18 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.target", player ) ) {
 
 				if ( inargs.length < 2 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target add [entity:Name] or [player:Name] or "
-																+ "[group:Name] or [entity:monster] or [entity:player]" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target remove [target]" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target clear" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target list" );
+					targetCommandHelp( player );
+					
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target add [entity:Name] or [player:Name] or "
+//																+ "[group:Name] or [entity:monster] or [entity:player]" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target remove [target]" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target clear" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target list" );
+					
 					return true;
 				}
 				
 				String arg = joinArgs( 2 + nextArg, inargs );
-//				String arg = "";
-//				for ( int i = 2 + nextArg; i < inargs.length; i++ ) {
-//					arg += " " + inargs[i];
-//				}
-//				arg = arg.trim();
 	
 				if ( arg.equalsIgnoreCase( "nationenemies" ) && inst.myNPC.isSpawned() ) {
 					String natname = TownyBridge.getNationNameForLocation( inst.myNPC.getEntity().getLocation() );
@@ -969,35 +960,37 @@ public abstract class CommandHandler {
 					inst.validTargets.add( arg.toUpperCase() );
 					inst.processTargets();
 					inst.clearTarget();
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Target added. Now targeting " 
-																				+ inst.validTargets.toString() );
+					player.sendMessage( ChatColor.GREEN + npcName + " Target added. Now targeting " 
+																	+ inst.validTargets.toString() );
 				}
 				else if ( inargs[nextArg + 1].equals( "remove" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 					
 					inst.validTargets.remove( arg.toUpperCase() );
 					inst.processTargets();
 					inst.clearTarget();
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Targets removed. Now targeting " 
-																				+ inst.validTargets.toString() );
+					player.sendMessage( ChatColor.GREEN + npcName + " Targets removed. Now targeting " 
+																	+ inst.validTargets.toString() );
 				}
 				else if ( inargs[nextArg + 1].equals( "clear" ) ) {
 					
 					inst.validTargets.clear();
 					inst.processTargets();
 					inst.clearTarget();
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Targets cleared." );
+					player.sendMessage( ChatColor.GREEN + npcName + " Targets cleared." );
 				}
 				else if ( inargs[nextArg + 1].equals( "list" ) ) {
 					player.sendMessage( ChatColor.GREEN + "Targets: " + inst.validTargets.toString() );
 				}
 				else {
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target list" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target clear" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target add type:name" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target remove type:name" );
-					player.sendMessage( ChatColor.GOLD + "type:name can be any of the following: entity:MobName entity:monster "
-													+ "entity:player entity:all player:PlayerName group:GroupName town:TownName "
-													+ "nation:NationName faction:FactionName" );
+					targetCommandHelp( player );
+					
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target list" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target clear" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target add type:name" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry target remove type:name" );
+//					player.sendMessage( ChatColor.GOLD + "type:name can be any of the following: entity:MobName entity:monster "
+//													+ "entity:player entity:all player:PlayerName group:GroupName town:TownName "
+//													+ "nation:NationName faction:FactionName" );
 				}
 			}
 			return true;
@@ -1008,57 +1001,54 @@ public abstract class CommandHandler {
 			if ( checkCommandPerm( "sentry.ignore", player ) ) {
 
 				if ( inargs.length < 2 + nextArg ) {
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore list" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore clear" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore add type:name" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore remove type:name" );
-					player.sendMessage( ChatColor.GOLD + "type:name can be any of the following: entity:MobName "
-													+ "entity:monster entity:player entity:all player:PlayerName "
-													+ "group:GroupName town:TownName nation:NationName faction:FactionName");
+					ignoreCommandHelp( player );
+					
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore list" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore clear" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore add type:name" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore remove type:name" );
+//					player.sendMessage( ChatColor.GOLD + "type:name can be any of the following: entity:MobName "
+//													+ "entity:monster entity:player entity:all player:PlayerName "
+//													+ "group:GroupName town:TownName nation:NationName faction:FactionName");
 					return true;
 				}
 				String arg = joinArgs( 2 + nextArg, inargs );
-//				String arg = "";
-//				for ( int i = 2 + nextArg; i < inargs.length; i++ ) {
-//					arg += " " + inargs[i];
-//				}
-//				arg = arg.trim();
 	
 				if ( inargs[nextArg + 1].equals( "add" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 					
 					inst.ignoreTargets.add( arg.toUpperCase() );
 					inst.processTargets();
 					inst.clearTarget();
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Ignore added. Now ignoring " 
-																			+ inst.ignoreTargets.toString() );
+					player.sendMessage( ChatColor.GREEN + npcName + " Ignore added. Now ignoring " 
+																+ inst.ignoreTargets.toString() );
 				}
 				else if ( inargs[nextArg + 1].equals( "remove" ) && arg.length() > 0 && arg.split( ":" ).length > 1 ) {
 	
 					inst.ignoreTargets.remove( arg.toUpperCase() );
 					inst.processTargets();
 					inst.clearTarget();
-					player.sendMessage(ChatColor.GREEN + thisNPC.getName() + " Ignore removed. Now ignoring " 
-																			+ inst.ignoreTargets.toString());
+					player.sendMessage(ChatColor.GREEN + npcName + " Ignore removed. Now ignoring " 
+																+ inst.ignoreTargets.toString());
 				}
 				else if ( inargs[nextArg + 1].equals( "clear" ) ) {
 	
 					inst.ignoreTargets.clear();
 					inst.processTargets();
 					inst.clearTarget();
-					player.sendMessage( ChatColor.GREEN + thisNPC.getName() + " Ignore cleared." );
+					player.sendMessage( ChatColor.GREEN + npcName + " Ignore cleared." );
 				}
 				else if ( inargs[nextArg + 1].equals( "list" ) ) {
 	
 					player.sendMessage( ChatColor.GREEN + "Ignores: " + inst.ignoreTargets.toString() );
 				}
 				else {
-	
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore add [ENTITY:Name] or [PLAYER:Name] or "
-																					+ "[GROUP:Name] or [ENTITY:MONSTER]" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore remove [ENTITY:Name] or [PLAYER:Name] or "
-																					+ "[GROUP:Name] or [ENTITY:MONSTER]" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore clear" );
-					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore list" );
+					ignoreCommandHelp( player );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore add [ENTITY:Name] or [PLAYER:Name] or "
+//																					+ "[GROUP:Name] or [ENTITY:MONSTER]" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore remove [ENTITY:Name] or [PLAYER:Name] or "
+//																					+ "[GROUP:Name] or [ENTITY:MONSTER]" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore clear" );
+//					player.sendMessage( ChatColor.GOLD + "Usage: /sentry ignore list" );
 				}
 			}
 			return true;

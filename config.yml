@@ -21,7 +21,7 @@ DefaultStats:
  NightVision: 16
  Range: 10
  WarningRange: 0
- Respawn: 10
+ RespawnDelay: 10
  FollowDistance: 4
 # More default stats...
 DefaultValues:
@@ -33,9 +33,9 @@ DefaultValues:
  
 # Default options for new Sentries
 DefaultOptions:
- Drops: false
- KillDrops: true
- Criticals: true
+ DropInventory: false     # on death
+ KillDrops: true          # when killing others
+ CriticalHits: true
  Invincible: false
  Retaliate: true
  FriendlyFire: false
@@ -50,7 +50,6 @@ DefaultTexts:
 DefaultTargets:
  #- "entity:monster"
 
- 
 # Default ignore list for new Sentries
 DefaultIgnores:
  #- "entity:owner"
@@ -80,6 +79,7 @@ HitChances:
 # List of other plugins that Sentry can integrate with to enable target selection to respect the 
 # Teams/clan/faction/town/nation of players.  (ScoreboardTeams is the standard MC scoreboard.)
 # To disable an option, remove or comment it out.
+# NB Changes in these settings are not loaded by the /sentry reload command, only a server restart.
 OtherPlugins:
   - Vault
   - Towny
@@ -92,6 +92,7 @@ OtherPlugins:
 # backwards compatability, but only need to be active if you have Denizen scripts that are using them. 
 # NB Changes in these settings are not loaded by the /sentry reload command, only a server restart.
 DenizenIntegration:
+  SentryHealthByDenizen: true
   NpcDeathTrigger: true
   NpcDeathTriggerOwner: true
   DieCommand: true

@@ -1,8 +1,9 @@
 package net.aufdemrand.sentry;
 
 
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+
 import net.citizensnpcs.api.CitizensAPI;
 
 public class MountAttackStrategy implements net.citizensnpcs.api.ai.AttackStrategy {
@@ -14,16 +15,16 @@ public class MountAttackStrategy implements net.citizensnpcs.api.ai.AttackStrate
 		if ( attacker == bukkitTarget ) return true;
 	
 		Entity passenger = attacker.getPassenger();
+		
 		if ( passenger != null ) {		
 			return CitizensAPI.getNPCRegistry()
-					  .getNPC( passenger )
-					  .getNavigator()
-					  .getDefaultParameters()
-					  .attackStrategy()
-					  .handle( (LivingEntity) passenger, bukkitTarget );
-		} else {
-			//I think this does the default attack.
-		 	return false;
-		}		
+							  .getNPC( passenger )
+							  .getNavigator()
+							  .getDefaultParameters()
+							  .attackStrategy()
+							  .handle( (LivingEntity) passenger, bukkitTarget );
+		}
+		//I think this does the default attack.
+		return false;		
 	}
 }

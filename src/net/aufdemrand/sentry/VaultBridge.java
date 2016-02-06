@@ -22,6 +22,9 @@ public class VaultBridge extends PluginBridge {
 	VaultBridge( int flag ) {
 		super( flag );
 	}
+
+	@Override
+	String getCommandText() { return "Group"; }
 	
 	@Override
 	public boolean activate() {
@@ -41,16 +44,15 @@ public class VaultBridge extends PluginBridge {
 												  + " groups found. The GROUP: target will function.";
 					return true;
 				}
-				activationMsg = "Vault integration: No permission groups found. "
-											+ "The GROUP: target will not function.";
+				if ( Sentry.debug ) 
+					Sentry.debugLog( "Vault integration: No permission groups found." );
 			} 
-			else { activationMsg = "Vault integration: Permissions Provider does not support groups. "
-											+ "The GROUP: target will not function."; 
-			}	
+			else if ( Sentry.debug ) 
+				Sentry.debugLog( "Vault integration: Permissions Provider does not support groups." );
 		}
-		else { activationMsg = "Vault integration: No Permissions Provider is registered. "
-											+ "The GROUP target will not function.";
-		}
+		else if ( Sentry.debug ) 
+			Sentry.debugLog( "Vault integration: No Permissions Provider is registered." );
+		
 		perms = null;
 		return false;
 	}
@@ -68,24 +70,6 @@ public class VaultBridge extends PluginBridge {
 
 	@Override
 	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void refreshLists( SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean addTarget( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addIgnore( String target, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -125,14 +109,21 @@ public class VaultBridge extends PluginBridge {
 	}
 
 	@Override
-	String getCommandText() {
-		return "GROUP";
-	}
-
-	@Override
 	String getCommandHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	boolean add( String target, SentryInstance inst, boolean asTarget ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

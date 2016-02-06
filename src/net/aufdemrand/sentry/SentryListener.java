@@ -221,32 +221,33 @@ public class SentryListener implements Listener {
 	@EventHandler( priority = EventPriority.HIGHEST ) 
 	public void onDamage( EntityDamageByEntityEvent event ) {
 
-		Entity damager = event.getDamager();
+		Entity damagerEnt = event.getDamager();
 		// a duplicate reference, as the original may get changed to refer to a projectile shooter.
-		Entity _damager = damager;
+		Entity _damager = damagerEnt;
 		Entity victim = event.getEntity();
 		
-		if ( Sentry.debug ) Sentry.debugLog( "start: from: " + damager + " to: " + victim 
+		if ( Sentry.debug ) Sentry.debugLog( "start: from: " + damagerEnt + " to: " + victim 
 															+ " cancelled: " + event.isCancelled()
 															+ " damage: " + event.getDamage() 
 															+ " cause: " + event.getCause() );
-		if ( damager == victim ) { 
+		if ( damagerEnt == victim ) { 
 			event.setCancelled( true );
 			return;
 		}
 
 		// following 'if' statements change damager to refer to the shooter of a projectile.
 		// TODO figure out why there is an (apparently redundant) 'instanceof Entity' checks here.
-		if ( damager instanceof Projectile ) {
+		if ( damagerEnt instanceof Projectile ) {
 			
-			ProjectileSource source = ((Projectile) damager).getShooter();
+			ProjectileSource source = ((Projectile) damagerEnt).getShooter();
 			
 			if ( source instanceof Entity )
-				damager = (Entity) source;
+				damagerEnt = (Entity) source;
 		}
 
-		SentryInstance instDamager = sentry.getSentryInstance( damager );
+		SentryInstance instDamager = sentry.getSentryInstance( damagerEnt );
 		SentryInstance instVictim = sentry.getSentryInstance( victim );
+		LivingEntity damager = (LivingEntity) damagerEnt;
 
 		if ( instDamager != null ) {
 
@@ -267,7 +268,7 @@ public class SentryListener implements Listener {
 									          		, _damager.getType() );
 									 
 				newProjectile.setVelocity( _damager.getVelocity() );
-				newProjectile.setShooter( (LivingEntity) damager );
+				newProjectile.setShooter( damager );
 				newProjectile.setTicksLived( _damager.getTicksLived() );
 				return;
 			}
@@ -277,8 +278,8 @@ public class SentryListener implements Listener {
 
 			// uncancel if not bodyguard.
 			if ( instDamager.guardTarget == null 
-			  || !sentry.bodyguardsObeyProtection ) 
-			  		event.setCancelled( false );
+			  || !Sentry.bodyguardsObeyProtection ) 
+			  			event.setCancelled( false );
 
 			// cancel if invulnerable non-sentry npc
 			if ( instVictim == null ) {
@@ -286,8 +287,8 @@ public class SentryListener implements Listener {
 				NPC npc = CitizensAPI.getNPCRegistry().getNPC( victim );
 				
 				if ( npc != null ) {
-					event.setCancelled( npc.data()
-							     		   .get( NPC.DEFAULT_PROTECTED_METADATA, true ) );
+						event.setCancelled( npc.data()
+							     		   		.get( NPC.DEFAULT_PROTECTED_METADATA, true ) );
 				}
 			}
 			// don't hurt guard target.
@@ -363,7 +364,7 @@ public class SentryListener implements Listener {
 
 		// process this event on each sentry to check for events that need a response.
 		if ( ( !event.isCancelled() || ok ) 
-		  && damager != victim 
+		  && damagerEnt != victim 
 		  && event.getDamage() > 0 ) {
 		  	
 			for ( NPC npc : CitizensAPI.getNPCRegistry() ) {
@@ -377,9 +378,8 @@ public class SentryListener implements Listener {
 				}
 				
 				if ( inst.guardEntity == victim 
-				  && inst.iWillRetaliate 
-				  && damager instanceof LivingEntity ) {
-				  		inst.setTarget( (LivingEntity) damager, true );
+				  && inst.iWillRetaliate ) {
+				  		inst.setTarget( damager );
 				}
 				
 				if ( inst.getMountNPC() != null 
@@ -387,8 +387,8 @@ public class SentryListener implements Listener {
 				  	
 					if ( damager == inst.guardEntity ) 
 						event.setCancelled( true );
-					else if ( inst.iWillRetaliate && damager instanceof LivingEntity )  
-						inst.setTarget( (LivingEntity) damager, true );
+					else if ( inst.iWillRetaliate )  
+						inst.setTarget( damager );
 				}
 
 				if ( inst.hasTargetType( SentryInstance.events )  
@@ -429,10 +429,10 @@ public class SentryListener implements Listener {
 				      && inst.targetsContain( "event:pvsentry" ) ) )
 				  
 				// is the damager on the sentry's ignore list?
-				  && !inst.isIgnoring( (LivingEntity) damager ) ) {
+				  && !inst.isIgnoring( damager ) ) {
 				  	// phew! we made it! the event is a valid trigger. Attack the aggressor!
 				  	
-				  		inst.setTarget( (LivingEntity) damager, true ); 
+				  		inst.setTarget( damager ); 
 				  }
 			}
 		}
@@ -456,7 +456,7 @@ public class SentryListener implements Listener {
 			if ( hnpc.getId() == inst.mountID ) {
 				// nooooo butterstuff!
 
-				Entity killer = ( (LivingEntity) hnpc.getEntity() ).getKiller();
+				Entity killer = ((LivingEntity) hnpc.getEntity()).getKiller();
 				if ( killer == null ) {
 					// might have been a projectile.
 					EntityDamageEvent ev = hnpc.getEntity().getLastDamageCause();
@@ -474,7 +474,6 @@ public class SentryListener implements Listener {
 
 				final LivingEntity perp = ( killer instanceof LivingEntity ) ? (LivingEntity) killer 
 											 							     : null;
-
 				if ( Sentry.denizenActive ) {
 					DenizenHook.denizenAction( each
 								 			 , "mount death"
@@ -488,7 +487,7 @@ public class SentryListener implements Listener {
 				final Runnable getThePerp = new Runnable() {
 					@Override
 					public void run() {
-						inst.setTarget( perp, true );
+						inst.setTarget( perp );
 					}
 				};
 				//delay so the mount is gone.

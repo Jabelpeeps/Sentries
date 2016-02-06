@@ -10,14 +10,14 @@ import net.citizensnpcs.api.npc.NPC;
 
 // 
 public class BodyguardTeleportStuckAction implements StuckAction {
-	SentryInstance inst = null;
-	Sentry plugin = null;
+	SentryInstance inst;
+	Sentry sentry;
 	
 	private static int MAX_ITERATIONS = 10;
 	
-	BodyguardTeleportStuckAction( SentryInstance inst, Sentry plugin ){
-		this.inst = inst; 
-		this.plugin = plugin;
+	BodyguardTeleportStuckAction( SentryInstance _inst, Sentry plugin ){
+		inst = _inst; 
+		sentry = plugin;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class BodyguardTeleportStuckAction implements StuckAction {
 			}
 		};
 		// send runnable to execute on main game loop
-		plugin.getServer().getScheduler().scheduleSyncDelayedTask( plugin, tpEvent, 2 );
+		sentry.getServer().getScheduler().scheduleSyncDelayedTask( sentry, tpEvent, 2 );
 
 		// TODO find out why we are returning false here - surely the event has been dealt with?
 		return false;

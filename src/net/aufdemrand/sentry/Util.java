@@ -18,18 +18,6 @@ import net.minecraft.server.v1_8_R3.LocaleI18n;
  */
 public abstract class Util {
 	
-	/*
-	 * Some strings to hold the names of external plugins in one location (in case of future changes to the names.)
-	 */
-	public static final String TOWNY = "Towny";
-	public static final String FACTIONS = "Factions";
-	public static final String WAR = "War";
-	public static final String CLANS = "SimpleClans";
-	public static final String SCORE = "ScoreboardTeams";
-	public static final String VAULT = "Vault";
-	public static final String CITIZENS = "Citizens";
-	public static final String DENIZEN = "Denizen";
-	
 	/**
 	 * This method appears to be tracing the source of a projectile travelling between two LivingEntity objects.
 	 * 

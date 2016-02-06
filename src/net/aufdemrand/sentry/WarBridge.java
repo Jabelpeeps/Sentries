@@ -22,6 +22,9 @@ public class WarBridge extends PluginBridge {
 	public boolean activate() {
 		return true;
 	}
+
+	@Override
+	String getCommandText() { return "War"; }
 	
 	@Override
 	public String getActivationMessage() {
@@ -40,12 +43,6 @@ public class WarBridge extends PluginBridge {
 		return false;
 	}
 
-	@Override
-	public void refreshLists( SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	public static String getWarTeam( Player player ) {
 			
 		Team warTeam = Team.getTeamByPlayerName( player.getName() );
@@ -59,25 +56,20 @@ public class WarBridge extends PluginBridge {
 	}
 
 	@Override
-	public boolean addTarget( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addIgnore( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	String getCommandText() {
-		return "WAR";
-	}
-
-	@Override
 	String getCommandHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	boolean add( String target, SentryInstance inst, boolean asTarget ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

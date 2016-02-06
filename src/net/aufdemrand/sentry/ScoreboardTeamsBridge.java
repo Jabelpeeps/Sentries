@@ -21,7 +21,12 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	public boolean activate() {
 		return true;
 	}
-	
+
+	@Override
+	String getCommandText() {
+		return "Team";
+	}
+
 	@Override
 	public String getActivationMessage() {
 		return "Minecraft scoreboard teams target is active, the TEAM: target will function";
@@ -37,12 +42,6 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public void refreshLists( SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	public static String getMCTeamName( Player player ) {
@@ -60,26 +59,21 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	}
 
 	@Override
-	public boolean addTarget( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addIgnore( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	String getCommandText() {
-		return "TEAM";
-	}
-
-	@Override
 	String getCommandHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	boolean add( String target, SentryInstance inst, boolean asTarget ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

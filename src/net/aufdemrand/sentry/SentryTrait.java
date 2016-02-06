@@ -1,10 +1,9 @@
 package net.aufdemrand.sentry;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
@@ -36,47 +35,48 @@ public class SentryTrait extends Trait implements Toggleable {
 		if ( inst == null ) {
 			inst = new SentryInstance( sentry );
 			inst.myNPC = npc;
-			inst.myTrait = this;
+//			inst.myTrait = this;  // unused? 
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void load( DataKey key ) throws NPCLoadException {
-		
+
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " load() start" );
 		ensureInst();
 
 		if ( key.keyExists( "traits" ) ) 
 			key = key.getRelative( "traits" );
-
+		
 		isToggled = key.getBoolean( "toggled", isToggled() );
 		
-		inst.iWillRetaliate		= key.getBoolean( "Retaliate", sentry.defaultBooleans.get( "Retaliate" ) );
-		inst.invincible			= key.getBoolean( "Invincinble", sentry.defaultBooleans.get( "Invincible" ) );
-		inst.dropInventory 		= key.getBoolean( "DropInventory", sentry.defaultBooleans.get( "Drops" ) );
-		inst.acceptsCriticals 	= key.getBoolean( "CriticalHits", sentry.defaultBooleans.get( "Criticals" ) );
-		inst.killsDropInventory = key.getBoolean( "KillDrops", sentry.defaultBooleans.get( "KillDrops" ) );
+		inst.iWillRetaliate		= key.getBoolean( S.RETALIATE, sentry.defaultBooleans.get( S.RETALIATE ) );
+		inst.invincible			= key.getBoolean( S.INVINCIBLE, sentry.defaultBooleans.get( S.INVINCIBLE ) );
+		inst.dropInventory 		= key.getBoolean( S.DROP_INVENTORY, sentry.defaultBooleans.get( S.DROP_INVENTORY ) );
+		inst.acceptsCriticals 	= key.getBoolean( S.CRITICAL_HITS, sentry.defaultBooleans.get( S.CRITICAL_HITS ) );
+		inst.killsDropInventory = key.getBoolean( S.KILLS_DROP, sentry.defaultBooleans.get( S.KILLS_DROP ) );
         inst.ignoreLOS 			= key.getBoolean( "IgnoreLOS", false );
-        inst.targetable 		= key.getBoolean( "Targetable", sentry.defaultBooleans.get( "Targetable" ) );
+        inst.targetable 		= key.getBoolean( S.TARGETABLE, sentry.defaultBooleans.get( S.TARGETABLE ) );
 				
-		inst.armorValue 	= key.getInt( "Armor", sentry.defaultIntegers.get( "Armor" ) );
-		inst.strength		= key.getInt( "Strength", sentry.defaultIntegers.get( "Strength" ) );
-		inst.sentryRange 	= key.getInt( "Range", sentry.defaultIntegers.get( "Range" ) );
-		inst.respawnDelay 	= key.getInt( "RespawnDelay", sentry.defaultIntegers.get( "Respawn" ) );
-		inst.followDistance = key.getInt( "FollowDistance", sentry.defaultIntegers.get( "FollowDistance" ) );
-		inst.warningRange 	= key.getInt( "WarningRange", sentry.defaultIntegers.get( "WarningRange" ) );
-		inst.nightVision 	= key.getInt( "NightVision", sentry.defaultIntegers.get( "NightVision" ) );
-		inst.mountID 		= key.getInt( "MountID", -1 );
+		inst.armorValue 	= key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
+		inst.strength		= key.getInt( S.STRENGTH, sentry.defaultIntegers.get( S.STRENGTH ) );
+		inst.sentryRange 	= key.getInt( S.RANGE, sentry.defaultIntegers.get( S.RANGE ) );
+		inst.respawnDelay 	= key.getInt( S.RESPAWN_DELAY, sentry.defaultIntegers.get( S.RESPAWN_DELAY ) );
+		inst.followDistance = key.getInt( S.FOLLOW_DISTANCE, sentry.defaultIntegers.get( S.FOLLOW_DISTANCE ) );
+		inst.warningRange 	= key.getInt( S.WARNING_RANGE, sentry.defaultIntegers.get( S.WARNING_RANGE ) );
+		inst.nightVision 	= key.getInt( S.NIGHT_VISION, sentry.defaultIntegers.get( S.NIGHT_VISION ) );
+		inst.mountID 		= key.getInt( S.MOUNTID, -1 );
 		
-		inst.sentrySpeed 	= (float) key.getDouble( "Speed", sentry.defaultDoubles.get( "Speed" ) );
-		inst.sentryWeight 	= key.getDouble( "Weight", sentry.defaultDoubles.get( "Weight" ) );
-		inst.sentryMaxHealth 	= key.getDouble( "Health", sentry.defaultDoubles.get( "Health" ) );
-		inst.attackRate 	= key.getDouble( "AttackRate", sentry.defaultDoubles.get( "AttackRate" ) );
-		inst.healRate 		= key.getDouble( "HealRate", sentry.defaultDoubles.get( "HealRate" ) );
+		inst.sentrySpeed 	= (float) key.getDouble( S.SPEED, sentry.defaultDoubles.get( S.SPEED ) );
+		inst.sentryWeight 	= key.getDouble( S.WEIGHT, sentry.defaultDoubles.get( S.WEIGHT ) );
+		inst.sentryMaxHealth 	= key.getDouble( S.HEALTH, sentry.defaultDoubles.get( S.HEALTH ) );
+		inst.attackRate 	= key.getDouble( S.ATTACK_RATE, sentry.defaultDoubles.get( S.ATTACK_RATE ) );
+		inst.healRate 		= key.getDouble( S.HEALRATE, sentry.defaultDoubles.get( S.HEALRATE ) );
 		
-		inst.guardTarget = key.getString( "GuardTarget", null );		
-		inst.greetingMsg = key.getString( "Greeting", sentry.defaultGreeting );
-		inst.warningMsg = key.getString( "Warning", sentry.defaultWarning );
+		inst.guardTarget = key.getString( S.GUARD_TARGET, null );		
+		inst.greetingMsg = key.getString( S.GREETING, sentry.defaultGreeting );
+		inst.warningMsg = key.getString( S.WARNING, sentry.defaultWarning );
 		
 		if ( key.keyExists( "Spawn" ) ) {
 			try {
@@ -86,40 +86,31 @@ public class SentryTrait extends Trait implements Toggleable {
 												   key.getDouble( "Spawn.z" ),
 												   (float) key.getDouble( "Spawn.yaw" ),
 												   (float) key.getDouble("Spawn.pitch") );
+				
+				if ( inst.spawnLocation.getWorld() == null ) 
+						inst.spawnLocation = null;
 			} catch (Exception e) {
 				e.printStackTrace();
 				inst.spawnLocation = null;
 			}
-			if ( inst.spawnLocation.getWorld() == null ) 
-				inst.spawnLocation = null;
 		}
 		if ( inst.guardTarget != null && inst.guardTarget.isEmpty() ) 
 			inst.guardTarget = null;
 		
-		List<String> targettemp; 
-		List<String> ignoretemp; 
-		
-		FileConfiguration cfg = sentry.getConfig();
-		
-		if ( key.getRaw( "Targets" ) != null ) 
-			targettemp = (List<String>) key.getRaw( "Targets" );
+		if ( key.getRaw( S.TARGETS ) != null ) 
+			inst.validTargets.addAll( (Set<String>) key.getRaw( S.TARGETS ) );
 		else 
-			targettemp = cfg.getStringList( "DefaultTargets" );
+			inst.validTargets.addAll( sentry.defaultTargets );
 
-		if ( key.getRaw( "Ignores" ) != null ) 
-			ignoretemp = (List<String>) key.getRaw( "Ignores" );
+		if ( key.getRaw( S.IGNORES ) != null ) 
+			inst.ignoreTargets.addAll( (Set<String>) key.getRaw( S.IGNORES ) );
 		else 
-			ignoretemp = cfg.getStringList( "DefaultIgnores" );
-
-		for ( String string : targettemp ) {
-			inst.validTargets.add( string.toUpperCase() );
-		}
+			inst.ignoreTargets.addAll( sentry.defaultIgnores );
 		
-		for ( String string : ignoretemp ) {
-			inst.ignoreTargets.add( string.toUpperCase() );
-		}
 		inst.loaded = true;
 		inst.processTargets();
+		
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " load() end" );
 	}
 
 	public SentryInstance getInstance() {
@@ -128,7 +119,7 @@ public class SentryTrait extends Trait implements Toggleable {
 
 	@Override
 	public void onSpawn() {
-		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onSpawn" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onSpawn()" );
 		
 		ensureInst();
 
@@ -147,8 +138,7 @@ public class SentryTrait extends Trait implements Toggleable {
 		if ( inst != null ) {
 			inst.cancelRunnable();
 		}
-
-		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + " onRemove" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + " onRemove()" );
 
 		inst = null;
 		isToggled = false;
@@ -157,14 +147,14 @@ public class SentryTrait extends Trait implements Toggleable {
 	@Override
 	public void onAttach() {
 		
-		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onAttach" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onAttach()" );
 		isToggled = true;
 	}
 
 	@Override
 	public void onDespawn() {
 		
-		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onDespawn" );
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onDespawn()" );
 		
 		if ( inst != null ) {
 			inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
@@ -175,22 +165,23 @@ public class SentryTrait extends Trait implements Toggleable {
 
 	@Override
 	public void save( DataKey key ) {
-		
+
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " save()" );
 		if ( inst == null ) return;
 		
 		key.setBoolean( "toggled", isToggled );
-		key.setBoolean( "Retaliate", inst.iWillRetaliate );
-		key.setBoolean( "Invincinble", inst.invincible );
-		key.setBoolean( "DropInventory", inst.dropInventory );
-		key.setBoolean( "KillDrops", inst.killsDropInventory );
-		key.setBoolean( "Targetable", inst.targetable );
-		key.setInt( "MountID", inst.mountID );
-		key.setBoolean( "CriticalHits", inst.acceptsCriticals );
+		key.setBoolean( S.RETALIATE, inst.iWillRetaliate );
+		key.setBoolean( S.INVINCIBLE, inst.invincible );
+		key.setBoolean( S.DROP_INVENTORY, inst.dropInventory );
+		key.setBoolean( S.KILLS_DROP, inst.killsDropInventory );
+		key.setBoolean( S.TARGETABLE, inst.targetable );
+		key.setInt( S.MOUNTID, inst.mountID );
+		key.setBoolean( S.CRITICAL_HITS, inst.acceptsCriticals );
         key.setBoolean( "IgnoreLOS", inst.ignoreLOS );
-		key.setRaw( "Targets", inst.validTargets );
-		key.setRaw( "Ignores", inst.ignoreTargets );
+		key.setRaw( S.TARGETS, inst.validTargets );
+		key.setRaw( S.IGNORES, inst.ignoreTargets );
 
-		if ( inst.spawnLocation != null ){
+		if ( inst.spawnLocation != null ) {
 			key.setDouble( "Spawn.x", inst.spawnLocation.getX() );
 			key.setDouble( "Spawn.y", inst.spawnLocation.getY() );
 			key.setDouble( "Spawn.z", inst.spawnLocation.getZ() );
@@ -199,33 +190,34 @@ public class SentryTrait extends Trait implements Toggleable {
 			key.setDouble( "Spawn.pitch", inst.spawnLocation.getPitch() );
 		}
 
-		key.setDouble( "Health", inst.sentryMaxHealth );
-		key.setInt( "Range", inst.sentryRange );
-		key.setInt( "RespawnDelay", inst.respawnDelay );
-		key.setDouble( "Speed", inst.sentrySpeed );
-		key.setDouble( "Weight", inst.sentryWeight );
-		key.setDouble( "HealRate", inst.healRate );
-		key.setInt( "Armor", inst.armorValue );
-		key.setInt( "Strength", inst.strength );
-		key.setInt( "WarningRange", inst.warningRange );
-		key.setDouble( "AttackRate", inst.attackRate );
-		key.setInt( "NightVision", inst.nightVision );
-		key.setInt( "FollowDistance", inst.followDistance );
+		key.setDouble( S.HEALTH, inst.sentryMaxHealth );
+		key.setInt( S.RANGE, inst.sentryRange );
+		key.setInt( S.RESPAWN_DELAY, inst.respawnDelay );
+		key.setDouble( S.SPEED, inst.sentrySpeed );
+		key.setDouble( S.WEIGHT, inst.sentryWeight );
+		key.setDouble( S.HEALRATE, inst.healRate );
+		key.setInt( S.ARMOR, inst.armorValue );
+		key.setInt( S.STRENGTH, inst.strength );
+		key.setInt( S.WARNING_RANGE, inst.warningRange );
+		key.setDouble( S.ATTACK_RATE, inst.attackRate );
+		key.setInt( S.NIGHT_VISION, inst.nightVision );
+		key.setInt( S.FOLLOW_DISTANCE, inst.followDistance );
 
 		if ( inst.guardTarget != null ) 
-			key.setString( "GuardTarget", inst.guardTarget );
+				key.setString( S.GUARD_TARGET, inst.guardTarget );
 		
-		else if ( key.keyExists( "GuardTarget" ) ) 
-				key.removeKey( "GuardTarget" );
+		else if ( key.keyExists( S.GUARD_TARGET ) ) 
+				key.removeKey( S.GUARD_TARGET );
 
-		key.setString( "Warning",inst.warningMsg );
-		key.setString( "Greeting",inst.greetingMsg );
+		key.setString( S.WARNING, inst.warningMsg );
+		key.setString( S.GREETING, inst.greetingMsg );
 	}
 
 	@SuppressWarnings("synthetic-access")
 	@Override
 	public void onCopy() {
-		
+
+		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onCopy()" );
 		if ( inst != null ) {
 			
 			final Runnable cloneInstance = new Runnable() {

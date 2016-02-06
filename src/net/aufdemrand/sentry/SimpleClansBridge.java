@@ -41,12 +41,6 @@ public class SimpleClansBridge extends PluginBridge {
 		return false;
 	}
 	
-	@Override
-	public void refreshLists( SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	public static String getClan( Player player ) {
 		
 		try {
@@ -62,25 +56,25 @@ public class SimpleClansBridge extends PluginBridge {
 	}
 
 	@Override
-	public boolean addTarget( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addIgnore( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	String getCommandText() {
-		return "CLAN";
+		return "Clan";
 	}
 
 	@Override
 	String getCommandHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	boolean add( String target, SentryInstance inst, boolean asTarget ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

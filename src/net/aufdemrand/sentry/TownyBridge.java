@@ -31,7 +31,9 @@ public class TownyBridge  extends PluginBridge {
 	public boolean activate() {
 		return true;
 	}
-	
+	@Override
+	String getCommandText() { return "Towny"; }
+
 	@Override
 	public String getActivationMessage() {
 		return "Registered with Towny sucessfully, the TOWN: and NATION: targets will function";
@@ -47,12 +49,6 @@ public class TownyBridge  extends PluginBridge {
 	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public void refreshLists( SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		
 	} 
 	
 	static String[] getResidentTownyInfo( Player player ) {
@@ -112,25 +108,20 @@ public class TownyBridge  extends PluginBridge {
 	}
 
 	@Override
-	public boolean addTarget( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addIgnore( String target, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	String getCommandText() {
-		return "TOWNY";
-	}
-
-	@Override
 	String getCommandHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	boolean add( String target, SentryInstance inst, boolean asTarget ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
