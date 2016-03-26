@@ -18,6 +18,7 @@ public class SentryTrait extends Trait implements Toggleable {
 	private SentryInstance inst;
 	private boolean isToggled = true;
 
+	// Traits are required to have a no-argument constructor.
 	public SentryTrait() {
 		// super-constructor sets private final String 'name' with argument given.
 		super( "sentry" );

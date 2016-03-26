@@ -1,79 +1,104 @@
 package net.aufdemrand.sentry;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 public class ScoreboardTeamsBridge extends PluginBridge {
 	
 	Map<SentryInstance, Set<Team>> friends = new HashMap<SentryInstance, Set<Team>>();
 	Map<SentryInstance, Set<Team>> enemies = new HashMap<SentryInstance, Set<Team>>();
+	Scoreboard scoreboard = Sentry.getSentry().getServer().getScoreboardManager().getMainScoreboard();
 	
-	ScoreboardTeamsBridge( int flag ) {
-		super( flag );
-	}
+	ScoreboardTeamsBridge( int flag ) { super( flag ); }
 	
 	@Override
-	public boolean activate() {
-		return true;
-	}
+	boolean activate() { return true; }
 
 	@Override
-	String getCommandText() {
-		return "Team";
-	}
+	String getPrefix() { return "TEAM"; }
 
 	@Override
-	public String getActivationMessage() {
-		return "Minecraft scoreboard teams target is active, the TEAM: target will function";
-	}
+	String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
 
 	@Override
-	public boolean isTarget( LivingEntity entity, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
 	
-	public static String getMCTeamName( Player player ) {
+	@Override
+	boolean isTarget( Player player, SentryInstance inst ) {
 		
-		Team team = Sentry.getSentry()
-						  .getServer()
-						  .getScoreboardManager()
-						  .getMainScoreboard()
-						  .getEntryTeam( player.getName() );
+		if ( !enemies.containsKey( inst ) ) return false;
 		
-		if ( team != null ) {
-			return team.getName();
+		return enemies.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
+	}
+
+	@Override
+	boolean isIgnoring( Player player, SentryInstance inst ) {
+		
+		if ( !friends.containsKey( inst ) ) return false;
+		
+		return friends.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
+	}
+
+	@Override
+	String add( String target, SentryInstance inst, boolean asTarget ) {
+
+		String targetTeam = CommandHandler.colon.split( target, 2 )[1];
+		Set<Team> teams = scoreboard.getTeams();
+		
+		for ( Team team : teams ) {
+			
+			if ( team.getName().equalsIgnoreCase( targetTeam ) ) 
+				return target.concat( addToList( inst, team, asTarget ) );
 		}
-		return null;
+		return "There is currently no Team matching ".concat( target );
 	}
 
+	private String addToList( SentryInstance inst, Team team, boolean asTarget ) {
+		Map<SentryInstance, Set<Team>> map = asTarget ? enemies : friends;
+		
+		if ( !map.containsKey( inst ) )
+			map.put( inst, new HashSet<Team>() );
+
+		if ( map.get( inst ).add( team ) )
+			return String.join( " ", S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
+		
+		return String.join( " ", S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );
+	}
+	
 	@Override
-	String getCommandHelp() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
+		if ( !isListed( inst, fromTargets ) ) {
+			return String.join( 
+					" ", inst.myNPC.getName(), S.NOT_ANY, "Teams added as ", fromTargets ? S.TARGETS : S.IGNORES , S.YET );
+		}
+		String targetTeam = CommandHandler.colon.split( entity, 2 )[1];
+		
+		Map<SentryInstance, Set<Team>> map = fromTargets ? enemies : friends;	
+		Set<Team> teams = map.get( inst );
+	
+		for ( Team team : teams ) {
+			if ( team.getName().equalsIgnoreCase( targetTeam ) && teams.remove( team ) ) {
+				
+				if ( teams.isEmpty() ) 
+					map.remove( inst );
+				
+				return String.join( " ", entity, S.REMOVED_FROM_LIST, fromTargets ? S.TARGETS : S.IGNORES );	
+			}
+		}
+		return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
+	}
+	
 	@Override
-	boolean add( String target, SentryInstance inst, boolean asTarget ) {
-		// TODO Auto-generated method stub
-		return false;
+	boolean isListed( SentryInstance inst, boolean asTarget ) {
+		
+		return ( asTarget ? enemies.containsKey( inst )
+						  : friends.containsKey( inst ) );
 	}
-
-	@Override
-	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

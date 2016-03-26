@@ -71,7 +71,7 @@ public class SentryInstance {
 	Sentry sentry;
 	
 	Location _projTargetLostLoc;
-	Location spawnLocation = null;
+	Location spawnLocation;
 	
 	int strength = 1;
 	int armorValue = 0;
@@ -102,25 +102,24 @@ public class SentryInstance {
 	
 	private GiveUpStuckAction giveup = new GiveUpStuckAction( this );
 
-	public String greetingMsg = "&a<NPC> says: Welcome, <PLAYER>!";
-	public String warningMsg = "&a<NPC> says: Halt! Come no further!";
+	String greetingMsg = "";
+	String warningMsg = "";
 	
 	private Map<Player, Long> warningsGiven = new HashMap<Player, Long>();
 	Set<Player> _myDamamgers = new HashSet<Player>();
 
-	public LivingEntity guardEntity = null;
-	public LivingEntity attackTarget = null;
-//	public LivingEntity projectileTarget = null;
-	public String guardTarget = null;
+	LivingEntity guardEntity;
+	LivingEntity attackTarget;
+	String guardTarget;
 	DamageCause causeOfDeath;
 
-	PacketPlayOutAnimation healAnimation = null;
+	PacketPlayOutAnimation healAnimation;
 	
-	public Set<String> ignoreTargets = new HashSet<String>();
-	public Set<String> validTargets = new HashSet<String>();
+	Set<String> ignoreTargets = new HashSet<String>();
+	Set<String> validTargets = new HashSet<String>();
 
-	public Set<String> _ignoreTargets = new HashSet<String>();
-	public Set<String> _validTargets = new HashSet<String>();
+	Set<String> _ignoreTargets = new HashSet<String>();
+	Set<String> _validTargets = new HashSet<String>();
 
 	// TODO why are we saving four instances of the system time?
 	long isRespawnable = 0;	
@@ -129,18 +128,24 @@ public class SentryInstance {
 	long oktoreasses= System.currentTimeMillis();
 	long okToTakedamage = 0;
 	
-	public List<PotionEffect> weaponSpecialEffects = null;
-	ItemStack potiontype = null;
+	List<PotionEffect> weaponSpecialEffects;
+	ItemStack potiontype;
 	Random random = new Random();
 	
-	public SentryStatus myStatus = SentryStatus.isSPAWNING;
-	public AttackType myAttacks;
+	SentryStatus myStatus = SentryStatus.isSPAWNING;
+	AttackType myAttacks;
 //	public SentryTrait myTrait;  // unused?
-	public NPC myNPC = null;
+	NPC myNPC;
 
 	private int taskID = 0;
 	
-	public SentryInstance( Sentry plugin ) {
+	public final int myID;
+	private static int nextID;
+	
+	static { nextID = 0; }
+	
+	SentryInstance( Sentry plugin ) {
+		myID = ++nextID;
 		sentry = plugin;
 		isRespawnable = System.currentTimeMillis();
 	}
@@ -192,9 +197,6 @@ public class SentryInstance {
 		navigatorParams.range( myRange );
 		navigatorParams.stationaryTicks( 5 * 20 );
 		navigatorParams.useNewPathfinder( false );
-		
-		// TODO why is this disabled?
-		//	myNPC.getNavigator().getDefaultParameters().stuckAction(new BodyguardTeleportStuckAction(this, this.plugin));
 
 		if ( myEntity instanceof Creeper )
 			navigatorParams.attackStrategy( new CreeperAttackStrategy() );
@@ -238,7 +240,7 @@ public class SentryInstance {
 
 		if ( CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
-			if ( hasIgnoreType( npcs ) ) 
+			if ( hasIgnoreType( allnpcs ) ) 
 				return true;
 
 			NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
@@ -265,8 +267,8 @@ public class SentryInstance {
 			if ( hasIgnoreType( owner ) && name.equalsIgnoreCase( myNPC.getTrait( Owner.class ).getOwner() ) ) 
 					return true;
 
-			if ( hasIgnoreType( permGroups ) && VaultBridge.checkGroups4Ignores( aTarget.getWorld(), player, this ) ) 
-					return true;
+//			if ( hasIgnoreType( permGroups ) && VaultBridge.checkGroups4Ignores( aTarget.getWorld(), player, this ) ) 
+//					return true;
 
 			if ( hasIgnoreType( towny ) ) {
 				
@@ -281,42 +283,48 @@ public class SentryInstance {
 							return true;
 			}
 
-			if ( hasIgnoreType( faction ) ) {
-				
-				String factionName = FactionsBridge.getFactionsTag( player );
-				
-				if ( factionName != null 
-					&& ignoresContain( "FACTION:" + factionName ) )
-							return true;
-			}
+//			if ( hasIgnoreType( faction ) ) {
+//				
+//				String factionName = FactionsBridge.getFactionsTag( player );
+//				
+//				if ( factionName != null 
+//					&& ignoresContain( "FACTION:" + factionName ) )
+//							return true;
+//			}
 			
-			if ( hasIgnoreType( war ) ) {
-				
-				String team = WarBridge.getWarTeam( player );
-				
-				if ( team != null
-					&& ignoresContain( "WARTEAM:" + team ) )
-							return true;
-			}
-			
-			// TODO add boolean in Sentry to record this is active (and add to config saving and loading)
-			if ( hasIgnoreType( mcTeams ) ) {
-				
-				String team = ScoreboardTeamsBridge.getMCTeamName( player );
+//			if ( hasIgnoreType( war ) ) {
+//				
+//				String team = WarBridge.getWarTeam( player );
+//				
+//				if ( team != null
+//					&& ignoresContain( "WARTEAM:" + team ) )
+//							return true;
+//			}
 
-				if ( team != null && ignoresContain( "TEAM:" + team ) )	
-							return true;
-			}
-			
-			if ( hasIgnoreType( clans ) ) {
-				
-				String clan = SimpleClansBridge.getClan( player );
 
-				if ( clan != null && ignoresContain( "CLAN:" + clan ) )
-							return true;
+//			if ( hasIgnoreType( mcTeams ) ) {
+//				
+//				String team = ScoreboardTeamsBridge.getMCTeamName( player );
+//
+//				if ( team != null && ignoresContain( "TEAM:" + team ) )	
+//							return true;
+//			}
+//			
+//			if ( hasIgnoreType( clans ) ) {
+//				
+//				String clan = SimpleClansBridge.getClan( player );
+//
+//				if ( clan != null && ignoresContain( "CLAN:" + clan ) )
+//							return true;
+//			}
+			for ( PluginBridge each : Sentry.activePlugins.values() ) {
+				if  (  hasIgnoreType( each.bitFlag ) 
+					&& each.isIgnoring( player, this ) ) {
+						return true;
+				}
 			}
 		}
-		else if ( aTarget instanceof Monster && hasIgnoreType( monsters ) ) 
+		else if ( aTarget instanceof Monster && hasIgnoreType( allmonsters ) ) 
 						return true;
 
 		else if ( hasIgnoreType( namedentities ) && ignoresContain( "ENTITY:" + aTarget.getType() ) )	
@@ -334,7 +342,7 @@ public class SentryInstance {
 
 		if ( CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
-			if ( hasTargetType( npcs ) ) 
+			if ( hasTargetType( allnpcs ) ) 
 					return true;
 
 			NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
@@ -361,12 +369,12 @@ public class SentryInstance {
 			if ( targetsContain( "ENTITY:OWNER" ) && name.equalsIgnoreCase( myNPC.getTrait( Owner.class ).getOwner() ) ) 
 						return true;
 
-			if ( hasTargetType( permGroups ) && VaultBridge.checkGroups4Targets( aTarget.getWorld(), player, this ) ) 
-						return true;
+//			if ( hasTargetType( permGroups ) && VaultBridge.checkGroups4Targets( player.getWorld(), player, this ) ) 
+//						return true;
 
-			if ( hasTargetType( towny ) || ( hasTargetType( townyenemies ) ) ) {
+			if ( hasTargetType( towny ) || hasTargetType( townyenemies ) ) {
 				
-				String[] info = TownyBridge.getResidentTownyInfo( (Player) aTarget );
+				String[] info = TownyBridge.getResidentTownyInfo( player );
 
 				if ( hasTargetType( towny ) && info[1] != null 
 					&& targetsContain( "TOWN:" + info[1] ) )
@@ -384,47 +392,51 @@ public class SentryInstance {
 				}
 			}
 
-			if ( hasTargetType( faction ) || hasTargetType( factionEnemies ) ) {
-				
-				String factionName = FactionsBridge.getFactionsTag((Player)aTarget);
+//			if ( hasTargetType( faction ) || hasTargetType( factionEnemies ) ) {
+//				
+//				String factionName = FactionsBridge.getFactionsTag( player );
+//
+//				if ( factionName != null ) {
+//					
+//					if ( targetsContain( "FACTION:" + factionName ) )
+//							return true;
+//
+//					if ( hasTargetType( factionEnemies ) ) 
+//						for ( String each : FactionEnemies ) 
+//							if ( FactionsBridge.isFactionEnemy( each,  factionName) ) 
+//							return true;						
+//				}	
+//			}
 
-				if ( factionName != null ) {
-					
-					if ( targetsContain( "FACTION:" + factionName ) )
-							return true;
-
-					if ( hasTargetType( factionEnemies ) ) 
-						for ( String each : FactionEnemies ) 
-							if ( FactionsBridge.isFactionEnemy( getMyEntity().getWorld().getName(), 
-																each, 
-																factionName) ) 
-							return true;						
-				}	
-			}
-
-			if ( hasTargetType( war ) ) {
-				
-				String team = WarBridge.getWarTeam( (Player) aTarget );
-
-				if ( team != null && targetsContain( "WARTEAM:" + team ) ) 
+//			if ( hasTargetType( war ) ) {
+//				
+//				String team = WarBridge.getWarTeam( player );
+//
+//				if ( team != null && targetsContain( "WARTEAM:" + team ) ) 
+//						return true;
+//			}
+//			if ( hasTargetType( mcTeams ) ) {
+//				
+//				String team = ScoreboardTeamsBridge.getMCTeamName( (Player) aTarget );
+//
+//				if ( team != null && targetsContain( "TEAM:" + team ) ) 
+//						return true;
+//			}
+//			if ( hasTargetType( clans ) ) {
+//				
+//				String clan = SimpleClansBridge.getClan( player );
+//
+//				if ( clan != null && targetsContain( "CLAN:" + clan ) ) 
+//						return true;
+//			}
+			for ( PluginBridge each : Sentry.activePlugins.values() ) {
+				if  (  hasTargetType( each.bitFlag ) 
+					&& each.isTarget( player, this ) ) {
 						return true;
-			}
-			if ( hasTargetType( mcTeams ) ) {
-				
-				String team = ScoreboardTeamsBridge.getMCTeamName( (Player) aTarget );
-
-				if ( team != null && targetsContain( "TEAM:" + team ) ) 
-						return true;
-			}
-			if ( hasTargetType( clans ) ) {
-				
-				String clan = SimpleClansBridge.getClan( (Player) aTarget );
-
-				if ( clan != null && targetsContain( "CLAN:" + clan ) ) 
-						return true;
+				}
 			}
 		}
-		else if ( aTarget instanceof Monster && hasTargetType( monsters ) )
+		else if ( aTarget instanceof Monster && hasTargetType( allmonsters ) )
 					return true;
 
 		else if (  hasTargetType( namedentities ) 
@@ -530,7 +542,7 @@ public class SentryInstance {
 				if ( aTarget instanceof Player && ((Player) aTarget).isSneaking() )
 						lightLevel /= 2;
 
-				// too dark?
+				// not too dark?
 				if ( lightLevel >= ( 16 - nightVision ) ) {
 
 					double dist = aTarget.getLocation().distance( myEntity.getLocation() );
@@ -584,15 +596,11 @@ public class SentryInstance {
 			}
 		}
 		return theTarget;
-		
-//		if ( theTarget != null ) {
-//			return theTarget;
-//		}
-//		return null;
 	}
 
 	public void draw( boolean on ) {
-		((CraftLivingEntity) getMyEntity()).getHandle().b( on ); // TODO: 1.8 UPDATE - IS THIS CORRECT?
+		// ((CraftLivingEntity) getMyEntity()).getHandle().b( on ); // TODO: 1.8 UPDATE - IS THIS CORRECT?
+		// I don't think it was, let see what happens without it.
 	}
 	
 	public void Fire( LivingEntity theTarget ) {
@@ -786,10 +794,6 @@ public class SentryInstance {
 		return (int) ( armorValue + mod );
 	}
 
-	public LivingEntity getGuardTarget() {
-		return guardEntity;
-	}
-
 	public double getHealth() {
 		if ( myNPC == null || getMyEntity() == null ) return 0;
 		
@@ -797,7 +801,6 @@ public class SentryInstance {
 	}
 
 	public float getSpeed() {
-		
 		if ( !myNPC.isSpawned() ) return sentrySpeed;
 		
 		double mod = 0;
@@ -819,7 +822,6 @@ public class SentryInstance {
 	}
 
 	public int getStrength() {
-		
 		if ( sentry.strengthBuffs.isEmpty() ) return strength;
 		
 		double mod = 0;
@@ -848,9 +850,9 @@ public class SentryInstance {
 	
 	public void onDamage( EntityDamageByEntityEvent event ) {
 
-		if ( myStatus == SentryStatus.isDYING ) return;
+		if ( myStatus == SentryStatus.isDYING || invincible ) return;
 
-		if ( myNPC == null || !myNPC.isSpawned() || invincible ) return;
+		if ( myNPC == null || !myNPC.isSpawned() ) return;
 
 		if ( guardTarget != null && guardEntity == null ) return; //dont take damage when bodyguard target isnt around.
 
@@ -859,8 +861,6 @@ public class SentryInstance {
 		okToTakedamage = System.currentTimeMillis();
 
 		event.getEntity().setLastDamageCause( event );
-		
-		if ( invincible ) return;
 
 		NPC npc = myNPC;
 		LivingEntity attacker = null;
@@ -884,9 +884,7 @@ public class SentryInstance {
 					attackTarget = attacker;
 					setTarget( attacker );			
 		}
-		
 		Hits hit = Hits.Hit;
-
 		double damage = event.getDamage();
 		
 		if ( acceptsCriticals ) {
@@ -894,7 +892,6 @@ public class SentryInstance {
 			hit = Hits.getHit();
 			damage = Math.round( damage * hit.damageModifier );
 		}
-
 		int arm = getArmor();
 
 		if ( damage > 0 ) {
@@ -905,7 +902,6 @@ public class SentryInstance {
 													 .getDirection()
 													 .multiply( 1.0 / ( sentryWeight + ( arm / 5 ) ) ) );
 			}
-
 			// Apply armor
 			damage -= arm;
 
@@ -943,7 +939,6 @@ public class SentryInstance {
 											= (EntityHuman) ((CraftLivingEntity) damager).getHandle();
 
 				die( true, event.getCause() );
-
 			}
 			else getMyEntity().damage( damage );
 		}
@@ -983,7 +978,6 @@ public class SentryInstance {
 																	 0, 
 																	 random.nextInt( 2 ) - 1 ) );
 			}
-
 			if ( getHealth() - finaldamage <= 0 ) 
 				die( true, cause );
 			else 
@@ -994,29 +988,29 @@ public class SentryInstance {
 	static final int none = 0;
 	static final int all = 1;
 	static final int allplayers = 2;
-	static final int npcs = 4;
-	static final int monsters = 8;
+	static final int allnpcs = 4;
+	static final int allmonsters = 8;
 	static final int events = 16;
 	static final int namedentities = 32;
 	static final int namedplayers = 64;
 	static final int namednpcs = 128;
 	static final int owner = 256;
 	
-	static final int faction = 512;
-	static final int towny = 1024;
-	static final int war = 2048;
-	static final int clans = 4096;
-	static final int townyenemies = 8192;
-	static final int factionEnemies = 16384;
-	static final int mcTeams = 16384*2;
-	static final int permGroups = 16384*4;
-	static final int bridges = 16384*8;
+	static final int towny = 512;
+	static final int townyenemies = 1024;
+//	static final int permGroups = 2048;
+//	static final int faction = 512;
+//	static final int factionEnemies = 4096;
+//	static final int war = 2048;
+//	static final int clans = 4096;
+//	static final int mcTeams = 16384*2;
+	static final int bridges = 2048;
 
 	int targetFlags = none;
 	int ignoreFlags = none;
 
 	List<String> NationsEnemies = new ArrayList<String>();
-	List<String> FactionEnemies = new ArrayList<String>();
+//	List<String> FactionEnemies = new ArrayList<String>();
 
 	/**
 	 * Scans the strings lists "validTargets" & "ignoreTargets", and sets the "targets" and "ignores" bit-filter 
@@ -1025,7 +1019,11 @@ public class SentryInstance {
 	 * Also adds the strings relating to any named entities to the corresponding list that is prefixed
 	 * with a "_" character.
 	 */
-	public void processTargets() {
+	void processTargets() {
+		processTargetStrings( true );
+	}
+	
+	void processTargetStrings( boolean onReload ) {
 		
 		if ( Sentry.debug ) Sentry.debugLog( "processing targets for npc: " + myNPC.getName() );
 		
@@ -1034,31 +1032,34 @@ public class SentryInstance {
 		_ignoreTargets.clear();
 		_validTargets.clear();
 		NationsEnemies.clear();
-		FactionEnemies.clear();
+//		FactionEnemies.clear();
 
 		for ( String target: validTargets ) {
 			
 			if      ( target.contains( "ENTITY:ALL" ) ) targetFlags |= all;
-			else if ( target.contains( "ENTITY:MONSTER" ) ) targetFlags |= monsters;
+			else if ( target.contains( "ENTITY:MONSTER" ) ) targetFlags |= allmonsters;
 			else if ( target.contains( "ENTITY:PLAYER" ) ) targetFlags |= allplayers;
-			else if ( target.contains( "ENTITY:NPC" ) ) targetFlags |= npcs;
-			else {
+			else if ( target.contains( "ENTITY:NPC" ) ) targetFlags |= allnpcs;
+			
+			else if ( !checkBridges( target, onReload, true) ) { 
+				
 				_validTargets.add( target );
+				
 				if 		( target.contains( "NPC:" ) ) targetFlags |= namednpcs;
 				else if ( target.contains( "EVENT:" ) ) targetFlags |= events;
 				else if ( target.contains( "PLAYER:" ) ) targetFlags |= namedplayers;
 				else if ( target.contains( "ENTITY:" ) ) targetFlags |= namedentities;
 				
-				else if ( Sentry.activePlugins.containsKey( S.VAULT ) && target.contains( "GROUP:" ) ) 
-								targetFlags |= permGroups;
-				else if ( Sentry.activePlugins.containsKey( S.FACTIONS ) ) {
-					if ( target.contains( "FACTION:" ) ) 
-								targetFlags |= faction;
-					if ( target.contains( "FACTIONENEMIES:" ) ) {
-								targetFlags |= factionEnemies;
-								FactionEnemies.add( target.split( ":" )[1] );
-					}
-				}
+//				else if ( Sentry.activePlugins.containsKey( S.VAULT ) && target.contains( "GROUP:" ) ) 
+//								targetFlags |= permGroups;
+//				else if ( Sentry.activePlugins.containsKey( S.FACTIONS ) ) {
+//					if ( target.contains( "FACTION:" ) ) 
+//								targetFlags |= faction;
+//					if ( target.contains( "FACTIONENEMIES:" ) ) {
+//								targetFlags |= factionEnemies;
+//								FactionEnemies.add( target.split( ":" )[1] );
+//					}
+//				}
 				else if ( Sentry.activePlugins.containsKey( S.TOWNY ) ) {
 					if ( target.contains( "TOWN:") ) 
 								targetFlags |= towny;
@@ -1069,48 +1070,75 @@ public class SentryInstance {
 								NationsEnemies.add( target.split( ":" )[1] );
 					}
 				}
-				else if ( Sentry.activePlugins.containsKey( S.WAR ) && target.contains( "WARTEAM:" ) )  
-								targetFlags |= war;
-				else if ( Sentry.activePlugins.containsKey( S.SCORE ) && target.contains( "TEAM:" ) )  
-								targetFlags |= mcTeams;
-				else if ( Sentry.activePlugins.containsKey( S.CLANS ) && target.contains( "CLAN:" ) )  
-								targetFlags |= clans;
+//				else if ( Sentry.activePlugins.containsKey( S.WAR ) && target.contains( "WARTEAM:" ) )  
+//								targetFlags |= war;
+//				else if ( Sentry.activePlugins.containsKey( S.SCORE ) && target.contains( "TEAM:" ) )  
+//								targetFlags |= mcTeams;
+//				else if ( Sentry.activePlugins.containsKey( S.CLANS ) && target.contains( "CLAN:" ) )  
+//								targetFlags |= clans;	
+				
 			}
 		}
 		// end of 1st for loop
 
 		for ( String ignore : ignoreTargets ) {
 			if 		( ignore.contains( "ENTITY:ALL" ) ) ignoreFlags |= all;
-			else if ( ignore.contains( "ENTITY:MONSTER" ) ) ignoreFlags |= monsters;
+			else if ( ignore.contains( "ENTITY:MONSTER" ) ) ignoreFlags |= allmonsters;
 			else if ( ignore.contains( "ENTITY:PLAYER" ) ) ignoreFlags |= allplayers;
-			else if ( ignore.contains( "ENTITY:NPC" ) ) ignoreFlags |= npcs;
+			else if ( ignore.contains( "ENTITY:NPC" ) ) ignoreFlags |= allnpcs;
 			else if ( ignore.contains( "ENTITY:OWNER" ) ) ignoreFlags |= owner;
-			else {
+			
+			else if ( !checkBridges( ignore, onReload, false) ) {
+				
 				_ignoreTargets.add( ignore );
 				
 				if 		( ignore.contains( "NPC:" ) ) ignoreFlags |= namednpcs;
 				else if ( ignore.contains( "PLAYER:" ) ) ignoreFlags |= namedplayers;
 				else if ( ignore.contains( "ENTITY:" ) ) ignoreFlags |= namedentities;
 				
-				else if ( Sentry.activePlugins.containsKey( S.VAULT ) && ignore.contains( "GROUP:" ) ) 
-								ignoreFlags |= permGroups;
-				else if ( Sentry.activePlugins.containsKey( S.FACTIONS ) && ignore.contains( "FACTION:" ) ) 
-								ignoreFlags |= faction;
+//				else if ( Sentry.activePlugins.containsKey( S.VAULT ) && ignore.contains( "GROUP:" ) ) 
+//								ignoreFlags |= permGroups;
+//				else if ( Sentry.activePlugins.containsKey( S.FACTIONS ) && ignore.contains( "FACTION:" ) ) 
+//								ignoreFlags |= faction;
 				else if ( Sentry.activePlugins.containsKey( S.TOWNY ) ) {
 							if ( ignore.contains( "TOWN:" ) 
 							  || ignore.contains( "NATION:" ) ) 
 										ignoreFlags |= towny;
 				}
-				else if ( Sentry.activePlugins.containsKey( S.WAR ) && ignore.contains( "WARTEAM:" ) )  
-								ignoreFlags |= war;
-				else if ( Sentry.activePlugins.containsKey( S.SCORE ) && ignore.contains( "TEAM:" ) ) 
-								ignoreFlags |= mcTeams;
-				else if ( Sentry.activePlugins.containsKey( S.CLANS ) && ignore.contains( "CLAN:" ) )  
-								ignoreFlags |= clans;
+//				else if ( Sentry.activePlugins.containsKey( S.WAR ) && ignore.contains( "WARTEAM:" ) )  
+//								ignoreFlags |= war;
+//				else if ( Sentry.activePlugins.containsKey( S.SCORE ) && ignore.contains( "TEAM:" ) ) 
+//								ignoreFlags |= mcTeams;
+//				else if ( Sentry.activePlugins.containsKey( S.CLANS ) && ignore.contains( "CLAN:" ) )  
+//								ignoreFlags |= clans;
+				
 			}
 		}
+		if ( Sentry.debug ) Sentry.debugLog( "Target flags: " + targetFlags + "  Ignore flags: " + ignoreFlags );
 	}
 
+	private boolean checkBridges( String target, boolean onReload, boolean asTarget ) {
+		
+		for ( PluginBridge each : Sentry.activePlugins.values() ) {
+			
+			if ( target.contains( each.getPrefix().concat( ":" ) ) ) {
+				
+				if ( onReload ) 
+					each.add( target, this, asTarget );
+				
+				if ( each.isListed( this, asTarget ) ) {
+					
+					if ( asTarget ) 
+						targetFlags |= each.bitFlag;
+					else
+						ignoreFlags |= each.bitFlag;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private class SentryLogic implements Runnable {
 
 		SentryLogic() {}
@@ -1159,7 +1187,7 @@ public class SentryInstance {
 				&& isMyChunkLoaded() ) 
 						mount();
 
-			if  (  myStatus == SentryStatus.isHOSTILE 
+			if  (  myStatus == SentryStatus.isATTACKING 
 				&& myNPC.isSpawned() ) {
 
 				if ( !isMyChunkLoaded() ) {
@@ -1176,46 +1204,39 @@ public class SentryInstance {
 						oktoreasses = System.currentTimeMillis() + 3000;
 				}
 
-				if  (  myAttacks != AttackType.brawler
-					&& attackTarget != null 
-					&& !attackTarget.isDead() 
-					&& attackTarget.getWorld() == myEntity.getLocation().getWorld() ) {
+				if ( attackTarget != null & !attackTarget.isDead() 
+						&& attackTarget.getWorld() == myEntity.getLocation().getWorld() ) {
 					
-						if (_projTargetLostLoc == null)
-							_projTargetLostLoc = attackTarget.getLocation();
-	
-						if ( !getNavigator().isNavigating() )
-							faceEntity( myEntity, attackTarget );
-	
-						draw( true );
-	
-						if ( System.currentTimeMillis() > oktoFire ) {
-
-							oktoFire = (long) (System.currentTimeMillis() + attackRate * 1000.0 );
-							Fire( attackTarget );
-						}
+					if  ( myAttacks != AttackType.brawler ) {
 						
-						if ( attackTarget != null )
-							_projTargetLostLoc = attackTarget.getLocation();
+							if (_projTargetLostLoc == null)
+								_projTargetLostLoc = attackTarget.getLocation();
+		
+							if ( !getNavigator().isNavigating() )
+								faceEntity( myEntity, attackTarget );
+		
+							draw( true );
+		
+							if ( System.currentTimeMillis() > oktoFire ) {
 	
-						return; 
-				}
-
-				else if ( attackTarget != null && !attackTarget.isDead() ) {
-
+								oktoFire = (long) (System.currentTimeMillis() + attackRate * 1000.0 );
+								Fire( attackTarget );
+							}
+							
+							if ( attackTarget != null )
+								_projTargetLostLoc = attackTarget.getLocation();
+		
+							return; 
+					}
 					if ( isMounted() ) 
 						faceEntity( myEntity, attackTarget );
 
-					if ( attackTarget.getWorld() != myEntity.getLocation().getWorld() ) {
+					double dist = attackTarget.getLocation().distance( myEntity.getLocation() );
+					//block if in range
+					draw( dist < 3 );
+					// Did it get away?
+					if ( dist > sentryRange ) 
 						clearTarget();
-					}
-					else {
-						double dist = attackTarget.getLocation().distance( myEntity.getLocation() );
-						//block if in range
-						draw( dist < 3 );
-						// Did it get away?
-						if ( dist > sentryRange ) clearTarget();
-					}
 				}
 				else clearTarget();
 			}
@@ -1274,7 +1295,7 @@ public class SentryInstance {
 
 				LivingEntity target = null;
 
-				if ( targetFlags > 0 ) {
+				if ( targetFlags > none) {
 						target = findTarget( sentryRange );
 				}
 
@@ -1471,7 +1492,6 @@ public class SentryInstance {
 				
 			} else {
 				goalController.setPaused( true );
-				//	if (!myNPC.getTrait(Waypoints.class).getCurrentProvider().isPaused())  myNPC.getTrait(Waypoints.class).getCurrentProvider().setPaused(true);
 				
 				if  (  navigator.getEntityTarget() == null 
 					|| navigator.getEntityTarget().getTarget() != guardEntity ) {
@@ -1489,11 +1509,6 @@ public class SentryInstance {
 		}
 
 		if ( theEntity == guardEntity )	return; 
-
-//		if ( isretaliation ) 
-//			myStatus = SentryStatus.isRETALIATING;
-//		else 
-//			myStatus = SentryStatus.isHOSTILE;
 
 		if ( !getNavigator().isNavigating() ) 
 			faceEntity( myEntity, theEntity );
@@ -1516,11 +1531,11 @@ public class SentryInstance {
 		}
 	}
 
-	Navigator getNavigator() {
+	private Navigator getNavigator() {
 		return ifMountedGetMount().getNavigator();
 	}
 
-	protected GoalController getGoalController() {
+	private GoalController getGoalController() {
 		return ifMountedGetMount().getDefaultGoalController();
 	}
 	
@@ -1660,5 +1675,17 @@ public class SentryInstance {
 	
 	public boolean isMounted() {
 		return mountID >= 0;
+	}
+	
+	@Override
+	public boolean equals( Object obj ) {
+		if ( obj == null || !(obj instanceof SentryInstance ) ) return false;
+		if ( ((SentryInstance) obj).myID == myID ) return true;
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return myID;
 	}
 }

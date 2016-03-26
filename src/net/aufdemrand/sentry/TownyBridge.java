@@ -3,9 +3,9 @@ package net.aufdemrand.sentry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
@@ -23,30 +23,46 @@ public class TownyBridge  extends PluginBridge {
 	Map<SentryInstance, Set<Nation>> friendlyNations = new HashMap<SentryInstance, Set<Nation>>();
 	Map<SentryInstance, Set<Nation>> rivalNations = new HashMap<SentryInstance, Set<Nation>>();
 	
-	TownyBridge( int flag ) {
-		super( flag );
-	}
+	Town myTown;
+	Nation myNation;
+	String commandHelp;
+	
+	TownyBridge( int flag ) { super( flag ); }
 	
 	@Override
-	public boolean activate() {
-		return true;
-	}
+	boolean activate() { return true; }
+	
 	@Override
-	String getCommandText() { return "Towny"; }
+	String getPrefix() { return "TOWNY"; }
 
 	@Override
-	public String getActivationMessage() {
-		return "Registered with Towny sucessfully, the TOWN: and NATION: targets will function";
+	String getActivationMessage() { return "Registered with Towny sucessfully, the TOWNY: target will function"; }
+
+	@Override
+	String getCommandHelp() {
+		
+		if ( commandHelp == null ) {
+			StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+			
+			joiner.add( "Towny:Town:<TownName> for residents of the named Town." );
+			joiner.add( "Towny:Nation:<NationName> for residents of the named Nation." );
+			joiner.add( "The following are valid for tagets only:-" );
+			joiner.add( "Towny:TownEnemies for enemies of the Town the sentry is in." );
+			joiner.add( "Towny:NationEnemies for enemies of the Nation the sentry is in." );
+			
+			commandHelp = joiner.toString();
+		}
+		return commandHelp;
 	}
 
 	@Override
-	public boolean isTarget( LivingEntity entity, SentryInstance inst ) {
+	boolean isTarget( Player player, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean isIgnoring( LivingEntity entity, SentryInstance inst ) {
+	boolean isIgnoring( Player player, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
 	} 
@@ -108,20 +124,33 @@ public class TownyBridge  extends PluginBridge {
 	}
 
 	@Override
-	String getCommandHelp() {
+	String add( String target, SentryInstance inst, boolean asTarget ) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	boolean add( String target, SentryInstance inst, boolean asTarget ) {
+	String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override
-	boolean remove( String entity, SentryInstance inst, boolean fromTargets ) {
+	boolean isListed( SentryInstance inst, boolean asTarget ) {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	// TODO implement this function in the TownyBridge.
+	// if ( arg.equalsIgnoreCase( "nationenemies" ) && inst.myNPC.isSpawned() ) {
+	// String natname = TownyBridge.getNationNameForLocation( inst.myNPC.getEntity().getLocation() );
+	// if ( natname != null ) {
+	// arg += ":" + natname;
+	// }
+	// else 	{
+	// player.sendMessage( ChatColor.RED + "Could not get Nation for this NPC's location" );
+	// return true;
+	// }
+	// }
+			
 }

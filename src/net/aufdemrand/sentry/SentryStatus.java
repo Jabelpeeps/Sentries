@@ -29,6 +29,8 @@ enum SentryStatus {
 
 						if ( Sentry.debug ) Sentry.debugLog( "respawning" + inst.myNPC.getName() );
 						
+						inst.myStatus = SentryStatus.isSPAWNING;
+						
 						if ( inst.guardEntity == null ) 
 							inst.myNPC.spawn( inst.spawnLocation.clone() );
 						else 
@@ -84,8 +86,6 @@ enum SentryStatus {
 					}
 				}
 			}
-
-			inst.myStatus = SentryStatus.isDEAD;
 			
 			if ( inst.dropInventory )  
 				myEntity.getLocation().getWorld()
@@ -134,16 +134,16 @@ enum SentryStatus {
 			
 			if ( inst.respawnDelay == -1 ) {
 				
-				inst.cancelRunnable();
-				
 				if ( inst.isMounted() ) 
 					Util.removeMount( inst.mountID );
-				
+
+				inst.cancelRunnable();
 				inst.myNPC.destroy();	
 			} 
 			else 
 				inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
-			
+
+			inst.myStatus = SentryStatus.isDEAD;
 			return false;
 		}
 	},
@@ -162,7 +162,7 @@ enum SentryStatus {
 			return false;
 		}
 	},
-	isHOSTILE {
+	isATTACKING {
 			@Override
 			boolean update( SentryInstance inst ) {
 				// TODO Auto-generated method stub

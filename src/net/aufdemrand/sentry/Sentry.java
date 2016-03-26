@@ -73,6 +73,8 @@ public class Sentry extends JavaPlugin {
 												Material.IRON_LEGGINGS,
 												Material.DIAMOND_LEGGINGS,
 												Material.GOLD_LEGGINGS );
+	
+	static Map<String, Integer> equipmentSlots = new HashMap<String, Integer>();
 
 	Map<Material, Double> armorBuffs = new EnumMap<Material, Double>( Material.class );
 	Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
@@ -126,7 +128,12 @@ public class Sentry extends JavaPlugin {
 				logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
 			}
 		}
-
+		equipmentSlots.put( "hand", 0 );
+		equipmentSlots.put( "helmet", 1 );
+		equipmentSlots.put( "chestplate", 2 );
+		equipmentSlots.put( "leggings", 3 );
+		equipmentSlots.put( "boots", 4 );
+		
 		int targetBitFlag = SentryInstance.bridges;
 		
 		for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
@@ -150,7 +157,11 @@ public class Sentry extends JavaPlugin {
 			catch ( NoSuchMethodException e ) { helpfulReflectionError( each ); e.printStackTrace(); }  
 			catch ( SecurityException e ) { helpfulReflectionError( each ); e.printStackTrace(); } 
 		
-			if ( bridge == null || !bridge.activate( ) ) continue;
+			if ( bridge == null ) continue;
+			if ( !bridge.activate() ) {
+				logger.log( Level.INFO, bridge.getActivationMessage() );
+				continue;
+			}
 			
 			if ( debug ) logger.log( Level.INFO, each + " activated with bitFlag value of " + bridge.bitFlag );
 			logger.log( Level.INFO, bridge.getActivationMessage() );
@@ -169,7 +180,6 @@ public class Sentry extends JavaPlugin {
 				public void run() {
 					
 					while ( arrows.size() > 200 ) {
-						
 						Projectile arrow = arrows.remove();
 						
 						if ( arrow != null ) arrow.remove();
@@ -182,8 +192,7 @@ public class Sentry extends JavaPlugin {
 	}
 	
 	private void helpfulReflectionError( String name ) {
-		logger.log( Level.WARNING, "Error loading PluginBridge for the value: '" + name + "' from config.yml. "
-									+ "Check that the PluginBridge is named correctly." );
+		logger.log( Level.WARNING, "Error loading PluginBridge for the value: '" + name + "' from config.yml. " );
 	}
 	
 	void reloadMyConfig() {
@@ -253,7 +262,6 @@ public class Sentry extends JavaPlugin {
 			}
 			return true;
 		}
-		
 		int slot = 0;
 		Material type = newEquipment.getType();
 		
@@ -272,8 +280,7 @@ public class Sentry extends JavaPlugin {
 	
 	public SentryInstance getSentryInstance( Entity ent ) {
 		
-		if  (  ent != null 
-			&& ent instanceof LivingEntity ) {
+		if ( ent != null && ent instanceof LivingEntity ) {
 				return getSentryInstance( CitizensAPI.getNPCRegistry().getNPC( ent ) );
 		}			
 		return null;
@@ -281,8 +288,7 @@ public class Sentry extends JavaPlugin {
 
 	public SentryInstance getSentryInstance( NPC npc ) {
 		
-		if ( npc != null 
-		  && npc.hasTrait( SentryTrait.class ) ) {
+		if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
 				return npc.getTrait( SentryTrait.class ).getInstance();
 		}
 		return null;
@@ -322,20 +328,16 @@ public class Sentry extends JavaPlugin {
 		
 		for ( String each : config.getStringList( node ) ) {
 			if ( debug ) debugLog( each );
+			
 			String[] args = each.trim().split(" ");
 			
 			if ( args.length != 2 ) continue;
 
-			double val = 0;
-
-			try {
-				val = Double.parseDouble( args[1] );
-			} catch (Exception e) { }
-
+			double val = Util.string2Double( args[1] );
 			Material item = Util.getMaterial( args[0] );
 
 			if ( item != null 
-			  && val != 0 
+			  && val > 0 
 			  && !map.containsKey( item ) ) {
 				
 				map.put( item, val );
@@ -423,7 +425,7 @@ public class Sentry extends JavaPlugin {
 				
 				return true;
 		}
-		logger.log( Level.INFO, S.ERROR_PLUGIN_NOT_FOUND + name );
+		logger.log( Level.INFO, S.ERROR_PLUGIN_NOT_FOUND.concat( name ) );
 		
 		return false;
 	}

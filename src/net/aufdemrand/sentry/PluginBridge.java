@@ -1,6 +1,6 @@
 package net.aufdemrand.sentry;
 
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 /** 
  * An abstract class to act as a bridge between Sentry and other Server plugins.
@@ -45,33 +45,33 @@ public abstract class PluginBridge {
 	abstract String getActivationMessage();
 
 	/**
-	 * Determines whether the supplied LivingEntity is a valid target of the supplied
+	 * Determines whether the supplied Player is a valid target of the supplied
 	 * SentryInstance.
 	 * <p>
 	 * This method should return a result as quickly as possible, so that server
 	 * performance is not affected if it is called often.
 	 * 
-	 * @param entity - the possible target entity
+	 * @param entity - the possible target player
 	 * @param inst - the SentryInstance that is asking.
-	 * @return true - if the entity is a valid target.
+	 * @return true - if the player is a valid target.
 	 */
-	abstract boolean isTarget( LivingEntity entity, SentryInstance inst );
+	abstract boolean isTarget( Player player, SentryInstance inst );
 	
 	/**
-	 * Determines whether the supplied LivingEntity should be ignored as a possible 
+	 * Determines whether the supplied Player should be ignored as a possible 
 	 * target of the supplied SentryInstance.
 	 * <p>
 	 * This method should return a result as quickly as possible, so that server
 	 * performance is not affected if it is called often.
 	 * 
-	 * @param entity - the entity that should possibly be ignored.
+	 * @param entity - the player that should possibly be ignored.
 	 * @param inst - the SentryInstance that is asking.
-	 * @return true - if the entity should be ignored.
+	 * @return true - if the player should be ignored.
 	 */
-	abstract boolean isIgnoring( LivingEntity entity, SentryInstance inst );
+	abstract boolean isIgnoring( Player player, SentryInstance inst );
 	
 	/**
-	 * Adds an entity - identified by the supplied string - as either a target or ignore
+	 * Adds an entity - identified by the supplied string - as either a target or ignore for
 	 * the supplied for the supplied SentryInstance.	 
 	 * <p>
 	 * The PluginBridge should achieve this task without modifying the SentryInstance
@@ -82,12 +82,12 @@ public abstract class PluginBridge {
 	 * can vary, as long as the pluginBridge knows how to parse the String).
 	 * @param inst - the SentryInstance instance that will have the target recorded against it.
 	 * @param asTarget - send true to add to the targets list, false to add to ignores.
-	 * @return true - if the target is added successfully.
+	 * @return a string that will be displayed to the player (either for success or failure)
 	 */
-	abstract boolean add( String target, SentryInstance inst, boolean asTarget );
+	abstract String add( String target, SentryInstance inst, boolean asTarget );
 	
 	/**
-	 * Removes the entity - identified by the supplied string - as either a target or ignores
+	 * Removes the entity - identified by the supplied string - as either a target or ignore for
 	 * the supplied for the supplied SentryInstance.
 	 * <p>
 	 * The PluginBridge should achieve this task without modifying the SentryInstance
@@ -98,14 +98,14 @@ public abstract class PluginBridge {
 	 * can vary, as long as the pluginBridge knows how to parse the String).
 	 * @param inst - the SentryInstance instance that will have the target recorded against it.
 	 * @param fromTargets - send true to remove from the targets list, false to remove from ignores.
-	 * @return true - if the entity is removed successfully.
+	 * @return a string that will be displayed to the player (either for success or failure)
 	 */
-	abstract boolean remove( String entity, SentryInstance inst, boolean fromTargets );
+	abstract String remove( String entity, SentryInstance inst, boolean fromTargets );
 	
 	/**
-	 * @return a string to be used as a command argument to refer to this PluginBridge.
+	 * @return a string to be used as the first part of the command argument to refer to this PluginBridge.
 	 */
-	abstract String getCommandText();
+	abstract String getPrefix();
 	
 	/**
 	 * @return the help text describing how to identify targets and ignores for this 
@@ -114,12 +114,12 @@ public abstract class PluginBridge {
 	 */
 	abstract String getCommandHelp();
 
-//  I don't think this will be needed now.	
-//	/**
-//	 * Refreshes the information held in the cache regarding the supplied
-//	 * SentryInstance only.
-//	 * 
-//	 * @param inst - the SentryInstance to re-cache.
-//	 */
-//	abstract void refreshLists( SentryInstance inst );
+	/**
+	 * A method to check whether the supplied SentryInstance has any targets or ignores 
+	 * tracked by this bridge.
+	 * @param inst - the SentryInstance instance to check
+	 * @param asTarget - supply true to check target list(s), and false to check ignores.
+	 * @return true - if the SentryInstance is listed.
+	 */
+	abstract boolean isListed( SentryInstance inst, boolean asTarget );
 }
