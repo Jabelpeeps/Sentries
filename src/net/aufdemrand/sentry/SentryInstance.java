@@ -603,7 +603,7 @@ public class SentryInstance {
 		// I don't think it was, let see what happens without it.
 	}
 	
-	public void Fire( LivingEntity theTarget ) {
+	public void fire( LivingEntity theTarget ) {
 		
 		LivingEntity myEntity = getMyEntity();
 		Class<? extends Projectile> myProjectile = myAttacks.getProjectile();
@@ -765,6 +765,8 @@ public class SentryInstance {
 		if ( effect != null )
 			myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
 
+		faceEntity( getMyEntity(), theTarget );
+		
 		if ( myProjectile == Arrow.class )
 			draw( false );
 		else 
@@ -1204,7 +1206,7 @@ public class SentryInstance {
 						oktoreasses = System.currentTimeMillis() + 3000;
 				}
 
-				if ( attackTarget != null & !attackTarget.isDead() 
+				if ( attackTarget != null && !attackTarget.isDead() 
 						&& attackTarget.getWorld() == myEntity.getLocation().getWorld() ) {
 					
 					if  ( myAttacks != AttackType.brawler ) {
@@ -1214,13 +1216,19 @@ public class SentryInstance {
 		
 							if ( !getNavigator().isNavigating() )
 								faceEntity( myEntity, attackTarget );
+							
+							if ( !getNavigator().isPaused() ) {
+								 	getNavigator().setPaused( true );
+								 	getNavigator().cancelNavigation();
+								 	getNavigator().setTarget( (Entity) SentryInstance.this.attackTarget, true );
+							}
 		
 							draw( true );
-		
+	
 							if ( System.currentTimeMillis() > oktoFire ) {
 	
 								oktoFire = (long) (System.currentTimeMillis() + attackRate * 1000.0 );
-								Fire( attackTarget );
+								fire( attackTarget );
 							}
 							
 							if ( attackTarget != null )
@@ -1242,6 +1250,10 @@ public class SentryInstance {
 			}
 
 			else if ( myStatus == SentryStatus.isLOOKING && myNPC.isSpawned() ) {
+				
+				if ( getNavigator().isPaused() ) {
+					 getNavigator().setPaused( false );
+				}
 
 				if ( myEntity.isInsideVehicle() == true ) faceAlignWithVehicle(); 
 
@@ -1531,7 +1543,7 @@ public class SentryInstance {
 		}
 	}
 
-	private Navigator getNavigator() {
+	Navigator getNavigator() {
 		return ifMountedGetMount().getNavigator();
 	}
 
