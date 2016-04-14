@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package net.aufdemrand.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,9 +7,14 @@ import java.util.Set;
 
 import org.bukkit.entity.Player;
 
+import net.aufdemrand.sentry.CommandHandler;
+import net.aufdemrand.sentry.PluginBridge;
+import net.aufdemrand.sentry.S;
+import net.aufdemrand.sentry.SentryInstance;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
+
 
 public class SimpleClansBridge extends PluginBridge {
 	
@@ -20,19 +25,19 @@ public class SimpleClansBridge extends PluginBridge {
 	SimpleClansBridge( int flag ) { super( flag ); }
 	
 	@Override
-	boolean activate() { return true; }
+	protected boolean activate() { return true; }
 	
 	@Override
-	String getActivationMessage() { return "SimpleClans is active, The CLAN: target will function"; }
+	protected String getActivationMessage() { return "SimpleClans is active, The CLAN: target will function"; }
 
 	@Override
-	String getCommandHelp() { return "Clan:<ClanName> for a SimpleClans Clan."; }
+	protected String getCommandHelp() { return "Clan:<ClanName> for a SimpleClans Clan."; }
 
 	@Override
-	String getPrefix() { return "CLAN"; }
+	protected String getPrefix() { return "CLAN"; }
 	
 	@Override
-	boolean isTarget( Player player, SentryInstance inst ) {
+	protected boolean isTarget( Player player, SentryInstance inst ) {
 		
 		if ( !rivals.containsKey( inst ) ) return false;
 		
@@ -40,7 +45,7 @@ public class SimpleClansBridge extends PluginBridge {
 	}
 
 	@Override
-	boolean isIgnoring( Player player, SentryInstance inst ) {
+	protected boolean isIgnoring( Player player, SentryInstance inst ) {
 
 		if ( !allies.containsKey( inst ) ) return false;
 		
@@ -48,7 +53,7 @@ public class SimpleClansBridge extends PluginBridge {
 	}
 	
 	@Override
-	String add( String target, SentryInstance inst, boolean asTarget ) {
+	protected String add( String target, SentryInstance inst, boolean asTarget ) {
 		
 		String targetClan = CommandHandler.colon.split( target, 2 )[1];
 		
@@ -73,7 +78,7 @@ public class SimpleClansBridge extends PluginBridge {
 	}
 	
 	@Override
-	String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+	protected String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
 		if ( !isListed( inst, fromTargets ) ) {
 			return String.join( 
@@ -98,7 +103,7 @@ public class SimpleClansBridge extends PluginBridge {
 	}
 	
 	@Override
-	boolean isListed( SentryInstance inst, boolean asTarget ) {
+	protected boolean isListed( SentryInstance inst, boolean asTarget ) {
 		
 		return ( asTarget ? rivals.containsKey( inst )
 				  		  : allies.containsKey( inst ) );

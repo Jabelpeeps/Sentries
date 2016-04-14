@@ -13,10 +13,10 @@ import org.bukkit.Effect;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 /////////////////////////
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
@@ -50,6 +50,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
+import net.aufdemrand.sentry.attackstrategies.CreeperAttackStrategy;
+import net.aufdemrand.sentry.attackstrategies.MountAttackStrategy;
+import net.aufdemrand.sentry.attackstrategies.SpiderAttackStrategy;
+import net.aufdemrand.sentry.pluginbridges.TownyBridge;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
@@ -60,10 +64,10 @@ import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
-//Version Specifics
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityPotion;
-import net.minecraft.server.v1_8_R3.PacketPlayOutAnimation;
+import net.minecraft.server.v1_9_R1.EntityHuman;
+import net.minecraft.server.v1_9_R1.EntityPotion;
+import net.minecraft.server.v1_9_R1.Packet;
+import net.minecraft.server.v1_9_R1.PacketPlayOutAnimation;
 
 
 public class SentryInstance {
@@ -113,7 +117,7 @@ public class SentryInstance {
 	String guardTarget;
 	DamageCause causeOfDeath;
 
-	PacketPlayOutAnimation healAnimation;
+	Packet<?> healAnimation;
 	
 	Set<String> ignoreTargets = new HashSet<String>();
 	Set<String> validTargets = new HashSet<String>();
@@ -135,7 +139,7 @@ public class SentryInstance {
 	SentryStatus myStatus = SentryStatus.isSPAWNING;
 	AttackType myAttacks;
 //	public SentryTrait myTrait;  // unused?
-	NPC myNPC;
+	public NPC myNPC;
 
 	private int taskID = 0;
 	
@@ -721,7 +725,7 @@ public class SentryInstance {
 				Projectile projectile;
 	
 				if ( myProjectile == ThrownPotion.class ) {
-					net.minecraft.server.v1_8_R3.World nmsWorld = ((CraftWorld) myEntity.getWorld()).getHandle();
+					net.minecraft.server.v1_9_R1.World nmsWorld = ((CraftWorld) myEntity.getWorld()).getHandle();
 					EntityPotion ent = new EntityPotion( nmsWorld
 														, myLocation.getX()
 														, myLocation.getY()
@@ -831,7 +835,7 @@ public class SentryInstance {
 
 		if ( myEntity instanceof Player ) {
 			
-			Material item = ((Player) myEntity).getInventory().getItemInHand().getType();
+			Material item = ((Player) myEntity).getInventory().getItemInMainHand().getType();
 			
 			if ( sentry.strengthBuffs.containsKey( item ) ) {
 					mod += sentry.strengthBuffs.get( item );
@@ -924,7 +928,7 @@ public class SentryInstance {
 				((Player) attacker).sendMessage( Util.format( msg, 
 															  npc, 
 															  attacker, 
-															  ((Player) attacker).getItemInHand().getType(), 
+															  ((Player) attacker).getInventory().getItemInMainHand().getType(), 
 															  damage + "" ) );
 			}
 		}
@@ -1174,7 +1178,7 @@ public class SentryInstance {
 						setHealth( getHealth() + heal );
 
 						if ( healAnimation != null ) 
-								NMS.sendPacketsNearby( null, myEntity.getLocation(), healAnimation );
+								NMS.sendPacketNearby( null, myEntity.getLocation(), healAnimation );
 
 						if ( getHealth() >= sentryMaxHealth ) 
 								_myDamamgers.clear(); 
@@ -1220,7 +1224,7 @@ public class SentryInstance {
 							if ( !getNavigator().isPaused() ) {
 								 	getNavigator().setPaused( true );
 								 	getNavigator().cancelNavigation();
-								 	getNavigator().setTarget( (Entity) SentryInstance.this.attackTarget, true );
+								 	getNavigator().setTarget( SentryInstance.this.attackTarget, true );
 							}
 		
 							draw( true );
@@ -1296,7 +1300,7 @@ public class SentryInstance {
 							myNPC.teleport( guardEntLoc.add( 1,0,1 ), TeleportCause.PLUGIN );
 						}
 						else if ( dist > followDistance && !isNavigating ) {
-							navigator.setTarget( (Entity) guardEntity, false );
+							navigator.setTarget( guardEntity, false );
 							navigator.getLocalParameters().stationaryTicks( 3 * 20 );
 						}
 						else if ( dist < followDistance && isNavigating ) {
@@ -1428,7 +1432,7 @@ public class SentryInstance {
 		LivingEntity myEntity = getMyEntity();
 		
 		if ( myEntity instanceof HumanEntity ) {
-			item = ((HumanEntity) myEntity).getInventory().getItemInHand();
+			item = ((HumanEntity) myEntity).getInventory().getItemInMainHand();
 			weapon = item.getType();
 			
 			myAttacks = AttackType.find( weapon );
@@ -1513,7 +1517,7 @@ public class SentryInstance {
 						myNPC.spawn( guardEntity.getLocation().add( 1, 0, 1 ) );
 						return;
 					}
-					navigator.setTarget( (Entity) guardEntity, false );
+					navigator.setTarget( guardEntity, false );
 					navigator.getLocalParameters().stationaryTicks( 3 * 20 );
 				}
 			} 
@@ -1536,7 +1540,7 @@ public class SentryInstance {
 			if ( !goalController.isPaused() )
 						goalController.setPaused( true );
 			
-			navigator.setTarget( (Entity) theEntity, true );
+			navigator.setTarget( theEntity, true );
 			navigator.getLocalParameters().speedModifier( getSpeed() );
 			navigator.getLocalParameters().stuckAction( giveup );
 			navigator.getLocalParameters().stationaryTicks( 5 * 20 );

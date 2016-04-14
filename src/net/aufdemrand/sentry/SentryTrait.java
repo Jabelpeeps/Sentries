@@ -4,7 +4,9 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.event.EventHandler;
 
+import net.citizensnpcs.api.event.CitizensReloadEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
@@ -150,6 +152,15 @@ public class SentryTrait extends Trait implements Toggleable {
 		
 		if ( Sentry.debug ) Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onAttach()" );
 		isToggled = true;
+	}
+
+	@EventHandler
+	public void onCitReload(CitizensReloadEvent event) {
+		if ( inst != null ) {
+			inst.cancelRunnable();
+		}
+		inst = null;
+		isToggled = false;
 	}
 
 	@Override

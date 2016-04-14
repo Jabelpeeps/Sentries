@@ -101,17 +101,22 @@ enum SentryStatus {
 				
 				for ( ItemStack is : inventory.getArmorContents() ) {
 					
-					if ( is.getType() != null ) 
+					if ( is != null && is.getType() != null ) 
 						items.add( is );
 				}
 
-				ItemStack is = inventory.getItemInHand();
+				ItemStack is = inventory.getItemInMainHand();
+				
+				if ( is.getType() != null ) items.add( is );
+				
+				is = inventory.getItemInOffHand();
 				
 				if ( is.getType() != null ) items.add( is );
 
 				inventory.clear();
 				inventory.setArmorContents( null );
-				inventory.setItemInHand( null );
+				inventory.setItemInMainHand( null );
+				inventory.setItemInOffHand( null );
 			}
 
 			if ( items.isEmpty() ) 

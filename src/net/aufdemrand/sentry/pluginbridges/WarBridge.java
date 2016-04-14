@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package net.aufdemrand.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +12,11 @@ import com.tommytony.war.Team;
 import com.tommytony.war.War;
 import com.tommytony.war.Warzone;
 
+import net.aufdemrand.sentry.CommandHandler;
+import net.aufdemrand.sentry.PluginBridge;
+import net.aufdemrand.sentry.S;
+import net.aufdemrand.sentry.SentryInstance;
+
 public class WarBridge extends PluginBridge {
 	
 	Map<SentryInstance, Set<Team>> friends = new HashMap<SentryInstance, Set<Team>>();
@@ -22,19 +27,19 @@ public class WarBridge extends PluginBridge {
 	}
 	
 	@Override
-	boolean activate() { return true; }
+	protected boolean activate() { return true; }
 
 	@Override
-	String getPrefix() { return "WAR"; }
+	protected String getPrefix() { return "WAR"; }
 	
 	@Override
-	String getActivationMessage() { return "War is active, The WAR: target will function"; }
+	protected String getActivationMessage() { return "War is active, The WAR: target will function"; }
 
 	@Override
-	String getCommandHelp() { return "War:<TeamName> for a War Team."; }
+	protected String getCommandHelp() { return "War:<TeamName> for a War Team."; }
 	
 	@Override
-	boolean isTarget( Player player, SentryInstance inst ) {
+	protected boolean isTarget( Player player, SentryInstance inst ) {
 		
 		if ( !enemies.containsKey( inst ) ) return false;
 		
@@ -42,7 +47,7 @@ public class WarBridge extends PluginBridge {
 	}
 
 	@Override
-	boolean isIgnoring( Player player, SentryInstance inst ) {
+	protected boolean isIgnoring( Player player, SentryInstance inst ) {
 
 		if ( !friends.containsKey( inst ) ) return false;
 		
@@ -50,7 +55,7 @@ public class WarBridge extends PluginBridge {
 	}
 
 	@Override
-	String add( String target, SentryInstance inst, boolean asTarget ) {
+	protected String add( String target, SentryInstance inst, boolean asTarget ) {
 
 		String targetTeam = CommandHandler.colon.split( target, 2 )[1];
 		List<Warzone> zones = War.war.getWarzones();
@@ -81,7 +86,7 @@ public class WarBridge extends PluginBridge {
 	}
 	
 	@Override
-	String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+	protected String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
 		if ( !isListed( inst, fromTargets ) ) {
 			return String.join( 
@@ -105,7 +110,7 @@ public class WarBridge extends PluginBridge {
 	}
 	
 	@Override
-	boolean isListed( SentryInstance inst, boolean asTarget ) {
+	protected boolean isListed( SentryInstance inst, boolean asTarget ) {
 
 		return ( asTarget ? enemies.containsKey( inst )
 						  : friends.containsKey( inst ) );

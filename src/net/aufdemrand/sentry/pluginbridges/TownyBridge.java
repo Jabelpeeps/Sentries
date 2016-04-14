@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package net.aufdemrand.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +15,9 @@ import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
+import net.aufdemrand.sentry.PluginBridge;
+import net.aufdemrand.sentry.SentryInstance;
+
 public class TownyBridge  extends PluginBridge {
 	
 	Map<SentryInstance, Set<Town>> friendlyTowns = new HashMap<SentryInstance, Set<Town>>();
@@ -23,30 +26,30 @@ public class TownyBridge  extends PluginBridge {
 	Map<SentryInstance, Set<Nation>> friendlyNations = new HashMap<SentryInstance, Set<Nation>>();
 	Map<SentryInstance, Set<Nation>> rivalNations = new HashMap<SentryInstance, Set<Nation>>();
 	
-	Town myTown;
-	Nation myNation;
+	Map<SentryInstance, Town> myTown = new HashMap<SentryInstance, Town>();
+	Map<SentryInstance, Nation> myNation = new HashMap<SentryInstance, Nation>();
 	String commandHelp;
 	
 	TownyBridge( int flag ) { super( flag ); }
 	
 	@Override
-	boolean activate() { return true; }
+	protected boolean activate() { return true; }
 	
 	@Override
-	String getPrefix() { return "TOWNY"; }
+	protected String getPrefix() { return "TOWNY"; }
 
 	@Override
-	String getActivationMessage() { return "Registered with Towny sucessfully, the TOWNY: target will function"; }
+	protected String getActivationMessage() { return "Registered with Towny sucessfully, the TOWNY: target will function"; }
 
 	@Override
-	String getCommandHelp() {
+	protected String getCommandHelp() {
 		
 		if ( commandHelp == null ) {
 			StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 			
 			joiner.add( "Towny:Town:<TownName> for residents of the named Town." );
 			joiner.add( "Towny:Nation:<NationName> for residents of the named Nation." );
-			joiner.add( "The following are valid for tagets only:-" );
+			joiner.add( "The following are valid for targets only:-" );
 			joiner.add( "Towny:TownEnemies for enemies of the Town the sentry is in." );
 			joiner.add( "Towny:NationEnemies for enemies of the Nation the sentry is in." );
 			
@@ -56,18 +59,18 @@ public class TownyBridge  extends PluginBridge {
 	}
 
 	@Override
-	boolean isTarget( Player player, SentryInstance inst ) {
+	protected boolean isTarget( Player player, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	boolean isIgnoring( Player player, SentryInstance inst ) {
+	protected boolean isIgnoring( Player player, SentryInstance inst ) {
 		// TODO Auto-generated method stub
 		return false;
 	} 
 	
-	static String[] getResidentTownyInfo( Player player ) {
+	public static String[] getResidentTownyInfo( Player player ) {
 		
 		String[] info = { null, null };
 
@@ -89,7 +92,7 @@ public class TownyBridge  extends PluginBridge {
 		return info;
 	}
 	
-	static boolean isNationEnemy( String Nation1, String Nation2 ) {
+	public static boolean isNationEnemy( String Nation1, String Nation2 ) {
 		
 		if  (  !Nation1.equalsIgnoreCase( Nation2 ) 
 			&& TownyUniverse.getDataSource().hasNation( Nation1 )
@@ -124,19 +127,19 @@ public class TownyBridge  extends PluginBridge {
 	}
 
 	@Override
-	String add( String target, SentryInstance inst, boolean asTarget ) {
+	protected String add( String target, SentryInstance inst, boolean asTarget ) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+	protected String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	boolean isListed( SentryInstance inst, boolean asTarget ) {
+	protected boolean isListed( SentryInstance inst, boolean asTarget ) {
 		// TODO Auto-generated method stub
 		return false;
 	}

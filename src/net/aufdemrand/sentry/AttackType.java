@@ -35,7 +35,7 @@ enum AttackType {
 	brawler( 	"Brawler", 		Material.AIR,				null ) {
 		@Override
 		Material getWeapon( SentryInstance sentry ) {
-			return ((HumanEntity) sentry.getMyEntity()).getInventory().getItemInHand().getType();
+			return ((HumanEntity) sentry.getMyEntity()).getInventory().getItemInMainHand().getType();
 		}
 	};
 	

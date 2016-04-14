@@ -1,12 +1,13 @@
-package net.aufdemrand.sentry;
+package net.aufdemrand.sentry.attackstrategies;
 
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.ai.AttackStrategy;
 
-public class MountAttackStrategy implements net.citizensnpcs.api.ai.AttackStrategy {
+public class MountAttackStrategy implements AttackStrategy {
   	// make the rider attack when in range.
 	
 	@Override

@@ -14,15 +14,15 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import net.citizensnpcs.Citizens;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.trait.trait.Owner;
 
 public abstract class CommandHandler {
 	
-	static Pattern colon = Pattern.compile( ":" );
+	public static Pattern colon = Pattern.compile( ":" );
 	static Pattern initialDoubleQuote = Pattern.compile( "^\"" );
 	static Pattern endDoubleQuote = Pattern.compile( "\"$" );
 	static Pattern initialSingleQuote = Pattern.compile( "^'" );
@@ -406,9 +406,8 @@ public abstract class CommandHandler {
 		// check to see whether the value saved is an npc ID, and save a reference if so.
 		if ( npcid == -1 ) {
 			
-			thisNPC = ((Citizens) sentry.pluginManager.getPlugin( S.CITIZENS ))
-													  .getNPCSelector()
-													  .getSelected( player );
+			thisNPC = ((CitizensPlugin) CitizensAPI.getPlugin()).getDefaultNPCSelector().getSelected( player );
+			
 			if ( thisNPC == null ) {
 				player.sendMessage( S.Col.RED.concat( S.ERROR_NO_NPC ) );
 				return true;

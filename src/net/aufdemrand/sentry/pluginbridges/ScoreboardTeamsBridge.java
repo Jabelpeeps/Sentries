@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package net.aufdemrand.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import net.aufdemrand.sentry.CommandHandler;
+import net.aufdemrand.sentry.PluginBridge;
+import net.aufdemrand.sentry.S;
+import net.aufdemrand.sentry.Sentry;
+import net.aufdemrand.sentry.SentryInstance;
+
 public class ScoreboardTeamsBridge extends PluginBridge {
 	
 	Map<SentryInstance, Set<Team>> friends = new HashMap<SentryInstance, Set<Team>>();
@@ -18,19 +24,19 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	ScoreboardTeamsBridge( int flag ) { super( flag ); }
 	
 	@Override
-	boolean activate() { return true; }
+	protected boolean activate() { return true; }
 
 	@Override
-	String getPrefix() { return "TEAM"; }
+	protected String getPrefix() { return "TEAM"; }
 
 	@Override
-	String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
+	protected String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
 
 	@Override
-	String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
+	protected String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
 	
 	@Override
-	boolean isTarget( Player player, SentryInstance inst ) {
+	protected boolean isTarget( Player player, SentryInstance inst ) {
 		
 		if ( !enemies.containsKey( inst ) ) return false;
 		
@@ -38,7 +44,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	}
 
 	@Override
-	boolean isIgnoring( Player player, SentryInstance inst ) {
+	protected boolean isIgnoring( Player player, SentryInstance inst ) {
 		
 		if ( !friends.containsKey( inst ) ) return false;
 		
@@ -46,7 +52,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	}
 
 	@Override
-	String add( String target, SentryInstance inst, boolean asTarget ) {
+	protected String add( String target, SentryInstance inst, boolean asTarget ) {
 
 		String targetTeam = CommandHandler.colon.split( target, 2 )[1];
 		Set<Team> teams = scoreboard.getTeams();
@@ -72,7 +78,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	}
 	
 	@Override
-	String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+	protected String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
 		if ( !isListed( inst, fromTargets ) ) {
 			return String.join( 
@@ -96,7 +102,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
 	}
 	
 	@Override
-	boolean isListed( SentryInstance inst, boolean asTarget ) {
+	protected boolean isListed( SentryInstance inst, boolean asTarget ) {
 		
 		return ( asTarget ? enemies.containsKey( inst )
 						  : friends.containsKey( inst ) );

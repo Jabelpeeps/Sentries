@@ -6,7 +6,7 @@ import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 
-public class GiveUpStuckAction implements StuckAction {
+class GiveUpStuckAction implements StuckAction {
 	
 	SentryInstance inst;
 	
@@ -16,16 +16,16 @@ public class GiveUpStuckAction implements StuckAction {
 
 	@Override
 	public boolean run( NPC npc, Navigator navigator ) {
-		// inst.plugin.getServer().broadcastMessage("give up stuck action");
 		
 		if ( !npc.isSpawned() ) return false;
 		
-        	Location base = navigator.getTargetAsLocation();
-        
-        	if ( base.getWorld() == npc.getEntity().getLocation().getWorld() 
-        	  && npc.getEntity().getLocation().distanceSquared( base ) <= 4 ) {
-                		return true;
-        	}	
+    	Location target = navigator.getTargetAsLocation();
+    	Location present = npc.getEntity().getLocation();
+    
+    	if ( target.getWorld() == present.getWorld() 
+    	  && present.distanceSquared( target ) <= 4 ) {
+            		return true;
+    	}	
 		inst.clearTarget();
 		return false;
 	}

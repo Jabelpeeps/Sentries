@@ -19,7 +19,7 @@ public abstract class PluginBridge {
 	
 	final int bitFlag;
 	
-	PluginBridge( int flag ) {
+	protected PluginBridge( int flag ) {
 		bitFlag = flag;
 	}
 	
@@ -33,7 +33,7 @@ public abstract class PluginBridge {
 	 * @return true - if the activation was successful.
 	 * @return false - if not.
 	 */
-	abstract boolean activate();
+	protected abstract boolean activate();
 	
 	/**
 	 * Implementations may specify a string to be used for logging once a call 
@@ -42,7 +42,7 @@ public abstract class PluginBridge {
 	 * 
 	 * @return the string.
 	 */
-	abstract String getActivationMessage();
+	protected abstract String getActivationMessage();
 
 	/**
 	 * Determines whether the supplied Player is a valid target of the supplied
@@ -55,7 +55,7 @@ public abstract class PluginBridge {
 	 * @param inst - the SentryInstance that is asking.
 	 * @return true - if the player is a valid target.
 	 */
-	abstract boolean isTarget( Player player, SentryInstance inst );
+	protected abstract boolean isTarget( Player player, SentryInstance inst );
 	
 	/**
 	 * Determines whether the supplied Player should be ignored as a possible 
@@ -68,7 +68,7 @@ public abstract class PluginBridge {
 	 * @param inst - the SentryInstance that is asking.
 	 * @return true - if the player should be ignored.
 	 */
-	abstract boolean isIgnoring( Player player, SentryInstance inst );
+	protected abstract boolean isIgnoring( Player player, SentryInstance inst );
 	
 	/**
 	 * Adds an entity - identified by the supplied string - as either a target or ignore for
@@ -84,7 +84,7 @@ public abstract class PluginBridge {
 	 * @param asTarget - send true to add to the targets list, false to add to ignores.
 	 * @return a string that will be displayed to the player (either for success or failure)
 	 */
-	abstract String add( String target, SentryInstance inst, boolean asTarget );
+	protected abstract String add( String target, SentryInstance inst, boolean asTarget );
 	
 	/**
 	 * Removes the entity - identified by the supplied string - as either a target or ignore for
@@ -100,19 +100,19 @@ public abstract class PluginBridge {
 	 * @param fromTargets - send true to remove from the targets list, false to remove from ignores.
 	 * @return a string that will be displayed to the player (either for success or failure)
 	 */
-	abstract String remove( String entity, SentryInstance inst, boolean fromTargets );
+	protected abstract String remove( String entity, SentryInstance inst, boolean fromTargets );
 	
 	/**
 	 * @return a string to be used as the first part of the command argument to refer to this PluginBridge.
 	 */
-	abstract String getPrefix();
+	protected abstract String getPrefix();
 	
 	/**
 	 * @return the help text describing how to identify targets and ignores for this 
 	 * PluginBridge - so that they will be recognised when parsed by 'addTarget()' and 
 	 * 'addIgnore()'
 	 */
-	abstract String getCommandHelp();
+	protected abstract String getCommandHelp();
 
 	/**
 	 * A method to check whether the supplied SentryInstance has any targets or ignores 
@@ -121,5 +121,5 @@ public abstract class PluginBridge {
 	 * @param asTarget - supply true to check target list(s), and false to check ignores.
 	 * @return true - if the SentryInstance is listed.
 	 */
-	abstract boolean isListed( SentryInstance inst, boolean asTarget );
+	protected abstract boolean isListed( SentryInstance inst, boolean asTarget );
 }

@@ -9,7 +9,7 @@ import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 
 // 
-public class BodyguardTeleportStuckAction implements StuckAction {
+class BodyguardTeleportStuckAction implements StuckAction {
 	SentryInstance inst;
 	Sentry sentry;
 	
@@ -28,21 +28,22 @@ public class BodyguardTeleportStuckAction implements StuckAction {
 		// the next section tests whether the npc has already reached its destination
 		// and returns if so.
 		Location destination = navigator.getTargetAsLocation();
+		Location present = npc.getEntity().getLocation();
 
-		if ( destination.getWorld() == npc.getEntity().getLocation().getWorld() 
-			&& npc.getEntity().getLocation().distanceSquared( destination ) <= 4 )
-				
+		if ( destination.getWorld() == present.getWorld() 
+			&& present.distanceSquared( destination ) <= 4 ) {				
 				return true;
-		
+		}
 	    if ( inst.guardEntity == null 
-		   || !Util.CanWarp( inst.guardEntity, npc ) ) 
+		   || !Util.CanWarp( inst.guardEntity, npc ) ) {
 			    // do nothing, next logic tick will clear the entity.
 			    return true; 
-		
+	    }
 	    // now we run a loop to find an air block above the npc.
 		int i = 0;
 		// get block that npc is standing on currently.
 		Block block = destination.getBlock();
+		
 		do {
 			// break out of loop after MAX_INTERATIONS
 			if ( i++ >= MAX_ITERATIONS ) {

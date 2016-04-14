@@ -1,18 +1,20 @@
-package net.aufdemrand.sentry;
+package net.aufdemrand.sentry.attackstrategies;
 
 import java.util.Random;
 
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
 
-import net.minecraft.server.v1_8_R3.Entity;
+import net.aufdemrand.sentry.Sentry;
+import net.citizensnpcs.api.ai.AttackStrategy;
+import net.minecraft.server.v1_9_R1.Entity;
 
-public class SpiderAttackStrategy implements net.citizensnpcs.api.ai.AttackStrategy {
+public class SpiderAttackStrategy implements AttackStrategy {
 	
 	private Random random = new Random();
-	Sentry sentry = null;
+	Sentry sentry;
 
-	public SpiderAttackStrategy (Sentry plugin) {
+	public SpiderAttackStrategy ( Sentry plugin ) {
 		sentry = plugin;
 	}
 

@@ -38,7 +38,7 @@ import net.citizensnpcs.api.trait.trait.Equipment;
 
 public class Sentry extends JavaPlugin {
 
-	static boolean debug = true;
+	public static boolean debug = true;
 	
 	static boolean dieLikePlayers = false;
 	static boolean bodyguardsObeyProtection = true;
