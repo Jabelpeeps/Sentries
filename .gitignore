@@ -6,3 +6,5 @@ target/
 bin/
 .DS_Store
 .jardesc
+.classpath
+.project
