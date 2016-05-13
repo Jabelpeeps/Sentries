@@ -19,10 +19,10 @@
     <!-- Repositories -->
     <repositories>
         
-       <!--  <repository>
+       <repository>
         	<id>spigot-repo</id>
         	<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository> -->
+        </repository>
         
         <repository>
             <id>everything</id>
@@ -130,7 +130,7 @@
         </dependency>
     </dependencies>
 
-    <ciManagement>
+<!--    <ciManagement>
         <system>jenkins</system>
         <url>http://ci.citizensnpcs.co</url>
     </ciManagement>
@@ -139,7 +139,7 @@
         <developerConnection>scm:git:git:@github.com:mcmonkey4eva/Sentry.git</developerConnection>
         <url>https://github.com/mcmonkey4eva/Sentry/tree/master/</url>
     </scm>
-
+-->
     <build>
         <defaultGoal>clean package install</defaultGoal>
         <finalName>${project.name}</finalName>
