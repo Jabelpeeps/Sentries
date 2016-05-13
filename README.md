@@ -17,6 +17,7 @@ ONGOING:-
 
 TODO:-
 * expand readme giving more details of features (old and new)
+* setup my own ci server for this fork.
 * add more features... 
 
 (pls post any suggestions as issues and/or PR's)
