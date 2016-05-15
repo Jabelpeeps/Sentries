@@ -20,6 +20,7 @@ ONGOING:-
 
 TODO:-
 * expand readme giving more details of features (old and new)
+* remove use of NMS and classes from CraftBukkit as far as possible.
 * add more features... 
 
 (pls post any suggestions as issues and/or PR's)
