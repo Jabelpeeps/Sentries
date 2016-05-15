@@ -1,5 +1,5 @@
 # Sentry
-[![Build Status](http://jabelpeeps.org/jenkins/buildStatus/icon?job=21st_Sentry&build=36)](http://jabelpeeps.org/jenkins/job/21st_Sentry/36/)
+[![Build Status](http://jabelpeeps.org/jenkins/buildStatus/icon?job=21st_Sentry)](http://jabelpeeps.org/jenkins/job/21st_Sentry)
 
 Citizens2 Town Sentry Character
 
