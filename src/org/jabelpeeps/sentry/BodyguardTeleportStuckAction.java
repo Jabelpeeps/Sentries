@@ -8,67 +8,75 @@ import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 
-// 
+//
 class BodyguardTeleportStuckAction implements StuckAction {
-	SentryInstance inst;
-	Sentry sentry;
-	
-	private static int MAX_ITERATIONS = 10;
-	
-	BodyguardTeleportStuckAction( SentryInstance _inst, Sentry plugin ){
-		inst = _inst; 
-		sentry = plugin;
-	}
 
-	@Override
-	public boolean run(final NPC npc, Navigator navigator) {
+    SentryInstance inst;
+    Sentry sentry;
 
-		if ( !npc.isSpawned() ) return false;
-		
-		// the next section tests whether the npc has already reached its destination
-		// and returns if so.
-		Location destination = navigator.getTargetAsLocation();
-		Location present = npc.getEntity().getLocation();
+    private static int MAX_ITERATIONS = 10;
 
-		if ( destination.getWorld() == present.getWorld() 
-			&& present.distanceSquared( destination ) <= 4 ) {				
-				return true;
-		}
-	    if ( inst.guardEntity == null 
-		   || !Util.CanWarp( inst.guardEntity, npc ) ) {
-			    // do nothing, next logic tick will clear the entity.
-			    return true; 
-	    }
-	    // now we run a loop to find an air block above the npc.
-		int i = 0;
-		// get block that npc is standing on currently.
-		Block block = destination.getBlock();
-		
-		do {
-			// break out of loop after MAX_INTERATIONS
-			if ( i++ >= MAX_ITERATIONS ) {
-				block = destination.getBlock();
-				break;	
-			}
-			// move referenced block up 1 block
-			block = block.getRelative( BlockFace.UP );	
-			
-		// continue looping until an empty block is found	
-		} while ( !block.isEmpty() );
+    BodyguardTeleportStuckAction( SentryInstance _inst, Sentry plugin ) {
+        inst = _inst;
+        sentry = plugin;
+    }
 
-		final Location loc = block.getLocation();
-		
-		// defining runnable separately for clarity of code (as well as preventing small chance of memory leaks)
-		final Runnable tpEvent = new Runnable(){
+    @Override
+    public boolean run( final NPC npc, Navigator navigator ) {
 
-			@Override public void run() {
-				npc.teleport( loc, org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN );	
-			}
-		};
-		// send runnable to execute on main game loop
-		sentry.getServer().getScheduler().scheduleSyncDelayedTask( sentry, tpEvent, 2 );
+        if ( !npc.isSpawned() )
+            return false;
 
-		// TODO find out why we are returning false here - surely the event has been dealt with?
-		return false;
-	}
+        // the next section tests whether the npc has already reached its
+        // destination
+        // and returns if so.
+        Location destination = navigator.getTargetAsLocation();
+        Location present = npc.getEntity().getLocation();
+
+        if ( destination.getWorld() == present.getWorld()
+                && present.distanceSquared( destination ) <= 4 ) {
+            return true;
+        }
+        if ( inst.guardEntity == null
+                || !Util.CanWarp( inst.guardEntity, npc ) ) {
+            // do nothing, next logic tick will clear the entity.
+            return true;
+        }
+        // now we run a loop to find an air block above the npc.
+        int i = 0;
+        // get block that npc is standing on currently.
+        Block block = destination.getBlock();
+
+        do {
+            // break out of loop after MAX_INTERATIONS
+            if ( i++ >= MAX_ITERATIONS ) {
+                block = destination.getBlock();
+                break;
+            }
+            // move referenced block up 1 block
+            block = block.getRelative( BlockFace.UP );
+
+            // continue looping until an empty block is found
+        } while ( !block.isEmpty() );
+
+        final Location loc = block.getLocation();
+
+        // defining runnable separately for clarity of code (as well as
+        // preventing small chance of memory leaks)
+        final Runnable tpEvent = new Runnable() {
+
+            @Override
+            public void run() {
+                npc.teleport( loc,
+                        org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN );
+            }
+        };
+        // send runnable to execute on main game loop
+        sentry.getServer().getScheduler().scheduleSyncDelayedTask( sentry,
+                tpEvent, 2 );
+
+        // TODO find out why we are returning false here - surely the event has
+        // been dealt with?
+        return false;
+    }
 }

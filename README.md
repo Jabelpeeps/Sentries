@@ -1,7 +1,7 @@
-# Sentry
+# Sentries
 [![Build Status](http://jabelpeeps.org/jenkins/buildStatus/icon?job=Sentries)](http://jabelpeeps.org/jenkins/job/Sentries)
 
-Citizens2 Town Sentry Character
+Citizens2 Sentry, Bodyguard, and Fighting Trait.
 
 This is my own near-total re-write of the Sentry codebase, with a focus on updating & re-working it to improve performance, while maintaining it's current features.
 

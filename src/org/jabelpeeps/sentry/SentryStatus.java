@@ -17,164 +17,183 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 enum SentryStatus {
-	
-	isDEAD {
-		@Override
-		boolean update( SentryInstance inst ) {
-			
-			if  (  System.currentTimeMillis() > inst.isRespawnable 
-				&& inst.respawnDelay > 0 
-				&& inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,
-																inst.spawnLocation.getBlockZ() >> 4 ) ) {
 
-						if ( Sentry.debug ) Sentry.debugLog( "respawning" + inst.myNPC.getName() );
-						
-						inst.myStatus = SentryStatus.isSPAWNING;
-						
-						if ( inst.guardEntity == null ) 
-							inst.myNPC.spawn( inst.spawnLocation.clone() );
-						else 
-							inst.myNPC.spawn( inst.guardEntity.getLocation().add( 2, 0, 2 ) );
-						
-						return true;
-			}
-			return false;
-		}
-	},
-	
-	isDYING {
-		@Override
-		boolean update( SentryInstance inst ) {
-			
-			LivingEntity myEntity = inst.getMyEntity();
-			
-			inst.clearTarget();
+    isDEAD {
 
-			if ( Sentry.denizenActive ) {
+        @Override
+        boolean update( SentryInstance inst ) {
 
-				DenizenHook.denizenAction( inst.myNPC, "death", null );
-				DenizenHook.denizenAction( inst.myNPC, 
-										"death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
+            if ( System.currentTimeMillis() > inst.isRespawnable
+                    && inst.respawnDelay > 0
+                    && inst.spawnLocation.getWorld().isChunkLoaded(
+                            inst.spawnLocation.getBlockX() >> 4,
+                            inst.spawnLocation.getBlockZ() >> 4 ) ) {
 
-				Entity killer = myEntity.getKiller();
-				
-				if ( killer == null ) {
-					//might have been a projectile.
-					EntityDamageEvent ev = myEntity.getLastDamageCause();
-					if 	(  ev != null 
-						&& ev instanceof EntityDamageByEntityEvent ) {
-								killer = ((EntityDamageByEntityEvent) ev).getDamager();
-					}
-				}
+                if ( Sentry.debug )
+                    Sentry.debugLog( "respawning" + inst.myNPC.getName() );
 
-				if ( killer != null ) {
+                inst.myStatus = SentryStatus.isSPAWNING;
 
-					if 	(  killer instanceof Projectile 
-						&& ((Projectile) killer).getShooter() != null
-                        && ((Projectile) killer).getShooter() instanceof Entity )
-                        	killer = (Entity) ((Projectile) killer).getShooter();
+                if ( inst.guardEntity == null )
+                    inst.myNPC.spawn( inst.spawnLocation.clone() );
+                else
+                    inst.myNPC.spawn(
+                            inst.guardEntity.getLocation().add( 2, 0, 2 ) );
 
-					if ( Sentry.debug ) Sentry.debugLog( "Running Denizen actions for " + inst.myNPC.getName() 
-															+ " with killer: " + killer.toString() );
+                return true;
+            }
+            return false;
+        }
+    },
 
-					if ( killer instanceof OfflinePlayer ) {
-						DenizenHook.denizenAction( inst.myNPC, "death by player", (OfflinePlayer) killer );
-					}
-					else {
-						DenizenHook.denizenAction( inst.myNPC, "death by entity", null );
-						DenizenHook.denizenAction( inst.myNPC, "death by " + killer.getType().toString(), null );
-					}
-				}
-			}
-			
-			if ( inst.dropInventory )  
-				myEntity.getLocation().getWorld()
-									  .spawn( myEntity.getLocation(), 
-											  ExperienceOrb.class )
-									  .setExperience( Sentry.sentryEXP );
+    isDYING {
 
-			List<ItemStack> items = new LinkedList<ItemStack>();
+        @Override
+        boolean update( SentryInstance inst ) {
 
-			if ( myEntity instanceof HumanEntity ) {
+            LivingEntity myEntity = inst.getMyEntity();
 
-				PlayerInventory inventory = ((HumanEntity) myEntity).getInventory();
-				
-				for ( ItemStack is : inventory.getArmorContents() ) {
-					
-					if ( is != null && is.getType() != null ) 
-						items.add( is );
-				}
+            inst.clearTarget();
 
-				ItemStack is = inventory.getItemInMainHand();
-				
-				if ( is.getType() != null ) items.add( is );
-				
-				is = inventory.getItemInOffHand();
-				
-				if ( is.getType() != null ) items.add( is );
+            if ( Sentry.denizenActive ) {
 
-				inventory.clear();
-				inventory.setArmorContents( null );
-				inventory.setItemInMainHand( null );
-				inventory.setItemInOffHand( null );
-			}
+                DenizenHook.denizenAction( inst.myNPC, "death", null );
+                DenizenHook.denizenAction( inst.myNPC, "death by"
+                        + inst.causeOfDeath.toString().replace( " ", "_" ),
+                        null );
 
-			if ( items.isEmpty() ) 
-				myEntity.playEffect( EntityEffect.DEATH );
-			else 
-				myEntity.playEffect( EntityEffect.HURT );
+                Entity killer = myEntity.getKiller();
 
-			if ( !inst.dropInventory ) items.clear();
+                if ( killer == null ) {
+                    // might have been a projectile.
+                    EntityDamageEvent ev = myEntity.getLastDamageCause();
+                    if ( ev != null
+                            && ev instanceof EntityDamageByEntityEvent ) {
+                        killer = ((EntityDamageByEntityEvent) ev).getDamager();
+                    }
+                }
 
-			for ( ItemStack is : items ) 
-				myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), is );
+                if ( killer != null ) {
 
-			if ( Sentry.dieLikePlayers ) 
-				myEntity.setHealth( 0 );
-			else 
-				Sentry.getSentry().getServer()		//citizens will despawn it.
-								  .getPluginManager()
-								  .callEvent( new EntityDeathEvent( myEntity, items ) );
-							
-			
-			if ( inst.respawnDelay == -1 ) {
-				
-				if ( inst.isMounted() ) 
-					Util.removeMount( inst.mountID );
+                    if ( killer instanceof Projectile
+                            && ((Projectile) killer).getShooter() != null
+                            && ((Projectile) killer)
+                                    .getShooter() instanceof Entity )
+                        killer = (Entity) ((Projectile) killer).getShooter();
 
-				inst.cancelRunnable();
-				inst.myNPC.destroy();	
-			} 
-			else 
-				inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
+                    if ( Sentry.debug )
+                        Sentry.debugLog( "Running Denizen actions for "
+                                + inst.myNPC.getName() + " with killer: "
+                                + killer.toString() );
 
-			inst.myStatus = SentryStatus.isDEAD;
-			return false;
-		}
-	},
-	
-	isSPAWNING {
-		@Override
-		boolean update( SentryInstance inst ) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-	},
-	isLOOKING {
-		@Override
-		boolean update( SentryInstance inst ) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-	},
-	isATTACKING {
-			@Override
-			boolean update( SentryInstance inst ) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-	};
-	
-	
-	abstract boolean update( SentryInstance inst );
+                    if ( killer instanceof OfflinePlayer ) {
+                        DenizenHook.denizenAction( inst.myNPC,
+                                "death by player", (OfflinePlayer) killer );
+                    }
+                    else {
+                        DenizenHook.denizenAction( inst.myNPC,
+                                "death by entity", null );
+                        DenizenHook.denizenAction( inst.myNPC,
+                                "death by " + killer.getType().toString(),
+                                null );
+                    }
+                }
+            }
+
+            if ( inst.dropInventory )
+                myEntity.getLocation().getWorld()
+                        .spawn( myEntity.getLocation(), ExperienceOrb.class )
+                        .setExperience( Sentry.sentryEXP );
+
+            List<ItemStack> items = new LinkedList<ItemStack>();
+
+            if ( myEntity instanceof HumanEntity ) {
+
+                PlayerInventory inventory = ((HumanEntity) myEntity)
+                        .getInventory();
+
+                for ( ItemStack is : inventory.getArmorContents() ) {
+
+                    if ( is != null && is.getType() != null )
+                        items.add( is );
+                }
+
+                ItemStack is = inventory.getItemInMainHand();
+
+                if ( is.getType() != null )
+                    items.add( is );
+
+                is = inventory.getItemInOffHand();
+
+                if ( is.getType() != null )
+                    items.add( is );
+
+                inventory.clear();
+                inventory.setArmorContents( null );
+                inventory.setItemInMainHand( null );
+                inventory.setItemInOffHand( null );
+            }
+
+            if ( items.isEmpty() )
+                myEntity.playEffect( EntityEffect.DEATH );
+            else
+                myEntity.playEffect( EntityEffect.HURT );
+
+            if ( !inst.dropInventory )
+                items.clear();
+
+            for ( ItemStack is : items )
+                myEntity.getWorld().dropItemNaturally( myEntity.getLocation(),
+                        is );
+
+            if ( Sentry.dieLikePlayers )
+                myEntity.setHealth( 0 );
+            else
+                Sentry.getSentry().getServer() // citizens will despawn it.
+                        .getPluginManager()
+                        .callEvent( new EntityDeathEvent( myEntity, items ) );
+
+            if ( inst.respawnDelay == -1 ) {
+
+                if ( inst.isMounted() )
+                    Util.removeMount( inst.mountID );
+
+                inst.cancelRunnable();
+                inst.myNPC.destroy();
+            }
+            else
+                inst.isRespawnable = System.currentTimeMillis()
+                        + inst.respawnDelay * 1000;
+
+            inst.myStatus = SentryStatus.isDEAD;
+            return false;
+        }
+    },
+
+    isSPAWNING {
+
+        @Override
+        boolean update( SentryInstance inst ) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    },
+    isLOOKING {
+
+        @Override
+        boolean update( SentryInstance inst ) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    },
+    isATTACKING {
+
+        @Override
+        boolean update( SentryInstance inst ) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    };
+
+    abstract boolean update( SentryInstance inst );
 }
