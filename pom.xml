@@ -180,7 +180,7 @@
 		 </executions>
 	   </plugin>
 		    
-	   <plugin>
+<!--	   <plugin>
 	        <artifactId>maven-javadoc-plugin</artifactId>
 	        <version>2.10.3</version>
 	        <executions>
@@ -190,21 +190,22 @@
                           <goals>
 		              	<goal>jar</goal>
                           </goals>
-                          <configuration>
+                          <configuration>  -->
 		              <!-- switch on dependency-driven aggregation -->
-		              <includeDependencySources>true</includeDependencySources>
-		              <dependencySourceExcludes>
+<!--		              <includeDependencySources>true</includeDependencySources>
+		              <dependencySourceExcludes> -->
 			                <!-- exclude ONLY commons-cli artifacts -->
-                                    <dependencySourceExclude></dependencySourceExclude>
+<!--                                    <dependencySourceExclude></dependencySourceExclude>
 		              </dependencySourceExcludes>
-		              <dependencySourceIncludes>
+		              <dependencySourceIncludes> -->
 			                <!-- include ONLY dependencies I control -->
-	                           <dependencySourceInclude></dependencySourceInclude>
+<!--	                           <dependencySourceInclude></dependencySourceInclude>
 		              </dependencySourceIncludes>
 	                  </configuration>
 	             </execution>
 	        </executions>
 	    </plugin>
+-->	    
         </plugins>
     </build>
 
