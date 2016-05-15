@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import org.bukkit.Effect;
 import org.bukkit.Material;

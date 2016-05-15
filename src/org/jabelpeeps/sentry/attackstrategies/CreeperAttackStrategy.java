@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry.attackstrategies;
+package org.jabelpeeps.sentry.attackstrategies;
 
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftCreeper;
 import org.bukkit.entity.LivingEntity;

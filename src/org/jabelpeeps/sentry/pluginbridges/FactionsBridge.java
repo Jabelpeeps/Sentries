@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry.pluginbridges;
+package org.jabelpeeps.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,16 +7,15 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 import org.bukkit.entity.Player;
+import org.jabelpeeps.sentry.CommandHandler;
+import org.jabelpeeps.sentry.PluginBridge;
+import org.jabelpeeps.sentry.S;
+import org.jabelpeeps.sentry.SentryInstance;
 
 import com.massivecraft.factions.Rel;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.FactionColl;
 import com.massivecraft.factions.entity.MPlayer;
-
-import net.aufdemrand.sentry.CommandHandler;
-import net.aufdemrand.sentry.PluginBridge;
-import net.aufdemrand.sentry.S;
-import net.aufdemrand.sentry.SentryInstance;
 
 public class FactionsBridge extends PluginBridge {
 	

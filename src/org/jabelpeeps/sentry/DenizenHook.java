@@ -1,5 +1,5 @@
 
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import java.util.Set;
 import java.util.logging.Level;

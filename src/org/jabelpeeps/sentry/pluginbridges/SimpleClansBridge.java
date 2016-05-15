@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry.pluginbridges;
+package org.jabelpeeps.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.entity.Player;
+import org.jabelpeeps.sentry.CommandHandler;
+import org.jabelpeeps.sentry.PluginBridge;
+import org.jabelpeeps.sentry.S;
+import org.jabelpeeps.sentry.SentryInstance;
 
-import net.aufdemrand.sentry.CommandHandler;
-import net.aufdemrand.sentry.PluginBridge;
-import net.aufdemrand.sentry.S;
-import net.aufdemrand.sentry.SentryInstance;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;

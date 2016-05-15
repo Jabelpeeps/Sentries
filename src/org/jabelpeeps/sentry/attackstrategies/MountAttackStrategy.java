@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry.attackstrategies;
+package org.jabelpeeps.sentry.attackstrategies;
 
 
 import org.bukkit.entity.Entity;

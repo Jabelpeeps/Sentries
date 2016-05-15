@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -48,12 +48,12 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
+import org.jabelpeeps.sentry.attackstrategies.CreeperAttackStrategy;
+import org.jabelpeeps.sentry.attackstrategies.MountAttackStrategy;
+import org.jabelpeeps.sentry.attackstrategies.SpiderAttackStrategy;
+import org.jabelpeeps.sentry.pluginbridges.TownyBridge;
 
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
-import net.aufdemrand.sentry.attackstrategies.CreeperAttackStrategy;
-import net.aufdemrand.sentry.attackstrategies.MountAttackStrategy;
-import net.aufdemrand.sentry.attackstrategies.SpiderAttackStrategy;
-import net.aufdemrand.sentry.pluginbridges.TownyBridge;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;

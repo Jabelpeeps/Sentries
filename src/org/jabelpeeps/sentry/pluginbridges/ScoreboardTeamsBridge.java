@@ -1,72 +1,63 @@
-package net.aufdemrand.sentry.pluginbridges;
+package org.jabelpeeps.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
+import org.jabelpeeps.sentry.CommandHandler;
+import org.jabelpeeps.sentry.PluginBridge;
+import org.jabelpeeps.sentry.S;
+import org.jabelpeeps.sentry.Sentry;
+import org.jabelpeeps.sentry.SentryInstance;
 
-import com.tommytony.war.Team;
-import com.tommytony.war.War;
-import com.tommytony.war.Warzone;
-
-import net.aufdemrand.sentry.CommandHandler;
-import net.aufdemrand.sentry.PluginBridge;
-import net.aufdemrand.sentry.S;
-import net.aufdemrand.sentry.SentryInstance;
-
-public class WarBridge extends PluginBridge {
+public class ScoreboardTeamsBridge extends PluginBridge {
 	
 	Map<SentryInstance, Set<Team>> friends = new HashMap<SentryInstance, Set<Team>>();
 	Map<SentryInstance, Set<Team>> enemies = new HashMap<SentryInstance, Set<Team>>();
+	Scoreboard scoreboard = Sentry.getSentry().getServer().getScoreboardManager().getMainScoreboard();
 	
-	WarBridge( int flag ) {
-		super( flag );
-	}
+	ScoreboardTeamsBridge( int flag ) { super( flag ); }
 	
 	@Override
 	protected boolean activate() { return true; }
 
 	@Override
-	protected String getPrefix() { return "WAR"; }
-	
-	@Override
-	protected String getActivationMessage() { return "War is active, The WAR: target will function"; }
+	protected String getPrefix() { return "TEAM"; }
 
 	@Override
-	protected String getCommandHelp() { return "War:<TeamName> for a War Team."; }
+	protected String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
+
+	@Override
+	protected String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
 	
 	@Override
 	protected boolean isTarget( Player player, SentryInstance inst ) {
 		
 		if ( !enemies.containsKey( inst ) ) return false;
 		
-		return enemies.get( inst ).contains( Team.getTeamByPlayerName( player.getName() ) );
+		return enemies.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
 	}
 
 	@Override
 	protected boolean isIgnoring( Player player, SentryInstance inst ) {
-
+		
 		if ( !friends.containsKey( inst ) ) return false;
 		
-		return friends.get( inst ).contains( Team.getTeamByPlayerName( player.getName() ) );
+		return friends.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
 	}
 
 	@Override
 	protected String add( String target, SentryInstance inst, boolean asTarget ) {
 
 		String targetTeam = CommandHandler.colon.split( target, 2 )[1];
-		List<Warzone> zones = War.war.getWarzones();
-		Set<Team> teams = new HashSet<Team>();
-		
-		for ( Warzone zone : zones ) {
-			teams.addAll( zone.getTeams() );
-		}
+		Set<Team> teams = scoreboard.getTeams();
 		
 		for ( Team team : teams ) {
-		
+			
 			if ( team.getName().equalsIgnoreCase( targetTeam ) ) 
 				return target.concat( addToList( inst, team, asTarget ) );
 		}
@@ -90,7 +81,7 @@ public class WarBridge extends PluginBridge {
 
 		if ( !isListed( inst, fromTargets ) ) {
 			return String.join( 
-					" ", inst.myNPC.getName(), S.NOT_ANY, "Teams added as",	fromTargets ? S.TARGETS : S.IGNORES , S.YET );
+					" ", inst.myNPC.getName(), S.NOT_ANY, "Teams added as ", fromTargets ? S.TARGETS : S.IGNORES , S.YET );
 		}
 		String targetTeam = CommandHandler.colon.split( entity, 2 )[1];
 		
@@ -111,7 +102,7 @@ public class WarBridge extends PluginBridge {
 	
 	@Override
 	protected boolean isListed( SentryInstance inst, boolean asTarget ) {
-
+		
 		return ( asTarget ? enemies.containsKey( inst )
 						  : friends.containsKey( inst ) );
 	}

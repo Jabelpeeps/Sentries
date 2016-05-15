@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import java.util.LinkedList;
 import java.util.List;

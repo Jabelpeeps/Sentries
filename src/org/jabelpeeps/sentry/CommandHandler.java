@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import java.text.DecimalFormat;
 import java.util.Map.Entry;

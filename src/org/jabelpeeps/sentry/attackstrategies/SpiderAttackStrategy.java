@@ -1,11 +1,11 @@
-package net.aufdemrand.sentry.attackstrategies;
+package org.jabelpeeps.sentry.attackstrategies;
 
 import java.util.Random;
 
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
+import org.jabelpeeps.sentry.Sentry;
 
-import net.aufdemrand.sentry.Sentry;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.minecraft.server.v1_9_R1.Entity;
 

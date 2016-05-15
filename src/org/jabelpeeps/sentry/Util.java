@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

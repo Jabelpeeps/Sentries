@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry.pluginbridges;
+package org.jabelpeeps.sentry.pluginbridges;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,8 @@ import java.util.StringJoiner;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jabelpeeps.sentry.PluginBridge;
+import org.jabelpeeps.sentry.SentryInstance;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
@@ -14,9 +16,6 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
-
-import net.aufdemrand.sentry.PluginBridge;
-import net.aufdemrand.sentry.SentryInstance;
 
 public class TownyBridge  extends PluginBridge {
 	

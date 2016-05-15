@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import org.bukkit.ChatColor;
 
@@ -6,7 +6,7 @@ import org.bukkit.ChatColor;
  * A container to externalise the Strings used by Sentry.
  */
 public abstract class S {
-	public final static String PACKAGE = "net.aufdemrand.sentry.";
+	public final static String PACKAGE = "org.jabelpeeps.sentry.";
 	
 	public interface Col {
 		public final static String RED = ChatColor.RED.toString();

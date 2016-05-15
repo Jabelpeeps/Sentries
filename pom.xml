@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.aufdemrand</groupId>
+    <groupId>org.jabelpeeps</groupId>
     <artifactId>sentry</artifactId>
     <packaging>jar</packaging>
     <version>2.0.0</version>
@@ -123,16 +123,6 @@
         </dependency>
     </dependencies>
 
-<!--    <ciManagement>
-        <system>jenkins</system>
-        <url>http://ci.citizensnpcs.co</url>
-    </ciManagement>
-    <scm>
-        <connection>scm:git:git://github.com/mcmonkey4eva/Sentry.git</connection>
-        <developerConnection>scm:git:git:@github.com:mcmonkey4eva/Sentry.git</developerConnection>
-        <url>https://github.com/mcmonkey4eva/Sentry/tree/master/</url>
-    </scm>
--->
     <build>
         <defaultGoal>clean package install</defaultGoal>
         <finalName>${project.name}</finalName>
@@ -167,45 +157,19 @@
             </plugin>
             
             <plugin>
-		 <artifactId>maven-source-plugin</artifactId>
-		 <version>2.1.1</version>
-		 <executions>
-		      <execution>
-		            <id>bundle-sources</id>
-		            <phase>clean</phase>
-		            <goals>
-		                 <goal>jar-no-fork</goal>
-		            </goals>
-		      </execution>
-		 </executions>
-	   </plugin>
+				 <artifactId>maven-source-plugin</artifactId>
+				 <version>2.1.1</version>
+				 <executions>
+				      <execution>
+				            <id>bundle-sources</id>
+				            <phase>clean</phase>
+				            <goals>
+				                 <goal>jar-no-fork</goal>
+				            </goals>
+				      </execution>
+				 </executions>
+			 </plugin>
 		    
-<!--	   <plugin>
-	        <artifactId>maven-javadoc-plugin</artifactId>
-	        <version>2.10.3</version>
-	        <executions>
-	             <execution>
-	                  <id>javadoc-jar</id>
-	                  <phase>clean</phase>
-                          <goals>
-		              	<goal>jar</goal>
-                          </goals>
-                          <configuration>  -->
-		              <!-- switch on dependency-driven aggregation -->
-<!--		              <includeDependencySources>true</includeDependencySources>
-		              <dependencySourceExcludes> -->
-			                <!-- exclude ONLY commons-cli artifacts -->
-<!--                                    <dependencySourceExclude></dependencySourceExclude>
-		              </dependencySourceExcludes>
-		              <dependencySourceIncludes> -->
-			                <!-- include ONLY dependencies I control -->
-<!--	                           <dependencySourceInclude></dependencySourceInclude>
-		              </dependencySourceIncludes>
-	                  </configuration>
-	             </execution>
-	        </executions>
-	    </plugin>
--->	    
         </plugins>
     </build>
 

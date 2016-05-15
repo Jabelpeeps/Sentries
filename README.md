@@ -3,9 +3,9 @@
 
 Citizens2 Town Sentry Character
 
-This is my own updating & re-working of the Sentry codebase.
+This is my own near-total re-write of the Sentry codebase, with a focus on updating & re-working it to improve performance, while maintaining it's current features.
 
-Originally this was with the previous maintainer's (mcmonkey4eva) blessing, although he has now abandoned it to start again from scratch, and is writing another plugin that does much the same stuff.  I guess that makes me the maintainer of Sentry now.
+This re-write would not have been possible without the original codebase for me to start from, and so credit and thanks are due to aufdemrand, jrbudda and mcmonkey4eva the previous maintainers of this project.
 
 COMPLETED:-
 * tidying codebase up for readability.

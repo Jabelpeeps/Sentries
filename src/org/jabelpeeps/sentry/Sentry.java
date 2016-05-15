@@ -1,4 +1,4 @@
-package net.aufdemrand.sentry;
+package org.jabelpeeps.sentry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
