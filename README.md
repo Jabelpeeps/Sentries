@@ -1,4 +1,5 @@
 # Sentry
+[![Build Status](http://jabelpeeps.org/jenkins/buildStatus/icon?job=21st_Sentry&build=36)](http://jabelpeeps.org/jenkins/job/21st_Sentry/36/)
 Citizens2 Town Sentry Character
 
 This is my own updating & re-working of the Sentry codebase.
@@ -9,6 +10,7 @@ COMPLETED:-
 * tidying codebase up for readability.
 * updated the code to remove uses of deprecated methods from dependencies. (re-done for 1.9!)
 * finish interface (actually an abstract class) for other plugins
+* setup my own ci server for this fork.
 
 ONGOING:-
 * re-organising the code to improve performance in critical sections.
@@ -17,7 +19,6 @@ ONGOING:-
 
 TODO:-
 * expand readme giving more details of features (old and new)
-* setup my own ci server for this fork.
 * add more features... 
 
 (pls post any suggestions as issues and/or PR's)
