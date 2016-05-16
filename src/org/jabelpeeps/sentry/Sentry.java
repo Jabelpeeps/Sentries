@@ -145,7 +145,7 @@ public class Sentry extends JavaPlugin {
             try {
                 @SuppressWarnings( "unchecked" )
                 Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class
-                        .forName( S.PACKAGE + each + "Bridge" );
+                        .forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
                 Constructor<? extends PluginBridge> constructor = clazz
                         .getDeclaredConstructor( int.class );
 
