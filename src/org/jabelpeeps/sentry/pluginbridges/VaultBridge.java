@@ -28,17 +28,17 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    protected String getPrefix() {
+    public String getPrefix() {
         return "GROUP";
     }
 
     @Override
-    protected String getCommandHelp() {
+    public String getCommandHelp() {
         return "Group:<GroupName> for a permission group.";
     }
 
     @Override
-    protected boolean activate() {
+    public boolean activate() {
 
         RegisteredServiceProvider<Permission> permissionProvider = Sentry
                 .getSentry().getServer().getServicesManager()
@@ -70,12 +70,12 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    protected String getActivationMessage() {
+    public String getActivationMessage() {
         return activationMsg;
     }
 
     @Override
-    protected boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryInstance inst ) {
 
         if ( !enemies.containsKey( inst ) )
             return false;
@@ -84,7 +84,7 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryInstance inst ) {
 
         if ( !friends.containsKey( inst ) )
             return false;
@@ -107,15 +107,14 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryInstance inst, boolean asTarget ) {
 
         return (asTarget ? enemies.containsKey( inst )
                 : friends.containsKey( inst ));
     }
 
     @Override
-    protected String add( String target, SentryInstance inst,
-            boolean asTarget ) {
+    public String add( String target, SentryInstance inst, boolean asTarget ) {
 
         String targetGroup = CommandHandler.colon.split( target, 2 )[1];
 
@@ -143,13 +142,11 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    protected String remove( String entity, SentryInstance inst,
-            boolean fromTargets ) {
+    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
             return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
-                    "Groups added as", fromTargets ? S.TARGETS : S.IGNORES,
-                    S.YET );
+                    "Groups added as", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
         String targetGroup = CommandHandler.colon.split( entity, 2 )[1];
 

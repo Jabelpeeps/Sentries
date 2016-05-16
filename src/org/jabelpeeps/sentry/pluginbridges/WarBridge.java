@@ -26,27 +26,27 @@ public class WarBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean activate() {
+    public boolean activate() {
         return true;
     }
 
     @Override
-    protected String getPrefix() {
+    public String getPrefix() {
         return "WAR";
     }
 
     @Override
-    protected String getActivationMessage() {
+    public String getActivationMessage() {
         return "War is active, The WAR: target will function";
     }
 
     @Override
-    protected String getCommandHelp() {
+    public String getCommandHelp() {
         return "War:<TeamName> for a War Team.";
     }
 
     @Override
-    protected boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryInstance inst ) {
 
         if ( !enemies.containsKey( inst ) )
             return false;
@@ -56,7 +56,7 @@ public class WarBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryInstance inst ) {
 
         if ( !friends.containsKey( inst ) )
             return false;
@@ -66,8 +66,7 @@ public class WarBridge extends PluginBridge {
     }
 
     @Override
-    protected String add( String target, SentryInstance inst,
-            boolean asTarget ) {
+    public String add( String target, SentryInstance inst, boolean asTarget ) {
 
         String targetTeam = CommandHandler.colon.split( target, 2 )[1];
         List<Warzone> zones = War.war.getWarzones();
@@ -101,8 +100,7 @@ public class WarBridge extends PluginBridge {
     }
 
     @Override
-    protected String remove( String entity, SentryInstance inst,
-            boolean fromTargets ) {
+    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
             return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
@@ -130,7 +128,7 @@ public class WarBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryInstance inst, boolean asTarget ) {
 
         return (asTarget ? enemies.containsKey( inst )
                 : friends.containsKey( inst ));

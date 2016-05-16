@@ -231,9 +231,12 @@ public class SentryInstance {
         updateAttackType();
 
         if ( taskID == 0 ) {
-            taskID = sentry.getServer().getScheduler()
-                    .scheduleSyncRepeatingTask( sentry, new SentryLogic(),
-                            40 + myNPC.getId(), Sentry.logicTicks );
+            taskID = sentry.getServer()
+                           .getScheduler()
+                           .scheduleSyncRepeatingTask( sentry, 
+                                                       new SentryLogic(), 
+                                                       40 + myNPC.getId(), 
+                                                       Sentry.logicTicks );
         }
     }
 
@@ -242,8 +245,7 @@ public class SentryInstance {
             sentry.getServer().getScheduler().cancelTask( taskID );
     }
 
-    public boolean hasTargetType( int type ) {
-        return (targetFlags & type) == type;
+    public boolean hasTargetType( int type ) { return (targetFlags & type) == type;
     }
 
     public boolean hasIgnoreType( int type ) {
@@ -345,7 +347,7 @@ public class SentryInstance {
             // return true;
             // }
             for ( PluginBridge each : Sentry.activePlugins.values() ) {
-                if ( hasIgnoreType( each.bitFlag )
+                if ( hasIgnoreType( each.getBitFlag() )
                         && each.isIgnoring( player, this ) ) {
                     return true;
                 }
@@ -469,7 +471,7 @@ public class SentryInstance {
             // return true;
             // }
             for ( PluginBridge each : Sentry.activePlugins.values() ) {
-                if ( hasTargetType( each.bitFlag )
+                if ( hasTargetType( each.getBitFlag() )
                         && each.isTarget( player, this ) ) {
                     return true;
                 }
@@ -764,14 +766,14 @@ public class SentryInstance {
         }
         switch ( myAttacks.lightningLevel ) {
 
-            case (1):
+            case 1:
                 to.getWorld().strikeLightningEffect( to );
                 theTarget.damage( getStrength(), myEntity );
 
-            case (2):
+            case 2:
                 to.getWorld().strikeLightning( to );
 
-            case (3):
+            case 3:
                 to.getWorld().strikeLightningEffect( to );
                 theTarget.setHealth( 0 );
 
@@ -792,8 +794,7 @@ public class SentryInstance {
                 else if ( myProjectile == EnderPearl.class )
                     projectile = myEntity.launchProjectile( myProjectile );
                 else
-                    projectile = myEntity.getWorld().spawn( myLocation,
-                            myProjectile );
+                    projectile = myEntity.getWorld().spawn( myLocation, myProjectile );
 
                 if ( myProjectile == Fireball.class
                         || myProjectile == WitherSkull.class ) {
@@ -911,44 +912,24 @@ public class SentryInstance {
         return (int) (strength + mod);
     }
 
-    static Set<AttackType> pyros = EnumSet.of( AttackType.pyro1,
-            AttackType.pyro2, AttackType.pyro3 );
-    static Set<AttackType> stormCallers = EnumSet.of( AttackType.sc1,
-            AttackType.sc2, AttackType.sc3 );
+    static Set<AttackType> pyros = EnumSet.of( AttackType.pyro1, AttackType.pyro2, AttackType.pyro3 );
+    static Set<AttackType> stormCallers = EnumSet.of( AttackType.sc1, AttackType.sc2, AttackType.sc3 );
 
-    public boolean isPyromancer() {
-        return pyros.contains( myAttacks );
-    }
-
-    public boolean isPyromancer1() {
-        return (myAttacks == AttackType.pyro1);
-    }
-
-    public boolean isStormcaller() {
-        return stormCallers.contains( myAttacks );
-    }
-
-    public boolean isWarlock1() {
-        return (myAttacks == AttackType.warlock1);
-    }
-
-    public boolean isWitchDoctor() {
-        return (myAttacks == AttackType.witchdoctor);
-    }
+    public boolean isPyromancer() { return pyros.contains( myAttacks ); }
+    public boolean isPyromancer1() { return (myAttacks == AttackType.pyro1); }
+    public boolean isStormcaller() { return stormCallers.contains( myAttacks ); }
+    public boolean isWarlock1() { return (myAttacks == AttackType.warlock1); }
+    public boolean isWitchDoctor() { return (myAttacks == AttackType.witchdoctor); }
 
     public void onDamage( EntityDamageByEntityEvent event ) {
 
-        if ( myStatus == SentryStatus.isDYING || invincible )
-            return;
+        if ( myStatus == SentryStatus.isDYING || invincible ) return;
 
-        if ( myNPC == null || !myNPC.isSpawned() )
-            return;
+        if ( myNPC == null || !myNPC.isSpawned() ) return;
 
-        if ( guardTarget != null && guardEntity == null )
-            return; // dont take damage when bodyguard target isnt around.
+        if ( guardTarget != null && guardEntity == null ) return; // dont take damage when bodyguard target isnt around.
 
-        if ( System.currentTimeMillis() < okToTakedamage + 500 )
-            return;
+        if ( System.currentTimeMillis() < okToTakedamage + 500 ) return;
 
         okToTakedamage = System.currentTimeMillis();
 
@@ -1014,11 +995,14 @@ public class SentryInstance {
             String msg = hit.message;
 
             if ( msg != null && !msg.isEmpty() ) {
-                ((Player) attacker)
-                        .sendMessage( Util.format( msg, npc, attacker,
-                                ((Player) attacker).getInventory()
-                                        .getItemInMainHand().getType(),
-                                damage + "" ) );
+                ((Player) attacker).sendMessage( 
+                        Util.format( msg,
+                                     npc,
+                                     attacker, 
+                                     ((Player) attacker).getInventory()
+                                                        .getItemInMainHand()
+                                                        .getType(),
+                                     String.valueOf( damage ) ) );
             }
         }
 
@@ -1030,9 +1014,8 @@ public class SentryInstance {
 
                 // set the killer
                 if ( damager instanceof HumanEntity )
-                    ((CraftLivingEntity) getMyEntity())
-                            .getHandle().killer = (EntityHuman) ((CraftLivingEntity) damager)
-                                    .getHandle();
+                    ((CraftLivingEntity) getMyEntity()).getHandle().killer 
+                                = (EntityHuman) ((CraftLivingEntity) damager).getHandle();
 
                 die( true, event.getCause() );
             }
@@ -1043,17 +1026,13 @@ public class SentryInstance {
 
     public void onEnvironmentDamage( EntityDamageEvent event ) {
 
-        if ( myStatus == SentryStatus.isDYING )
-            return;
+        if ( myStatus == SentryStatus.isDYING ) return;
 
-        if ( myNPC == null || !myNPC.isSpawned() || invincible )
-            return;
+        if ( myNPC == null || !myNPC.isSpawned() || invincible ) return;
 
-        if ( guardTarget != null && guardEntity == null )
-            return; // dont take damage when bodyguard target isnt around.
+        if ( guardTarget != null && guardEntity == null ) return; // dont take damage when bodyguard target isnt around.
 
-        if ( System.currentTimeMillis() < okToTakedamage + 500 )
-            return;
+        if ( System.currentTimeMillis() < okToTakedamage + 500 ) return;
 
         okToTakedamage = System.currentTimeMillis();
 
@@ -1260,9 +1239,9 @@ public class SentryInstance {
                 if ( each.isListed( this, asTarget ) ) {
 
                     if ( asTarget )
-                        targetFlags |= each.bitFlag;
+                        targetFlags |= each.getBitFlag();
                     else
-                        ignoreFlags |= each.bitFlag;
+                        ignoreFlags |= each.getBitFlag();
                 }
                 return true;
             }
@@ -1551,13 +1530,11 @@ public class SentryInstance {
 
     public void setHealth( double health ) {
 
-        if ( myNPC == null )
-            return;
+        if ( myNPC == null ) return;
 
         LivingEntity myEntity = getMyEntity();
 
-        if ( myEntity == null )
-            return;
+        if ( myEntity == null ) return;
 
         if ( ((CraftLivingEntity) myEntity).getMaxHealth() != sentryMaxHealth )
             myEntity.setMaxHealth( sentryMaxHealth );
@@ -1589,20 +1566,13 @@ public class SentryInstance {
             if ( myAttacks != AttackType.witchdoctor )
                 item.setDurability( (short) 0 );
         }
-        else if ( myEntity instanceof Skeleton )
-            myAttacks = AttackType.archer;
-        else if ( myEntity instanceof Ghast )
-            myAttacks = AttackType.pyro3;
-        else if ( myEntity instanceof Snowman )
-            myAttacks = AttackType.magi;
-        else if ( myEntity instanceof Wither )
-            myAttacks = AttackType.warlock2;
-        else if ( myEntity instanceof Witch )
-            myAttacks = AttackType.witchdoctor;
-        else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon )
-            myAttacks = AttackType.pyro2;
-        else
-            myAttacks = AttackType.brawler;
+        else if ( myEntity instanceof Skeleton ) myAttacks = AttackType.archer;
+        else if ( myEntity instanceof Ghast ) myAttacks = AttackType.pyro3;
+        else if ( myEntity instanceof Snowman ) myAttacks = AttackType.magi;
+        else if ( myEntity instanceof Wither ) myAttacks = AttackType.warlock2;
+        else if ( myEntity instanceof Witch ) myAttacks = AttackType.witchdoctor;
+        else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttacks = AttackType.pyro2;
+        else myAttacks = AttackType.brawler;
 
         weaponSpecialEffects = sentry.weaponEffects.get( weapon );
 
@@ -1860,9 +1830,7 @@ public class SentryInstance {
         return null;
     }
 
-    public boolean isMounted() {
-        return mountID >= 0;
-    }
+    public boolean isMounted() { return mountID >= 0; }
 
     @Override
     public boolean equals( Object obj ) {
@@ -1874,7 +1842,5 @@ public class SentryInstance {
     }
 
     @Override
-    public int hashCode() {
-        return myID;
-    }
+    public int hashCode() { return myID; }
 }

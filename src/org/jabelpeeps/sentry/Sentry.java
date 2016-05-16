@@ -183,7 +183,7 @@ public class Sentry extends JavaPlugin {
             if ( debug )
                 logger.log( Level.INFO,
                         each + " activated with bitFlag value of "
-                                + bridge.bitFlag );
+                                + bridge.getBitFlag() );
             logger.log( Level.INFO, bridge.getActivationMessage() );
 
             targetBitFlag *= 2;

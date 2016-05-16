@@ -8,7 +8,6 @@ import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 
-//
 class BodyguardTeleportStuckAction implements StuckAction {
 
     SentryInstance inst;
@@ -28,8 +27,7 @@ class BodyguardTeleportStuckAction implements StuckAction {
             return false;
 
         // the next section tests whether the npc has already reached its
-        // destination
-        // and returns if so.
+        // destination and returns if so.
         Location destination = navigator.getTargetAsLocation();
         Location present = npc.getEntity().getLocation();
 

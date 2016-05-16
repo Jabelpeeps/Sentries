@@ -18,7 +18,11 @@ import org.bukkit.entity.Player;
  */
 public abstract class PluginBridge {
 
-    final int bitFlag;
+    private final int bitFlag;
+
+    public int getBitFlag() {
+        return bitFlag;
+    }
 
     protected PluginBridge( int flag ) {
         bitFlag = flag;
@@ -34,7 +38,7 @@ public abstract class PluginBridge {
      * @return true - if the activation was successful.
      * @return false - if not.
      */
-    protected abstract boolean activate();
+    public abstract boolean activate();
 
     /**
      * Implementations may specify a string to be used for logging once a call
@@ -43,7 +47,7 @@ public abstract class PluginBridge {
      * 
      * @return the string.
      */
-    protected abstract String getActivationMessage();
+    public abstract String getActivationMessage();
 
     /**
      * Determines whether the supplied Player is a valid target of the supplied
@@ -58,7 +62,7 @@ public abstract class PluginBridge {
      *            - the SentryInstance that is asking.
      * @return true - if the player is a valid target.
      */
-    protected abstract boolean isTarget( Player player, SentryInstance inst );
+    public abstract boolean isTarget( Player player, SentryInstance inst );
 
     /**
      * Determines whether the supplied Player should be ignored as a possible
@@ -73,7 +77,7 @@ public abstract class PluginBridge {
      *            - the SentryInstance that is asking.
      * @return true - if the player should be ignored.
      */
-    protected abstract boolean isIgnoring( Player player, SentryInstance inst );
+    public abstract boolean isIgnoring( Player player, SentryInstance inst );
 
     /**
      * Adds an entity - identified by the supplied string - as either a target
@@ -97,8 +101,7 @@ public abstract class PluginBridge {
      * @return a string that will be displayed to the player (either for success
      *         or failure)
      */
-    protected abstract String add( String target, SentryInstance inst,
-            boolean asTarget );
+    public abstract String add( String target, SentryInstance inst, boolean asTarget );
 
     /**
      * Removes the entity - identified by the supplied string - as either a
@@ -122,21 +125,20 @@ public abstract class PluginBridge {
      * @return a string that will be displayed to the player (either for success
      *         or failure)
      */
-    protected abstract String remove( String entity, SentryInstance inst,
-            boolean fromTargets );
+    public abstract String remove( String entity, SentryInstance inst, boolean fromTargets );
 
     /**
      * @return a string to be used as the first part of the command argument to
      *         refer to this PluginBridge.
      */
-    protected abstract String getPrefix();
+    public abstract String getPrefix();
 
     /**
      * @return the help text describing how to identify targets and ignores for
      *         this PluginBridge - so that they will be recognised when parsed
      *         by 'addTarget()' and 'addIgnore()'
      */
-    protected abstract String getCommandHelp();
+    public abstract String getCommandHelp();
 
     /**
      * A method to check whether the supplied SentryInstance has any targets or
@@ -149,6 +151,5 @@ public abstract class PluginBridge {
      *            ignores.
      * @return true - if the SentryInstance is listed.
      */
-    protected abstract boolean isListed( SentryInstance inst,
-            boolean asTarget );
+    public abstract boolean isListed( SentryInstance inst, boolean asTarget );
 }

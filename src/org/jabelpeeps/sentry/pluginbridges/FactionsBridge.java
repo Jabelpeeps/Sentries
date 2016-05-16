@@ -29,22 +29,22 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean activate() {
+    public boolean activate() {
         return true;
     }
 
     @Override
-    protected String getPrefix() {
+    public String getPrefix() {
         return "FACTION";
     }
 
     @Override
-    protected String getActivationMessage() {
+    public String getActivationMessage() {
         return "Factions is active, the FACTION: target will function";
     }
 
     @Override
-    protected String getCommandHelp() {
+    public String getCommandHelp() {
 
         if ( commandHelp == null ) {
 
@@ -60,7 +60,7 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryInstance inst ) {
 
         Faction target = MPlayer.get( player ).getFaction();
 
@@ -76,7 +76,7 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryInstance inst ) {
 
         Faction ignore = MPlayer.get( player ).getFaction();
 
@@ -92,15 +92,14 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryInstance inst, boolean asTarget ) {
 
         return asTarget ? rivalFactions.containsKey( inst )
-                : friendlyFactions.containsKey( inst );
+                        : friendlyFactions.containsKey( inst );
     }
 
     @Override
-    protected String add( String target, SentryInstance inst,
-            boolean asTarget ) {
+    public String add( String target, SentryInstance inst, boolean asTarget ) {
 
         String[] input = CommandHandler.colon.split( target, 3 );
 
@@ -111,40 +110,34 @@ public class FactionsBridge extends PluginBridge {
                 if ( faction.getName().equalsIgnoreCase( input[2] ) ) {
 
                     myFaction.put( inst, faction );
-                    return String.join( " ", inst.myNPC.getName(), "has joined",
-                            faction.getName() );
+                    return String.join( " ", inst.myNPC.getName(), "has joined", faction.getName() );
                 }
             }
         }
         for ( Faction faction : FactionColl.get().getAll() ) {
 
             if ( faction.getName().equalsIgnoreCase( input[1] ) )
-                return String.join( " ", target,
-                        addToList( inst, faction, asTarget ) );
+                return String.join( " ", target, addToList( inst, faction, asTarget ) );
         }
         return "There is currently no Faction name matching ".concat( target );
     }
 
-    private String addToList( SentryInstance inst, Faction faction,
-            boolean asTarget ) {
+    private String addToList( SentryInstance inst, Faction faction, boolean asTarget ) {
 
         Map<SentryInstance, Set<Faction>> map = asTarget ? rivalFactions
-                : friendlyFactions;
+                                                         : friendlyFactions;
 
         if ( !map.containsKey( inst ) )
             map.put( inst, new HashSet<Faction>() );
 
         if ( map.get( inst ).add( faction ) )
-            return String.join( " ", S.ADDED_TO_LIST,
-                    asTarget ? S.TARGETS : S.IGNORES );
+            return String.join( " ", S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
 
-        return String.join( " ", S.ALLREADY_ON_LIST,
-                asTarget ? S.TARGETS : S.IGNORES );
+        return String.join( " ", S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );
     }
 
     @Override
-    protected String remove( String entity, SentryInstance inst,
-            boolean fromTargets ) {
+    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         String[] input = CommandHandler.colon.split( entity, 3 );
 
@@ -154,25 +147,22 @@ public class FactionsBridge extends PluginBridge {
 
                 if ( faction.getName().equalsIgnoreCase( input[2] )
                         && myFaction.containsKey( inst )
-                        && myFaction.get( inst ).getName()
-                                .equalsIgnoreCase( input[2] ) ) {
+                        && myFaction.get( inst ).getName().equalsIgnoreCase( input[2] ) ) {
 
                     myFaction.remove( inst );
 
-                    return String.join( " ", inst.myNPC.getName(), "has left",
-                            input[2] );
+                    return String.join( " ", inst.myNPC.getName(), "has left", input[2] );
                 }
             }
         }
 
         if ( !isListed( inst, fromTargets ) ) {
             return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
-                    "Factions added as", fromTargets ? S.TARGETS : S.IGNORES,
-                    S.YET );
+                    "Factions added as", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
 
         Map<SentryInstance, Set<Faction>> map = fromTargets ? rivalFactions
-                : friendlyFactions;
+                                                            : friendlyFactions;
         Set<Faction> factions = map.get( inst );
 
         for ( Faction faction : factions ) {
@@ -183,11 +173,9 @@ public class FactionsBridge extends PluginBridge {
                 if ( factions.isEmpty() )
                     map.remove( inst );
 
-                return String.join( " ", entity, S.REMOVED_FROM_LIST,
-                        fromTargets ? S.TARGETS : S.IGNORES );
+                return String.join( " ", entity, S.REMOVED_FROM_LIST, fromTargets ? S.TARGETS : S.IGNORES );
             }
         }
-        return String.join( " ", entity, S.NOT_FOUND_ON_LIST,
-                fromTargets ? S.TARGETS : S.IGNORES );
+        return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
     }
 }

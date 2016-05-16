@@ -7,20 +7,12 @@ import java.util.Set;
 import org.bukkit.configuration.file.FileConfiguration;
 
 enum Hits {
-    Crit3( 2.0, 2,
-            "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage" ), Crit2(
-                    1.75, 4,
-                    "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage" ), Crit1(
-                            1.50, 6,
-                            "&e*** <NPC> sustains \"a mere flesh wound\" for <AMOUNT> damage" ), Glance(
-                                    0.5, 4,
-                                    "&f*** Your paltry blow does only <AMOUNT> damage to <NPC>" ), Miss(
-                                            0, 4,
-                                            "&7*** You MISSED! <NPC> thumbs their nose at you!" ), Hit(
-                                                    1.0, 0, "" ), // represents
-                                                                  // a standard
-                                                                  // unmodified
-                                                                  // hit.
+    Crit3( 2.0, 2, "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage" ), 
+    Crit2( 1.75, 4, "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage" ), 
+    Crit1( 1.50, 6, "&e*** <NPC> sustains \"a mere flesh wound\" for <AMOUNT> damage" ), 
+    Glance( 0.5, 4, "&f*** Your paltry blow does only <AMOUNT> damage to <NPC>" ), 
+    Miss( 0, 4, "&7*** You MISSED! <NPC> thumbs their nose at you!" ), 
+    Hit( 1.0, 0, "" ),             // represents a standard unmodified hit.
     Block( 0, 0, "&7*** <NPC> skillfully parries your attack!" );
 
     double damageModifier;
@@ -31,7 +23,10 @@ enum Hits {
     static boolean useCriticalHits;
     static Random rand = new Random();
     private static Set<Hits> randomisedHits = EnumSet.of( Hits.Crit3,
-            Hits.Crit2, Hits.Crit1, Hits.Glance, Hits.Miss );
+                                                          Hits.Crit2, 
+                                                          Hits.Crit1, 
+                                                          Hits.Glance, 
+                                                          Hits.Miss );
 
     Hits( double mod, int chance, String msg ) {
         damageModifier = mod;

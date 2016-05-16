@@ -34,35 +34,31 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean activate() {
+    public boolean activate() {
         return true;
     }
 
     @Override
-    protected String getPrefix() {
+    public String getPrefix() {
         return "TOWNY";
     }
 
     @Override
-    protected String getActivationMessage() {
+    public String getActivationMessage() {
         return "Registered with Towny sucessfully, the TOWNY: target will function";
     }
 
     @Override
-    protected String getCommandHelp() {
+    public String getCommandHelp() {
 
         if ( commandHelp == null ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
-            joiner.add(
-                    "Towny:Town:<TownName> for residents of the named Town." );
-            joiner.add(
-                    "Towny:Nation:<NationName> for residents of the named Nation." );
+            joiner.add( "Towny:Town:<TownName> for residents of the named Town." );
+            joiner.add( "Towny:Nation:<NationName> for residents of the named Nation." );
             joiner.add( "The following are valid for targets only:-" );
-            joiner.add(
-                    "Towny:TownEnemies for enemies of the Town the sentry is in." );
-            joiner.add(
-                    "Towny:NationEnemies for enemies of the Nation the sentry is in." );
+            joiner.add( "Towny:TownEnemies for enemies of the Town the sentry is in." );
+            joiner.add( "Towny:NationEnemies for enemies of the Nation the sentry is in." );
 
             commandHelp = joiner.toString();
         }
@@ -70,13 +66,13 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryInstance inst ) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    protected boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryInstance inst ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -144,21 +140,19 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    protected String add( String target, SentryInstance inst,
-            boolean asTarget ) {
+    public String add( String target, SentryInstance inst, boolean asTarget ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected String remove( String entity, SentryInstance inst,
-            boolean fromTargets ) {
+    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryInstance inst, boolean asTarget ) {
         // TODO Auto-generated method stub
         return false;
     }

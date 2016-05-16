@@ -26,27 +26,27 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean activate() {
+    public boolean activate() {
         return true;
     }
 
     @Override
-    protected String getActivationMessage() {
+    public String getActivationMessage() {
         return "SimpleClans is active, The CLAN: target will function";
     }
 
     @Override
-    protected String getCommandHelp() {
+    public String getCommandHelp() {
         return "Clan:<ClanName> for a SimpleClans Clan.";
     }
 
     @Override
-    protected String getPrefix() {
+    public String getPrefix() {
         return "CLAN";
     }
 
     @Override
-    protected boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryInstance inst ) {
 
         if ( !rivals.containsKey( inst ) )
             return false;
@@ -56,7 +56,7 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    protected boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryInstance inst ) {
 
         if ( !allies.containsKey( inst ) )
             return false;
@@ -66,8 +66,7 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    protected String add( String target, SentryInstance inst,
-            boolean asTarget ) {
+    public String add( String target, SentryInstance inst, boolean asTarget ) {
 
         String targetClan = CommandHandler.colon.split( target, 2 )[1];
 
@@ -87,16 +86,13 @@ public class SimpleClansBridge extends PluginBridge {
             map.put( inst, new HashSet<Clan>() );
 
         if ( map.get( inst ).add( clan ) )
-            return String.join( " ", S.ADDED_TO_LIST,
-                    asTarget ? S.TARGETS : S.IGNORES );
+            return String.join( " ", S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
 
-        return String.join( " ", S.ALLREADY_ON_LIST,
-                asTarget ? S.TARGETS : S.IGNORES );
+        return String.join( " ", S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );
     }
 
     @Override
-    protected String remove( String entity, SentryInstance inst,
-            boolean fromTargets ) {
+    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
             return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
@@ -116,18 +112,16 @@ public class SimpleClansBridge extends PluginBridge {
                 if ( clans.isEmpty() )
                     map.remove( inst );
 
-                return String.join( " ", entity, S.REMOVED_FROM_LIST,
-                        fromTargets ? S.TARGETS : S.IGNORES );
+                return String.join( " ", entity, S.REMOVED_FROM_LIST, fromTargets ? S.TARGETS : S.IGNORES );
             }
         }
-        return String.join( " ", entity, S.NOT_FOUND_ON_LIST,
-                fromTargets ? S.TARGETS : S.IGNORES );
+        return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
     }
 
     @Override
-    protected boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryInstance inst, boolean asTarget ) {
 
         return (asTarget ? rivals.containsKey( inst )
-                : allies.containsKey( inst ));
+                         : allies.containsKey( inst ));
     }
 }

@@ -17,38 +17,22 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
 
 enum AttackType {
-    // Columns:- "name" weapon projectile incendiary? lightning level?
-    bombardier( "Bombardier", Material.EGG, Egg.class ), archer( "Archer",
-            Material.BOW, Arrow.class ), magi( "IceMagi", Material.SNOW_BALL,
-                    Snowball.class ), pyro1( "Pyro1",
-                            Material.REDSTONE_TORCH_ON,
-                            SmallFireball.class ), pyro2( "Pyro2",
-                                    Material.TORCH, SmallFireball.class, true,
-                                    0 ), pyro3( "Pyro3", Material.BLAZE_ROD,
-                                            Fireball.class ), sc1(
-                                                    "StormCaller1",
-                                                    Material.PAPER,
-                                                    ThrownPotion.class, false,
-                                                    1 ), sc2( "StormCaller2",
-                                                            Material.BOOK,
-                                                            ThrownPotion.class,
-                                                            false, 2 ), sc3(
-                                                                    "StormCaller3",
-                                                                    Material.BOOK_AND_QUILL,
-                                                                    ThrownPotion.class,
-                                                                    false,
-                                                                    3 ), warlock1(
-                                                                            "Warlock1",
-                                                                            Material.ENDER_PEARL,
-                                                                            EnderPearl.class ), warlock2(
-                                                                                    "Warlock2",
-                                                                                    Material.SKULL_ITEM,
-                                                                                    WitherSkull.class ),
-    // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled
-    // for now.
-    witchdoctor( "WitchDoctor", Material.POTION, ThrownPotion.class ),
-
-    brawler( "Brawler", Material.AIR, null ) {
+    // Columns:- "name"         weapon held                 projectile       incendiary? lightning level?
+    bombardier( "Bombardier",   Material.EGG,               Egg.class ), 
+    archer(     "Archer",       Material.BOW,               Arrow.class ), 
+    magi(       "IceMagi",      Material.SNOW_BALL,         Snowball.class ), 
+    pyro1(      "Pyro1",        Material.REDSTONE_TORCH_ON, SmallFireball.class ), 
+    pyro2(      "Pyro2",        Material.TORCH,             SmallFireball.class, true, 0 ),
+    pyro3(      "Pyro3",        Material.BLAZE_ROD,         Fireball.class ), 
+    sc1(        "StormCaller1", Material.PAPER,             ThrownPotion.class, false, 1 ), 
+    sc2(        "StormCaller2", Material.BOOK,              ThrownPotion.class, false, 2 ), 
+    sc3(        "StormCaller3", Material.BOOK_AND_QUILL,    ThrownPotion.class, false, 3 ), 
+    warlock1(   "Warlock1",     Material.ENDER_PEARL,       EnderPearl.class ), 
+    warlock2(   "Warlock2",     Material.SKULL_ITEM,        WitherSkull.class ),
+    // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled  for now.
+    witchdoctor( "WitchDoctor", Material.POTION,            ThrownPotion.class ),
+    
+    brawler(     "Brawler",     Material.AIR,               null ) {
 
         @Override
         Material getWeapon( SentryInstance sentry ) {
@@ -57,8 +41,7 @@ enum AttackType {
         }
     };
 
-    // The strings used for the names must correspond exactly with the names
-    // used in the config file.
+    // The strings used for the names must correspond exactly with the names used in the config file.
     String name;
     private Material weapon;
     private Class<? extends Projectile> projectile;
@@ -70,8 +53,7 @@ enum AttackType {
         this( n, w, p, false, 0 );
     }
 
-    AttackType( String n, Material w, Class<? extends Projectile> p, boolean i,
-            int ll ) {
+    AttackType( String n, Material w, Class<? extends Projectile> p, boolean i, int ll ) {
         name = n;
         weapon = w;
         projectile = p;
@@ -79,8 +61,8 @@ enum AttackType {
         lightningLevel = ll;
     }
 
-    // the argument for this method is only used in the override for the
-    // 'brawler' instance.
+    @SuppressWarnings( "unused" )
+    // the argument for this method is only used in the override for the  'brawler' instance.
     Material getWeapon( SentryInstance sentry ) {
         return weapon;
     }
@@ -89,8 +71,7 @@ enum AttackType {
         return projectile;
     }
 
-    static Map<Material, AttackType> reverseSearch = new EnumMap<Material, AttackType>(
-            Material.class );
+    static Map<Material, AttackType> reverseSearch = new EnumMap<Material, AttackType>( Material.class );
     static {
         updateMap();
     }
@@ -108,7 +89,7 @@ enum AttackType {
      */
     static AttackType find( Material item ) {
         return (reverseSearch.containsKey( item )) ? reverseSearch.get( item )
-                : AttackType.brawler;
+                                                   : AttackType.brawler;
     }
 
     /**
