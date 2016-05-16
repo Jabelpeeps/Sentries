@@ -24,7 +24,7 @@ public abstract class PluginBridge {
         return bitFlag;
     }
 
-    protected PluginBridge( int flag ) {
+    public PluginBridge( int flag ) {
         bitFlag = flag;
     }
 

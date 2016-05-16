@@ -24,7 +24,7 @@ public class FactionsBridge extends PluginBridge {
     Map<SentryInstance, Faction> myFaction = new HashMap<SentryInstance, Faction>();
     String commandHelp;
 
-    FactionsBridge( int flag ) {
+    public FactionsBridge( int flag ) {
         super( flag );
     }
 

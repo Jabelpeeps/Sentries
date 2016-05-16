@@ -23,7 +23,7 @@ public class VaultBridge extends PluginBridge {
     private String activationMsg = "";
     static Permission perms = null;
 
-    VaultBridge( int flag ) {
+    public VaultBridge( int flag ) {
         super( flag );
     }
 

@@ -21,7 +21,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     Scoreboard scoreboard = Sentry.getSentry().getServer()
             .getScoreboardManager().getMainScoreboard();
 
-    ScoreboardTeamsBridge( int flag ) {
+    public ScoreboardTeamsBridge( int flag ) {
         super( flag );
     }
 

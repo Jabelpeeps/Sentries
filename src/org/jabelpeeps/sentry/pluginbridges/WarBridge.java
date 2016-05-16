@@ -21,7 +21,7 @@ public class WarBridge extends PluginBridge {
     Map<SentryInstance, Set<Team>> friends = new HashMap<SentryInstance, Set<Team>>();
     Map<SentryInstance, Set<Team>> enemies = new HashMap<SentryInstance, Set<Team>>();
 
-    WarBridge( int flag ) {
+    public WarBridge( int flag ) {
         super( flag );
     }
 

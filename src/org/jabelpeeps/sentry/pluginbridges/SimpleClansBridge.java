@@ -21,7 +21,7 @@ public class SimpleClansBridge extends PluginBridge {
     Map<SentryInstance, Set<Clan>> rivals = new HashMap<SentryInstance, Set<Clan>>();
     ClanManager clanManager = SimpleClans.getInstance().getClanManager();
 
-    SimpleClansBridge( int flag ) {
+    public SimpleClansBridge( int flag ) {
         super( flag );
     }
 

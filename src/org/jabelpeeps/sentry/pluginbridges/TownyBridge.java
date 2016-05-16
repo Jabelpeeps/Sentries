@@ -29,7 +29,7 @@ public class TownyBridge extends PluginBridge {
     Map<SentryInstance, Nation> myNation = new HashMap<SentryInstance, Nation>();
     String commandHelp;
 
-    TownyBridge( int flag ) {
+    public TownyBridge( int flag ) {
         super( flag );
     }
 
