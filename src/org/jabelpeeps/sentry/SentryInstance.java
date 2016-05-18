@@ -160,22 +160,14 @@ public class SentryInstance {
         LivingEntity myEntity = getMyEntity();
 
         // check for illegal values
-        if ( sentryWeight <= 0 )
-            sentryWeight = 1.0;
-        if ( attackRate > 30 )
-            attackRate = 30.0;
-        if ( sentryMaxHealth < 0 )
-            sentryMaxHealth = 0;
-        if ( sentryRange < 1 )
-            sentryRange = 1;
-        if ( sentryRange > 200 )
-            sentryRange = 200;
-        if ( sentryWeight <= 0 )
-            sentryWeight = 1.0;
-        if ( respawnDelay < -1 )
-            respawnDelay = -1;
-        if ( spawnLocation == null )
-            spawnLocation = myEntity.getLocation();
+        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
+        if ( attackRate > 30 ) attackRate = 30.0;
+        if ( sentryMaxHealth < 0 ) sentryMaxHealth = 0;
+        if ( sentryRange < 1 ) sentryRange = 1;
+        if ( sentryRange > 200 ) sentryRange = 200;
+        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
+        if ( respawnDelay < -1 ) respawnDelay = -1;
+        if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
 
         // Allow Denizen to handle the sentry's health if it is active.
         if ( Sentry.denizenActive ) {
@@ -183,8 +175,7 @@ public class SentryInstance {
                 myNPC.removeTrait( HealthTrait.class );
         }
 
-        // disable citizens respawning, because Sentry doesn't always raise
-        // EntityDeath
+        // disable citizens respawning, because Sentry doesn't always raise EntityDeath
         myNPC.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
 
         setHealth( sentryMaxHealth );
@@ -245,7 +236,8 @@ public class SentryInstance {
             sentry.getServer().getScheduler().cancelTask( taskID );
     }
 
-    public boolean hasTargetType( int type ) { return (targetFlags & type) == type;
+    public boolean hasTargetType( int type ) { 
+        return (targetFlags & type) == type;
     }
 
     public boolean hasIgnoreType( int type ) {
@@ -254,47 +246,42 @@ public class SentryInstance {
 
     public boolean isIgnoring( LivingEntity aTarget ) {
 
-        if ( aTarget == guardEntity )
-            return true;
-        if ( ignoreFlags == none )
-            return false;
-        if ( hasIgnoreType( all ) )
-            return true;
+        if ( aTarget == guardEntity ) return true;
+        if ( ignoreFlags == none ) return false;
+        if ( hasIgnoreType( all ) ) return true;
 
         if ( CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
-            if ( hasIgnoreType( allnpcs ) )
-                return true;
+            if ( hasIgnoreType( allnpcs ) ) return true;
 
             NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
 
             if ( targetNpc != null ) {
 
-                if ( hasIgnoreType( namednpcs )
+                if (    hasIgnoreType( namednpcs )
                         && ignoresContain( "NPC:" + targetNpc.getName() ) )
                     return true;
 
                 // As this is an NPC and we haven't decided whether to ignore it
                 // yet, let check the ignores of the owner.
-                return isIgnoring( (LivingEntity) sentry.getServer()
-                        .getOfflinePlayer( targetNpc.getTrait( Owner.class )
-                                .getOwnerId() ) );
+                return isIgnoring( 
+                        (LivingEntity) sentry.getServer().getOfflinePlayer( 
+                                targetNpc.getTrait( Owner.class ).getOwnerId() ) );
             }
         }
         else if ( aTarget instanceof Player ) {
 
-            if ( hasIgnoreType( allplayers ) )
-                return true;
+            if ( hasIgnoreType( allplayers ) ) return true;
 
             Player player = (Player) aTarget;
             String name = player.getName();
 
-            if ( hasIgnoreType( namedplayers )
+            if (    hasIgnoreType( namedplayers )
                     && ignoresContain( "PLAYER:" + name ) )
                 return true;
 
-            if ( hasIgnoreType( owner ) && name.equalsIgnoreCase(
-                    myNPC.getTrait( Owner.class ).getOwner() ) )
+            if (    hasIgnoreType( owner ) 
+                    && name.equalsIgnoreCase( myNPC.getTrait( Owner.class ).getOwner() ) )
                 return true;
 
             // if ( hasIgnoreType( permGroups ) &&
@@ -365,44 +352,42 @@ public class SentryInstance {
 
     public boolean isTarget( LivingEntity aTarget ) {
 
-        if ( targetFlags == none || targetFlags == events )
-            return false;
+        if ( targetFlags == none || targetFlags == events ) return false;
 
-        if ( hasTargetType( all ) )
-            return true;
+        if ( hasTargetType( all ) ) return true;
 
         if ( CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
-            if ( hasTargetType( allnpcs ) )
-                return true;
+            if ( hasTargetType( allnpcs ) ) return true;
 
             NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
 
             String targetName = targetNpc.getName();
 
-            if ( hasTargetType( namednpcs )
+            if (    hasTargetType( namednpcs )
                     && targetsContain( "NPC:" + targetName ) )
                 return true;
 
             // As we are checking an NPC and haven't decided whether to attack
             // it yet, lets check the owner.
-            return isTarget( (LivingEntity) sentry.getServer().getOfflinePlayer(
-                    targetNpc.getTrait( Owner.class ).getOwnerId() ) );
+            return isTarget( 
+                    (LivingEntity) sentry.getServer().getOfflinePlayer(
+                            targetNpc.getTrait( Owner.class ).getOwnerId() ) );
         }
+        
         else if ( aTarget instanceof Player ) {
 
-            if ( hasTargetType( allplayers ) )
-                return true;
+            if ( hasTargetType( allplayers ) ) return true;
 
             Player player = (Player) aTarget;
             String name = player.getName();
 
-            if ( hasTargetType( namedplayers )
+            if (    hasTargetType( namedplayers )
                     && targetsContain( "PLAYER:" + name ) )
                 return true;
 
-            if ( targetsContain( "ENTITY:OWNER" ) && name.equalsIgnoreCase(
-                    myNPC.getTrait( Owner.class ).getOwner() ) )
+            if (    targetsContain( "ENTITY:OWNER" ) 
+                    && name.equalsIgnoreCase( myNPC.getTrait( Owner.class ).getOwner() ) )
                 return true;
 
             // if ( hasTargetType( permGroups ) &&
@@ -414,13 +399,14 @@ public class SentryInstance {
 
                 String[] info = TownyBridge.getResidentTownyInfo( player );
 
-                if ( hasTargetType( towny ) && info[1] != null
+                if (    hasTargetType( towny ) 
+                        && info[1] != null
                         && targetsContain( "TOWN:" + info[1] ) )
                     return true;
 
                 if ( info[0] != null ) {
 
-                    if ( hasTargetType( towny )
+                    if (    hasTargetType( towny )
                             && targetsContain( "NATION:" + info[0] ) )
                         return true;
 
@@ -471,7 +457,7 @@ public class SentryInstance {
             // return true;
             // }
             for ( PluginBridge each : Sentry.activePlugins.values() ) {
-                if ( hasTargetType( each.getBitFlag() )
+                if (    hasTargetType( each.getBitFlag() )
                         && each.isTarget( player, this ) ) {
                     return true;
                 }
@@ -509,9 +495,9 @@ public class SentryInstance {
         return _validTargets.contains( theTarget.toUpperCase().intern() );
     }
 
-    public void deactivate() {
-        sentry.getServer().getScheduler().cancelTask( taskID );
-    }
+//    public void deactivate() {
+//        sentry.getServer().getScheduler().cancelTask( taskID );
+//    }
 
     public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
         // most of the former contents of this method have been moved to the
@@ -580,7 +566,7 @@ public class SentryInstance {
                 continue;
 
             // find closest target
-            if ( !isIgnoring( (LivingEntity) aTarget )
+            if (    !isIgnoring( (LivingEntity) aTarget )
                     && isTarget( (LivingEntity) aTarget ) ) {
 
                 // can i see it?
@@ -588,7 +574,7 @@ public class SentryInstance {
                         .getLightLevel();
 
                 // sneaking cut light in half
-                if ( aTarget instanceof Player
+                if (    aTarget instanceof Player
                         && ((Player) aTarget).isSneaking() )
                     lightLevel /= 2;
 
@@ -600,11 +586,11 @@ public class SentryInstance {
 
                     if ( hasLOS( aTarget ) ) {
 
-                        if ( warningRange > 0 && !warningMsg.isEmpty()
+                        if (    warningRange > 0 && !warningMsg.isEmpty()
                                 && myStatus == SentryStatus.isLOOKING
                                 && aTarget instanceof Player
-                                && dist > (range - warningRange) && !CitizensAPI
-                                        .getNPCRegistry().isNPC( aTarget ) ) {
+                                && dist > (range - warningRange) 
+                                && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
                             if ( !warningsGiven.containsKey( aTarget ) || System
                                     .currentTimeMillis() > warningsGiven
@@ -634,15 +620,14 @@ public class SentryInstance {
                     && aTarget instanceof Player
                     && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
-                if ( myEntity.hasLineOfSight( aTarget )
-                        && (!warningsGiven.containsKey( aTarget )
+                if (    myEntity.hasLineOfSight( aTarget )
+                        && (    !warningsGiven.containsKey( aTarget )
                                 || System.currentTimeMillis() > warningsGiven
-                                        .get( aTarget ) + 60000) ) {
+                                                        .get( aTarget ) + 60000) ) {
 
                     Player player = (Player) aTarget;
 
-                    player.sendMessage( Util.format( greetingMsg, myNPC, player,
-                            null, null ) );
+                    player.sendMessage( Util.format( greetingMsg, myNPC, player, null, null ) );
                     faceEntity( myEntity, aTarget );
 
                     warningsGiven.put( player, System.currentTimeMillis() );
@@ -653,8 +638,8 @@ public class SentryInstance {
     }
 
     public void draw( boolean on ) {
-        // ((CraftLivingEntity) getMyEntity()).getHandle().b( on ); // TODO: 1.8
-        // UPDATE - IS THIS CORRECT?
+        // ((CraftLivingEntity) getMyEntity()).getHandle().b( on ); 
+        // TODO: 1.8 UPDATE - IS THIS CORRECT?
         // I don't think it was, let see what happens without it.
     }
 
@@ -754,11 +739,11 @@ public class SentryInstance {
 
             if ( myProjectile == Arrow.class
                     || myProjectile == ThrownPotion.class )
-                v = v + (1.188 * Math.pow( hangtime, 2 ));
+                v += (1.188 * Math.pow( hangtime, 2 ));
             else
-                v = v + (0.5 * Math.pow( hangtime, 2 ));
+                v += (0.5 * Math.pow( hangtime, 2 ));
 
-            v = v + (random.nextDouble() - 0.8) / 2;
+            v += (random.nextDouble() - 0.8) / 2;
 
             // apply power
             victor = victor.multiply( v / 20.0 );
@@ -769,14 +754,14 @@ public class SentryInstance {
             case 1:
                 to.getWorld().strikeLightningEffect( to );
                 theTarget.damage( getStrength(), myEntity );
-
+                break;
             case 2:
                 to.getWorld().strikeLightning( to );
-
+                break;
             case 3:
                 to.getWorld().strikeLightningEffect( to );
                 theTarget.setHealth( 0 );
-
+                break;
             default:
                 // not lightning
                 Projectile projectile;
@@ -827,8 +812,7 @@ public class SentryInstance {
         }
 
         if ( effect != null )
-            myEntity.getWorld().playEffect( myEntity.getLocation(), effect,
-                    null );
+            myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
 
         faceEntity( getMyEntity(), theTarget );
 
@@ -852,8 +836,7 @@ public class SentryInstance {
         double mod = 0;
 
         if ( getMyEntity() instanceof Player ) {
-            for ( ItemStack is : ((Player) getMyEntity()).getInventory()
-                    .getArmorContents() ) {
+            for ( ItemStack is : ((Player) getMyEntity()).getInventory().getArmorContents() ) {
                 Material item = is.getType();
 
                 if ( sentry.armorBuffs.containsKey( item ) )
@@ -880,8 +863,7 @@ public class SentryInstance {
         if ( !sentry.speedBuffs.isEmpty() ) {
 
             if ( myEntity instanceof Player ) {
-                for ( ItemStack stack : ((Player) myEntity).getInventory()
-                        .getArmorContents() ) {
+                for ( ItemStack stack : ((Player) myEntity).getInventory().getArmorContents() ) {
                     Material item = stack.getType();
 
                     if ( sentry.speedBuffs.containsKey( item ) )
@@ -889,8 +871,7 @@ public class SentryInstance {
                 }
             }
         }
-        return (float) (sentrySpeed + mod)
-                * (myEntity.isInsideVehicle() ? 2 : 1);
+        return (float) (sentrySpeed + mod) * (myEntity.isInsideVehicle() ? 2 : 1);
     }
 
     public int getStrength() {
@@ -940,7 +921,7 @@ public class SentryInstance {
         Entity damager = event.getDamager();
 
         // Find the attacker
-        if ( damager instanceof Projectile
+        if (    damager instanceof Projectile
                 && ((Projectile) damager).getShooter() instanceof LivingEntity )
             attacker = (LivingEntity) ((Projectile) damager).getShooter();
 
@@ -950,9 +931,10 @@ public class SentryInstance {
         if ( Sentry.ignoreListIsInvincible && isIgnoring( attacker ) )
             return;
 
-        if ( attacker != null && iWillRetaliate
-                && (!(damager instanceof Projectile) || CitizensAPI
-                        .getNPCRegistry().getNPC( attacker ) == null) ) {
+        if (    attacker != null 
+                && iWillRetaliate
+                && (    !(damager instanceof Projectile) 
+                        || CitizensAPI.getNPCRegistry().getNPC( attacker ) == null) ) {
 
             attackTarget = attacker;
             setTarget( attacker );
@@ -965,20 +947,21 @@ public class SentryInstance {
             hit = Hits.getHit();
             damage = Math.round( damage * hit.damageModifier );
         }
-        int arm = getArmor();
+        
+        int armour = getArmor();
 
         if ( damage > 0 ) {
 
             if ( attacker != null ) {
                 // knockback
-                npc.getEntity()
-                        .setVelocity( attacker.getLocation().getDirection()
-                                .multiply( 1.0 / (sentryWeight + (arm / 5)) ) );
+                npc.getEntity().setVelocity( attacker.getLocation()
+                                                     .getDirection()
+                                                     .multiply( 1.0 / (sentryWeight + (armour / 5)) ) );
             }
-            // Apply armor
-            damage -= arm;
+            // Apply armour
+            damage -= armour;
 
-            // there was damage before armor.
+            // there was damage before armour.
             if ( damage <= 0 ) {
                 npc.getEntity().getWorld().playEffect(
                         npc.getEntity().getLocation(),
@@ -1025,7 +1008,9 @@ public class SentryInstance {
     }
 
     public void onEnvironmentDamage( EntityDamageEvent event ) {
-
+        // not called for fall damage, or for lightning on stormcallers,
+        // or for fire on pyromancers & stormcallers, or for poison on witchdoctors.
+        
         if ( myStatus == SentryStatus.isDYING ) return;
 
         if ( myNPC == null || !myNPC.isSpawned() || invincible ) return;

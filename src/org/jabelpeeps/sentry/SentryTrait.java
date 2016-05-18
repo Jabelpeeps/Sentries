@@ -11,13 +11,14 @@ import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.MemoryDataKey;
-import net.citizensnpcs.trait.Toggleable;
 
-public class SentryTrait extends Trait implements Toggleable {
+public class SentryTrait extends Trait { // implements Toggleable {
 
     private Sentry sentry;
     private SentryInstance inst;
-    private boolean isToggled = true;
+    
+    // this field and its getter & setter appear to be unused
+//    private boolean isToggled = true;
 
     // Traits are required to have a no-argument constructor.
     public SentryTrait() {
@@ -46,13 +47,13 @@ public class SentryTrait extends Trait implements Toggleable {
     public void load( DataKey key ) throws NPCLoadException {
 
         if ( Sentry.debug )
-            Sentry.debugLog( npc.getName() + ":" + npc.getId() + " load() start" );
+            Sentry.debugLog( npc.getName() + ":[" + npc.getId() + "] load() start" );
         
         ensureInst();
 
         if ( key.keyExists( "traits" ) ) key = key.getRelative( "traits" );
 
-        isToggled = key.getBoolean( "toggled", isToggled() );
+ //       isToggled = key.getBoolean( "toggled", isToggled() );
 
         inst.iWillRetaliate = key.getBoolean( S.RETALIATE, sentry.defaultBooleans.get( S.RETALIATE ) );
         inst.invincible = key.getBoolean( S.INVINCIBLE, sentry.defaultBooleans.get( S.INVINCIBLE ) );
@@ -117,7 +118,7 @@ public class SentryTrait extends Trait implements Toggleable {
 
         if ( Sentry.debug )
             Sentry.debugLog(
-                    npc.getName() + ":" + npc.getId() + " load() end" );
+                    npc.getName() + ":[" + npc.getId() + "] load() end" );
     }
 
     public SentryInstance getInstance() {
@@ -127,7 +128,7 @@ public class SentryTrait extends Trait implements Toggleable {
     @Override
     public void onSpawn() {
         if ( Sentry.debug )
-            Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onSpawn()" );
+            Sentry.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
 
         ensureInst();
 
@@ -148,10 +149,10 @@ public class SentryTrait extends Trait implements Toggleable {
             inst.cancelRunnable();
         }
         if ( Sentry.debug )
-            Sentry.debugLog( npc.getName() + " onRemove()" );
+            Sentry.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
 
         inst = null;
-        isToggled = false;
+ //       isToggled = false;
     }
 
     @Override
@@ -159,8 +160,8 @@ public class SentryTrait extends Trait implements Toggleable {
 
         if ( Sentry.debug )
             Sentry.debugLog(
-                    npc.getName() + ":" + npc.getId() + " onAttach()" );
-        isToggled = true;
+                    npc.getName() + ":[" + npc.getId() + "] onAttach()" );
+ //       isToggled = true;
     }
 
     @EventHandler
@@ -169,7 +170,7 @@ public class SentryTrait extends Trait implements Toggleable {
             inst.cancelRunnable();
         }
         inst = null;
-        isToggled = false;
+//        isToggled = false;
     }
 
     @Override
@@ -177,7 +178,7 @@ public class SentryTrait extends Trait implements Toggleable {
 
         if ( Sentry.debug )
             Sentry.debugLog(
-                    npc.getName() + ":" + npc.getId() + " onDespawn()" );
+                    npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
 
         if ( inst != null ) {
             inst.isRespawnable = System.currentTimeMillis()
@@ -191,11 +192,11 @@ public class SentryTrait extends Trait implements Toggleable {
     public void save( DataKey key ) {
 
         if ( Sentry.debug )
-            Sentry.debugLog( npc.getName() + ":" + npc.getId() + " save()" );
+            Sentry.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
         if ( inst == null )
             return;
 
-        key.setBoolean( "toggled", isToggled );
+//        key.setBoolean( "toggled", isToggled );
         key.setBoolean( S.RETALIATE, inst.iWillRetaliate );
         key.setBoolean( S.INVINCIBLE, inst.invincible );
         key.setBoolean( S.DROP_INVENTORY, inst.dropInventory );
@@ -244,7 +245,7 @@ public class SentryTrait extends Trait implements Toggleable {
     public void onCopy() {
 
         if ( Sentry.debug )
-            Sentry.debugLog( npc.getName() + ":" + npc.getId() + " onCopy()" );
+            Sentry.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
         if ( inst != null ) {
 
             final Runnable cloneInstance = new Runnable() {
@@ -260,14 +261,14 @@ public class SentryTrait extends Trait implements Toggleable {
         }
     }
 
-    @Override
-    public boolean toggle() {
-        isToggled = !isToggled;
-        return isToggled;
-    }
-
-    public boolean isToggled() {
-        return isToggled;
-    }
+//    @Override
+//    public boolean toggle() {
+//        isToggled = !isToggled;
+//        return isToggled;
+//    }
+//
+//    public boolean isToggled() {
+//        return isToggled;
+//    }
 
 }

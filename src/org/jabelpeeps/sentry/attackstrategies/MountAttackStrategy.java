@@ -18,9 +18,12 @@ public class MountAttackStrategy implements AttackStrategy {
         Entity passenger = attacker.getPassenger();
 
         if ( passenger != null ) {
-            return CitizensAPI.getNPCRegistry().getNPC( passenger )
-                    .getNavigator().getLocalParameters().attackStrategy()
-                    .handle( (LivingEntity) passenger, bukkitTarget );
+            return CitizensAPI.getNPCRegistry()
+                              .getNPC( passenger )
+                              .getNavigator()
+                              .getLocalParameters()
+                              .attackStrategy()
+                              .handle( (LivingEntity) passenger, bukkitTarget );
         }
         // I think this does the default attack.
         return false;

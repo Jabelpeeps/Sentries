@@ -57,7 +57,7 @@ public abstract class S {
     public final static String HELP_ADD = "- to add <type:name> to the list";
 
     public final static String HELP_ADD_REMOVE_TYPES = "  <type:name> can be any of the following: entity:<MobName> entity:monster entity:player entity:all "
-            + "player:<PlayerName> group:<GroupName> town:<TownName> nation:<NationName> faction:<FactionName>";
+            + "player:<PlayerName>";   // group:<GroupName> town:<TownName> nation:<NationName> faction:<FactionName>";
 
     // a random selection of single words.
     public final static String SECONDS = "seconds";
