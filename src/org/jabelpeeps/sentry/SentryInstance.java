@@ -170,7 +170,7 @@ public class SentryInstance {
         if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
 
         // Allow Denizen to handle the sentry's health if it is active.
-        if ( Sentry.denizenActive ) {
+        if ( DenizenHook.sentryHealthByDenizen ) {
             if ( myNPC.hasTrait( HealthTrait.class ) )
                 myNPC.removeTrait( HealthTrait.class );
         }

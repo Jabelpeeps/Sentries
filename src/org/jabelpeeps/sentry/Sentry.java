@@ -66,14 +66,10 @@ public class Sentry extends JavaPlugin {
 
     static Map<String, Integer> equipmentSlots = new HashMap<String, Integer>();
 
-    Map<Material, Double> armorBuffs = new EnumMap<Material, Double>(
-            Material.class );
-    Map<Material, Double> speedBuffs = new EnumMap<Material, Double>(
-            Material.class );
-    Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>(
-            Material.class );
-    Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>(
-            Material.class );
+    Map<Material, Double> armorBuffs = new EnumMap<Material, Double>( Material.class );
+    Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
+    Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>( Material.class );
+    Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>( Material.class );
 
     Map<String, Boolean> defaultBooleans = new HashMap<String, Boolean>();
     Map<String, Integer> defaultIntegers = new HashMap<String, Integer>();
@@ -97,8 +93,7 @@ public class Sentry extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        if ( sentryPlugin != null )
-            return;
+        if ( sentryPlugin != null ) return;
 
         sentryPlugin = this;
         logger = getLogger();
@@ -111,17 +106,13 @@ public class Sentry extends JavaPlugin {
 
         if ( checkPlugin( S.DENIZEN ) ) {
 
-            String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription()
-                    .getVersion();
+            String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription() .getVersion();
 
             if ( vers.startsWith( "0.9" ) ) {
 
-                denizenHook = new DenizenHook(
-                        (Denizen) pluginManager.getPlugin( S.DENIZEN ), this );
+                denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( S.DENIZEN ), this );
                 denizenActive = DenizenHook.npcDeathTriggerActive
-                        || DenizenHook.npcDeathTriggerOwnerActive
-                        || DenizenHook.dieCommandActive
-                        || DenizenHook.liveCommandActive;
+                        || DenizenHook.npcDeathTriggerOwnerActive;
             }
             else {
                 logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
@@ -144,46 +135,29 @@ public class Sentry extends JavaPlugin {
 
             try {
                 @SuppressWarnings( "unchecked" )
-                Class<? extends PluginBridge> clazz = (Class<? extends PluginBridge>) Class
-                        .forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
-                Constructor<? extends PluginBridge> constructor = clazz
-                        .getDeclaredConstructor( int.class );
+                Class<? extends PluginBridge> clazz = 
+                    (Class<? extends PluginBridge>) Class.forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
+                Constructor<? extends PluginBridge> constructor =  clazz.getDeclaredConstructor( int.class );
 
                 bridge = constructor.newInstance( targetBitFlag );
-            } catch ( ClassNotFoundException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
-            } catch ( InstantiationException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
-            } catch ( IllegalAccessException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
-            } catch ( IllegalArgumentException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
-            } catch ( InvocationTargetException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
-            } catch ( NoSuchMethodException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
-            } catch ( SecurityException e ) {
-                helpfulReflectionError( each );
-                e.printStackTrace();
+                
+            } catch ( ClassNotFoundException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( InstantiationException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( IllegalAccessException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( IllegalArgumentException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( InvocationTargetException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( NoSuchMethodException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( SecurityException e ) { helpfulReflectionError( each ); e.printStackTrace();
             }
 
-            if ( bridge == null )
-                continue;
+            if ( bridge == null ) continue;
             if ( !bridge.activate() ) {
                 logger.log( Level.INFO, bridge.getActivationMessage() );
                 continue;
             }
 
             if ( debug )
-                logger.log( Level.INFO,
-                        each + " activated with bitFlag value of "
-                                + bridge.getBitFlag() );
+                logger.log( Level.INFO, each + " activated with bitFlag value of " + bridge.getBitFlag() );
             logger.log( Level.INFO, bridge.getActivationMessage() );
 
             targetBitFlag *= 2;
@@ -191,8 +165,7 @@ public class Sentry extends JavaPlugin {
             activePlugins.put( each, bridge );
         }
 
-        CitizensAPI.getTraitFactory().registerTrait(
-                TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
+        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
         pluginManager.registerEvents( new SentryListener( this ), this );
 
@@ -209,15 +182,13 @@ public class Sentry extends JavaPlugin {
                 }
             }
         };
-        getServer().getScheduler().scheduleSyncRepeatingTask( this,
-                removeArrows, 40, 20 * 120 );
+        getServer().getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
 
         reloadMyConfig();
     }
 
     private void helpfulReflectionError( String name ) {
-        logger.log( Level.WARNING, "Error loading PluginBridge for the value: '"
-                + name + "' from config.yml. " );
+        logger.log( Level.WARNING, "Error loading PluginBridge for the plugin: '" + name + "' from config.yml. " );
     }
 
     void reloadMyConfig() {
@@ -243,10 +214,8 @@ public class Sentry extends JavaPlugin {
         Hits.loadConfig( config );
 
         dieLikePlayers = config.getBoolean( "Server.DieLikePlayers" );
-        bodyguardsObeyProtection = config
-                .getBoolean( "Server.BodyguardsObeyProtection", true );
-        ignoreListIsInvincible = config
-                .getBoolean( "Server.IgnoreListInvincibility", true );
+        bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
+        ignoreListIsInvincible = config.getBoolean( "Server.IgnoreListInvincibility", true );
 
         logicTicks = config.getInt( "Server.LogicTicks", 10 );
         sentryEXP = config.getInt( "Server.ExpValue", 5 );
@@ -315,8 +284,7 @@ public class Sentry extends JavaPlugin {
     public SentryInstance getSentryInstance( Entity ent ) {
 
         if ( ent != null && ent instanceof LivingEntity ) {
-            return getSentryInstance(
-                    CitizensAPI.getNPCRegistry().getNPC( ent ) );
+            return getSentryInstance( CitizensAPI.getNPCRegistry().getNPC( ent ) );
         }
         return null;
     }
@@ -344,8 +312,7 @@ public class Sentry extends JavaPlugin {
         Bukkit.getServer().getScheduler().cancelTasks( this );
     }
 
-    public void loadIntoSet( FileConfiguration config, String key,
-            Set<Material> set ) {
+    public void loadIntoSet( FileConfiguration config, String key, Set<Material> set ) {
 
         if ( config.getBoolean( "UseCustom" + key ) ) {
 
@@ -362,8 +329,7 @@ public class Sentry extends JavaPlugin {
         }
     }
 
-    private void loadIntoMaterialMap( FileConfiguration config, String node,
-            Map<Material, Double> map ) {
+    private void loadIntoMaterialMap( FileConfiguration config, String node, Map<Material, Double> map ) {
         map.clear();
 
         for ( String each : config.getStringList( node ) ) {
@@ -386,16 +352,14 @@ public class Sentry extends JavaPlugin {
     }
 
     @SuppressWarnings( "unchecked" )
-    private <T> void loadIntoStringMap( FileConfiguration config, String node,
-            Map<String, T> map ) {
+    private <T> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
 
         map.clear();
         map.putAll( (Map<String, T>) config.getConfigurationSection( node )
                 .getValues( false ) );
     }
 
-    private void loadPotions( FileConfiguration config, String path,
-            Map<Material, List<PotionEffect>> map ) {
+    private void loadPotions( FileConfiguration config, String path, Map<Material, List<PotionEffect>> map ) {
         map.clear();
 
         for ( String each : config.getStringList( path ) ) {
@@ -465,10 +429,9 @@ public class Sentry extends JavaPlugin {
      */
     private boolean checkPlugin( String name ) {
 
-        if ( S.SCORE.equals( name ) )
-            return true;
+        if ( S.SCORE.equals( name ) ) return true;
 
-        if ( pluginManager.getPlugin( name ) != null
+        if (    pluginManager.getPlugin( name ) != null
                 && pluginManager.getPlugin( name ).isEnabled() ) {
 
             if ( debug )

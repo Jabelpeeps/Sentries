@@ -58,16 +58,14 @@ enum SentryStatus {
             if ( Sentry.denizenActive ) {
 
                 DenizenHook.denizenAction( inst.myNPC, "death", null );
-                DenizenHook.denizenAction( inst.myNPC, "death by"
-                        + inst.causeOfDeath.toString().replace( " ", "_" ),
-                        null );
+                DenizenHook.denizenAction( inst.myNPC, "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
 
                 Entity killer = myEntity.getKiller();
 
                 if ( killer == null ) {
                     // might have been a projectile.
                     EntityDamageEvent ev = myEntity.getLastDamageCause();
-                    if ( ev != null
+                    if (    ev != null
                             && ev instanceof EntityDamageByEntityEvent ) {
                         killer = ((EntityDamageByEntityEvent) ev).getDamager();
                     }
@@ -75,27 +73,20 @@ enum SentryStatus {
 
                 if ( killer != null ) {
 
-                    if ( killer instanceof Projectile
+                    if (    killer instanceof Projectile
                             && ((Projectile) killer).getShooter() != null
-                            && ((Projectile) killer)
-                                    .getShooter() instanceof Entity )
+                            && ((Projectile) killer).getShooter() instanceof Entity )
                         killer = (Entity) ((Projectile) killer).getShooter();
 
                     if ( Sentry.debug )
-                        Sentry.debugLog( "Running Denizen actions for "
-                                + inst.myNPC.getName() + " with killer: "
-                                + killer.toString() );
+                        Sentry.debugLog( "Running Denizen actions for " + inst.myNPC.getName() + " with killer: " + killer.toString() );
 
                     if ( killer instanceof OfflinePlayer ) {
-                        DenizenHook.denizenAction( inst.myNPC,
-                                "death by player", (OfflinePlayer) killer );
+                        DenizenHook.denizenAction( inst.myNPC, "death by player", (OfflinePlayer) killer );
                     }
                     else {
-                        DenizenHook.denizenAction( inst.myNPC,
-                                "death by entity", null );
-                        DenizenHook.denizenAction( inst.myNPC,
-                                "death by " + killer.getType().toString(),
-                                null );
+                        DenizenHook.denizenAction( inst.myNPC, "death by entity", null );
+                        DenizenHook.denizenAction( inst.myNPC, "death by " + killer.getType().toString(), null );
                     }
                 }
             }
@@ -109,8 +100,7 @@ enum SentryStatus {
 
             if ( myEntity instanceof HumanEntity ) {
 
-                PlayerInventory inventory = ((HumanEntity) myEntity)
-                        .getInventory();
+                PlayerInventory inventory = ((HumanEntity) myEntity).getInventory();
 
                 for ( ItemStack is : inventory.getArmorContents() ) {
 
@@ -143,8 +133,7 @@ enum SentryStatus {
                 items.clear();
 
             for ( ItemStack is : items )
-                myEntity.getWorld().dropItemNaturally( myEntity.getLocation(),
-                        is );
+                myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), is );
 
             if ( Sentry.dieLikePlayers )
                 myEntity.setHealth( 0 );
