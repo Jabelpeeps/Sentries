@@ -371,22 +371,22 @@ public abstract class CommandHandler {
                     player.sendMessage( "  Change the greeting text. <NPC> and <PLAYER> can be used as placeholders" );
                 }
                 if ( checkCommandPerm( S.PERM_INFO, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry info", S.Col.RESET, "- View all attributes of a sentry NPC" ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, "- View all attributes of a sentry NPC" ) );
                 
                 if ( checkCommandPerm( S.PERM_DEBUG, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry debug", S.Col.RESET, "- displays debug info on the console",
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, "- displays debug info on the console",
                             System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
 
                 if ( checkCommandPerm( S.PERM_RELOAD, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry reload", S.Col.RESET, "- Reloads the config file" ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, "- Reloads the config file" ) );
                 
                 if ( mainHelpOutro == null ) {
                     StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
                     joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-                    joiner.add( String.join( " ", "If '...' is shown do", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, "for further help" ) );
+                    joiner.add( String.join( "", "If '...' is shown do", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, "for further help" ) );
                     joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-                    joiner.add( String.join( " ", "Select NPC's with", S.Col.GOLD, "'/npc sel'", S.Col.RESET, "before running commands, or use",
+                    joiner.add( String.join( "", "Select NPC's with", S.Col.GOLD, "'/npc sel'", S.Col.RESET, "before running commands, or use",
                             S.Col.GOLD, "/sentry #npcid <command> [args]", S.Col.RESET, "to use commands on the sentry with the given npcid number." ) );
                     joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
 
@@ -625,7 +625,7 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_GUARD, player ) ) {
 
-                if ( inargs.length >= nextArg + 1 && S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
+                if ( inargs.length > nextArg + 1 && S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
                     inst.findGuardEntity( null, false );
                 }
                 if ( inargs.length >= 1 + nextArg ) {
