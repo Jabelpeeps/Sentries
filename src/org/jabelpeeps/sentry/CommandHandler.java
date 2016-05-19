@@ -625,43 +625,44 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_GUARD, player ) ) {
 
-                if ( inargs.length > nextArg + 1 && S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-                    inst.findGuardEntity( null, false );
+                if ( inargs.length > nextArg + 1 ) {
+                    
+                    if ( S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
+                        inst.findGuardEntity( null, false );
+                    }
+                    else {
+                        boolean localonly = false;
+                        boolean playersonly = false;
+                        int start = 1;
+                        boolean ok = false;
+    
+                        if ( inargs[nextArg + 1].equalsIgnoreCase( "-p" ) ) {
+                            start = 2;
+                            playersonly = true;
+                        }
+    
+                        if ( inargs[nextArg + 1].equalsIgnoreCase( "-l" ) ) {
+                            start = 2;
+                            localonly = true;
+                        }
+    
+                        String arg = joinArgs( start + nextArg, inargs );
+    
+                        if ( !playersonly ) {
+                            ok = inst.findGuardEntity( arg, false );
+                        }
+    
+                        if ( !localonly ) {
+                            ok = inst.findGuardEntity( arg, true );
+                        }
+    
+                        if ( ok )
+                            player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now guarding", arg ) );
+                        else
+                            player.sendMessage( String.join( " ", S.Col.RED, npcName, "could not find", arg ) );
+                        return true;
+                    }
                 }
-                if ( inargs.length >= 1 + nextArg ) {
-
-                    boolean localonly = false;
-                    boolean playersonly = false;
-                    int start = 1;
-                    boolean ok = false;
-
-                    if ( inargs[nextArg + 1].equalsIgnoreCase( "-p" ) ) {
-                        start = 2;
-                        playersonly = true;
-                    }
-
-                    if ( inargs[nextArg + 1].equalsIgnoreCase( "-l" ) ) {
-                        start = 2;
-                        localonly = true;
-                    }
-
-                    String arg = joinArgs( start + nextArg, inargs );
-
-                    if ( !playersonly ) {
-                        ok = inst.findGuardEntity( arg, false );
-                    }
-
-                    if ( !localonly ) {
-                        ok = inst.findGuardEntity( arg, true );
-                    }
-
-                    if ( ok )
-                        player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now guarding", arg ) );
-                    else
-                        player.sendMessage( String.join( " ", S.Col.RED, npcName, "could not find", arg ) );
-                    return true;
-                }
-
                 if ( inst.guardTarget == null )
                     player.sendMessage( S.Col.GREEN.concat( "Guarding: My Surroundings" ) );
                 else if ( inst.guardEntity == null )
@@ -973,6 +974,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_EQUIP, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
+                    player.sendMessage( String.join( "", S.ERROR, "More arguments needed.") );
                     player.sendMessage( equipCommandHelp() );
                 }
                 
@@ -991,13 +993,15 @@ public abstract class CommandHandler {
 
                         for ( Entry<String, Integer> each : Sentry.equipmentSlots.entrySet() )
 
-                            if ( each.getKey().equalsIgnoreCase( inargs[nextArg + 2] ) )
+                            if ( each.getKey().equalsIgnoreCase( inargs[nextArg + 2] ) ) {
                                 thisNPC.getTrait( Equipment.class )
                                        .set( each.getValue(),
                                              new ItemStack( Material.AIR ) );
+                            player.sendMessage( String.join( "", S.Col.GREEN, "removed ", npcName, "'s ", inargs[nextArg +2] ) );
+                            }
                     }
                     else {
-                        Material mat = Util.getMaterial( inargs[nextArg + 1] );
+                        Material mat = Material.getMaterial( inargs[nextArg + 1] );
 
                         if ( mat == null ) {
                             player.sendMessage( S.Col.RED.concat(

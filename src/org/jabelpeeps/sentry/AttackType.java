@@ -105,11 +105,10 @@ enum AttackType {
         if ( config.getBoolean( "UseCustomWeapons" ) ) {
 
             for ( AttackType attack : values() ) {
-                if ( attack == brawler )
-                    continue;
+                
+                if ( attack == brawler ) continue;
 
-                attack.weapon = Util.getMaterial(
-                        config.getString( "AttackTypes." + attack.name ) );
+                attack.weapon = Material.getMaterial( config.getString( "AttackTypes." + attack.name ) );
             }
             updateMap();
         }

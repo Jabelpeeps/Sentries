@@ -41,7 +41,8 @@ public abstract class Util {
     public static Vector normalizeVector( Vector victor ) {
 
         double mag = Math.sqrt( Math.pow( victor.getX(), 2 )
-                + Math.pow( victor.getY(), 2 ) + Math.pow( victor.getZ(), 2 ) );
+                              + Math.pow( victor.getY(), 2 ) 
+                              + Math.pow( victor.getZ(), 2 ) );
 
         if ( mag != 0 )
             return victor.multiply( 1 / mag );
@@ -90,18 +91,14 @@ public abstract class Util {
             if ( player.hasPermission( "sentry.bodyguard.*" ) ) {
                 // all players have "*" perm by default.
 
-                if ( player
-                        .isPermissionSet( "sentry.bodyguard."
-                                + player.getWorld().getName() )
-                        && !player.hasPermission( "sentry.bodyguard."
-                                + player.getWorld().getName() ) ) {
+                if (    player .isPermissionSet( "sentry.bodyguard."  + player.getWorld().getName() )
+                        && !player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
                     // denied in this world.
                     return false;
                 }
                 return true;
             }
-            if ( player.hasPermission(
-                    "sentry.bodyguard." + player.getWorld().getName() ) ) {
+            if ( player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
                 // no "*"" but specifically allowed this world.
                 return true;
             }
@@ -109,8 +106,7 @@ public abstract class Util {
         return false;
     }
 
-    public static double hangtime( double launchAngle, double v, double elev,
-            double g ) {
+    public static double hangtime( double launchAngle, double v, double elev, double g ) {
 
         double a = v * Math.sin( launchAngle );
         double b = -2 * g * elev;
@@ -121,8 +117,7 @@ public abstract class Util {
         return (a + Math.sqrt( Math.pow( a, 2 ) + b )) / g;
     }
 
-    public static Double launchAngle( Location from, Location to, double v,
-            double elev, double g ) {
+    public static Double launchAngle( Location from, Location to, double v, double elev, double g ) {
 
         Vector victor = from.clone().subtract( to ).toVector();
 
@@ -153,17 +148,14 @@ public abstract class Util {
      * The method will return immediately if 'input' is null, and will remove
      * the tags related to any other arguments that are null objects.
      */
-    public static String format( String input, NPC npc, CommandSender player,
-            Material item, String amount ) {
+    public static String format( String input, NPC npc, CommandSender player, Material item, String amount ) {
 
         if ( input == null )
             return null;
 
         input = input.replace( "<NPC>", (npc == null) ? "" : npc.getName() );
-        input = input.replace( "<PLAYER>",
-                (player == null) ? "" : player.getName() );
-        input = input.replace( "<ITEM>",
-                (item == null) ? "" : Util.getLocalItemName( item ) );
+        input = input.replace( "<PLAYER>", (player == null) ? "" : player.getName() );
+        input = input.replace( "<ITEM>", (item == null) ? "" : Util.getLocalItemName( item ) );
         input = input.replace( "<AMOUNT>", (amount == null) ? "" : amount );
 
         input = ChatColor.translateAlternateColorCodes( '&', input );
@@ -240,24 +232,25 @@ public abstract class Util {
         }
     }
 
-    /**
-     * New method with this name, now re-written to return Material values from
-     * the official enum.
-     */
-    static Material getMaterial( String materialName ) {
-
-        if ( materialName == null )
-            return null;
-
-        String[] args = materialName.toUpperCase().split( ":" );
-
-        Material material = Material.getMaterial( args[0] );
-
-        if ( material == null )
-            throw new RuntimeException( "Invalid Material name:" + materialName
-                    + ". Please check config.yml carefully." );
-
-        return material;
-    }
+//    /**
+//     * New method with this name, now re-written to return Material values from
+//     * the official enum.
+//     */
+//    static Material getMaterial( String materialName ) {
+//
+//        if ( materialName == null )
+//            return null;
+//
+//        // not sure why we need this.
+//    //    String[] args = materialName.toUpperCase().split( ":" );
+//
+//        Material material = Material.getMaterial( materialName );
+//
+//        if ( material == null )
+//            throw new RuntimeException( "Invalid Material name:" + materialName
+//                    + ". Please check config.yml carefully." );
+//
+//        return material;
+//    }
 
 }

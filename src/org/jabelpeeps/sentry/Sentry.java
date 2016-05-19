@@ -245,15 +245,14 @@ public class Sentry extends JavaPlugin {
     boolean equip( NPC npc, SentryInstance inst, ItemStack newEquipment ) {
 
         Equipment equipment = npc.getTrait( Equipment.class );
-        if ( equipment == null )
-            return false;
+        if ( equipment == null ) return false;
         // the npc's entity type does not support equipment.
 
         if ( newEquipment == null ) {
 
             for ( int i = 0; i < 5; i++ ) {
 
-                if ( equipment.get( i ) != null
+                if (    equipment.get( i ) != null
                         && equipment.get( i ).getType() != Material.AIR ) {
                     equipment.set( i, null );
                 }
@@ -264,14 +263,10 @@ public class Sentry extends JavaPlugin {
         Material type = newEquipment.getType();
 
         // First, determine the slot to edit
-        if ( helmets.contains( type ) )
-            slot = 1;
-        else if ( chestplates.contains( type ) )
-            slot = 2;
-        else if ( leggings.contains( type ) )
-            slot = 3;
-        else if ( boots.contains( type ) )
-            slot = 4;
+        if ( helmets.contains( type ) ) slot = 1;
+        else if ( chestplates.contains( type ) ) slot = 2;
+        else if ( leggings.contains( type ) ) slot = 3;
+        else if ( boots.contains( type ) ) slot = 4;
 
         equipment.set( slot, newEquipment );
 
@@ -298,8 +293,7 @@ public class Sentry extends JavaPlugin {
     }
 
     @Override
-    public boolean onCommand( CommandSender player, Command cmd,
-            String cmdLabel, String[] inargs ) {
+    public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
 
         return CommandHandler.call( player, inargs, this );
     }
@@ -307,8 +301,7 @@ public class Sentry extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        logger.log( Level.INFO,
-                " v" + getDescription().getVersion() + " disabled." );
+        logger.log( Level.INFO, " v" + getDescription().getVersion() + " disabled." );
         Bukkit.getServer().getScheduler().cancelTasks( this );
     }
 
@@ -324,7 +317,7 @@ public class Sentry extends JavaPlugin {
                 set.clear();
 
                 for ( String each : strings )
-                    set.add( Util.getMaterial( each.trim() ) );
+                    set.add( Material.getMaterial( each.trim() ) );
             }
         }
     }
@@ -338,11 +331,10 @@ public class Sentry extends JavaPlugin {
 
             String[] args = each.trim().split( " " );
 
-            if ( args.length != 2 )
-                continue;
+            if ( args.length != 2 ) continue;
 
             double val = Util.string2Double( args[1] );
-            Material item = Util.getMaterial( args[0] );
+            Material item = Material.getMaterial( args[0] );
 
             if ( item != null && val > 0 && !map.containsKey( item ) ) {
 
@@ -355,23 +347,21 @@ public class Sentry extends JavaPlugin {
     private <T> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
 
         map.clear();
-        map.putAll( (Map<String, T>) config.getConfigurationSection( node )
-                .getValues( false ) );
+        map.putAll( (Map<String, T>) config.getConfigurationSection( node ).getValues( false ) );
     }
 
     private void loadPotions( FileConfiguration config, String path, Map<Material, List<PotionEffect>> map ) {
         map.clear();
 
         for ( String each : config.getStringList( path ) ) {
+            
             String[] args = each.trim().split( " " );
 
-            if ( args.length < 2 )
-                continue;
+            if ( args.length < 2 ) continue;
 
-            Material item = Util.getMaterial( args[0] );
+            Material item = Material.getMaterial( args[0] );
 
-            if ( item == null )
-                continue;
+            if ( item == null ) continue;
 
             List<PotionEffect> list = new ArrayList<PotionEffect>();
 
@@ -398,21 +388,18 @@ public class Sentry extends JavaPlugin {
 
         PotionEffectType type = PotionEffectType.getByName( args[0] );
 
-        if ( type == null )
-            return null;
+        if ( type == null ) return null;
 
         if ( args.length > 1 ) {
             dur = Util.string2Int( args[1] );
 
-            if ( dur < 0 )
-                dur = 10;
+            if ( dur < 0 ) dur = 10;
         }
 
         if ( args.length > 2 ) {
             amp = Util.string2Int( args[2] );
 
-            if ( amp < 0 )
-                amp = 1;
+            if ( amp < 0 ) amp = 1;
         }
         return new PotionEffect( type, dur, amp );
     }
