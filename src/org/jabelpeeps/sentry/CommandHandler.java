@@ -449,6 +449,7 @@ public abstract class CommandHandler {
         // did player specify an integer as the first argument?
         int npcid = Util.string2Int( inargs[0] );
 
+        // if a positive number was found, the next argument to parse will be at position 1, otherwise 0.
         int nextArg = (npcid > 0) ? 1 : 0;
 
         if ( !enoughArgs( 1 + nextArg, inargs, player ) )
@@ -458,8 +459,7 @@ public abstract class CommandHandler {
         // check to see whether the value saved is an npc ID, and save a reference if so.
         if ( npcid == -1 ) {
 
-            thisNPC = ((CitizensPlugin) CitizensAPI.getPlugin())
-                    .getDefaultNPCSelector().getSelected( player );
+            thisNPC = ((CitizensPlugin) CitizensAPI.getPlugin()).getDefaultNPCSelector().getSelected( player );
 
             if ( thisNPC == null ) {
                 player.sendMessage( S.Col.RED.concat( S.ERROR_NO_NPC ) );
@@ -471,8 +471,7 @@ public abstract class CommandHandler {
             thisNPC = CitizensAPI.getNPCRegistry().getById( npcid );
 
             if ( thisNPC == null ) {
-                player.sendMessage( String.join( "", S.Col.RED,
-                        S.ERROR_ID_INVALID, String.valueOf( npcid ) ) );
+                player.sendMessage( String.join( "", S.Col.RED, S.ERROR_ID_INVALID, String.valueOf( npcid ) ) );
                 return true;
             }
         }
@@ -490,8 +489,7 @@ public abstract class CommandHandler {
 
             // TODO consider changing this section to allow admins to modify other players' npcs.
 
-            if ( !thisNPC.getTrait( Owner.class ).getOwner()
-                    .equalsIgnoreCase( player.getName() ) ) {
+            if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( player.getName() ) ) {
                 // player is not owner of the npc
 
                 if ( !((Player) player).hasPermission( S.PERM_CITS_ADMIN ) ) {
@@ -501,8 +499,7 @@ public abstract class CommandHandler {
                             "You must be the owner of this Sentry to execute commands." ) );
                     return true;
                 }
-                if ( !thisNPC.getTrait( Owner.class ).getOwner()
-                        .equalsIgnoreCase( "server" ) ) {
+                if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
                     // not server-owned NPC
 
                     player.sendMessage( S.Col.RED.concat(
@@ -664,7 +661,10 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_GUARD, player ) ) {
 
-                if ( inargs.length < 1 + nextArg ) {
+                if ( inargs.length >= nextArg + 1 && S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
+                    inst.findGuardEntity( null, false );
+                }
+                if ( inargs.length >= 1 + nextArg ) {
 
                     boolean localonly = false;
                     boolean playersonly = false;
@@ -692,28 +692,22 @@ public abstract class CommandHandler {
                     }
 
                     if ( ok )
-                        player.sendMessage( String.join( " ", S.Col.GREEN,
-                                npcName, "is now guarding", arg ) );
+                        player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now guarding", arg ) );
                     else
-                        player.sendMessage( String.join( " ", S.Col.RED,
-                                npcName, "could not find", arg ) );
+                        player.sendMessage( String.join( " ", S.Col.RED, npcName, "could not find", arg ) );
                     return true;
-                }
-
-                if ( S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-                    inst.findGuardEntity( null, false );
                 }
 
                 if ( inst.guardTarget == null )
                     player.sendMessage(
                             S.Col.GREEN.concat( "Guarding: My Surroundings" ) );
                 else if ( inst.guardEntity == null )
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "is configured to guard", inst.guardTarget,
-                            "but cannot find them at the moment" ) );
+                    player.sendMessage( 
+                            String.join( " ", S.Col.GREEN, npcName, "is configured to guard",
+                                         inst.guardTarget, "but cannot find them at the moment" ) );
                 else
-                    player.sendMessage( String.join( " ", S.Col.BLUE,
-                            "Guarding:", inst.guardEntity.toString() ) );
+                    player.sendMessage( 
+                            String.join( " ", S.Col.BLUE, "Guarding:", inst.guardEntity.getName() ) );
 
             }
             return true;
@@ -724,26 +718,23 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_FOLLOW_DIST, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( String.join( "", S.Col.GOLD, npcName,
-                            "'s Follow Distance is ",
-                            String.valueOf( inst.followDistance ) ) );
-                    player.sendMessage( S.Col.GOLD.concat(
-                            "Usage: /sentry follow [#]. Default is 4. " ) );
+                    player.sendMessage( 
+                            String.join( "", S.Col.GOLD, npcName, "'s Follow Distance is ", String.valueOf( inst.followDistance ) ) );
+                    player.sendMessage( 
+                            S.Col.GOLD.concat( "Usage: /sentry follow [#]. Default is 4. " ) );
                 }
                 else {
                     int dist = Util.string2Int( inargs[nextArg + 1] );
                     if ( dist < 0 ) {
-                        player.sendMessage( String.join( "", S.ERROR,
-                                inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
+                        player.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
                         return true;
                     }
 
                     if ( dist > 32 )
                         dist = 32;
                     inst.followDistance = dist * dist;
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "follow distance set to",
-                            String.valueOf( dist ) ) );
+                    player.sendMessage( 
+                            String.join( " ", S.Col.GREEN, npcName, "follow distance set to", String.valueOf( dist ) ) );
                 }
             }
             return true;
@@ -754,11 +745,10 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_HEALTH, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( String.join( "", S.Col.GOLD, npcName,
-                            "'s Health is ",
-                            String.valueOf( inst.sentryMaxHealth ) ) );
-                    player.sendMessage( S.Col.GOLD.concat(
-                            "Usage: /sentry health [#]   note: Typically players have 20 HPs when fully healed" ) );
+                    player.sendMessage( 
+                            String.join( "", S.Col.GOLD, npcName, "'s Health is ", String.valueOf( inst.sentryMaxHealth ) ) );
+                    player.sendMessage( 
+                            S.Col.GOLD.concat( "Usage: /sentry health [#]   note: Typically players have 20 HPs when fully healed" ) );
                 }
                 else {
                     int HPs = Util.string2Int( inargs[nextArg + 1] );
