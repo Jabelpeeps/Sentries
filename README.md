@@ -17,10 +17,13 @@ ONGOING:-
 * re-organising the code to improve performance in critical sections.
 * move all appropriate code into classes implementing interface for other plugins.
 * rework the command handling to improve UX.
+* fixing bugs
 
 TODO:-
 * expand readme giving more details of features (old and new)
 * remove use of NMS and classes from CraftBukkit as far as possible.
+* make better use of the second (off)hand.
+* (maybe) have sentries work together better (in teams)
 * add more features... 
 
 (pls post any suggestions as issues and/or PR's)
