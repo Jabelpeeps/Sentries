@@ -35,7 +35,7 @@ permissions:
      children:
        sentry.stats.strength: true
        sentry.stats.range: true
-       sentry.stats.armor: true
+       sentry.stats.armour: true
        sentry.stats.speed: true
        sentry.stats.nightvision: true
        sentry.stats.respawn: true
@@ -74,7 +74,7 @@ permissions:
      deafult: op
   sentry.stats.strength:
      default: op
-  sentry.stats.armor:
+  sentry.stats.armour:
      default: op
   sentry.stats.speed:
      default: op
