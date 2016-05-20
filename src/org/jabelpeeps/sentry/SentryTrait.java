@@ -63,7 +63,7 @@ public class SentryTrait extends Trait { // implements Toggleable {
         inst.ignoreLOS = key.getBoolean( "IgnoreLOS", false );
         inst.targetable = key.getBoolean( S.TARGETABLE, sentry.defaultBooleans.get( S.TARGETABLE ) );
 
-        inst.armorValue = key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
+        inst.armourValue = key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
         inst.strength = key.getInt( S.STRENGTH, sentry.defaultIntegers.get( S.STRENGTH ) );
         inst.sentryRange = key.getInt( S.RANGE, sentry.defaultIntegers.get( S.RANGE ) );
         inst.respawnDelay = key.getInt( S.RESPAWN_DELAY, sentry.defaultIntegers.get( S.RESPAWN_DELAY ) );
@@ -223,7 +223,7 @@ public class SentryTrait extends Trait { // implements Toggleable {
         key.setDouble( S.SPEED, inst.sentrySpeed );
         key.setDouble( S.WEIGHT, inst.sentryWeight );
         key.setDouble( S.HEALRATE, inst.healRate );
-        key.setInt( S.ARMOR, inst.armorValue );
+        key.setInt( S.ARMOR, inst.armourValue );
         key.setInt( S.STRENGTH, inst.strength );
         key.setInt( S.WARNING_RANGE, inst.warningRange );
         key.setDouble( S.ATTACK_RATE, inst.attackRate );

@@ -294,7 +294,7 @@ public abstract class CommandHandler {
                     player.sendMessage( S.Col.GOLD + "/sentry health [1-2000000]" );
                     player.sendMessage( "  Sets the Sentry's Health" );
                 }
-                if ( checkCommandPerm( S.PERM_ARMOR, player ) ) {
+                if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry armor [0-2000000]" );
                     player.sendMessage( "  Sets the Sentry's Armor" );
                 }
@@ -371,23 +371,23 @@ public abstract class CommandHandler {
                     player.sendMessage( "  Change the greeting text. <NPC> and <PLAYER> can be used as placeholders" );
                 }
                 if ( checkCommandPerm( S.PERM_INFO, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, "- View all attributes of a sentry NPC" ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, " - View all attributes of a sentry NPC" ) );
                 
                 if ( checkCommandPerm( S.PERM_DEBUG, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, "- displays debug info on the console",
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - displays debug info on the console",
                             System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
 
                 if ( checkCommandPerm( S.PERM_RELOAD, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, "- Reloads the config file" ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, " - Reloads the config file" ) );
                 
                 if ( mainHelpOutro == null ) {
                     StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
                     joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-                    joiner.add( String.join( "", "If '...' is shown do", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, "for further help" ) );
+                    joiner.add( String.join( "", "If '...' is shown do ", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, " for further help" ) );
                     joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-                    joiner.add( String.join( "", "Select NPC's with", S.Col.GOLD, "'/npc sel'", S.Col.RESET, "before running commands, or use",
-                            S.Col.GOLD, "/sentry #npcid <command> [args]", S.Col.RESET, "to use commands on the sentry with the given npcid number." ) );
+                    joiner.add( String.join( "", "Select NPC's with ", S.Col.GOLD, "'/npc sel'", S.Col.RESET, " before running commands, or use ",
+                            S.Col.GOLD, "/sentry #npcid <command> [args]", S.Col.RESET, " to run command on the sentry with the given npcid number." ) );
                     joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
 
                     mainHelpOutro = joiner.toString();
@@ -684,8 +684,7 @@ public abstract class CommandHandler {
                 if ( inargs.length <= 1 + nextArg ) {
                     player.sendMessage( 
                             String.join( "", S.Col.GOLD, npcName, "'s Follow Distance is ", String.valueOf( inst.followDistance ) ) );
-                    player.sendMessage( 
-                            S.Col.GOLD.concat( "Usage: /sentry follow [#]. Default is 4. " ) );
+                    player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry follow [#]. Default is 4. " ) );
                 }
                 else {
                     int dist = Util.string2Int( inargs[nextArg + 1] );
@@ -733,13 +732,14 @@ public abstract class CommandHandler {
             return true;
         }
         // -------------------------------------------armour command-----------------------
-        if ( S.ARMOR.equalsIgnoreCase( inargs[nextArg] ) ) {
+        if (    S.ARMOUR.equalsIgnoreCase( inargs[nextArg] )
+                || S.ARMOR.equalsIgnoreCase( inargs[nextArg] ) ) {
 
-            if ( checkCommandPerm( S.PERM_ARMOR, player ) ) {
+            if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
                     player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Armour is ",
-                            String.valueOf( inst.armorValue ) ) );
+                            String.valueOf( inst.armourValue ) ) );
                     player.sendMessage(
                             S.Col.GOLD.concat( "Usage: /sentry armour [#] " ) );
                 }
@@ -752,7 +752,7 @@ public abstract class CommandHandler {
 
                     if ( armour > 2000000 )
                         armour = 2000000;
-                    inst.armorValue = armour;
+                    inst.armourValue = armour;
                     player.sendMessage( 
                             String.join( " ", S.Col.GREEN, npcName, "armour set to", String.valueOf( armour ) ) );
                 }
@@ -1074,39 +1074,32 @@ public abstract class CommandHandler {
 
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
-                joiner.add( String.join( "", S.Col.GOLD, "------- Sentry Info for (",
-                        String.valueOf( thisNPC.getId() ), ") ", npcName, "------" ) );
-                joiner.add( String.join( " ", S.Col.RED, "[HP]:", S.Col.WHITE,
-                        String.valueOf( inst.getHealth() ), "/",
-                        String.valueOf( inst.sentryMaxHealth ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[AP]:", S.Col.WHITE,
-                        String.valueOf( inst.getArmor() ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[STR]:", S.Col.WHITE,
-                        String.valueOf( inst.getStrength() ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[SPD]:", S.Col.WHITE,
-                        new DecimalFormat( "#.0" ).format( inst.getSpeed() ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[RNG]:", S.Col.WHITE,
-                        String.valueOf( inst.sentryRange ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[ATK]:", S.Col.WHITE,
-                        String.valueOf( inst.attackRate ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[VIS]:", S.Col.WHITE,
-                        String.valueOf( inst.nightVision ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[HEAL]:", S.Col.WHITE,
-                        String.valueOf( inst.healRate ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[WARN]:", S.Col.WHITE,
-                        String.valueOf( inst.warningRange ) ) );
-                joiner.add( String.join( " ", S.Col.RED, "[FOL]:", S.Col.WHITE,
-                        String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
+                joiner.add( String.join( "", S.Col.GOLD, "------- Sentry Info for ", npcName, " (npcid - ",
+                        String.valueOf( thisNPC.getId() ), ") ", "------" ) );
+                
+                joiner.add( String.join( "", S.Col.RED, "[HP]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/",
+                        String.valueOf( inst.sentryMaxHealth ),
+                        S.Col.RED, "[AP]:", S.Col.WHITE, String.valueOf( inst.getArmor() ),
+                        S.Col.RED, "[STR]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
+                        S.Col.RED, "[SPD]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
+                        S.Col.RED, "[RNG]:", S.Col.WHITE, String.valueOf( inst.sentryRange ),
+                        S.Col.RED, "[ATK]:", S.Col.WHITE, String.valueOf( inst.attackRate ),
+                        S.Col.RED, "[VIS]:", S.Col.WHITE, String.valueOf( inst.nightVision ),
+                        S.Col.RED, "[HEAL]:", S.Col.WHITE, String.valueOf( inst.healRate ),
+                        S.Col.RED, "[WARN]:", S.Col.WHITE, String.valueOf( inst.warningRange ),
+                        S.Col.RED, "[FOL]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
-                joiner.add( String.join( "", S.Col.GREEN, "Invincible: ",
-                        String.valueOf( inst.invincible ), "  Retaliate: ",
-                        String.valueOf( inst.iWillRetaliate ) ) );
-                joiner.add( String.join( "", S.Col.GREEN, "Drops Items: ",
-                        String.valueOf( inst.dropInventory ), "  Critical Hits: ",
-                        String.valueOf( inst.acceptsCriticals ) ) );
-                joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ",
-                        String.valueOf( inst.killsDropInventory ), "  Respawn Delay: ",
-                        String.valueOf( inst.respawnDelay ), "secs" ) );
+                joiner.add( String.join( "", S.Col.GREEN, 
+                        "Invincible: ", String.valueOf( inst.invincible ), 
+                        "  Retaliate: ", String.valueOf( inst.iWillRetaliate ) ) );
+                joiner.add( String.join( "", S.Col.GREEN, 
+                        "Drops Items: ", String.valueOf( inst.dropInventory ), 
+                        "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
+                joiner.add( String.join( "", S.Col.GREEN, 
+                        "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
+                        "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
+                joiner.add( String.join( "", S.Col.BLUE, "Currently: ", inst.myNPC.isSpawned() ? "Spawned" 
+                                                                                               : "Not Spawned" ) );
                 joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 
                 if ( inst.attackTarget == null )

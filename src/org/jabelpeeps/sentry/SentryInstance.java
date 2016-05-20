@@ -77,7 +77,7 @@ public class SentryInstance {
     Location spawnLocation;
 
     int strength = 1;
-    int armorValue = 0;
+    int armourValue = 0;
     int epCount = 0;
     int nightVision = 16;
     int respawnDelay = 10;
@@ -831,7 +831,7 @@ public class SentryInstance {
     public int getArmor() {
 
         if ( sentry.armorBuffs.isEmpty() )
-            return armorValue;
+            return armourValue;
 
         double mod = 0;
 
@@ -843,7 +843,7 @@ public class SentryInstance {
                     mod += sentry.armorBuffs.get( item );
             }
         }
-        return (int) (armorValue + mod);
+        return (int) (armourValue + mod);
     }
 
     public double getHealth() {

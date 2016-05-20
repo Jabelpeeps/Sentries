@@ -108,6 +108,7 @@ public abstract class S {
     public final static String SPEED = "Speed";
     public final static String WEIGHT = "Weight";
     public final static String ARMOR = "Armor";
+    public final static String ARMOUR = "Armour";
     public final static String STRENGTH = "Strength";
     public final static String MOUNTID = "MountID";
 
@@ -139,7 +140,7 @@ public abstract class S {
     public final static String PERM_RANGE = "sentry.stats.range";
     public final static String PERM_HEALTH = "sentry.stats.health";
     public final static String PERM_HEAL_RATE = "sentry.stats.healrate";
-    public final static String PERM_ARMOR = "sentry.stats.armor";
+    public final static String PERM_ARMOUR = "sentry.stats.armour";
     public final static String PERM_STRENGTH = "sentry.stats.strength";
     public final static String PERM_NIGHTVISION = "sentry.stats.nightvision";
     public final static String PERM_ATTACK_RATE = "sentry.stats.attackrate";
