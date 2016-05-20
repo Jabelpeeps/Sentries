@@ -5,12 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jabelpeeps.sentry.CommandHandler;
 import org.jabelpeeps.sentry.PluginBridge;
 import org.jabelpeeps.sentry.S;
-import org.jabelpeeps.sentry.Sentry;
 import org.jabelpeeps.sentry.SentryInstance;
 
 import net.milkbowl.vault.permission.Permission;
@@ -23,26 +23,19 @@ public class VaultBridge extends PluginBridge {
     private String activationMsg = "";
     static Permission perms = null;
 
-    public VaultBridge( int flag ) {
-        super( flag );
-    }
+    public VaultBridge( int flag ) { super( flag ); }
 
     @Override
-    public String getPrefix() {
-        return "GROUP";
-    }
+    public String getPrefix() { return "GROUP"; }
 
     @Override
-    public String getCommandHelp() {
-        return "Group:<GroupName> for a permission group.";
-    }
+    public String getCommandHelp() { return "Group:<GroupName> for a permission group."; }
 
     @Override
     public boolean activate() {
 
-        RegisteredServiceProvider<Permission> permissionProvider = Sentry
-                .getSentry().getServer().getServicesManager()
-                .getRegistration( Permission.class );
+        RegisteredServiceProvider<Permission> permissionProvider = 
+                Bukkit.getServicesManager().getRegistration( Permission.class );
 
         if ( permissionProvider != null ) {
             perms = permissionProvider.getProvider();
@@ -70,15 +63,12 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    public String getActivationMessage() {
-        return activationMsg;
-    }
+    public String getActivationMessage() { return activationMsg; }
 
     @Override
     public boolean isTarget( Player player, SentryInstance inst ) {
 
-        if ( !enemies.containsKey( inst ) )
-            return false;
+        if ( !enemies.containsKey( inst ) ) return false;
 
         return checkGroups( enemies.get( inst ), player );
     }
@@ -86,16 +76,14 @@ public class VaultBridge extends PluginBridge {
     @Override
     public boolean isIgnoring( Player player, SentryInstance inst ) {
 
-        if ( !friends.containsKey( inst ) )
-            return false;
+        if ( !friends.containsKey( inst ) ) return false;
 
         return checkGroups( friends.get( inst ), player );
     }
 
     private boolean checkGroups( Set<String> set, Player player ) {
 
-        for ( String each : perms.getPlayerGroups( player.getWorld().getName(),
-                player ) ) {
+        for ( String each : perms.getPlayerGroups( player.getWorld().getName(), player ) ) {
             if ( set.contains( each ) )
                 return true;
         }
@@ -110,7 +98,7 @@ public class VaultBridge extends PluginBridge {
     public boolean isListed( SentryInstance inst, boolean asTarget ) {
 
         return (asTarget ? enemies.containsKey( inst )
-                : friends.containsKey( inst ));
+                         : friends.containsKey( inst ));
     }
 
     @Override
@@ -126,19 +114,16 @@ public class VaultBridge extends PluginBridge {
         return "There is currently no Group matching ".concat( target );
     }
 
-    private String addToList( SentryInstance inst, String group,
-            boolean asTarget ) {
+    private String addToList( SentryInstance inst, String group, boolean asTarget ) {
         Map<SentryInstance, Set<String>> map = asTarget ? enemies : friends;
 
         if ( !map.containsKey( inst ) )
             map.put( inst, new HashSet<String>() );
 
         if ( map.get( inst ).add( group ) )
-            return String.join( " ", S.ADDED_TO_LIST,
-                    asTarget ? S.TARGETS : S.IGNORES );
+            return String.join( " ", S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
 
-        return String.join( " ", S.ALLREADY_ON_LIST,
-                asTarget ? S.TARGETS : S.IGNORES );
+        return String.join( " ", S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );
     }
 
     @Override
@@ -155,61 +140,15 @@ public class VaultBridge extends PluginBridge {
 
         for ( String group : groups ) {
 
-            if ( group.equalsIgnoreCase( targetGroup )
+            if (    group.equalsIgnoreCase( targetGroup )
                     && groups.remove( group ) ) {
 
                 if ( groups.isEmpty() )
                     map.remove( inst );
 
-                return String.join( " ", entity, S.REMOVED_FROM_LIST,
-                        fromTargets ? S.TARGETS : S.IGNORES );
+                return String.join( " ", entity, S.REMOVED_FROM_LIST, fromTargets ? S.TARGETS : S.IGNORES );
             }
         }
-        return String.join( " ", entity, S.NOT_FOUND_ON_LIST,
-                fromTargets ? S.TARGETS : S.IGNORES );
+        return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
     }
-
-    // static boolean checkGroups4Targets( World world, OfflinePlayer player,
-    // SentryInstance inst ) {
-    //
-    // // check world permission groups & then global permission groups if
-    // needed.
-    // return checkGroups4Targets( perms.getPlayerGroups( world.getName(),
-    // player ), inst )
-    // || checkGroups4Targets( perms.getPlayerGroups( (String) null, player ),
-    // inst );
-    // }
-    //
-    // private static boolean checkGroups4Targets( String[] groups,
-    // SentryInstance inst ) {
-    //
-    // if ( groups != null ) {
-    // for ( String each : groups )
-    // if ( inst.targetsContain( "GROUP:" + each ) )
-    // return true;
-    // }
-    // return false;
-    // }
-    //
-    // static boolean checkGroups4Ignores( World world, OfflinePlayer player,
-    // SentryInstance inst ) {
-    //
-    // // check world permission groups & then global permission groups if
-    // needed.
-    // return checkGroups4Ignores( perms.getPlayerGroups( world.getName(),
-    // player ), inst )
-    // || checkGroups4Ignores( perms.getPlayerGroups( (String) null, player ),
-    // inst );
-    // }
-    //
-    // private static boolean checkGroups4Ignores( String[] groups,
-    // SentryInstance inst ) {
-    //
-    // if ( groups != null ) {
-    // for ( String each : groups )
-    // if ( inst.ignoresContain( "GROUP:" + each ) )
-    // return true;
-    // }
-    // return false;
-    // }
 }

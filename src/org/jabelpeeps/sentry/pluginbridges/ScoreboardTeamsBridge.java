@@ -5,51 +5,39 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jabelpeeps.sentry.CommandHandler;
 import org.jabelpeeps.sentry.PluginBridge;
 import org.jabelpeeps.sentry.S;
-import org.jabelpeeps.sentry.Sentry;
 import org.jabelpeeps.sentry.SentryInstance;
 
 public class ScoreboardTeamsBridge extends PluginBridge {
 
     Map<SentryInstance, Set<Team>> friends = new HashMap<SentryInstance, Set<Team>>();
     Map<SentryInstance, Set<Team>> enemies = new HashMap<SentryInstance, Set<Team>>();
-    Scoreboard scoreboard = Sentry.getSentry().getServer()
-            .getScoreboardManager().getMainScoreboard();
+    Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
-    public ScoreboardTeamsBridge( int flag ) {
-        super( flag );
-    }
+    public ScoreboardTeamsBridge( int flag ) { super( flag ); }
 
     @Override
-    public boolean activate() {
-        return true;
-    }
+    public boolean activate() { return true; }
 
     @Override
-    public String getPrefix() {
-        return "TEAM";
-    }
+    public String getPrefix() { return "TEAM"; }
 
     @Override
-    public String getActivationMessage() {
-        return "MC Scoreboard Teams active, the TEAM: target will function";
-    }
+    public String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
 
     @Override
-    public String getCommandHelp() {
-        return "Team:<TeamName> for a Minecraft Scoreboard Team.";
-    }
+    public String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
 
     @Override
     public boolean isTarget( Player player, SentryInstance inst ) {
 
-        if ( !enemies.containsKey( inst ) )
-            return false;
+        if ( !enemies.containsKey( inst ) ) return false;
 
         return enemies.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
     }
@@ -57,8 +45,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     @Override
     public boolean isIgnoring( Player player, SentryInstance inst ) {
 
-        if ( !friends.containsKey( inst ) )
-            return false;
+        if ( !friends.containsKey( inst ) ) return false;
 
         return friends.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
     }
@@ -77,8 +64,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         return "There is currently no Team matching ".concat( target );
     }
 
-    private String addToList( SentryInstance inst, Team team,
-            boolean asTarget ) {
+    private String addToList( SentryInstance inst, Team team, boolean asTarget ) {
         Map<SentryInstance, Set<Team>> map = asTarget ? enemies : friends;
 
         if ( !map.containsKey( inst ) )
@@ -94,9 +80,8 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
-                    "Teams added as ", fromTargets ? S.TARGETS : S.IGNORES,
-                    S.YET );
+            return String.join( " ", inst.myNPC.getName(), S.NOT_ANY, "Teams added as ", 
+                    fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
         String targetTeam = CommandHandler.colon.split( entity, 2 )[1];
 
@@ -104,7 +89,8 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         Set<Team> teams = map.get( inst );
 
         for ( Team team : teams ) {
-            if ( team.getName().equalsIgnoreCase( targetTeam )
+            
+            if (    team.getName().equalsIgnoreCase( targetTeam )
                     && teams.remove( team ) ) {
 
                 if ( teams.isEmpty() )
