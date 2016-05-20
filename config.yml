@@ -93,6 +93,8 @@ OtherPlugins:
 # NB Changes in these settings are not loaded by the /sentry reload command, only a server restart.
 DenizenIntegration:
   SentryHealthByDenizen: true
+  # if you turn the setting above off (false), you will need to add the health trait to NPC's manually
+  # for them to be able to take damage.
   NpcDeathTrigger: true
   NpcDeathTriggerOwner: true
   DieCommand: true
