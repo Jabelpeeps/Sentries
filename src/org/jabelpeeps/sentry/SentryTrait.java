@@ -105,7 +105,6 @@ public class SentryTrait extends Trait {
     boolean acceptsCriticals = true;
     boolean iWillRetaliate = true;
     boolean ignoreLOS = false;
-    boolean mountCreated = false;
 
     private GiveUpStuckAction giveup = new GiveUpStuckAction( this );
 
@@ -1627,15 +1626,31 @@ public class SentryTrait extends Trait {
     private GoalController getGoalController() {
         return ifMountedGetMount().getDefaultGoalController();
     }
+    
+    //--------------------------------menthods dealing with Mounts----------
+    /** Returns true if mountID >= 0 */
+    public boolean isMounted() { return mountID >= 0; }
+ 
+    /** Returns the NPC with the current mountID or null if the id = -1 (the default) */
+    // TODO convert to use uuid's
+    protected NPC getMountNPC() {
+        if ( isMounted() ) {
+            return CitizensAPI.getNPCRegistry().getById( mountID );
+        }
+        return null;
+    }
 
     private NPC ifMountedGetMount() {
 
-        NPC npc = getMountNPC();
-
-        if ( npc == null || !npc.isSpawned() )
-            npc = npc;
-
-        return npc;
+        if ( Sentry.debug )
+            Sentry.debugLog( String.join( "", S.Col.RED, "ifMountedGetMount(): mountID = ", String.valueOf( mountID ) ) ) ;
+        
+        NPC returnNPC = npc;
+        
+        if ( isMounted() && getMountNPC().isSpawned() ) {
+            returnNPC = getMountNPC();
+        }
+        return returnNPC;
     }
 
     public void dismount() {
@@ -1646,7 +1661,7 @@ public class SentryTrait extends Trait {
 
             if ( mount != null ) {
                 getMyEntity().getVehicle().setPassenger( null );
-                mount.despawn( DespawnReason.PLUGIN );
+                mount.despawn( DespawnReason.PENDING_RESPAWN );
             }
         }
     }
@@ -1661,17 +1676,16 @@ public class SentryTrait extends Trait {
 
             NPC mount = getMountNPC();
 
-            if ( mount == null || (!mount.isSpawned() && !mountCreated) ) {
+            if ( mount == null || !mount.isSpawned() ) {
 
-                mount = createMount();
+                mount = spawnMount();
             }
 
             if ( mount != null ) {
-                mountCreated = true;
 
                 if ( !mount.isSpawned() ) return; // dead mount
 
-                mount.data().set( NPC.DEFAULT_PROTECTED_METADATA, false );
+                mount.setProtected( false );
 
                 NavigatorParameters mountParams = mount.getNavigator().getDefaultParameters();
                 NavigatorParameters myParams = npc.getNavigator().getDefaultParameters();
@@ -1690,15 +1704,13 @@ public class SentryTrait extends Trait {
         }
     }
 
-    public NPC createMount() {
-        if ( Sentry.debug )
-            Sentry.debugLog( "Creating mount for " + npc.getName() );
+    /** 
+     * Spawns and returns a mountNPC, creating a new NPC of type horse if the sentry does not already have a mount.
+     * The method will do nothing and return null if the Sentry is not spawned.  */
+    public NPC spawnMount() {
+        if ( Sentry.debug ) Sentry.debugLog( "Creating mount for " + npc.getName() );
 
         if ( npc.isSpawned() ) {
-
-            if ( getMyEntity() == null )
-                Sentry.logger.info(
-                        "why is this spawned but bukkit entity is null???" );
 
             NPC mount = null;
 
@@ -1711,8 +1723,7 @@ public class SentryTrait extends Trait {
                     Sentry.logger.info( "Cannot find mount NPC " + mountID );
             }
             else {
-                mount = CitizensAPI.getNPCRegistry().createNPC(
-                        EntityType.HORSE, npc.getName() + "_Mount" );
+                mount = CitizensAPI.getNPCRegistry().createNPC( EntityType.HORSE, npc.getName() + "_Mount" );
                 mount.getTrait( MobType.class ).setType( EntityType.HORSE );
             }
 
@@ -1721,11 +1732,9 @@ public class SentryTrait extends Trait {
             }
             else {
                 mount.spawn( getMyEntity().getLocation() );
-
                 mount.getTrait( Owner.class ).setOwner( npc.getTrait( Owner.class ).getOwner() );
 
                 ((Horse) mount.getEntity()).getInventory().setSaddle( new ItemStack( Material.SADDLE ) );
-
                 mountID = mount.getId();
 
                 return mount;
@@ -1733,7 +1742,8 @@ public class SentryTrait extends Trait {
         }
         return null;
     }
-
+    //------------------------------------------end of methods for mounts
+    
     public boolean hasLOS( Entity other ) {
 
         if ( !npc.isSpawned() ) return false;
@@ -1743,27 +1753,13 @@ public class SentryTrait extends Trait {
     }
 
     public LivingEntity getMyEntity() {
-        if (    npc == null 
-                || npc.getEntity() == null
+        if (    npc.getEntity() == null
                 || npc.getEntity().isDead() )
             return null;
 
-        if ( !(npc.getEntity() instanceof LivingEntity) ) {
-            Sentry.logger.info( "Sentry " + npc.getName() + " is not a living entity! Errors inbound...." );
-            return null;
-        }
         return (LivingEntity) npc.getEntity();
     }
 
-    protected NPC getMountNPC() {
-        if ( isMounted() ) {
-            return CitizensAPI.getNPCRegistry().getById( mountID );
-        }
-        return null;
-    }
-
-    public boolean isMounted() { return mountID >= 0; }
-    
     @SuppressWarnings( "unused" )
     @EventHandler
     public void onCitReload( CitizensReloadEvent event ) {
