@@ -8,9 +8,9 @@ import net.citizensnpcs.api.npc.NPC;
 
 class GiveUpStuckAction implements StuckAction {
 
-    SentryInstance inst;
+    SentryTrait inst;
 
-    GiveUpStuckAction( SentryInstance _inst ) {
+    GiveUpStuckAction( SentryTrait _inst ) {
         inst = _inst;
     }
 

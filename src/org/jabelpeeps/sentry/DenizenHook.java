@@ -119,9 +119,9 @@ public class DenizenHook {
 
             if ( ent != null ) {
 
-                if ( npc.getCitizen().hasTrait( SentryInstance.class ) ) {
+                if ( npc.getCitizen().hasTrait( SentryTrait.class ) ) {
 
-                    SentryInstance inst = npc.getCitizen() .getTrait( SentryInstance.class );
+                    SentryTrait inst = npc.getCitizen() .getTrait( SentryTrait.class );
 
                     boolean deaggro = false;
 
@@ -164,7 +164,7 @@ public class DenizenHook {
 
             LivingEntity ent = (LivingEntity) npc.getEntity();
 
-            SentryInstance inst = npc.getCitizen().getTrait( SentryInstance.class );
+            SentryTrait inst = npc.getCitizen().getTrait( SentryTrait.class );
 
             if ( inst != null ) {
                 dB.log( "Goodbye, cruel world... " );

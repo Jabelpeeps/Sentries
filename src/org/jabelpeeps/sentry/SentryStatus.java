@@ -21,7 +21,7 @@ enum SentryStatus {
     isDEAD {
 
         @Override
-        boolean update( SentryInstance inst ) {
+        boolean update( SentryTrait inst ) {
 
             if ( System.currentTimeMillis() > inst.isRespawnable
                     && inst.respawnDelay > 0
@@ -49,7 +49,7 @@ enum SentryStatus {
     isDYING {
 
         @Override
-        boolean update( SentryInstance inst ) {
+        boolean update( SentryTrait inst ) {
 
             LivingEntity myEntity = inst.getMyEntity();
 
@@ -162,7 +162,7 @@ enum SentryStatus {
     isSPAWNING {
 
         @Override
-        boolean update( SentryInstance inst ) {
+        boolean update( SentryTrait inst ) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -170,7 +170,7 @@ enum SentryStatus {
     isLOOKING {
 
         @Override
-        boolean update( SentryInstance inst ) {
+        boolean update( SentryTrait inst ) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -178,11 +178,11 @@ enum SentryStatus {
     isATTACKING {
 
         @Override
-        boolean update( SentryInstance inst ) {
+        boolean update( SentryTrait inst ) {
             // TODO Auto-generated method stub
             return false;
         }
     };
 
-    abstract boolean update( SentryInstance inst );
+    abstract boolean update( SentryTrait inst );
 }

@@ -76,7 +76,7 @@ public class SentryListener implements Listener {
                 // dispenser.)
             }
         }
-        SentryInstance inst = sentry.getSentryInstance( killer );
+        SentryTrait inst = sentry.getSentryInstance( killer );
 
         if ( inst != null && !inst.killsDropInventory ) {
             event.getDrops().clear();
@@ -88,7 +88,7 @@ public class SentryListener implements Listener {
     public void despawn( NPCDespawnEvent event ) {
         // don't despawn active bodyguards on chunk unload
 
-        SentryInstance inst = sentry.getSentryInstance( event.getNPC() );
+        SentryTrait inst = sentry.getSentryInstance( event.getNPC() );
 
         if (    inst != null 
                 && event.getReason() == DespawnReason.CHUNK_UNLOAD
@@ -102,7 +102,7 @@ public class SentryListener implements Listener {
     public void entteleportevent( EntityTeleportEvent event ) {
         // stop warlocks teleporting when they throw enderpearls
 
-        SentryInstance inst = sentry.getSentryInstance( event.getEntity() );
+        SentryTrait inst = sentry.getSentryInstance( event.getEntity() );
 
         if (    inst != null 
                 && inst.epCount != 0 
@@ -115,7 +115,7 @@ public class SentryListener implements Listener {
     public void entteleportevent( PlayerTeleportEvent event ) {
         // stop player-type warlocks teleporting when they throw enderpearls
 
-        SentryInstance inst = sentry.getSentryInstance( event.getPlayer() );
+        SentryTrait inst = sentry.getSentryInstance( event.getPlayer() );
 
         if (    inst != null 
                 && inst.epCount != 0 
@@ -130,7 +130,7 @@ public class SentryListener implements Listener {
 
         Projectile projectile = event.getEntity();
         Entity shooter = (Entity) projectile.getShooter();
-        SentryInstance inst = sentry.getSentryInstance( shooter );
+        SentryTrait inst = sentry.getSentryInstance( shooter );
 
         if ( projectile instanceof EnderPearl ) {
 
@@ -176,7 +176,7 @@ public class SentryListener implements Listener {
         if ( event instanceof EntityDamageByEntityEvent )
             return;
 
-        SentryInstance inst = sentry.getSentryInstance( event.getEntity() );
+        SentryTrait inst = sentry.getSentryInstance( event.getEntity() );
 
         if ( inst != null ) {
 
@@ -248,8 +248,8 @@ public class SentryListener implements Listener {
                 damagerEnt = (Entity) source;
         }
 
-        SentryInstance instDamager = sentry.getSentryInstance( damagerEnt );
-        SentryInstance instVictim = sentry.getSentryInstance( victim );
+        SentryTrait instDamager = sentry.getSentryInstance( damagerEnt );
+        SentryTrait instVictim = sentry.getSentryInstance( victim );
         LivingEntity damager = (LivingEntity) damagerEnt;
 
         if ( instDamager != null ) {
@@ -378,7 +378,7 @@ public class SentryListener implements Listener {
 
             for ( NPC npc : CitizensAPI.getNPCRegistry() ) {
 
-                SentryInstance inst = sentry.getSentryInstance( npc );
+                SentryTrait inst = sentry.getSentryInstance( npc );
 
                 if (    inst == null 
                         || !npc.isSpawned()
@@ -400,7 +400,7 @@ public class SentryListener implements Listener {
                         inst.setTarget( damager );
                 }
 
-                if ( inst.hasTargetType( SentryInstance.events )
+                if ( inst.hasTargetType( SentryTrait.events )
                         && inst.myStatus == SentryStatus.isLOOKING
                         && damager instanceof Player
                         && !CitizensAPI.getNPCRegistry().isNPC( damager )
@@ -454,7 +454,7 @@ public class SentryListener implements Listener {
         // if the mount dies carry aggression over.
         for ( NPC each : CitizensAPI.getNPCRegistry() ) {
 
-            final SentryInstance inst = sentry.getSentryInstance( each );
+            final SentryTrait inst = sentry.getSentryInstance( each );
             if ( inst == null || !each.isSpawned() || !inst.isMounted() )
                 continue; // not a sentry, not spawned, or not mounted
 
@@ -506,7 +506,7 @@ public class SentryListener implements Listener {
         // stops players, other than the guardEntity, from using right-click on horses
 
         // get a sentry instance if one is attached to the npc.
-        SentryInstance inst = sentry.getSentryInstance( event.getNPC() );
+        SentryTrait inst = sentry.getSentryInstance( event.getNPC() );
 
         // stop here if not.
         if ( inst == null ) return;

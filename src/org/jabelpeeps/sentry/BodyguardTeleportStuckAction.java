@@ -1,8 +1,10 @@
 package org.jabelpeeps.sentry;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
@@ -10,12 +12,12 @@ import net.citizensnpcs.api.npc.NPC;
 
 class BodyguardTeleportStuckAction implements StuckAction {
 
-    SentryInstance inst;
+    SentryTrait inst;
     Sentry sentry;
 
     private static int MAX_ITERATIONS = 10;
 
-    BodyguardTeleportStuckAction( SentryInstance _inst, Sentry plugin ) {
+    BodyguardTeleportStuckAction( SentryTrait _inst, Sentry plugin ) {
         inst = _inst;
         sentry = plugin;
     }
@@ -31,11 +33,11 @@ class BodyguardTeleportStuckAction implements StuckAction {
         Location destination = navigator.getTargetAsLocation();
         Location present = npc.getEntity().getLocation();
 
-        if ( destination.getWorld() == present.getWorld()
+        if (    destination.getWorld() == present.getWorld()
                 && present.distanceSquared( destination ) <= 4 ) {
             return true;
         }
-        if ( inst.guardEntity == null
+        if (    inst.guardEntity == null
                 || !Util.CanWarp( inst.guardEntity, npc ) ) {
             // do nothing, next logic tick will clear the entity.
             return true;
@@ -59,22 +61,18 @@ class BodyguardTeleportStuckAction implements StuckAction {
 
         final Location loc = block.getLocation();
 
-        // defining runnable separately for clarity of code (as well as
-        // preventing small chance of memory leaks)
+        // defining runnable separately for clarity of code (as well as preventing small chance of memory leaks)
         final Runnable tpEvent = new Runnable() {
 
             @Override
             public void run() {
-                npc.teleport( loc,
-                        org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN );
+                npc.teleport( loc, PlayerTeleportEvent.TeleportCause.PLUGIN );
             }
         };
         // send runnable to execute on main game loop
-        sentry.getServer().getScheduler().scheduleSyncDelayedTask( sentry,
-                tpEvent, 2 );
+        Bukkit.getScheduler().scheduleSyncDelayedTask( sentry, tpEvent, 2 );
 
-        // TODO find out why we are returning false here - surely the event has
-        // been dealt with?
+        // TODO find out why we are returning false here - surely the event has been dealt with?
         return false;
     }
 }

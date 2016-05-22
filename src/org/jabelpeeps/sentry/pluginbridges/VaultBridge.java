@@ -11,14 +11,14 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jabelpeeps.sentry.CommandHandler;
 import org.jabelpeeps.sentry.PluginBridge;
 import org.jabelpeeps.sentry.S;
-import org.jabelpeeps.sentry.SentryInstance;
+import org.jabelpeeps.sentry.SentryTrait;
 
 import net.milkbowl.vault.permission.Permission;
 
 public class VaultBridge extends PluginBridge {
 
-    Map<SentryInstance, Set<String>> friends = new HashMap<SentryInstance, Set<String>>();
-    Map<SentryInstance, Set<String>> enemies = new HashMap<SentryInstance, Set<String>>();
+    Map<SentryTrait, Set<String>> friends = new HashMap<SentryTrait, Set<String>>();
+    Map<SentryTrait, Set<String>> enemies = new HashMap<SentryTrait, Set<String>>();
 
     private String activationMsg = "";
     static Permission perms = null;
@@ -66,7 +66,7 @@ public class VaultBridge extends PluginBridge {
     public String getActivationMessage() { return activationMsg; }
 
     @Override
-    public boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryTrait inst ) {
 
         if ( !enemies.containsKey( inst ) ) return false;
 
@@ -74,7 +74,7 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryTrait inst ) {
 
         if ( !friends.containsKey( inst ) ) return false;
 
@@ -95,14 +95,14 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryTrait inst, boolean asTarget ) {
 
         return (asTarget ? enemies.containsKey( inst )
                          : friends.containsKey( inst ));
     }
 
     @Override
-    public String add( String target, SentryInstance inst, boolean asTarget ) {
+    public String add( String target, SentryTrait inst, boolean asTarget ) {
 
         String targetGroup = CommandHandler.colon.split( target, 2 )[1];
 
@@ -114,8 +114,8 @@ public class VaultBridge extends PluginBridge {
         return "There is currently no Group matching ".concat( target );
     }
 
-    private String addToList( SentryInstance inst, String group, boolean asTarget ) {
-        Map<SentryInstance, Set<String>> map = asTarget ? enemies : friends;
+    private String addToList( SentryTrait inst, String group, boolean asTarget ) {
+        Map<SentryTrait, Set<String>> map = asTarget ? enemies : friends;
 
         if ( !map.containsKey( inst ) )
             map.put( inst, new HashSet<String>() );
@@ -127,7 +127,7 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
-    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+    public String remove( String entity, SentryTrait inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
             return String.join( " ", inst.getNPC().getName(), S.NOT_ANY,
@@ -135,7 +135,7 @@ public class VaultBridge extends PluginBridge {
         }
         String targetGroup = CommandHandler.colon.split( entity, 2 )[1];
 
-        Map<SentryInstance, Set<String>> map = fromTargets ? enemies : friends;
+        Map<SentryTrait, Set<String>> map = fromTargets ? enemies : friends;
         Set<String> groups = map.get( inst );
 
         for ( String group : groups ) {

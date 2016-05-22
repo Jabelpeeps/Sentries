@@ -51,7 +51,7 @@ public abstract class PluginBridge {
 
     /**
      * Determines whether the supplied Player is a valid target of the supplied
-     * SentryInstance.
+     * SentryTrait.
      * <p>
      * This method should return a result as quickly as possible, so that server
      * performance is not affected if it is called often.
@@ -59,14 +59,14 @@ public abstract class PluginBridge {
      * @param entity
      *            - the possible target player
      * @param inst
-     *            - the SentryInstance that is asking.
+     *            - the SentryTrait that is asking.
      * @return true - if the player is a valid target.
      */
-    public abstract boolean isTarget( Player player, SentryInstance inst );
+    public abstract boolean isTarget( Player player, SentryTrait inst );
 
     /**
      * Determines whether the supplied Player should be ignored as a possible
-     * target of the supplied SentryInstance.
+     * target of the supplied SentryTrait.
      * <p>
      * This method should return a result as quickly as possible, so that server
      * performance is not affected if it is called often.
@@ -74,17 +74,17 @@ public abstract class PluginBridge {
      * @param entity
      *            - the player that should possibly be ignored.
      * @param inst
-     *            - the SentryInstance that is asking.
+     *            - the SentryTrait that is asking.
      * @return true - if the player should be ignored.
      */
-    public abstract boolean isIgnoring( Player player, SentryInstance inst );
+    public abstract boolean isIgnoring( Player player, SentryTrait inst );
 
     /**
      * Adds an entity - identified by the supplied string - as either a target
-     * or ignore for the supplied for the supplied SentryInstance.
+     * or ignore for the supplied for the supplied SentryTrait.
      * <p>
      * The PluginBridge should achieve this task without modifying the
-     * SentryInstance (which knows nothing about the third party plugin) but
+     * SentryTrait (which knows nothing about the third party plugin) but
      * should store relevant references in preparation for a call to
      * 'isTarget()' or 'isIgnoring()'
      * 
@@ -93,7 +93,7 @@ public abstract class PluginBridge {
      *            contents can vary, as long as the pluginBridge knows how to
      *            parse the String).
      * @param inst
-     *            - the SentryInstance instance that will have the target
+     *            - the SentryTrait instance that will have the target
      *            recorded against it.
      * @param asTarget
      *            - send true to add to the targets list, false to add to
@@ -101,14 +101,14 @@ public abstract class PluginBridge {
      * @return a string that will be displayed to the player (either for success
      *         or failure)
      */
-    public abstract String add( String target, SentryInstance inst, boolean asTarget );
+    public abstract String add( String target, SentryTrait inst, boolean asTarget );
 
     /**
      * Removes the entity - identified by the supplied string - as either a
-     * target or ignore for the supplied for the supplied SentryInstance.
+     * target or ignore for the supplied for the supplied SentryTrait.
      * <p>
      * The PluginBridge should achieve this task without modifying the
-     * SentryInstance (which knows nothing about the third party plugin) but
+     * SentryTrait (which knows nothing about the third party plugin) but
      * should store relevant references in preparation for a call to
      * 'isTarget()' or 'isIgnoring()'
      * 
@@ -117,7 +117,7 @@ public abstract class PluginBridge {
      *            contents can vary, as long as the pluginBridge knows how to
      *            parse the String).
      * @param inst
-     *            - the SentryInstance instance that will have the target
+     *            - the SentryTrait instance that will have the target
      *            recorded against it.
      * @param fromTargets
      *            - send true to remove from the targets list, false to remove
@@ -125,7 +125,7 @@ public abstract class PluginBridge {
      * @return a string that will be displayed to the player (either for success
      *         or failure)
      */
-    public abstract String remove( String entity, SentryInstance inst, boolean fromTargets );
+    public abstract String remove( String entity, SentryTrait inst, boolean fromTargets );
 
     /**
      * @return a string to be used as the first part of the command argument to
@@ -141,15 +141,15 @@ public abstract class PluginBridge {
     public abstract String getCommandHelp();
 
     /**
-     * A method to check whether the supplied SentryInstance has any targets or
+     * A method to check whether the supplied SentryTrait has any targets or
      * ignores tracked by this bridge.
      * 
      * @param inst
-     *            - the SentryInstance instance to check
+     *            - the SentryTrait instance to check
      * @param asTarget
      *            - supply true to check target list(s), and false to check
      *            ignores.
-     * @return true - if the SentryInstance is listed.
+     * @return true - if the SentryTrait is listed.
      */
-    public abstract boolean isListed( SentryInstance inst, boolean asTarget );
+    public abstract boolean isListed( SentryTrait inst, boolean asTarget );
 }

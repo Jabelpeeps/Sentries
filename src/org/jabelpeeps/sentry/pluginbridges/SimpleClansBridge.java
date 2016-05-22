@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.jabelpeeps.sentry.CommandHandler;
 import org.jabelpeeps.sentry.PluginBridge;
 import org.jabelpeeps.sentry.S;
-import org.jabelpeeps.sentry.SentryInstance;
+import org.jabelpeeps.sentry.SentryTrait;
 
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
@@ -17,8 +17,8 @@ import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 
 public class SimpleClansBridge extends PluginBridge {
 
-    Map<SentryInstance, Set<Clan>> allies = new HashMap<SentryInstance, Set<Clan>>();
-    Map<SentryInstance, Set<Clan>> rivals = new HashMap<SentryInstance, Set<Clan>>();
+    Map<SentryTrait, Set<Clan>> allies = new HashMap<SentryTrait, Set<Clan>>();
+    Map<SentryTrait, Set<Clan>> rivals = new HashMap<SentryTrait, Set<Clan>>();
     ClanManager clanManager = SimpleClans.getInstance().getClanManager();
 
     public SimpleClansBridge( int flag ) { super( flag ); }
@@ -36,7 +36,7 @@ public class SimpleClansBridge extends PluginBridge {
     public String getPrefix() { return "CLAN"; }
 
     @Override
-    public boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryTrait inst ) {
 
         if ( !rivals.containsKey( inst ) ) return false;
 
@@ -44,7 +44,7 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryTrait inst ) {
 
         if ( !allies.containsKey( inst ) ) return false;
 
@@ -52,7 +52,7 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    public String add( String target, SentryInstance inst, boolean asTarget ) {
+    public String add( String target, SentryTrait inst, boolean asTarget ) {
 
         String targetClan = CommandHandler.colon.split( target, 2 )[1];
 
@@ -64,9 +64,9 @@ public class SimpleClansBridge extends PluginBridge {
         return "There is currently no Clan matching ".concat( target );
     }
 
-    private String addToList( SentryInstance inst, Clan clan, boolean asTarget ) {
+    private String addToList( SentryTrait inst, Clan clan, boolean asTarget ) {
         
-        Map<SentryInstance, Set<Clan>> map = asTarget ? rivals : allies;
+        Map<SentryTrait, Set<Clan>> map = asTarget ? rivals : allies;
 
         if ( !map.containsKey( inst ) )
             map.put( inst, new HashSet<Clan>() );
@@ -78,7 +78,7 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+    public String remove( String entity, SentryTrait inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
             return String.join( " ", inst.getNPC().getName(), S.NOT_ANY,
@@ -86,7 +86,7 @@ public class SimpleClansBridge extends PluginBridge {
         }
         String targetClan = CommandHandler.colon.split( entity, 2 )[1];
 
-        Map<SentryInstance, Set<Clan>> map = fromTargets ? rivals : allies;
+        Map<SentryTrait, Set<Clan>> map = fromTargets ? rivals : allies;
         Set<Clan> clans = map.get( inst );
 
         for ( Clan clan : clans ) {
@@ -104,7 +104,7 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryTrait inst, boolean asTarget ) {
 
         return (asTarget ? rivals.containsKey( inst )
                          : allies.containsKey( inst ));

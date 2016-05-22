@@ -118,7 +118,7 @@ public class Sentry extends JavaPlugin {
         equipmentSlots.put( "leggings", 3 );
         equipmentSlots.put( "boots", 4 );
 
-        int targetBitFlag = SentryInstance.bridges;
+        int targetBitFlag = SentryTrait.bridges;
 
         for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
 
@@ -159,7 +159,7 @@ public class Sentry extends JavaPlugin {
             activePlugins.put( each, bridge );
         }
 
-        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryInstance.class ).withName( "sentry" ) );
+        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
         pluginManager.registerEvents( new SentryListener( this ), this );
 
@@ -236,7 +236,7 @@ public class Sentry extends JavaPlugin {
         logger.info( s );
     }
 
-    boolean equip( NPC npc, SentryInstance inst, ItemStack newEquipment ) {
+    boolean equip( NPC npc, SentryTrait inst, ItemStack newEquipment ) {
 
         Equipment equipment = npc.getTrait( Equipment.class );
         if ( equipment == null ) return false;
@@ -270,7 +270,7 @@ public class Sentry extends JavaPlugin {
         return true;
     }
 
-    public SentryInstance getSentryInstance( Entity ent ) {
+    public SentryTrait getSentryInstance( Entity ent ) {
 
         if ( ent != null && ent instanceof LivingEntity ) {
             return getSentryInstance( CitizensAPI.getNPCRegistry().getNPC( ent ) );
@@ -278,10 +278,10 @@ public class Sentry extends JavaPlugin {
         return null;
     }
 
-    public SentryInstance getSentryInstance( NPC npc ) {
+    public SentryTrait getSentryInstance( NPC npc ) {
 
-        if ( npc != null && npc.hasTrait( SentryInstance.class ) ) {
-            return npc.getTrait( SentryInstance.class );
+        if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
+            return npc.getTrait( SentryTrait.class );
         }
         return null;
     }

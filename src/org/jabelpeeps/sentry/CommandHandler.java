@@ -449,7 +449,7 @@ public abstract class CommandHandler {
             }
         }
         // We are now sure that thisNPC is valid, and that npcid contains its id.
-        if ( !thisNPC.hasTrait( SentryInstance.class ) ) {
+        if ( !thisNPC.hasTrait( SentryTrait.class ) ) {
             player.sendMessage( S.Col.RED.concat( S.ERROR_NOT_SENTRY ) );
             return true;
         }
@@ -457,7 +457,7 @@ public abstract class CommandHandler {
 
         // We need to check that the player sending the command has the authority to use it.
         // First lets be sure we are dealing with an actual player, not a player type npc.
-        if ( player instanceof Player
+        if (    player instanceof Player
                 && !CitizensAPI.getNPCRegistry().isNPC( (Entity) player ) ) {
 
             // TODO consider changing this section to allow admins to modify other players' npcs.
@@ -483,8 +483,8 @@ public abstract class CommandHandler {
         }
 
         // We now know that player is either the owner, or an admin with a server-owned npc. 
-        // Lets save a reference to the SentryInstance of the npc before continuing.
-        SentryInstance inst = thisNPC.getTrait( SentryInstance.class );
+        // Lets save a reference to the SentryTrait of the npc before continuing.
+        SentryTrait inst = thisNPC.getTrait( SentryTrait.class );
         String npcName = thisNPC.getName();
 
         // hold the state of the third argument (if it holds a boolean value) in a field for later use. 
@@ -1169,7 +1169,7 @@ public abstract class CommandHandler {
         return false;
     }
 
-    private static String parseTargetOrIgnore( String[] inargs, int nextArg,  String npcName, SentryInstance inst, boolean forTargets ) {
+    private static String parseTargetOrIgnore( String[] inargs, int nextArg,  String npcName, SentryTrait inst, boolean forTargets ) {
 
         String[] typeArgs = new String[inargs.length - (2 + nextArg)];
         System.arraycopy( inargs, 2 + nextArg, typeArgs, 0, inargs.length - (2 + nextArg) );

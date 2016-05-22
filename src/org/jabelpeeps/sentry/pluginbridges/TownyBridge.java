@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 import org.bukkit.entity.Player;
 import org.jabelpeeps.sentry.PluginBridge;
 import org.jabelpeeps.sentry.S;
-import org.jabelpeeps.sentry.SentryInstance;
+import org.jabelpeeps.sentry.SentryTrait;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Town;
@@ -26,7 +26,7 @@ public class TownyBridge extends PluginBridge {
      * (taken from http://towny.palmergames.com/towny/757-2/#How_Towny_Controls_PVP_Combat )
      */
 
-    Map<SentryInstance, Town> myTown = new HashMap<SentryInstance, Town>();
+    Map<SentryTrait, Town> myTown = new HashMap<SentryTrait, Town>();
     String commandHelp;
 
     public TownyBridge( int flag ) { super( flag ); }
@@ -55,17 +55,17 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isTarget( Player player, SentryInstance inst ) {
+    public boolean isTarget( Player player, SentryTrait inst ) {
         return !CombatUtil.preventDamageCall( inst.getMyEntity(), player );
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryInstance inst ) {
+    public boolean isIgnoring( Player player, SentryTrait inst ) {
         return CombatUtil.preventDamageCall( inst.getMyEntity(), player );
     }
 
     @Override
-    public String add( String target, SentryInstance inst, boolean asTarget ) {
+    public String add( String target, SentryTrait inst, boolean asTarget ) {
         
         Town town = null;
         String outstring = "";
@@ -88,7 +88,7 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
+    public String remove( String entity, SentryTrait inst, boolean fromTargets ) {
         String outstring = "";
         
         if (    !isListed( inst, false ) 
@@ -103,7 +103,7 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isListed( SentryInstance inst, boolean asTarget ) {
+    public boolean isListed( SentryTrait inst, boolean asTarget ) {
         return myTown.containsKey( inst );
     }
 }

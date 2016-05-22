@@ -73,7 +73,7 @@ import net.minecraft.server.v1_9_R1.EntityPotion;
 import net.minecraft.server.v1_9_R1.Packet;
 import net.minecraft.server.v1_9_R1.PacketPlayOutAnimation;
 
-public class SentryInstance extends Trait {
+public class SentryTrait extends Trait {
 
     Sentry sentry;
 
@@ -151,7 +151,7 @@ public class SentryInstance extends Trait {
         nextID = 0;
     }
     
-    public SentryInstance() {
+    public SentryTrait() {
         super( "sentry" );
         sentry = (Sentry) Bukkit.getServer().getPluginManager().getPlugin( "Sentry" );
         myID = ++nextID;
@@ -400,7 +400,7 @@ public class SentryInstance extends Trait {
             navigatorParams.attackStrategy( new SpiderAttackStrategy() );
 
         // as far as I can see the initialise() method is only called from
-        // SentryTrait.onSpawn(), which does a prior check that
+        // onSpawn(), which does a prior check that
         // the load() method has run, and the load method has a call to
         // processTargets(), so a second call isn't needed here.
 
@@ -1214,7 +1214,7 @@ public class SentryInstance extends Trait {
 
         SentryLogic() {}
 
-        @SuppressWarnings( { "null" } )
+        @SuppressWarnings( { "null", "synthetic-access" } )
         @Override
         public void run() {
 
@@ -1223,7 +1223,7 @@ public class SentryInstance extends Trait {
             if ( myEntity == null ) myStatus = SentryStatus.isDEAD;
           
             if ( myStatus == SentryStatus.isDEAD || myStatus == SentryStatus.isDYING ) {
-                myStatus.update( SentryInstance.this );
+                myStatus.update( SentryTrait.this );
                 return;
             }
             if ( attackTarget != null ) setTarget( attackTarget );
@@ -1286,7 +1286,7 @@ public class SentryInstance extends Trait {
                         if ( !getNavigator().isPaused() ) {
                             getNavigator().setPaused( true );
                             getNavigator().cancelNavigation();
-                            getNavigator().setTarget( SentryInstance.this.attackTarget, true );
+                            getNavigator().setTarget( SentryTrait.this.attackTarget, true );
                         }
 
                         draw( true );
@@ -1442,8 +1442,7 @@ public class SentryInstance extends Trait {
             }
         }
         else {
-            for ( Entity each : getMyEntity().getNearbyEntities( sentryRange,
-                    sentryRange, sentryRange ) ) {
+            for ( Entity each : getMyEntity().getNearbyEntities( sentryRange, sentryRange, sentryRange ) ) {
 
                 String ename = null;
 
@@ -1765,6 +1764,7 @@ public class SentryInstance extends Trait {
 
     public boolean isMounted() { return mountID >= 0; }
     
+    @SuppressWarnings( "unused" )
     @EventHandler
     public void onCitReload( CitizensReloadEvent event ) {
 
@@ -1773,8 +1773,8 @@ public class SentryInstance extends Trait {
 
     @Override
     public boolean equals( Object obj ) {
-        if ( obj == null || !(obj instanceof SentryInstance) ) return false;
-        if ( ((SentryInstance) obj).myID == myID ) return true;
+        if ( obj == null || !(obj instanceof SentryTrait) ) return false;
+        if ( ((SentryTrait) obj).myID == myID ) return true;
         return false;
     }
 
