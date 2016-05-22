@@ -93,11 +93,11 @@ public class TownyBridge extends PluginBridge {
         
         if (    !isListed( inst, false ) 
                 || !myTown.get( inst ).getName().equalsIgnoreCase( entity ) ) {;
-            outstring = String.join( "", S.Col.RED, inst.myNPC.getName(), " is not a member of ", entity );
+            outstring = String.join( "", S.Col.RED, inst.getNPC().getName(), " is not a member of ", entity );
         }
         else {
             myTown.remove( inst );
-            outstring = String.join( "", S.Col.GREEN, inst.myNPC.getName(), " has left ", entity );
+            outstring = String.join( "", S.Col.GREEN, inst.getNPC().getName(), " has left ", entity );
         }
         return outstring;
     }

@@ -47,22 +47,17 @@ public class Sentry extends JavaPlugin {
     static Map<String, PluginBridge> activePlugins = new HashMap<String, PluginBridge>();
 
     // Lists of various armour items that will be accepted, by default.
-    public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS,
-            Material.CHAINMAIL_BOOTS, Material.IRON_BOOTS,
-            Material.DIAMOND_BOOTS, Material.GOLD_BOOTS );
+    public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, 
+            Material.IRON_BOOTS, Material.DIAMOND_BOOTS, Material.GOLD_BOOTS );
 
-    public Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE,
-            Material.CHAINMAIL_CHESTPLATE, Material.IRON_CHESTPLATE,
-            Material.DIAMOND_CHESTPLATE, Material.GOLD_CHESTPLATE );
+    public Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, Material.CHAINMAIL_CHESTPLATE, 
+            Material.IRON_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.GOLD_CHESTPLATE );
 
-    public Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET,
-            Material.CHAINMAIL_HELMET, Material.IRON_HELMET,
-            Material.DIAMOND_HELMET, Material.GOLD_HELMET, Material.PUMPKIN,
-            Material.JACK_O_LANTERN );
+    public Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET, Material.CHAINMAIL_HELMET, Material.IRON_HELMET,
+            Material.DIAMOND_HELMET, Material.GOLD_HELMET, Material.PUMPKIN, Material.JACK_O_LANTERN );
 
-    public Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS,
-            Material.CHAINMAIL_LEGGINGS, Material.IRON_LEGGINGS,
-            Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
+    public Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
+            Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
 
     static Map<String, Integer> equipmentSlots = new HashMap<String, Integer>();
 
@@ -111,8 +106,7 @@ public class Sentry extends JavaPlugin {
             if ( vers.startsWith( "0.9" ) ) {
 
                 denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( S.DENIZEN ), this );
-                denizenActive = DenizenHook.npcDeathTriggerActive
-                        || DenizenHook.npcDeathTriggerOwnerActive;
+                denizenActive = DenizenHook.npcDeathTriggerActive || DenizenHook.npcDeathTriggerOwnerActive;
             }
             else {
                 logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
@@ -128,8 +122,7 @@ public class Sentry extends JavaPlugin {
 
         for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
 
-            if ( !checkPlugin( each ) )
-                continue;
+            if ( !checkPlugin( each ) ) continue;
 
             PluginBridge bridge = null;
 
@@ -137,6 +130,7 @@ public class Sentry extends JavaPlugin {
                 @SuppressWarnings( "unchecked" )
                 Class<? extends PluginBridge> clazz = 
                     (Class<? extends PluginBridge>) Class.forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
+                
                 Constructor<? extends PluginBridge> constructor =  clazz.getDeclaredConstructor( int.class );
 
                 bridge = constructor.newInstance( targetBitFlag );
@@ -165,7 +159,7 @@ public class Sentry extends JavaPlugin {
             activePlugins.put( each, bridge );
         }
 
-        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
+        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryInstance.class ).withName( "sentry" ) );
 
         pluginManager.registerEvents( new SentryListener( this ), this );
 
@@ -286,8 +280,8 @@ public class Sentry extends JavaPlugin {
 
     public SentryInstance getSentryInstance( NPC npc ) {
 
-        if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
-            return npc.getTrait( SentryTrait.class ).getInstance();
+        if ( npc != null && npc.hasTrait( SentryInstance.class ) ) {
+            return npc.getTrait( SentryInstance.class );
         }
         return null;
     }

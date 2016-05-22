@@ -511,7 +511,7 @@ public class SentryListener implements Listener {
         // stop here if not.
         if ( inst == null ) return;
 
-        if (    inst.myNPC.getEntity() instanceof Horse
+        if (    inst.getNPC().getEntity() instanceof Horse
                 && inst.guardEntity != event.getClicker() ) {
 
             event.setCancelled( true );

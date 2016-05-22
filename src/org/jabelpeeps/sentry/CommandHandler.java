@@ -449,7 +449,7 @@ public abstract class CommandHandler {
             }
         }
         // We are now sure that thisNPC is valid, and that npcid contains its id.
-        if ( !thisNPC.hasTrait( SentryTrait.class ) ) {
+        if ( !thisNPC.hasTrait( SentryInstance.class ) ) {
             player.sendMessage( S.Col.RED.concat( S.ERROR_NOT_SENTRY ) );
             return true;
         }
@@ -484,7 +484,7 @@ public abstract class CommandHandler {
 
         // We now know that player is either the owner, or an admin with a server-owned npc. 
         // Lets save a reference to the SentryInstance of the npc before continuing.
-        SentryInstance inst = thisNPC.getTrait( SentryTrait.class ).getInstance();
+        SentryInstance inst = thisNPC.getTrait( SentryInstance.class );
         String npcName = thisNPC.getName();
 
         // hold the state of the third argument (if it holds a boolean value) in a field for later use. 
@@ -1098,8 +1098,8 @@ public abstract class CommandHandler {
                 joiner.add( String.join( "", S.Col.GREEN, 
                         "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
                         "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
-                joiner.add( String.join( "", S.Col.BLUE, "Currently: ", inst.myNPC.isSpawned() ? "Spawned" 
-                                                                                               : "Not Spawned" ) );
+                joiner.add( String.join( "", S.Col.BLUE, "Currently: ", inst.getNPC().isSpawned() ? "Spawned" 
+                                                                                                  : "Not Spawned" ) );
                 joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 
                 if ( inst.attackTarget == null )

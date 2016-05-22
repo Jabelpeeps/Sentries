@@ -30,14 +30,14 @@ enum SentryStatus {
                             inst.spawnLocation.getBlockZ() >> 4 ) ) {
 
                 if ( Sentry.debug )
-                    Sentry.debugLog( "respawning" + inst.myNPC.getName() );
+                    Sentry.debugLog( "respawning" + inst.getNPC().getName() );
 
                 inst.myStatus = SentryStatus.isSPAWNING;
 
                 if ( inst.guardEntity == null )
-                    inst.myNPC.spawn( inst.spawnLocation.clone() );
+                    inst.getNPC().spawn( inst.spawnLocation.clone() );
                 else
-                    inst.myNPC.spawn(
+                    inst.getNPC().spawn(
                             inst.guardEntity.getLocation().add( 2, 0, 2 ) );
 
                 return true;
@@ -57,8 +57,8 @@ enum SentryStatus {
 
             if ( Sentry.denizenActive ) {
 
-                DenizenHook.denizenAction( inst.myNPC, "death", null );
-                DenizenHook.denizenAction( inst.myNPC, "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
+                DenizenHook.denizenAction( inst.getNPC(), "death", null );
+                DenizenHook.denizenAction( inst.getNPC(), "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
 
                 Entity killer = myEntity.getKiller();
 
@@ -79,14 +79,14 @@ enum SentryStatus {
                         killer = (Entity) ((Projectile) killer).getShooter();
 
                     if ( Sentry.debug )
-                        Sentry.debugLog( "Running Denizen actions for " + inst.myNPC.getName() + " with killer: " + killer.toString() );
+                        Sentry.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
 
                     if ( killer instanceof OfflinePlayer ) {
-                        DenizenHook.denizenAction( inst.myNPC, "death by player", (OfflinePlayer) killer );
+                        DenizenHook.denizenAction( inst.getNPC(), "death by player", (OfflinePlayer) killer );
                     }
                     else {
-                        DenizenHook.denizenAction( inst.myNPC, "death by entity", null );
-                        DenizenHook.denizenAction( inst.myNPC, "death by " + killer.getType().toString(), null );
+                        DenizenHook.denizenAction( inst.getNPC(), "death by entity", null );
+                        DenizenHook.denizenAction( inst.getNPC(), "death by " + killer.getType().toString(), null );
                     }
                 }
             }
@@ -148,7 +148,7 @@ enum SentryStatus {
                     Util.removeMount( inst.mountID );
 
                 inst.cancelRunnable();
-                inst.myNPC.destroy();
+                inst.getNPC().destroy();
             }
             else
                 inst.isRespawnable = System.currentTimeMillis()

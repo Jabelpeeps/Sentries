@@ -21,48 +21,34 @@ public class SimpleClansBridge extends PluginBridge {
     Map<SentryInstance, Set<Clan>> rivals = new HashMap<SentryInstance, Set<Clan>>();
     ClanManager clanManager = SimpleClans.getInstance().getClanManager();
 
-    public SimpleClansBridge( int flag ) {
-        super( flag );
-    }
+    public SimpleClansBridge( int flag ) { super( flag ); }
 
     @Override
-    public boolean activate() {
-        return true;
-    }
+    public boolean activate() { return true; }
 
     @Override
-    public String getActivationMessage() {
-        return "SimpleClans is active, The CLAN: target will function";
-    }
+    public String getActivationMessage() { return "SimpleClans is active, The CLAN: target will function"; }
 
     @Override
-    public String getCommandHelp() {
-        return "Clan:<ClanName> for a SimpleClans Clan.";
-    }
+    public String getCommandHelp() { return "Clan:<ClanName> for a SimpleClans Clan."; }
 
     @Override
-    public String getPrefix() {
-        return "CLAN";
-    }
+    public String getPrefix() { return "CLAN"; }
 
     @Override
     public boolean isTarget( Player player, SentryInstance inst ) {
 
-        if ( !rivals.containsKey( inst ) )
-            return false;
+        if ( !rivals.containsKey( inst ) ) return false;
 
-        return rivals.get( inst ).contains(
-                clanManager.getClanByPlayerName( player.getName() ) );
+        return rivals.get( inst ).contains( clanManager.getClanByPlayerName( player.getName() ) );
     }
 
     @Override
     public boolean isIgnoring( Player player, SentryInstance inst ) {
 
-        if ( !allies.containsKey( inst ) )
-            return false;
+        if ( !allies.containsKey( inst ) ) return false;
 
-        return allies.get( inst ).contains(
-                clanManager.getClanByPlayerName( player.getName() ) );
+        return allies.get( inst ).contains( clanManager.getClanByPlayerName( player.getName() ) );
     }
 
     @Override
@@ -78,8 +64,8 @@ public class SimpleClansBridge extends PluginBridge {
         return "There is currently no Clan matching ".concat( target );
     }
 
-    private String addToList( SentryInstance inst, Clan clan,
-            boolean asTarget ) {
+    private String addToList( SentryInstance inst, Clan clan, boolean asTarget ) {
+        
         Map<SentryInstance, Set<Clan>> map = asTarget ? rivals : allies;
 
         if ( !map.containsKey( inst ) )
@@ -95,9 +81,8 @@ public class SimpleClansBridge extends PluginBridge {
     public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
-                    "Clans added as", fromTargets ? S.TARGETS : S.IGNORES,
-                    S.YET );
+            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY,
+                    "Clans added as", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
         String targetClan = CommandHandler.colon.split( entity, 2 )[1];
 

@@ -80,7 +80,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.myNPC.getName(), S.NOT_ANY, "Teams added as ", 
+            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY, "Teams added as ", 
                     fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
         String targetTeam = CommandHandler.colon.split( entity, 2 )[1];

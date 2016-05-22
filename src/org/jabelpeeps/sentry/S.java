@@ -24,7 +24,7 @@ public abstract class S {
     // Strings used in messages for players and/or console errors.
     public final static String ERROR_NO_CITIZENS = "Sentry cannot be loaded without Citizens 2.0. Aborting.";
     public final static String ERROR_WRONG_DENIZEN = "This version of Sentry is only compatable with Denizen 0.9 versions";
-    public final static String ERROR_PLUGIN_NOT_FOUND = "Could not find the other plugin called ";
+    public final static String ERROR_PLUGIN_NOT_FOUND = "Could not find a plugin called ";
 
     public final static String ERROR = Col.RED.concat( "Error: '" );
     public final static String ERROR_NOT_NUMBER = "' was not recognised as a valid number.";

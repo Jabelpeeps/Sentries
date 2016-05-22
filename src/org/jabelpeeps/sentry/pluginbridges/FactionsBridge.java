@@ -51,8 +51,7 @@ public class FactionsBridge extends PluginBridge {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
             joiner.add( "Faction:<FactionName> for members of a faction." );
-            joiner.add(
-                    "Faction:Join:<FactionName> have a sentry attack enemies of the named faction." );
+            joiner.add( "Faction:Join:<FactionName> have a sentry attack enemies of the named faction." );
 
             commandHelp = joiner.toString();
         }
@@ -110,7 +109,7 @@ public class FactionsBridge extends PluginBridge {
                 if ( faction.getName().equalsIgnoreCase( input[2] ) ) {
 
                     myFaction.put( inst, faction );
-                    return String.join( " ", inst.myNPC.getName(), "has joined", faction.getName() );
+                    return String.join( " ", inst.getNPC().getName(), "has joined", faction.getName() );
                 }
             }
         }
@@ -151,13 +150,13 @@ public class FactionsBridge extends PluginBridge {
 
                     myFaction.remove( inst );
 
-                    return String.join( " ", inst.myNPC.getName(), "has left", input[2] );
+                    return String.join( " ", inst.getNPC().getName(), "has left", input[2] );
                 }
             }
         }
 
         if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
+            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY,
                     "Factions added as", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
 

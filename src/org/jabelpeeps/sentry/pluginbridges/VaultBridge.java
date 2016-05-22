@@ -130,7 +130,7 @@ public class VaultBridge extends PluginBridge {
     public String remove( String entity, SentryInstance inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.myNPC.getName(), S.NOT_ANY,
+            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY,
                     "Groups added as", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
         String targetGroup = CommandHandler.colon.split( entity, 2 )[1];
