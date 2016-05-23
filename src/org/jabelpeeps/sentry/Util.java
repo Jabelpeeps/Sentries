@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_9_R1.LocaleI18n;
+import net.minecraft.server.v1_9_R2.LocaleI18n;
 
 /**
  * An abstract collection of useful static methods.
