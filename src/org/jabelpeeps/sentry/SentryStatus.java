@@ -34,11 +34,11 @@ enum SentryStatus {
 
                 inst.myStatus = SentryStatus.isSPAWNING;
 
-                if ( inst.guardEntity == null )
+                if ( inst.guardeeEntity == null )
                     inst.getNPC().spawn( inst.spawnLocation.clone() );
                 else
                     inst.getNPC().spawn(
-                            inst.guardEntity.getLocation().add( 2, 0, 2 ) );
+                            inst.guardeeEntity.getLocation().add( 2, 0, 2 ) );
 
                 return true;
             }
@@ -144,7 +144,7 @@ enum SentryStatus {
 
             if ( inst.respawnDelay == -1 ) {
 
-                if ( inst.isMounted() )
+                if ( inst.hasMount() )
                     Util.removeMount( inst.mountID );
 
                 inst.cancelRunnable();

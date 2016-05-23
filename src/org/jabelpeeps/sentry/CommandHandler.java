@@ -235,7 +235,22 @@ public abstract class CommandHandler {
         }
         return outString;
     }
-
+    private static String mainHelpOutro() {
+        
+        if ( mainHelpOutro == null ) {
+            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+    
+            joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
+            joiner.add( String.join( "", "If '...' is shown do ", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, " for further help" ) );
+            joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
+            joiner.add( String.join( "", "Select NPC's with ", S.Col.GOLD, "'/npc sel'", S.Col.RESET, " before running commands, or use ",
+                    S.Col.GOLD, "/sentry #npcid <command> [args]", S.Col.RESET, " to run command on the sentry with the given npcid number." ) );
+            joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
+    
+            mainHelpOutro = joiner.toString();
+        }
+        return mainHelpOutro;
+    }
     // ------------------------------------------------------------------------------------
     /**
      * The only accessible method of this class. It parses the arguments and
@@ -374,25 +389,13 @@ public abstract class CommandHandler {
                     player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, " - View all attributes of a sentry NPC" ) );
                 
                 if ( checkCommandPerm( S.PERM_DEBUG, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - displays debug info on the console",
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the display debug info on the console",
                             System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
 
                 if ( checkCommandPerm( S.PERM_RELOAD, player ) )
                     player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, " - Reloads the config file" ) );
                 
-                if ( mainHelpOutro == null ) {
-                    StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-
-                    joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-                    joiner.add( String.join( "", "If '...' is shown do ", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, " for further help" ) );
-                    joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-                    joiner.add( String.join( "", "Select NPC's with ", S.Col.GOLD, "'/npc sel'", S.Col.RESET, " before running commands, or use ",
-                            S.Col.GOLD, "/sentry #npcid <command> [args]", S.Col.RESET, " to run command on the sentry with the given npcid number." ) );
-                    joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-
-                    mainHelpOutro = joiner.toString();
-                }
-                player.sendMessage( mainHelpOutro );
+                player.sendMessage( mainHelpOutro() );
             }
             return true;
         }
@@ -435,7 +438,7 @@ public abstract class CommandHandler {
             thisNPC = ((CitizensPlugin) CitizensAPI.getPlugin()).getDefaultNPCSelector().getSelected( player );
 
             if ( thisNPC == null ) {
-                player.sendMessage( S.Col.RED.concat( S.ERROR_NO_NPC ) );
+                player.sendMessage( S.ERROR.concat( S.ERROR_NO_NPC ) );
                 return true;
             }
             npcid = thisNPC.getId();
@@ -444,13 +447,13 @@ public abstract class CommandHandler {
             thisNPC = CitizensAPI.getNPCRegistry().getById( npcid );
 
             if ( thisNPC == null ) {
-                player.sendMessage( String.join( "", S.Col.RED, S.ERROR_ID_INVALID, String.valueOf( npcid ) ) );
+                player.sendMessage( String.join( "", S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) ) );
                 return true;
             }
         }
         // We are now sure that thisNPC is valid, and that npcid contains its id.
         if ( !thisNPC.hasTrait( SentryTrait.class ) ) {
-            player.sendMessage( S.Col.RED.concat( S.ERROR_NOT_SENTRY ) );
+            player.sendMessage( S.ERROR.concat( S.ERROR_NOT_SENTRY ) );
             return true;
         }
         // OK, we have a sentry to modify.
@@ -602,14 +605,14 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_MOUNT, player ) ) {
 
-                set = (set == null) ? !inst.isMounted() : set;
+                set = (set == null) ? !inst.hasMount() : set;
 
                 if ( set ) {
                     inst.mount();
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now Mounted" ) );
                 }
                 else {
-                    if ( inst.isMounted() )
+                    if ( inst.hasMount() )
                         Util.removeMount( inst.mountID );
 
                     inst.mountID = -1;
@@ -663,15 +666,15 @@ public abstract class CommandHandler {
                         return true;
                     }
                 }
-                if ( inst.guardTarget == null )
+                if ( inst.guardeeName == null )
                     player.sendMessage( S.Col.GREEN.concat( "Guarding: My Surroundings" ) );
-                else if ( inst.guardEntity == null )
+                else if ( inst.guardeeEntity == null )
                     player.sendMessage( 
                             String.join( " ", S.Col.GREEN, npcName, "is configured to guard",
-                                         inst.guardTarget, "but cannot find them at the moment" ) );
+                                         inst.guardeeName, "but cannot find them at the moment" ) );
                 else
                     player.sendMessage( 
-                            String.join( " ", S.Col.BLUE, "Guarding:", inst.guardEntity.getName() ) );
+                            String.join( " ", S.Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
 
             }
             return true;
@@ -1079,15 +1082,15 @@ public abstract class CommandHandler {
                 
                 joiner.add( String.join( "", S.Col.RED, "[HP]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/",
                         String.valueOf( inst.sentryMaxHealth ),
-                        S.Col.RED, "[AP]:", S.Col.WHITE, String.valueOf( inst.getArmor() ),
-                        S.Col.RED, "[STR]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
-                        S.Col.RED, "[SPD]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
-                        S.Col.RED, "[RNG]:", S.Col.WHITE, String.valueOf( inst.sentryRange ),
-                        S.Col.RED, "[ATK]:", S.Col.WHITE, String.valueOf( inst.attackRate ),
-                        S.Col.RED, "[VIS]:", S.Col.WHITE, String.valueOf( inst.nightVision ),
-                        S.Col.RED, "[HEAL]:", S.Col.WHITE, String.valueOf( inst.healRate ),
-                        S.Col.RED, "[WARN]:", S.Col.WHITE, String.valueOf( inst.warningRange ),
-                        S.Col.RED, "[FOL]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
+                        S.Col.RED, " [AP]:", S.Col.WHITE, String.valueOf( inst.getArmor() ),
+                        S.Col.RED, " [STR]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
+                        S.Col.RED, " [SPD]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
+                        S.Col.RED, " [RNG]:", S.Col.WHITE, String.valueOf( inst.sentryRange ),
+                        S.Col.RED, " [ATK]:", S.Col.WHITE, String.valueOf( inst.attackRate ),
+                        S.Col.RED, " [VIS]:", S.Col.WHITE, String.valueOf( inst.nightVision ),
+                        S.Col.RED, " [HEAL]:", S.Col.WHITE, String.valueOf( inst.healRate ),
+                        S.Col.RED, " [WARN]:", S.Col.WHITE, String.valueOf( inst.warningRange ),
+                        S.Col.RED, " [FOL]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
                 joiner.add( String.join( "", S.Col.GREEN, 
                         "Invincible: ", String.valueOf( inst.invincible ), 
@@ -1107,10 +1110,10 @@ public abstract class CommandHandler {
                 else
                     joiner.add( String.join( "", S.Col.BLUE, "Current Target: ", inst.attackTarget.getName() ) );
 
-                if ( inst.guardEntity == null )
+                if ( inst.guardeeEntity == null )
                     joiner.add( S.Col.BLUE.concat( "Guarding: My Surroundings" ) );
                 else
-                    joiner.add( String.join( "", S.Col.BLUE, "Guarding: ", inst.guardEntity.getName() ) );
+                    joiner.add( String.join( "", S.Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() ) );
 
                 player.sendMessage( joiner.toString() );
             }

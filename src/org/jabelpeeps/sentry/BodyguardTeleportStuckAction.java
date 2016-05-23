@@ -37,8 +37,8 @@ class BodyguardTeleportStuckAction implements StuckAction {
                 && present.distanceSquared( destination ) <= 4 ) {
             return true;
         }
-        if (    inst.guardEntity == null
-                || !Util.CanWarp( inst.guardEntity, npc ) ) {
+        if (    inst.guardeeEntity == null
+                || !Util.CanWarp( inst.guardeeEntity, npc ) ) {
             // do nothing, next logic tick will clear the entity.
             return true;
         }

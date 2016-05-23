@@ -24,13 +24,13 @@ public abstract class S {
     // Strings used in messages for players and/or console errors.
     public final static String ERROR_NO_CITIZENS = "Sentry cannot be loaded without Citizens 2.0. Aborting.";
     public final static String ERROR_WRONG_DENIZEN = "This version of Sentry is only compatable with Denizen 0.9 versions";
-    public final static String ERROR_PLUGIN_NOT_FOUND = "Could not find a plugin called ";
+    public final static String ERROR_PLUGIN_NOT_FOUND = "Could not find the plugin called ";
 
     public final static String ERROR = Col.RED.concat( "Error: '" );
     public final static String ERROR_NOT_NUMBER = "' was not recognised as a valid number.";
 
     public final static String ERROR_NOT_SENTRY = "That command can only be used on a Sentry";
-    public final static String ERROR_NO_NPC = "You must provide an NPC #id or have an NPC selected to use this command";
+    public final static String ERROR_NO_NPC = "You must have an NPC selected or provide an NPC #id";
     public final static String ERROR_ID_INVALID = "Could not find an NPC with #id of ";
     public final static String ERROR_NO_COMMAND_PERM = "You do not have permission for that command";
     public final static String ERROR_NO_MORE_HELP = "No further help is available for this command.";

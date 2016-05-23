@@ -92,7 +92,7 @@ public class SentryListener implements Listener {
 
         if (    inst != null 
                 && event.getReason() == DespawnReason.CHUNK_UNLOAD
-                && inst.guardEntity != null ) {
+                && inst.guardeeEntity != null ) {
             event.setCancelled( true );
             // TODO do we need to tp the bodyguard to it's guardee?
         }
@@ -280,7 +280,7 @@ public class SentryListener implements Listener {
             event.setDamage( instDamager.getStrength() );
 
             // uncancel if not bodyguard.
-            if ( instDamager.guardTarget == null
+            if ( instDamager.guardeeName == null
                     || !Sentry.bodyguardsObeyProtection )
                 event.setCancelled( false );
 
@@ -295,7 +295,7 @@ public class SentryListener implements Listener {
                 }
             }
             // don't hurt guard target.
-            if ( victim == instDamager.guardEntity )
+            if ( victim == instDamager.guardeeEntity )
                 event.setCancelled( true );
 
             // apply potion effects
@@ -345,17 +345,17 @@ public class SentryListener implements Listener {
                 return;
 
             // only bodyguards obey pvp-protection
-            if ( instVictim.guardTarget == null )
+            if ( instVictim.guardeeName == null )
                 event.setCancelled( false );
 
             // don't take damage from guard entity.
-            if ( damager == instVictim.guardEntity )
+            if ( damager == instVictim.guardeeEntity )
                 event.setCancelled( true );
 
             if ( damager != null && instDamager != null
-                    && instDamager.guardEntity != null
-                    && instVictim.guardEntity != null
-                    && instDamager.guardEntity == instVictim.guardEntity ) {
+                    && instDamager.guardeeEntity != null
+                    && instVictim.guardeeEntity != null
+                    && instDamager.guardeeEntity == instVictim.guardeeEntity ) {
 
                 // don't take damage from co-guards.
                 event.setCancelled( true );
@@ -387,17 +387,17 @@ public class SentryListener implements Listener {
                     continue; 
                 }
 
-                if ( inst.guardEntity == victim && inst.iWillRetaliate ) {
-                    inst.setTarget( damager );
+                if ( inst.guardeeEntity == victim && inst.iWillRetaliate ) {
+                    inst.setAttackTarget( damager );
                 }
 
                 if ( inst.getMountNPC() != null
                         && inst.getMountNPC().getEntity() == victim ) {
 
-                    if ( damager == inst.guardEntity )
+                    if ( damager == inst.guardeeEntity )
                         event.setCancelled( true );
                     else if ( inst.iWillRetaliate )
-                        inst.setTarget( damager );
+                        inst.setAttackTarget( damager );
                 }
 
                 if ( inst.hasTargetType( SentryTrait.events )
@@ -439,7 +439,7 @@ public class SentryListener implements Listener {
                         && !inst.isIgnoring( damager ) ) {
                     // phew! we made it! the event is a valid trigger. Attack the aggressor!
 
-                    inst.setTarget( damager );
+                    inst.setAttackTarget( damager );
                 }
             }
         }
@@ -455,7 +455,7 @@ public class SentryListener implements Listener {
         for ( NPC each : CitizensAPI.getNPCRegistry() ) {
 
             final SentryTrait inst = sentry.getSentryInstance( each );
-            if ( inst == null || !each.isSpawned() || !inst.isMounted() )
+            if ( inst == null || !each.isSpawned() || !inst.hasMount() )
                 continue; // not a sentry, not spawned, or not mounted
 
             if ( hnpc.getId() == inst.mountID ) {
@@ -491,7 +491,7 @@ public class SentryListener implements Listener {
 
                     @Override
                     public void run() {
-                        inst.setTarget( perp );
+                        inst.setAttackTarget( perp );
                     }
                 };
                 // delay so the mount is gone.
@@ -503,7 +503,7 @@ public class SentryListener implements Listener {
 
     @EventHandler
     public void onNPCRightClick( NPCRightClickEvent event ) {
-        // stops players, other than the guardEntity, from using right-click on horses
+        // stops players, other than the guardeeEntity, from using right-click on horses
 
         // get a sentry instance if one is attached to the npc.
         SentryTrait inst = sentry.getSentryInstance( event.getNPC() );
@@ -512,7 +512,7 @@ public class SentryListener implements Listener {
         if ( inst == null ) return;
 
         if (    inst.getNPC().getEntity() instanceof Horse
-                && inst.guardEntity != event.getClicker() ) {
+                && inst.guardeeEntity != event.getClicker() ) {
 
             event.setCancelled( true );
         }
