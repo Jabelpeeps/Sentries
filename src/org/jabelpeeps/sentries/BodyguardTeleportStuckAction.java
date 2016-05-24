@@ -38,7 +38,7 @@ class BodyguardTeleportStuckAction implements StuckAction {
             return true;
         }
         if (    inst.guardeeEntity == null
-                || !Util.CanWarp( inst.guardeeEntity, npc ) ) {
+                || !Util.CanWarp( inst.guardeeEntity, destination.getWorld().getName() ) ) {
             // do nothing, next logic tick will clear the entity.
             return true;
         }
