@@ -127,7 +127,7 @@
 
     <build>
         <defaultGoal>clean package install</defaultGoal>
-        <finalName>Sentry.${project.version}.${BUILD_DISPLAY_NAME}</finalName>
+        <finalName>Sentry.${project.version}.${BUILD_NUMBER}</finalName>
         <sourceDirectory>${basedir}/src/</sourceDirectory>
         <resources>
             <resource>
