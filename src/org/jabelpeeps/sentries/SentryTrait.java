@@ -1280,7 +1280,7 @@ public class SentryTrait extends Trait {
 
         if ( onlyCheckAllPlayers ) {
 
-            for ( Player player : sentry.getServer().getOnlinePlayers() ) {
+            for ( Player player : Bukkit.getOnlinePlayers() ) {
 
                 if ( name.equals( player.getName() ) ) {
 
@@ -1485,7 +1485,7 @@ public class SentryTrait extends Trait {
  
     /** Returns the NPC with the current mountID or null if the id = -1 (the default) */
     // TODO convert to use uuid's
-    private NPC getMountNPC() {
+    NPC getMountNPC() {
         if ( hasMount() ) {
             return CitizensAPI.getNPCRegistry().getById( mountID );
         }
