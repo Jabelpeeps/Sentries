@@ -1,9 +1,9 @@
-package org.jabelpeeps.sentry.attackstrategies;
+package org.jabelpeeps.sentries.attackstrategies;
 
 import java.util.Random;
 
 import org.bukkit.entity.LivingEntity;
-import org.jabelpeeps.sentry.Sentry;
+import org.jabelpeeps.sentries.Sentries;
 
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.util.NMS;
@@ -11,17 +11,17 @@ import net.citizensnpcs.util.NMS;
 public class SpiderAttackStrategy implements AttackStrategy {
 
     private Random random = new Random();
-    // Sentry sentry;
+    // Sentries sentry;
 
-    public SpiderAttackStrategy() { // Sentry plugin ) {
+    public SpiderAttackStrategy() { // Sentries plugin ) {
         // sentry = plugin;
     }
 
     @Override
     public boolean handle( LivingEntity attacker, LivingEntity target ) {
 
-        if ( Sentry.debug )
-            Sentry.debugLog( "Spider ATTACK!" );
+        if ( Sentries.debug )
+            Sentries.debugLog( "Spider ATTACK!" );
 
         if ( random.nextInt( 20 ) == 0 ) {
 

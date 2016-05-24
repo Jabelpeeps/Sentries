@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import org.bukkit.Effect;
 import org.bukkit.Material;
@@ -33,9 +33,9 @@ import net.citizensnpcs.api.npc.NPC;
 
 public class SentryListener implements Listener {
 
-    public Sentry sentry;
+    public Sentries sentry;
 
-    public SentryListener( Sentry plugin ) {
+    public SentryListener( Sentries plugin ) {
         sentry = plugin;
     }
 
@@ -227,8 +227,8 @@ public class SentryListener implements Listener {
         Entity _damager = damagerEnt;
         Entity victim = event.getEntity();
 
-        if ( Sentry.debug )
-            Sentry.debugLog( "Damage: from:" + damagerEnt + " to:" + victim
+        if ( Sentries.debug )
+            Sentries.debugLog( "Damage: from:" + damagerEnt + " to:" + victim
                     + " cancelled:[" + event.isCancelled() + "] damage:["
                     + event.getDamage() + "] cause:" + event.getCause() );
         
@@ -281,7 +281,7 @@ public class SentryListener implements Listener {
 
             // uncancel if not bodyguard.
             if ( instDamager.guardeeName == null
-                    || !Sentry.bodyguardsObeyProtection )
+                    || !Sentries.bodyguardsObeyProtection )
                 event.setCancelled( false );
 
             // cancel if invulnerable non-sentry npc
@@ -478,7 +478,7 @@ public class SentryListener implements Listener {
 
                 final LivingEntity perp = (killer instanceof LivingEntity) ? (LivingEntity) killer 
                                                                            : null;
-                if ( Sentry.denizenActive ) {
+                if ( Sentries.denizenActive ) {
                     DenizenHook.denizenAction( each, "mount death", (perp instanceof Player) ? (Player) perp 
                                                                                              : null );
                 }

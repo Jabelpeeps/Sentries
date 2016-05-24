@@ -1,13 +1,13 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import org.bukkit.ChatColor;
 
 /**
- * A container to externalise the Strings used by Sentry.
+ * A container to externalise the Strings used by Sentries.
  */
 public abstract class S {
 
-    public final static String PACKAGE = "org.jabelpeeps.sentry.";
+    public final static String PACKAGE = "org.jabelpeeps.sentries.";
 
     public interface Col {
 
@@ -22,14 +22,14 @@ public abstract class S {
     }
 
     // Strings used in messages for players and/or console errors.
-    public final static String ERROR_NO_CITIZENS = "Sentry cannot be loaded without Citizens 2.0. Aborting.";
-    public final static String ERROR_WRONG_DENIZEN = "This version of Sentry is only compatable with Denizen 0.9 versions";
+    public final static String ERROR_NO_CITIZENS = "Sentries cannot be loaded without Citizens 2.0. Aborting.";
+    public final static String ERROR_WRONG_DENIZEN = "This version of Sentries is only compatable with Denizen 0.9 versions";
     public final static String ERROR_PLUGIN_NOT_FOUND = "Could not find the plugin called ";
 
     public final static String ERROR = Col.RED.concat( "Error: '" );
     public final static String ERROR_NOT_NUMBER = "' was not recognised as a valid number.";
 
-    public final static String ERROR_NOT_SENTRY = "That command can only be used on a Sentry";
+    public final static String ERROR_NOT_SENTRY = "That command can only be used on a Sentries";
     public final static String ERROR_NO_NPC = "You must have an NPC selected or provide an NPC #id";
     public final static String ERROR_ID_INVALID = "Could not find an NPC with #id of ";
     public final static String ERROR_NO_COMMAND_PERM = "You do not have permission for that command";
@@ -153,6 +153,7 @@ public abstract class S {
     public final static String PERM_CRITICAL_HITS = "sentry.options.criticals";
     public final static String PERM_RETALIATE = "sentry.options.retaliate";
     public final static String PERM_INVINCIBLE = "sentry.options.invincible";
+    public final static String PERM_BODYGUARD = "sentry.bodyguard."; // be sure to leave the last '.'
     public final static String PERM_CITS_ADMIN = "citizens.admin";
 
 }

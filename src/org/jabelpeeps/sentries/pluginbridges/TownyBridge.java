@@ -1,13 +1,13 @@
-package org.jabelpeeps.sentry.pluginbridges;
+package org.jabelpeeps.sentries.pluginbridges;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
 import org.bukkit.entity.Player;
-import org.jabelpeeps.sentry.PluginBridge;
-import org.jabelpeeps.sentry.S;
-import org.jabelpeeps.sentry.SentryTrait;
+import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.S;
+import org.jabelpeeps.sentries.SentryTrait;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Town;
@@ -46,8 +46,8 @@ public class TownyBridge extends PluginBridge {
         if ( commandHelp == null ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
-            joiner.add( "add/remove Towny:<town_name> to have a Sentry join/leave a town.");
-            joiner.add( "The Sentry will then follow friendly fire restrictions, and attack national enemies.");
+            joiner.add( "add/remove Towny:<town_name> to have a Sentries join/leave a town.");
+            joiner.add( "The Sentries will then follow friendly fire restrictions, and attack national enemies.");
 
             commandHelp = joiner.toString();
         }
@@ -77,12 +77,12 @@ public class TownyBridge extends PluginBridge {
             outstring = S.Col.RED.concat( "Town not found." );
         }
         else if ( isListed( inst, false ) ) {
-            outstring = String.join( "", S.Col.GREEN, "The Sentry has left ", 
+            outstring = String.join( "", S.Col.GREEN, "The Sentries has left ", 
                     myTown.replace( inst, town ).getName(), " and joined ", target );
         }
         else {
             myTown.put( inst, town );
-            outstring = String.join( "", S.Col.GREEN, "The Sentry has joined ", target ); 
+            outstring = String.join( "", S.Col.GREEN, "The Sentries has joined ", target ); 
         }
         return outstring;
     }

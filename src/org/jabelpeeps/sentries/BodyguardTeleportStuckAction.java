@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,11 +13,11 @@ import net.citizensnpcs.api.npc.NPC;
 class BodyguardTeleportStuckAction implements StuckAction {
 
     SentryTrait inst;
-    Sentry sentry;
+    Sentries sentry;
 
     private static int MAX_ITERATIONS = 10;
 
-    BodyguardTeleportStuckAction( SentryTrait _inst, Sentry plugin ) {
+    BodyguardTeleportStuckAction( SentryTrait _inst, Sentries plugin ) {
         inst = _inst;
         sentry = plugin;
     }

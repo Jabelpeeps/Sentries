@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import java.util.EnumSet;
 import java.util.Random;

@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import org.bukkit.Location;
 

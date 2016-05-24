@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry.attackstrategies;
+package org.jabelpeeps.sentries.attackstrategies;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;

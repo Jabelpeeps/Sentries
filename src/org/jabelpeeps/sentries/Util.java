@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -11,7 +11,6 @@ import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_9_R2.LocaleI18n;
 
 /**
  * An abstract collection of useful static methods.
@@ -50,8 +49,7 @@ public abstract class Util {
         return victor.multiply( 0 );
     }
 
-    public static Location leadLocation( Location loc, Vector victor,
-            double t ) {
+    public static Location leadLocation( Location loc, Vector victor, double t ) {
 
         return loc.clone().add( victor.clone().multiply( t ) );
     }
@@ -69,36 +67,34 @@ public abstract class Util {
     }
 
     /**
-     * Strangely named method, as appears to only check permissions for a player
-     * (when passed in as the Entity argument) - the sentry.bodyguard.
-     * <world-name> permission.
+     * checks a player's permissions for having a bodyguard in the specified world.
+     * (the sentry.bodyguard.<world-name> permission.)
      * 
      * @param Entity
-     *            entity this is checked to be an instance of Player, and then
-     *            has perms checked
-     * @param NPC
-     *            bodyguard unused
+     *            entity this is checked to be an instance of Player, and then has perms checked
+     * @param worldname
+     *            a String identifying the world to be checked.
      * 
-     * @returns true if player has permission "sentry.bodyguard" for the current
-     *          world.
+     * @returns true if player has permission "sentry.bodyguard.xxx" for the current world.
      */
-    public static boolean CanWarp( Entity entity, NPC bodyguyard ) {
+    public static boolean CanWarp( Entity entity, String worldname ) {
 
         if ( entity instanceof Player ) {
 
             Player player = (Player) entity;
-
-            if ( player.hasPermission( "sentry.bodyguard.*" ) ) {
+            String worldPerm = S.PERM_BODYGUARD.concat( worldname );
+            
+            if ( player.hasPermission( S.PERM_BODYGUARD.concat( "*" ) ) ) {
                 // all players have "*" perm by default.
-
-                if (    player .isPermissionSet( "sentry.bodyguard."  + player.getWorld().getName() )
-                        && !player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
+               
+                if (    player.isPermissionSet( worldPerm )
+                        && !player.hasPermission( worldPerm ) ) {
                     // denied in this world.
                     return false;
                 }
                 return true;
             }
-            if ( player.hasPermission( "sentry.bodyguard." + player.getWorld().getName() ) ) {
+            if ( player.hasPermission( worldPerm ) ) {
                 // no "*"" but specifically allowed this world.
                 return true;
             }
@@ -114,15 +110,13 @@ public abstract class Util {
         if ( Math.pow( a, 2 ) + b < 0 ) {
             return 0;
         }
-        return (a + Math.sqrt( Math.pow( a, 2 ) + b )) / g;
+        return ( a + Math.sqrt( Math.pow( a, 2 ) + b ) ) / g;
     }
 
     public static Double launchAngle( Location from, Location to, double v, double elev, double g ) {
 
         Vector victor = from.clone().subtract( to ).toVector();
-
-        Double dist = Math.sqrt(
-                Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
+        Double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
 
         double v2 = Math.pow( v, 2 );
         double v4 = Math.pow( v, 4 );
@@ -132,8 +126,7 @@ public abstract class Util {
         // Check unhittable.
         if ( v4 < derp ) {
             // target unreachable
-            // use this to fire at optimal max angle launchAngle = Math.atan( (
-            // 2*g*elev + v2) / (2*g*elev + 2*v2));
+            // use this to fire at optimal max angle launchAngle = Math.atan( ( 2*g*elev + v2) / (2*g*elev + 2*v2));
             return null;
         }
         // calc angle
@@ -150,8 +143,7 @@ public abstract class Util {
      */
     public static String format( String input, NPC npc, CommandSender player, Material item, String amount ) {
 
-        if ( input == null )
-            return null;
+        if ( input == null ) return "";
 
         input = input.replace( "<NPC>", (npc == null) ? "" : npc.getName() );
         input = input.replace( "<PLAYER>", (player == null) ? "" : player.getName() );
@@ -175,10 +167,10 @@ public abstract class Util {
         if ( mat == null || mat == Material.AIR )
             return "Hand";
 
-        if ( mat.isBlock() )
-            return mat.name();
+//        if ( mat.isBlock() )
+        return mat.name();
 
-        return LocaleI18n.get( mat.name() + ".name" );
+//        return LocaleI18n.get( mat.name() + ".name" );
     }
 
     /**
@@ -231,26 +223,4 @@ public abstract class Util {
             return -1;
         }
     }
-
-//    /**
-//     * New method with this name, now re-written to return Material values from
-//     * the official enum.
-//     */
-//    static Material getMaterial( String materialName ) {
-//
-//        if ( materialName == null )
-//            return null;
-//
-//        // not sure why we need this.
-//    //    String[] args = materialName.toUpperCase().split( ":" );
-//
-//        Material material = Material.getMaterial( materialName );
-//
-//        if ( material == null )
-//            throw new RuntimeException( "Invalid Material name:" + materialName
-//                    + ". Please check config.yml carefully." );
-//
-//        return material;
-//    }
-
 }

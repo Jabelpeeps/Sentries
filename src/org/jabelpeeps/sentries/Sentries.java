@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +35,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
 import net.citizensnpcs.api.trait.trait.Equipment;
 
-public class Sentry extends JavaPlugin {
+public class Sentries extends JavaPlugin {
 
     public static boolean debug = false;
 
@@ -101,7 +101,7 @@ public class Sentry extends JavaPlugin {
 
         if ( checkPlugin( S.DENIZEN ) ) {
 
-            String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription() .getVersion();
+            String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription().getVersion();
 
             if ( vers.startsWith( "0.9" ) ) {
 
@@ -151,7 +151,8 @@ public class Sentry extends JavaPlugin {
             }
 
             if ( debug )
-                logger.log( Level.INFO, each + " activated with bitFlag value of " + bridge.getBitFlag() );
+                debugLog( each + " activated with bitFlag value of " + bridge.getBitFlag() );
+            
             logger.log( Level.INFO, bridge.getActivationMessage() );
 
             targetBitFlag *= 2;
@@ -176,7 +177,7 @@ public class Sentry extends JavaPlugin {
                 }
             }
         };
-        getServer().getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
+        Bukkit.getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
 
         reloadMyConfig();
     }
@@ -226,7 +227,7 @@ public class Sentry extends JavaPlugin {
     /**
      * Sends a message to the logger associated with this plugin.
      * <p>
-     * The caller should check the boolean Sentry.debug is true before calling -
+     * The caller should check the boolean Sentries.debug is true before calling -
      * to avoid the overhead of compiling the String if it is not needed.
      * 
      * @param s
@@ -296,7 +297,8 @@ public class Sentry extends JavaPlugin {
     public void onDisable() {
 
         logger.log( Level.INFO, " v" + getDescription().getVersion() + " disabled." );
-        Bukkit.getServer().getScheduler().cancelTasks( this );
+        Bukkit.getScheduler().cancelTasks( this );
+        sentryPlugin = null;
     }
 
     public void loadIntoSet( FileConfiguration config, String key, Set<Material> set ) {
@@ -420,13 +422,14 @@ public class Sentry extends JavaPlugin {
 
             return true;
         }
-        logger.log( Level.INFO, S.ERROR_PLUGIN_NOT_FOUND.concat( name ) );
+        if ( debug )
+            debugLog( S.ERROR_PLUGIN_NOT_FOUND.concat( name ) );
 
         return false;
     }
 
     /**
-     * @return the current instance of Sentry, for calls that cannot be made
+     * @return the current instance of Sentries, for calls that cannot be made
      *         statically.
      */
     public static Plugin getSentry() {

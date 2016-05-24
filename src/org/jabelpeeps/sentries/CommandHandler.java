@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import java.text.DecimalFormat;
 import java.util.Map.Entry;
@@ -223,12 +223,12 @@ public abstract class CommandHandler {
     private static String getAdditionalTargets() {
         String outString = "";
 
-        if ( !Sentry.activePlugins.isEmpty() ) {
+        if ( !Sentries.activePlugins.isEmpty() ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
             joiner.add( "You may also use these additional types:- " );
 
-            for ( PluginBridge each : Sentry.activePlugins.values() ) {
+            for ( PluginBridge each : Sentries.activePlugins.values() ) {
                 joiner.add( each.getCommandHelp() );
             }
             outString = joiner.toString();
@@ -261,7 +261,7 @@ public abstract class CommandHandler {
      * @param sentry
      * @return - true if the command has been successfully handled.
      */
-    static boolean call( CommandSender player, String[] inargs, Sentry sentry ) {
+    static boolean call( CommandSender player, String[] inargs, Sentries sentry ) {
 
         if ( !enoughArgs( 1, inargs, player ) )
             return true;
@@ -286,7 +286,7 @@ public abstract class CommandHandler {
                 else player.sendMessage( S.ERROR_NO_MORE_HELP );
             }
             else {
-                player.sendMessage( String.join( "", System.lineSeparator(), S.Col.GOLD, "---------- Sentry Commands ----------", S.Col.RESET  ) );
+                player.sendMessage( String.join( "", System.lineSeparator(), S.Col.GOLD, "---------- Sentries Commands ----------", S.Col.RESET  ) );
 
                 if ( checkCommandPerm( S.PERM_TARGET, player ) )
                     player.sendMessage(
@@ -303,23 +303,23 @@ public abstract class CommandHandler {
 
                 if ( checkCommandPerm( S.PERM_SPEED, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry speed [0-1.5]" );
-                    player.sendMessage( "  Sets speed of the Sentry when attacking" );
+                    player.sendMessage( "  Sets speed of the Sentries when attacking" );
                 }
                 if ( checkCommandPerm( S.PERM_HEALTH, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry health [1-2000000]" );
-                    player.sendMessage( "  Sets the Sentry's Health" );
+                    player.sendMessage( "  Sets the Sentries's Health" );
                 }
                 if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry armor [0-2000000]" );
-                    player.sendMessage( "  Sets the Sentry's Armor" );
+                    player.sendMessage( "  Sets the Sentries's Armor" );
                 }
                 if ( checkCommandPerm( S.PERM_STRENGTH, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry strength [0-2000000]" );
-                    player.sendMessage( "  Sets the Sentry's Strength" );
+                    player.sendMessage( "  Sets the Sentries's Strength" );
                 }
                 if ( checkCommandPerm( S.PERM_ATTACK_RATE, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry attackrate [0.0-30.0]" );
-                    player.sendMessage( "  Sets the time between the Sentry's projectile attacks" );
+                    player.sendMessage( "  Sets the time between the Sentries's projectile attacks" );
                 }
                 if ( checkCommandPerm( S.PERM_HEAL_RATE, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry healrate [0.0-300.0]" );
@@ -327,11 +327,11 @@ public abstract class CommandHandler {
                 }
                 if ( checkCommandPerm( S.PERM_RANGE, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry range [1-100]" );
-                    player.sendMessage( "  Sets the Sentry's detection range" );
+                    player.sendMessage( "  Sets the Sentries's detection range" );
                 }
                 if ( checkCommandPerm( S.PERM_WARNING_RANGE, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry warningrange [0-50]" );
-                    player.sendMessage( "  How far beyond the detection range, that the Sentry will warn targets." );
+                    player.sendMessage( "  How far beyond the detection range, that the Sentries will warn targets." );
                 }
                 if ( checkCommandPerm( S.PERM_NIGHTVISION, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry nightvision [0-16] " );
@@ -339,7 +339,7 @@ public abstract class CommandHandler {
                 }
                 if ( checkCommandPerm( S.PERM_RESPAWN_DELAY, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry respawn [-1-2000000]" );
-                    player.sendMessage( "  Sets the number of seconds after death the Sentry will respawn." );
+                    player.sendMessage( "  Sets the number of seconds after death the Sentries will respawn." );
                 }
                 if ( checkCommandPerm( S.PERM_FOLLOW_DIST, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry follow [0-32]" );
@@ -347,19 +347,19 @@ public abstract class CommandHandler {
                 }
                 if ( checkCommandPerm( S.PERM_INVINCIBLE, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry invincible" );
-                    player.sendMessage( "  Toggle the Sentry to take no damage or knockback." );
+                    player.sendMessage( "  Toggle the Sentries to take no damage or knockback." );
                 }
                 if ( checkCommandPerm( S.PERM_RETALIATE, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry retaliate" );
-                    player.sendMessage( "  Toggle the Sentry to always attack an attacker." );
+                    player.sendMessage( "  Toggle the Sentries to always attack an attacker." );
                 }
                 if ( checkCommandPerm( S.PERM_CRITICAL_HITS, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry criticalhits" );
-                    player.sendMessage( "  Toggle the Sentry to take critical hits and misses" );
+                    player.sendMessage( "  Toggle the Sentries to take critical hits and misses" );
                 }
                 if ( checkCommandPerm( S.PERM_DROPS, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry drops" );
-                    player.sendMessage( "  Toggle the Sentry to drop equipped items on death" );
+                    player.sendMessage( "  Toggle the Sentries to drop equipped items on death" );
                 }
                 if ( checkCommandPerm( S.PERM_KILLDROPS, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry killdrops" );
@@ -404,8 +404,8 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_DEBUG, player ) ) {
 
-                Sentry.debug = !Sentry.debug;
-                player.sendMessage( S.Col.GREEN + "Debug is now: " + (Sentry.debug ? S.ON : S.OFF) );
+                Sentries.debug = !Sentries.debug;
+                player.sendMessage( S.Col.GREEN + "Debug is now: " + (Sentries.debug ? S.ON : S.OFF) );
             }
             return true;
         }
@@ -415,7 +415,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_RELOAD, player ) ) {
 
                 sentry.reloadMyConfig();
-                player.sendMessage( S.Col.GREEN + "reloaded Sentry's config.yml file" );
+                player.sendMessage( S.Col.GREEN + "reloaded Sentries's config.yml file" );
             }
             return true;
         }
@@ -472,14 +472,14 @@ public abstract class CommandHandler {
                     // player is not an admin either.
 
                     player.sendMessage( S.Col.RED.concat(
-                            "You must be the owner of this Sentry to execute commands." ) );
+                            "You must be the owner of this Sentries to execute commands." ) );
                     return true;
                 }
                 if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
                     // not server-owned NPC
 
                     player.sendMessage( S.Col.RED.concat(
-                            "You, or the server, must be the owner of this Sentry to execute commands." ) );
+                            "You, or the server, must be the owner of this Sentries to execute commands." ) );
                     return true;
                 }
             }
@@ -770,7 +770,7 @@ public abstract class CommandHandler {
                 if ( inargs.length <= 1 + nextArg ) {
                     player.sendMessage( S.Col.GOLD + npcName + "'s Strength is " + inst.strength );
                     player.sendMessage( S.Col.GOLD + "Usage: /sentry strength # " );
-                    player.sendMessage( S.Col.GOLD + "Note: At strength 0 the Sentry will do no damamge. " );
+                    player.sendMessage( S.Col.GOLD + "Note: At strength 0 the Sentries will do no damamge. " );
                 }
                 else {
                     int strength = Util.string2Int( inargs[nextArg + 1] );
@@ -825,7 +825,7 @@ public abstract class CommandHandler {
 
                     player.sendMessage( S.Col.GOLD + "Usage: /sentry respawn [-1 - 2000000] " );
                     player.sendMessage( S.Col.GOLD + "Usage: set to 0 to prevent automatic respawn" );
-                    player.sendMessage( S.Col.GOLD + "Usage: set to -1 to *permanently* delete the Sentry on death." );
+                    player.sendMessage( S.Col.GOLD + "Usage: set to -1 to *permanently* delete the Sentries on death." );
                 }
                 else {
                     int respawn = Util.string2Int( inargs[nextArg + 1] );
@@ -994,7 +994,7 @@ public abstract class CommandHandler {
                     }
                     else if ( S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
 
-                        for ( Entry<String, Integer> each : Sentry.equipmentSlots.entrySet() )
+                        for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() )
 
                             if ( each.getKey().equalsIgnoreCase( inargs[nextArg + 2] ) ) {
                                 thisNPC.getTrait( Equipment.class )
@@ -1077,7 +1077,7 @@ public abstract class CommandHandler {
 
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
-                joiner.add( String.join( "", S.Col.GOLD, "------- Sentry Info for ", npcName, " (npcid - ",
+                joiner.add( String.join( "", S.Col.GOLD, "------- Sentries Info for ", npcName, " (npcid - ",
                         String.valueOf( thisNPC.getId() ), ") ", "------" ) );
                 
                 joiner.add( String.join( "", S.Col.RED, "[HP]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/",
@@ -1177,8 +1177,8 @@ public abstract class CommandHandler {
         String[] typeArgs = new String[inargs.length - (2 + nextArg)];
         System.arraycopy( inargs, 2 + nextArg, typeArgs, 0, inargs.length - (2 + nextArg) );
 
-        if ( Sentry.debug )
-            Sentry.debugLog( "Target types list is:- " + joinArgs( 0, typeArgs ) );
+        if ( Sentries.debug )
+            Sentries.debugLog( "Target types list is:- " + joinArgs( 0, typeArgs ) );
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         Set<String> setOfTargets = forTargets ? inst.validTargets
@@ -1194,7 +1194,7 @@ public abstract class CommandHandler {
                     boolean messageSent = false, opSucceeded = false;
 
                     plugins: 
-                    for ( PluginBridge each : Sentry.activePlugins.values() ) {
+                    for ( PluginBridge each : Sentries.activePlugins.values() ) {
                         if ( each.getPrefix().equalsIgnoreCase( args[0] ) ) {
 
                             joiner.add( each.add( arg, inst, forTargets ) );
@@ -1227,7 +1227,7 @@ public abstract class CommandHandler {
                     boolean messageSent = false, opSucceeded = false;
 
                     plugins: 
-                    for ( PluginBridge each : Sentry.activePlugins.values() ) {
+                    for ( PluginBridge each : Sentries.activePlugins.values() ) {
                         if ( each.getPrefix().equalsIgnoreCase( args[0] ) ) {
 
                             joiner.add( each.remove( arg, inst, forTargets ) );

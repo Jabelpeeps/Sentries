@@ -1,9 +1,9 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import org.bukkit.entity.Player;
 
 /**
- * An abstract class to act as a bridge between Sentry and other Server plugins.
+ * An abstract class to act as a bridge between Sentries and other Server plugins.
  * <p>
  * Child classes need to interface with the plugin they are bridging to, in
  * order to be able to find out how the plugin groups players, and then decide
@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
  * and ignore information in order to avoid the potential for causing lag during
  * battles.
  * <p>
- * Some such bridges are provided with Sentry, but in future it should be
+ * Some such bridges are provided with Sentries, but in future it should be
  * possible for others to be added by third parties.
  */
 public abstract class PluginBridge {

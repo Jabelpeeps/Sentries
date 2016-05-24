@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +29,8 @@ enum SentryStatus {
                             inst.spawnLocation.getBlockX() >> 4,
                             inst.spawnLocation.getBlockZ() >> 4 ) ) {
 
-                if ( Sentry.debug )
-                    Sentry.debugLog( "respawning" + inst.getNPC().getName() );
+                if ( Sentries.debug )
+                    Sentries.debugLog( "respawning" + inst.getNPC().getName() );
 
                 inst.myStatus = SentryStatus.isSPAWNING;
 
@@ -55,7 +55,7 @@ enum SentryStatus {
 
             inst.clearTarget();
 
-            if ( Sentry.denizenActive ) {
+            if ( Sentries.denizenActive ) {
 
                 DenizenHook.denizenAction( inst.getNPC(), "death", null );
                 DenizenHook.denizenAction( inst.getNPC(), "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
@@ -78,8 +78,8 @@ enum SentryStatus {
                             && ((Projectile) killer).getShooter() instanceof Entity )
                         killer = (Entity) ((Projectile) killer).getShooter();
 
-                    if ( Sentry.debug )
-                        Sentry.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
+                    if ( Sentries.debug )
+                        Sentries.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
 
                     if ( killer instanceof OfflinePlayer ) {
                         DenizenHook.denizenAction( inst.getNPC(), "death by player", (OfflinePlayer) killer );
@@ -94,7 +94,7 @@ enum SentryStatus {
             if ( inst.dropInventory )
                 myEntity.getLocation().getWorld()
                         .spawn( myEntity.getLocation(), ExperienceOrb.class )
-                        .setExperience( Sentry.sentryEXP );
+                        .setExperience( Sentries.sentryEXP );
 
             List<ItemStack> items = new LinkedList<ItemStack>();
 
@@ -135,10 +135,10 @@ enum SentryStatus {
             for ( ItemStack is : items )
                 myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), is );
 
-            if ( Sentry.dieLikePlayers )
+            if ( Sentries.dieLikePlayers )
                 myEntity.setHealth( 0 );
             else
-                Sentry.getSentry().getServer() // citizens will despawn it.
+                Sentries.getSentry().getServer() // citizens will despawn it.
                         .getPluginManager()
                         .callEvent( new EntityDeathEvent( myEntity, items ) );
 

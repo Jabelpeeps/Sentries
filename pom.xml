@@ -6,10 +6,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jabelpeeps</groupId>
-    <artifactId>sentry</artifactId>
+    <artifactId>sentries</artifactId>
     <packaging>jar</packaging>
     <version>2.0.0</version>
-    <name>sentry</name>
+    <name>sentries</name>
     <description>Armed Citizens</description>
 
     <properties>

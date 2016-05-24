@@ -1,5 +1,5 @@
 
-package org.jabelpeeps.sentry;
+package org.jabelpeeps.sentries;
 
 import java.util.Set;
 import java.util.logging.Level;
@@ -28,7 +28,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class DenizenHook {
 
     static Denizen denizenPlugin;
-    static Sentry sentryPlugin;
+    static Sentries sentryPlugin;
     static boolean sentryHealthByDenizen = false;
     static boolean npcDeathTriggerActive = false;
     static boolean npcDeathTriggerOwnerActive = false;
@@ -37,7 +37,7 @@ public class DenizenHook {
 
     DenizenHook() {}
 
-    DenizenHook( Denizen denizen, Sentry sentry ) {
+    DenizenHook( Denizen denizen, Sentries sentry ) {
         denizenPlugin = denizen;
         sentryPlugin = sentry;
 
@@ -56,26 +56,26 @@ public class DenizenHook {
         
         if ( config.getBoolean( "SentryHealthByDenizen", true ) ) {
             sentryHealthByDenizen = true;
-            Sentry.logger.log( Level.INFO, "SentryHealthByDenizen configured to be enabled." );
+            Sentries.logger.log( Level.INFO, "SentryHealthByDenizen configured to be enabled." );
         }
         if ( config.getBoolean( "NpcDeathTrigger", true ) ) {
             hook.new NpcdeathTrigger().activate().as( "Npcdeath" );
-            Sentry.logger.log( Level.INFO, "NPCDeathTrigger registered sucessfully with Denizen" );
+            Sentries.logger.log( Level.INFO, "NPCDeathTrigger registered sucessfully with Denizen" );
             npcDeathTriggerActive = true;
         }
         if ( config.getBoolean( "NpcDeathTriggerOwner", true ) ) {
             hook.new NpcdeathTriggerOwner().activate().as( "Npcdeathowner" );
-            Sentry.logger.log( Level.INFO, "NPCDeathTriggerOwner registered sucessfully with Denizen" );
+            Sentries.logger.log( Level.INFO, "NPCDeathTriggerOwner registered sucessfully with Denizen" );
             npcDeathTriggerOwnerActive = true;
         }
         if ( config.getBoolean( "DieCommand", true ) ) {
             hook.new DieCommand().activate().as( "die" ).withOptions( "die", 0 );
-            Sentry.logger.log( Level.INFO, "DIE command registered sucessfully with Denizen" );
+            Sentries.logger.log( Level.INFO, "DIE command registered sucessfully with Denizen" );
             dieCommandActive = true;
         }
         if ( config.getBoolean( "LiveCommand", true ) ) {
             hook.new LiveCommand().activate().as( "live" ).withOptions( "live", 0 );
-            Sentry.logger.log( Level.INFO, "LIVE command registered sucessfully with Denizen" );
+            Sentries.logger.log( Level.INFO, "LIVE command registered sucessfully with Denizen" );
             liveCommandActive = true;
         }
     }
