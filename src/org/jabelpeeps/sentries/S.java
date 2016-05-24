@@ -100,6 +100,7 @@ public abstract class S {
     public final static String CRITICAL_HITS = "CriticalHits";
     public final static String DEFAULT_TARGETS = "DefaultTargets";
     public final static String DEFAULT_IGNORES = "DefaultIgnores";
+    public final static String IGNORE_LOS = IgnoreLOS;
     public final static String GREETING = "Greeting";
     public final static String WARNING = "Warning";
     public final static String HEALTH = "Health";

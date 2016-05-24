@@ -33,15 +33,12 @@ public class SpiderAttackStrategy implements AttackStrategy {
 
             double diffX = targetX - spiderX;
             double diffZ = targetZ - spiderZ;
-            double straightDistance = Math
-                    .sqrt( diffX * diffX + diffZ * diffZ );
+            double straightDistance = Math.sqrt( diffX * diffX + diffZ * diffZ );
 
-            NMS.getHandle( attacker ).motX = diffX / straightDistance * 0.5D
-                    * 0.800000011920929D
-                    + NMS.getHandle( attacker ).motX * 0.20000000298023224D;
-            NMS.getHandle( attacker ).motZ = diffZ / straightDistance * 0.5D
-                    * 0.800000011920929D
-                    + NMS.getHandle( attacker ).motZ * 0.20000000298023224D;
+            NMS.getHandle( attacker ).motX = diffX / straightDistance * 0.5D * 0.800000011920929D
+                                                + NMS.getHandle( attacker ).motX * 0.20000000298023224D;
+            NMS.getHandle( attacker ).motZ = diffZ / straightDistance * 0.5D * 0.800000011920929D
+                                                + NMS.getHandle( attacker ).motZ * 0.20000000298023224D;
             NMS.getHandle( attacker ).motY = 0.4000000059604645D;
         }
         return false;

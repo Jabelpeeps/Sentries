@@ -825,7 +825,7 @@ public abstract class CommandHandler {
 
                     player.sendMessage( S.Col.GOLD + "Usage: /sentry respawn [-1 - 2000000] " );
                     player.sendMessage( S.Col.GOLD + "Usage: set to 0 to prevent automatic respawn" );
-                    player.sendMessage( S.Col.GOLD + "Usage: set to -1 to *permanently* delete the Sentries on death." );
+                    player.sendMessage( S.Col.GOLD + "Usage: set to -1 to *permanently* delete the Sentry on death." );
                 }
                 else {
                     int respawn = Util.string2Int( inargs[nextArg + 1] );

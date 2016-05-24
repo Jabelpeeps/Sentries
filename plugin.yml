@@ -1,7 +1,7 @@
 name: Sentries
 authors: [aufdemrand, jrbudda, Jabelpeeps]
 description: Sentries are Citizens 2.0 characters (NPS's with traits) that Attack, Kill, Guard, Use ranged or melee weapons and work with Denizen.
-version: ${project.version}.${BUILD_NUMBER}
+version: ${project.version}
 main: org.jabelpeeps.sentries.Sentries
 website: http://wiki.citizensnpcs.co/Sentry
 depend: [Citizens]

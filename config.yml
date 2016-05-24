@@ -40,6 +40,7 @@ DefaultOptions:
  Retaliate: true
  FriendlyFire: false
  Targetable: true
+ IgnoreLOS: false
  
 # Default texts for new Sentries. You can use <NPC> and <PLAYER> as placeholders.
 DefaultTexts:

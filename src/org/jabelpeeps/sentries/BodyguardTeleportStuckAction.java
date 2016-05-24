@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
@@ -25,11 +25,9 @@ class BodyguardTeleportStuckAction implements StuckAction {
     @Override
     public boolean run( final NPC npc, Navigator navigator ) {
 
-        if ( !npc.isSpawned() )
-            return false;
+        if ( !npc.isSpawned() ) return false;
 
-        // the next section tests whether the npc has already reached its
-        // destination and returns if so.
+        // the next section tests whether the npc has already reached its destination and returns if so.
         Location destination = navigator.getTargetAsLocation();
         Location present = npc.getEntity().getLocation();
 
@@ -66,7 +64,7 @@ class BodyguardTeleportStuckAction implements StuckAction {
 
             @Override
             public void run() {
-                npc.teleport( loc, PlayerTeleportEvent.TeleportCause.PLUGIN );
+                npc.teleport( loc, TeleportCause.PLUGIN );
             }
         };
         // send runnable to execute on main game loop

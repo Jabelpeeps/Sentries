@@ -68,7 +68,7 @@ import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
-import net.minecraft.server.v1_9_R2.EntityHuman;
+//import net.minecraft.server.v1_9_R2.EntityHuman;
 import net.minecraft.server.v1_9_R2.EntityPotion;
 import net.minecraft.server.v1_9_R2.Packet;
 import net.minecraft.server.v1_9_R2.PacketPlayOutAnimation;
@@ -81,31 +81,31 @@ public class SentryTrait extends Trait {
     Location _projTargetLostLoc;
     Location spawnLocation;
 
-    int strength = 1;
-    int armourValue = 0;
-    int epCount = 0;
-    int nightVision = 16;
-    int respawnDelay = 10;
-    int sentryRange = 10;
-    int followDistance = 16;
-    int mountID = -1;
-    int warningRange = 0;
+    int strength;
+    int armourValue;
+    int epCount;
+    int nightVision;
+    int respawnDelay;
+    int sentryRange;
+    int followDistance;
+    int mountID;
+    int warningRange;
 
-    float sentrySpeed = 1.0f;
+    float sentrySpeed;
 
-    double attackRate = 2.0;
-    double healRate = 0.0;
-    double sentryWeight = 1.0;
-    double sentryMaxHealth = 20.0;
+    double attackRate;
+    double healRate;
+    double sentryWeight;
+    double sentryMaxHealth;
 
-    boolean killsDropInventory = true;
-    boolean dropInventory = false;
-    boolean targetable = true;
-    boolean invincible = false;
-    boolean loaded = false;
-    boolean acceptsCriticals = true;
-    boolean iWillRetaliate = true;
-    boolean ignoreLOS = false;
+    boolean killsDropInventory;
+    boolean dropInventory;
+    boolean targetable;
+    boolean invincible;
+    boolean loaded;
+    boolean acceptsCriticals;
+    boolean iWillRetaliate;
+    boolean ignoreLOS;
 
     private GiveUpStuckAction giveup = new GiveUpStuckAction( this );
 
@@ -153,7 +153,7 @@ public class SentryTrait extends Trait {
     
     public SentryTrait() {
         super( "sentry" );
-        sentry = (Sentries) Bukkit.getServer().getPluginManager().getPlugin( "Sentries" );
+        sentry = (Sentries) Bukkit.getPluginManager().getPlugin( "Sentries" );
         myID = ++nextID;
     }
     
@@ -172,7 +172,7 @@ public class SentryTrait extends Trait {
         dropInventory = key.getBoolean( S.DROP_INVENTORY, sentry.defaultBooleans.get( S.DROP_INVENTORY ) );
         acceptsCriticals = key.getBoolean( S.CRITICAL_HITS, sentry.defaultBooleans.get( S.CRITICAL_HITS ) );
         killsDropInventory = key.getBoolean( S.KILLS_DROP, sentry.defaultBooleans.get( S.KILLS_DROP ) );
-        ignoreLOS = key.getBoolean( "IgnoreLOS", false );
+        ignoreLOS = key.getBoolean( S.IGNORE_LOS, sentry.defaultBooleans.get( S.IGNORE_LOS ) );
         targetable = key.getBoolean( S.TARGETABLE, sentry.defaultBooleans.get( S.TARGETABLE ) );
 
         armourValue = key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
@@ -227,8 +227,7 @@ public class SentryTrait extends Trait {
         processTargetStrings();
 
         if ( Sentries.debug )
-            Sentries.debugLog(
-                    npc.getName() + ":[" + npc.getId() + "] load() end" );
+            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
     }
 
 //    @Override
@@ -286,7 +285,7 @@ public class SentryTrait extends Trait {
         key.setBoolean( S.TARGETABLE, targetable );
         key.setInt( S.MOUNTID, mountID );
         key.setBoolean( S.CRITICAL_HITS, acceptsCriticals );
-        key.setBoolean( "IgnoreLOS", ignoreLOS );
+        key.setBoolean( S.IGNORE_LOS, ignoreLOS );
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
 
@@ -366,7 +365,7 @@ public class SentryTrait extends Trait {
         setHealth( sentryMaxHealth );
 
         _myDamamgers.clear();
-        myStatus = SentryStatus.isLOOKING;
+//        myStatus = SentryStatus.isLOOKING;
 
         faceForward();
 
@@ -400,8 +399,7 @@ public class SentryTrait extends Trait {
         updateAttackType();
 
         if ( taskID == 0 ) {
-            taskID = sentry.getServer()
-                           .getScheduler()
+            taskID = Bukkit.getScheduler()
                            .scheduleSyncRepeatingTask( sentry, 
                                                        this, 
                                                        40 + npc.getId(), 
@@ -441,7 +439,7 @@ public class SentryTrait extends Trait {
                     return true;
 
                 // As this is an NPC and we haven't decided whether to ignore it yet, let check the ignores of the owner.
-                return isIgnoring( (LivingEntity) sentry.getServer().getOfflinePlayer( targetNpc.getTrait( Owner.class ).getOwnerId() ) );
+                return isIgnoring( (LivingEntity) Bukkit.getOfflinePlayer( targetNpc.getTrait( Owner.class ).getOwnerId() ) );
             }
         }
         else if ( aTarget instanceof Player ) {
@@ -497,7 +495,7 @@ public class SentryTrait extends Trait {
 
             // As we are checking an NPC and haven't decided whether to attack it yet, lets check the owner.
             return isTarget( 
-                    (LivingEntity) sentry.getServer().getOfflinePlayer( targetNpc.getTrait( Owner.class ).getOwnerId() ) );
+                    (LivingEntity) Bukkit.getOfflinePlayer( targetNpc.getTrait( Owner.class ).getOwnerId() ) );
         }
         
         else if ( aTarget instanceof Player ) {
@@ -558,7 +556,7 @@ public class SentryTrait extends Trait {
     public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
         // most of the former contents of this method have been moved to the SentryStatus state machine.
 
-        if ( myStatus == SentryStatus.isDYING
+        if (    myStatus == SentryStatus.isDYING
                 || myStatus == SentryStatus.isDEAD )
             return;
 
@@ -572,8 +570,7 @@ public class SentryTrait extends Trait {
 
     void faceEntity( Entity from, Entity at ) {
 
-        if ( from.getWorld() != at.getWorld() )
-            return;
+        if ( from.getWorld() != at.getWorld() ) return;
 
         Location fromLoc = from.getLocation();
         Location atLoc = at.getLocation();
@@ -585,8 +582,7 @@ public class SentryTrait extends Trait {
         double distanceXZSquared = xDiff * xDiff + zDiff * zDiff;
         double distanceY = Math.sqrt( distanceXZSquared + yDiff * yDiff );
 
-        double yaw = Math.acos( xDiff / Math.sqrt( distanceXZSquared ) ) * 180
-                / Math.PI;
+        double yaw = Math.acos( xDiff / Math.sqrt( distanceXZSquared ) ) * 180 / Math.PI;
         double pitch = (Math.acos( yDiff / distanceY ) * 180 / Math.PI) - 90;
 
         if ( zDiff < 0.0 ) {
@@ -610,8 +606,7 @@ public class SentryTrait extends Trait {
         LivingEntity myEntity = getMyEntity();
         range += warningRange;
 
-        List<Entity> entitiesInRange = myEntity.getNearbyEntities( range,
-                range / 2, range );
+        List<Entity> entitiesInRange = myEntity.getNearbyEntities( range, range / 2, range );
         LivingEntity theTarget = null;
         Double distanceToBeat = 99999.0;
 
@@ -624,8 +619,7 @@ public class SentryTrait extends Trait {
                     && isTarget( (LivingEntity) aTarget ) ) {
 
                 // can i see it?
-                double lightLevel = aTarget.getLocation().getBlock()
-                        .getLightLevel();
+                double lightLevel = aTarget.getLocation().getBlock().getLightLevel();
 
                 // sneaking cut light in half
                 if (    aTarget instanceof Player
@@ -650,8 +644,7 @@ public class SentryTrait extends Trait {
 
                                 Player player = (Player) aTarget;
 
-                                player.sendMessage( Util.format( warningMsg,
-                                        npc, player, null, null ) );
+                                player.sendMessage( Util.format( warningMsg, npc, player, null, null ) );
 
                                 if ( !getNavigator().isNavigating() )
                                     faceEntity( myEntity, aTarget );
@@ -673,8 +666,7 @@ public class SentryTrait extends Trait {
 
                 if (    myEntity.hasLineOfSight( aTarget )
                         && (    !warningsGiven.containsKey( aTarget )
-                                || System.currentTimeMillis() > warningsGiven
-                                                        .get( aTarget ) + 60000) ) {
+                                || System.currentTimeMillis() > warningsGiven .get( aTarget ) + 60000) ) {
 
                     Player player = (Player) aTarget;
 
@@ -744,8 +736,7 @@ public class SentryTrait extends Trait {
         Location to = Util.leadLocation( targetsHeart, targetVelocity, hangtime );
         Vector victor = to.clone().subtract( myLocation ).toVector();
 
-        double dist = Math.sqrt(
-                Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
+        double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
         elev = victor.getY();
 
         if ( dist == 0 )
@@ -816,9 +807,10 @@ public class SentryTrait extends Trait {
                 if ( myProjectile == ThrownPotion.class ) {
                     World nmsWorld = ((CraftWorld) myEntity.getWorld()).getHandle();
                     EntityPotion ent = new EntityPotion( nmsWorld,
-                            myLocation.getX(), myLocation.getY(),
-                            myLocation.getZ(),
-                            CraftItemStack.asNMSCopy( potiontype ) );
+                                                         myLocation.getX(), 
+                                                         myLocation.getY(),
+                                                         myLocation.getZ(),
+                                                         CraftItemStack.asNMSCopy( potiontype ) );
                     nmsWorld.addEntity( ent );
                     projectile = (Projectile) ent.getBukkitEntity();
                 }
@@ -827,15 +819,14 @@ public class SentryTrait extends Trait {
                 else
                     projectile = myEntity.getWorld().spawn( myLocation, myProjectile );
 
-                if ( myProjectile == Fireball.class
+                if (    myProjectile == Fireball.class
                         || myProjectile == WitherSkull.class ) {
                     victor = victor.multiply( 1 / 1000000000 );
                 }
                 else if ( myProjectile == SmallFireball.class ) {
 
                     victor = victor.multiply( 1 / 1000000000 );
-                    ((SmallFireball) projectile)
-                            .setIsIncendiary( myAttacks.incendiary );
+                    ((SmallFireball) projectile).setIsIncendiary( myAttacks.incendiary );
 
                     if ( !myAttacks.incendiary ) {
                         ((SmallFireball) projectile).setFireTicks( 0 );
@@ -929,8 +920,7 @@ public class SentryTrait extends Trait {
 
         if ( myEntity instanceof Player ) {
 
-            Material item = ((Player) myEntity).getInventory()
-                    .getItemInMainHand().getType();
+            Material item = ((Player) myEntity).getInventory().getItemInMainHand().getType();
 
             if ( sentry.strengthBuffs.containsKey( item ) ) {
                 mod += sentry.strengthBuffs.get( item );
@@ -973,11 +963,12 @@ public class SentryTrait extends Trait {
         else if ( damager instanceof LivingEntity )
             attacker = (LivingEntity) damager;
 
-        if ( Sentries.ignoreListIsInvincible && isIgnoring( attacker ) )
+        if (    attacker == null 
+                || (    Sentries.ignoreListIsInvincible 
+                        && isIgnoring( attacker ) ) ) {
             return;
-
-        if (    attacker != null 
-                && iWillRetaliate
+        }    
+        if (    iWillRetaliate
                 && (    !(damager instanceof Projectile) 
                         || CitizensAPI.getNPCRegistry().getNPC( attacker ) == null) ) {
 
@@ -997,25 +988,22 @@ public class SentryTrait extends Trait {
 
         if ( damage > 0 ) {
 
-            if ( attacker != null ) {
-                // knockback
-                npc.getEntity().setVelocity( attacker.getLocation()
-                                                     .getDirection()
-                                                     .multiply( 1.0 / (sentryWeight + (armour / 5)) ) );
-            }
+            // knockback
+            npc.getEntity().setVelocity( attacker.getLocation()
+                                                 .getDirection()
+                                                 .multiply( 1.0 / (sentryWeight + (armour / 5)) ) );
             // Apply armour
             damage -= armour;
 
             // there was damage before armour.
             if ( damage <= 0 ) {
-                npc.getEntity().getWorld().playEffect(
-                        npc.getEntity().getLocation(),
-                        Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
+                npc.getEntity().getWorld().playEffect( npc.getEntity().getLocation(),
+                                                       Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
                 hit = Hits.Block;
             }
         }
 
-        if ( attacker instanceof Player
+        if (    attacker instanceof Player
                 && !CitizensAPI.getNPCRegistry().isNPC( attacker ) ) {
 
             _myDamamgers.add( (Player) attacker );
@@ -1041,10 +1029,13 @@ public class SentryTrait extends Trait {
             if ( getHealth() - damage <= 0 ) {
 
                 // set the killer
-                if ( damager instanceof HumanEntity )
-                    ((CraftLivingEntity) getMyEntity()).getHandle().killer 
-                                = (EntityHuman) ((CraftLivingEntity) damager).getHandle();
+//                if ( damager instanceof HumanEntity ) 
+//
+//                    getMyEntity();
+//                    ((CraftLivingEntity) getMyEntity()).getHandle().killer 
+//                                = (EntityHuman) ((CraftLivingEntity) damager).getHandle();
 
+                getMyEntity().damage( damage, attacker );
                 die( true, event.getCause() );
             }
             else
@@ -1241,137 +1232,11 @@ public class SentryTrait extends Trait {
                 && isMyChunkLoaded() )
             mount();
 
-        if ( myStatus == SentryStatus.isATTACKING && npc.isSpawned() ) {
+        if (    npc.isSpawned() 
+                && (    myStatus == SentryStatus.isATTACKING 
+                        || myStatus == SentryStatus.isLOOKING ) ) {
 
-            if ( !isMyChunkLoaded() ) {
-                clearTarget();
-                return;
-            }
-
-            if (    targetFlags > none 
-                    && attackTarget == null
-                    && System.currentTimeMillis() > oktoreasses ) {
-
-                LivingEntity target = findTarget( sentryRange );
-                setAttackTarget( target );
-                oktoreasses = System.currentTimeMillis() + 3000;
-            }
-
-            if (    attackTarget != null 
-                    && !attackTarget.isDead()
-                    && attackTarget.getWorld() == myEntity.getLocation().getWorld() ) {
-
-                if ( myAttacks != AttackType.brawler ) {
-
-                    if ( _projTargetLostLoc == null )
-                        _projTargetLostLoc = attackTarget.getLocation();
-
-                    if ( !getNavigator().isNavigating() )
-                        faceEntity( myEntity, attackTarget );
-
-                    if ( !getNavigator().isPaused() ) {
-                        getNavigator().setPaused( true );
-                        getNavigator().cancelNavigation();
-                        getNavigator().setTarget( SentryTrait.this.attackTarget, true );
-                    }
-
-                    draw( true );
-
-                    if ( System.currentTimeMillis() > oktoFire ) {
-
-                        oktoFire = (long) (System.currentTimeMillis() + attackRate * 1000.0);
-                        fire( attackTarget );
-                    }
-
-                    if ( attackTarget != null )
-                        _projTargetLostLoc = attackTarget.getLocation();
-
-                    return;
-                }
-                if ( hasMount() )
-                    faceEntity( myEntity, attackTarget );
-
-                double dist = attackTarget.getLocation().distance( myEntity.getLocation() );
-                // block if in range
-                draw( dist < 3 );
-                // Did it get away?
-                if ( dist > sentryRange )
-                    clearTarget();
-            }
-            else
-                clearTarget();
-        }
-
-        else if ( myStatus == SentryStatus.isLOOKING
-                && npc.isSpawned() ) {
-
-            if ( getNavigator().isPaused() ) {
-                getNavigator().setPaused( false );
-            }
-
-            if ( myEntity.isInsideVehicle() == true )
-                faceAlignWithVehicle();
-
-            if (    guardeeEntity instanceof Player
-                    && !((Player) guardeeEntity).isOnline() ) {
-                guardeeEntity = null;
-            }
-            else if ( guardeeName != null 
-                    && guardeeEntity == null
-                    && findGuardEntity( guardeeName, false ) ) {
-                findGuardEntity( guardeeName, true );
-            }
-
-            if ( guardeeEntity != null ) {
-
-                Location npcLoc = myEntity.getLocation();
-                Location guardEntLoc = guardeeEntity.getLocation();
-
-                if (    guardEntLoc.getWorld() != npcLoc.getWorld()
-                        || !isMyChunkLoaded() ) {
-
-                    String worldname = guardeeEntity.getWorld().getName();
-                    
-                    if ( Util.CanWarp( guardeeEntity, worldname ) ) {
-                        npc.despawn();
-                        npc.spawn( guardEntLoc.add( 1, 0, 1 ) );
-                    }
-                    else {
-                        ((Player) guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
-                        guardeeEntity = null;
-                    }
-                }
-                else {
-                    Navigator navigator = getNavigator();
-                    boolean isNavigating = navigator.isNavigating();
-                    double dist = npcLoc.distanceSquared( guardEntLoc );
-
-                    if ( Sentries.debug )
-                        Sentries.debugLog( npc.getName() + " : " + navigator.getEntityTarget() + " " );
-
-                    if ( dist > 1024 ) {
-                        npc.teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
-                    }
-                    else if ( dist > followDistance && !isNavigating ) {
-                        navigator.setTarget( guardeeEntity, false );
-                        navigator.getLocalParameters().stationaryTicks( 3 * 20 );
-                    }
-                    else if ( dist < followDistance && isNavigating ) {
-                        navigator.cancelNavigation();
-                    }
-                }
-            }
-
-            LivingEntity target = null;
-
-            if ( targetFlags > none ) {
-                target = findTarget( sentryRange );
-            }
-
-            if ( target != null ) {
-                oktoreasses = System.currentTimeMillis() + 3000;
-                setAttackTarget( target );
-            }
+            myStatus.update( this );
         }
     }
 
@@ -1578,10 +1443,10 @@ public class SentryTrait extends Trait {
             return;
         }
 
+        if ( theEntity == guardeeEntity ) return;
+        
         GoalController goalController = getGoalController();
         Navigator navigator = getNavigator();
-
-        if ( theEntity == guardeeEntity ) return;
 
         if ( !navigator.isNavigating() )
             faceEntity( myEntity, theEntity );
@@ -1614,20 +1479,20 @@ public class SentryTrait extends Trait {
         return ifMountedGetMount().getDefaultGoalController();
     }
     
-    //--------------------------------menthods dealing with Mounts----------
+    //--------------------------------methods dealing with Mounts----------
     /** Returns true if mountID >= 0 */
     public boolean hasMount() { return mountID >= 0; }
  
     /** Returns the NPC with the current mountID or null if the id = -1 (the default) */
     // TODO convert to use uuid's
-    protected NPC getMountNPC() {
+    private NPC getMountNPC() {
         if ( hasMount() ) {
             return CitizensAPI.getNPCRegistry().getById( mountID );
         }
         return null;
     }
 
-    private NPC ifMountedGetMount() {
+    NPC ifMountedGetMount() {
 
 //        if ( Sentries.debug )
 //            Sentries.debugLog( String.join( "", S.Col.RED, "ifMountedGetMount(): mountID = ", String.valueOf( mountID ) ) ) ;
@@ -1684,9 +1549,10 @@ public class SentryTrait extends Trait {
                 mountParams.speedModifier( myParams.speedModifier() * 2 );
                 mountParams.range( myParams.range() + 5 );
 
-                ((CraftLivingEntity) mount.getEntity()).setCustomNameVisible( false );
-                mount.getEntity().setPassenger( null );
-                mount.getEntity().setPassenger( myEntity );
+                Entity ent = mount.getEntity();
+                ent.setCustomNameVisible( false );
+                ent.setPassenger( null );
+                ent.setPassenger( myEntity );
             }
             else
                 mountID = -1;
