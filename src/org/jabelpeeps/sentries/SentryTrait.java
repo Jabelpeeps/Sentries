@@ -68,7 +68,6 @@ import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
-//import net.minecraft.server.v1_9_R2.EntityHuman;
 import net.minecraft.server.v1_9_R2.EntityPotion;
 import net.minecraft.server.v1_9_R2.Packet;
 import net.minecraft.server.v1_9_R2.PacketPlayOutAnimation;
@@ -268,7 +267,7 @@ public class SentryTrait extends Trait {
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
 
         isRespawnable = System.currentTimeMillis() + respawnDelay * 1000;
-        myStatus = SentryStatus.isDEAD;
+//        myStatus = SentryStatus.isDEAD;
         dismount();
     }
     
@@ -1199,7 +1198,7 @@ public class SentryTrait extends Trait {
 
         if ( myEntity == null ) myStatus = SentryStatus.isDEAD;
       
-        if ( myStatus == SentryStatus.isDEAD || myStatus == SentryStatus.isDYING ) {
+        if ( myStatus == SentryStatus.isDEAD || myStatus == SentryStatus.isDYING || myStatus == SentryStatus.isSPAWNING ) {
             myStatus.update( this );
             return;
         }
@@ -1324,13 +1323,11 @@ public class SentryTrait extends Trait {
 
     public void setHealth( double health ) {
 
-        if ( npc == null ) return;
-
         LivingEntity myEntity = getMyEntity();
 
         if ( myEntity == null ) return;
 
-        if ( ((CraftLivingEntity) myEntity).getMaxHealth() != sentryMaxHealth )
+        if ( myEntity.getMaxHealth() != sentryMaxHealth )
             myEntity.setMaxHealth( sentryMaxHealth );
 
         if ( health > sentryMaxHealth )
