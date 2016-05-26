@@ -41,7 +41,6 @@ import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -933,117 +932,13 @@ public class SentryTrait extends Trait {
     static Set<AttackType> stormCallers = EnumSet.of( AttackType.sc1, AttackType.sc2, AttackType.sc3 );
 
     public boolean isPyromancer() { return pyros.contains( myAttacks ); }
-    public boolean isPyromancer1() { return (myAttacks == AttackType.pyro1); }
+    public boolean isPyromancer1() { return myAttacks == AttackType.pyro1; }
     public boolean isStormcaller() { return stormCallers.contains( myAttacks ); }
-    public boolean isWarlock1() { return (myAttacks == AttackType.warlock1); }
-    public boolean isWitchDoctor() { return (myAttacks == AttackType.witchdoctor); }
+    public boolean isWarlock1() { return myAttacks == AttackType.warlock1; }
+    public boolean isWitchDoctor() { return myAttacks == AttackType.witchdoctor; }
+    public boolean isNotFlammable() { return isPyromancer() || isStormcaller(); }
 
-    public void onDamage( EntityDamageByEntityEvent event ) {
-
-        if ( myStatus == SentryStatus.isDYING || invincible ) return;
-
-        if ( npc == null || !npc.isSpawned() ) return;
-
-        if ( guardeeName != null && guardeeEntity == null ) return;
-
-        if ( System.currentTimeMillis() < okToTakedamage + 500 ) return;
-
-        okToTakedamage = System.currentTimeMillis();
-
-        event.getEntity().setLastDamageCause( event );
-
-        LivingEntity attacker = null;
-        Entity damager = event.getDamager();
-
-        // Find the attacker
-        if (    damager instanceof Projectile
-                && ((Projectile) damager).getShooter() instanceof LivingEntity )
-            attacker = (LivingEntity) ((Projectile) damager).getShooter();
-
-        else if ( damager instanceof LivingEntity )
-            attacker = (LivingEntity) damager;
-
-        if (    attacker == null 
-                || (    Sentries.ignoreListIsInvincible 
-                        && isIgnoring( attacker ) ) ) {
-            return;
-        }    
-        if (    iWillRetaliate
-                && (    !(damager instanceof Projectile) 
-                        || CitizensAPI.getNPCRegistry().getNPC( attacker ) == null) ) {
-
-            attackTarget = attacker;
-            setAttackTarget( attacker );
-        }
-        Hits hit = Hits.Hit;
-        double damage = event.getDamage();
-
-        if ( acceptsCriticals ) {
-
-            hit = Hits.getHit();
-            damage = Math.round( damage * hit.damageModifier );
-        }
-        
-        int armour = getArmor();
-
-        if ( damage > 0 ) {
-
-            // knockback
-            npc.getEntity().setVelocity( attacker.getLocation()
-                                                 .getDirection()
-                                                 .multiply( 1.0 / (sentryWeight + (armour / 5)) ) );
-            // Apply armour
-            damage -= armour;
-
-            // there was damage before armour.
-            if ( damage <= 0 ) {
-                npc.getEntity().getWorld().playEffect( npc.getEntity().getLocation(),
-                                                       Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
-                hit = Hits.Block;
-            }
-        }
-
-        if (    attacker instanceof Player
-                && !CitizensAPI.getNPCRegistry().isNPC( attacker ) ) {
-
-            _myDamamgers.add( (Player) attacker );
-
-            String msg = hit.message;
-
-            if ( msg != null && !msg.isEmpty() ) {
-                ((Player) attacker).sendMessage( 
-                        Util.format( msg,
-                                     npc,
-                                     attacker, 
-                                     ((Player) attacker).getInventory()
-                                                        .getItemInMainHand()
-                                                        .getType(),
-                                     String.valueOf( damage ) ) );
-            }
-        }
-
-        if ( damage > 0 ) {
-            npc.getEntity().playEffect( EntityEffect.HURT );
-
-            // is he dead?
-            if ( getHealth() - damage <= 0 ) {
-
-                // set the killer
-//                if ( damager instanceof HumanEntity ) 
-//
-//                    getMyEntity();
-//                    ((CraftLivingEntity) getMyEntity()).getHandle().killer 
-//                                = (EntityHuman) ((CraftLivingEntity) damager).getHandle();
-
-                getMyEntity().damage( damage, attacker );
-                die( true, event.getCause() );
-            }
-            else
-                getMyEntity().damage( damage );
-        }
-    }
-
-    public void onEnvironmentDamage( NPCDamageEvent event ) {
+   public void onEnvironmentDamage( NPCDamageEvent event ) {
         // not called for fall damage, or for lightning on stormcallers,
         // or for fire on pyromancers & stormcallers, or for poison on witchdoctors.
         
@@ -1197,15 +1092,23 @@ public class SentryTrait extends Trait {
 
         LivingEntity myEntity = getMyEntity();
 
-        if ( myEntity == null ) myStatus = SentryStatus.isDEAD;
+        if ( myEntity == null ) 
+            myStatus = SentryStatus.isDEAD;
       
-        if ( myStatus == SentryStatus.isDEAD || myStatus == SentryStatus.isDYING || myStatus == SentryStatus.isSPAWNING ) {
-            myStatus = myStatus.update( this );
-            return;
-        }
-        // TODO figure why this is here
-  //      if ( attackTarget != null ) setAttackTarget( attackTarget );
+        myStatus = myStatus.update( this );
+    }
 
+    void reMountMount() {
+           
+        if (    npc.isSpawned() 
+                && !getMyEntity().isInsideVehicle() 
+                && hasMount()
+                && isMyChunkLoaded() )
+            mount();
+    }
+    
+    void tryToHeal() {
+        
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
 
             if ( getHealth() < sentryMaxHealth ) {
@@ -1218,7 +1121,7 @@ public class SentryTrait extends Trait {
                 setHealth( getHealth() + heal );
 
                 if ( healAnimation != null )
-                    NMS.sendPacketNearby( null, myEntity.getLocation(), healAnimation );
+                    NMS.sendPacketNearby( null, getMyEntity().getLocation(), healAnimation );
 
                 if ( getHealth() >= sentryMaxHealth )
                     _myDamamgers.clear();
@@ -1226,21 +1129,8 @@ public class SentryTrait extends Trait {
             }
             oktoheal = (long) (System.currentTimeMillis() + healRate * 1000);
         }
-
-        if (    npc.isSpawned() 
-                && !myEntity.isInsideVehicle() 
-                && hasMount()
-                && isMyChunkLoaded() )
-            mount();
-
-        if (    npc.isSpawned() 
-                && (    myStatus == SentryStatus.isATTACKING 
-                        || myStatus == SentryStatus.isFOLLOWING ) ) {
-
-            myStatus = myStatus.update( this );
-        }
     }
-
+    
     boolean isMyChunkLoaded() {
 
         LivingEntity myEntity = getMyEntity();

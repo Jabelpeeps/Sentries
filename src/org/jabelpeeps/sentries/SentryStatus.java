@@ -26,7 +26,7 @@ import net.citizensnpcs.api.npc.NPC;
 /** 
  * An Enum of states that a Sentry can be in.
  * <p>
- * Calling {@link#update(SentryTrait)} will carry out the appropriate actions, updating the state if needed.
+ * Calling {@link#update(SentryTrait)} will carry out the appropriate actions, returning an updated state (if needed).
  * */
 enum SentryStatus {
 
@@ -77,11 +77,11 @@ enum SentryStatus {
                 }
             }
 
-            if ( inst.dropInventory )
+            if ( inst.dropInventory ) {
                 myEntity.getWorld()
                         .spawn( myEntity.getLocation(), ExperienceOrb.class )
                         .setExperience( Sentries.sentryEXP );
-
+            }
             List<ItemStack> items = new LinkedList<ItemStack>();
 
             if ( myEntity instanceof HumanEntity ) {
@@ -174,6 +174,8 @@ enum SentryStatus {
         SentryStatus update( SentryTrait inst ) {
             
             if ( inst.getNPC().isSpawned() ) {
+                inst.tryToHeal();
+                inst.reMountMount();
                 // TODO spawn mount if Sentry has one.
                 if ( inst.guardeeName == null)
                     return SentryStatus.isLOOKING;
@@ -184,7 +186,8 @@ enum SentryStatus {
         }
     },
     
-    /** Sentries with this status will look for and navigate to the entities they are guarding (if set). */
+    /** Sentries with this status will look for and navigate to the entities they are guarding (if set). 
+     *  Once reunited with the guardee (or none it set), the status will be changed to {@link#isLOOKING()} */
     isFOLLOWING {
 
         @Override
@@ -217,20 +220,21 @@ enum SentryStatus {
                 if (    guardEntLoc.getWorld() != npcLoc.getWorld()
                         || !inst.isMyChunkLoaded() ) {
 
-                    String worldname = inst.guardeeEntity.getWorld().getName();
+                    if ( System.currentTimeMillis() > inst.oktoreasses ) {
+                        String worldname = inst.guardeeEntity.getWorld().getName();
                     
-                    if ( Util.CanWarp( inst.guardeeEntity, worldname ) ) {
+                        if ( Util.CanWarp( inst.guardeeEntity, worldname ) ) {
+                            
+                            inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
+                            return SentryStatus.isLOOKING;
+                        }
                         
-                        inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
-                        return SentryStatus.isLOOKING;
+                        ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
+                        inst.guardeeEntity = null;
+                        inst.oktoreasses = System.currentTimeMillis() + 3000;
                     }
-                    
-                    ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
-                    inst.guardeeEntity = null;
-                    // TODO add a period of inactivity for the guard, to avoid running these checks too often.
                     return this;
                 }
-                
                 Navigator navigator = inst.getNavigator();
                 boolean isNavigating = navigator.isNavigating();
                 double dist = npcLoc.distanceSquared( guardEntLoc );
@@ -255,10 +259,14 @@ enum SentryStatus {
         }
     },
     
+    /** Sentries with this status will search for possible targets, and be receptive to events 
+     *  within their detection range.  The will also heal whilst in this state. */
     isLOOKING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+            
+            inst.tryToHeal();
             
             LivingEntity target = null;
 
@@ -279,6 +287,7 @@ enum SentryStatus {
         }
     },
     
+    /** The status for Sentries who are attacking! */
     isATTACKING {
 
         @Override
@@ -344,5 +353,8 @@ enum SentryStatus {
         }
     };
 
+    /** Call this method to perform the activities needed for the current state. 
+     *  @param inst - the SentryTrait instance to be updated.
+     *  @return a new state when a change is needed. */
     abstract SentryStatus update( SentryTrait inst );
 }

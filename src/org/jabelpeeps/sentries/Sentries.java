@@ -143,6 +143,7 @@ public class Sentries extends JavaPlugin {
             }
 
             if ( bridge == null ) continue;
+            
             if ( !bridge.activate() ) {
                 logger.log( Level.INFO, bridge.getActivationMessage() );
                 continue;
@@ -170,8 +171,7 @@ public class Sentries extends JavaPlugin {
                 while ( arrows.size() > 200 ) {
                     Projectile arrow = arrows.remove();
 
-                    if ( arrow != null )
-                        arrow.remove();
+                    if ( arrow != null ) arrow.remove();
                 }
             }
         };
@@ -187,7 +187,6 @@ public class Sentries extends JavaPlugin {
     void reloadMyConfig() {
 
         saveDefaultConfig();
-        // load the contents of the config.yml from the disk.
         reloadConfig();
 
         FileConfiguration config = getConfig();
@@ -410,7 +409,7 @@ public class Sentries extends JavaPlugin {
         return false;
     }
 
-    /**
+//    /**
 //     * @return the current instance of Sentries, for calls that cannot be made
 //     *         statically.
 //     */
