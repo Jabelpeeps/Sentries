@@ -5,6 +5,6 @@ target/
 *.iml
 bin/
 .DS_Store
-.jardesc
+*.jardesc
 .classpath
 .project
