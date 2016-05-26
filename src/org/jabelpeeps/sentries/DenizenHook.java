@@ -137,7 +137,7 @@ public class DenizenHook {
                     dB.log( db );
 
                     if ( inst != null ) {
-                        inst.myStatus = SentryStatus.isLOOKING;
+                        inst.myStatus = SentryStatus.isFOLLOWING;
 
                         if ( deaggro )
                             inst.clearTarget();

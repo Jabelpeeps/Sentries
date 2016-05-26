@@ -223,4 +223,20 @@ public abstract class Util {
             return -1;
         }
     }
+
+    static SentryTrait getSentryTrait( Entity ent ) {
+    
+        if ( ent != null && ent instanceof LivingEntity ) {
+            return Util.getSentryTrait( CitizensAPI.getNPCRegistry().getNPC( ent ) );
+        }
+        return null;
+    }
+
+    static SentryTrait getSentryTrait( NPC npc ) {
+    
+        if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
+            return npc.getTrait( SentryTrait.class );
+        }
+        return null;
+    }
 }

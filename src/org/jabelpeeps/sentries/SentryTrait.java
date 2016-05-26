@@ -59,6 +59,7 @@ import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.event.CitizensReloadEvent;
 import net.citizensnpcs.api.event.DespawnReason;
+import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
@@ -364,7 +365,7 @@ public class SentryTrait extends Trait {
         setHealth( sentryMaxHealth );
 
         _myDamamgers.clear();
-//        myStatus = SentryStatus.isLOOKING;
+//        myStatus = SentryStatus.isFOLLOWING;
 
         faceForward();
 
@@ -633,7 +634,7 @@ public class SentryTrait extends Trait {
                     if ( hasLOS( aTarget ) ) {
 
                         if (    warningRange > 0 && !warningMsg.isEmpty()
-                                && myStatus == SentryStatus.isLOOKING
+                                && myStatus == SentryStatus.isFOLLOWING
                                 && aTarget instanceof Player
                                 && dist > (range - warningRange) 
                                 && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
@@ -659,7 +660,7 @@ public class SentryTrait extends Trait {
                 }
             }
             else if ( warningRange > 0 && !greetingMsg.isEmpty()
-                    && myStatus == SentryStatus.isLOOKING
+                    && myStatus == SentryStatus.isFOLLOWING
                     && aTarget instanceof Player
                     && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
@@ -1042,7 +1043,7 @@ public class SentryTrait extends Trait {
         }
     }
 
-    public void onEnvironmentDamage( EntityDamageEvent event ) {
+    public void onEnvironmentDamage( NPCDamageEvent event ) {
         // not called for fall damage, or for lightning on stormcallers,
         // or for fire on pyromancers & stormcallers, or for poison on witchdoctors.
         
@@ -1060,7 +1061,7 @@ public class SentryTrait extends Trait {
         double finaldamage = event.getDamage();
         DamageCause cause = event.getCause();
 
-        myEntity.setLastDamageCause( event );
+ //       myEntity.setLastDamageCause( event );
 
         if (    cause == DamageCause.CONTACT
                 || cause == DamageCause.BLOCK_EXPLOSION ) {
@@ -1199,10 +1200,11 @@ public class SentryTrait extends Trait {
         if ( myEntity == null ) myStatus = SentryStatus.isDEAD;
       
         if ( myStatus == SentryStatus.isDEAD || myStatus == SentryStatus.isDYING || myStatus == SentryStatus.isSPAWNING ) {
-            myStatus.update( this );
+            myStatus = myStatus.update( this );
             return;
         }
-        if ( attackTarget != null ) setAttackTarget( attackTarget );
+        // TODO figure why this is here
+  //      if ( attackTarget != null ) setAttackTarget( attackTarget );
 
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
 
@@ -1233,9 +1235,9 @@ public class SentryTrait extends Trait {
 
         if (    npc.isSpawned() 
                 && (    myStatus == SentryStatus.isATTACKING 
-                        || myStatus == SentryStatus.isLOOKING ) ) {
+                        || myStatus == SentryStatus.isFOLLOWING ) ) {
 
-            myStatus.update( this );
+            myStatus = myStatus.update( this );
         }
     }
 
@@ -1267,15 +1269,15 @@ public class SentryTrait extends Trait {
      */
     public boolean findGuardEntity( String name, boolean onlyCheckAllPlayers ) {
 
-        if ( npc == null ) return false;
+        if ( npc == null || name == null ) return false;
 
-        if ( name == null ) {
-            guardeeEntity = null;
-            guardeeName = null;
-
-            clearTarget();
-            return true;
-        }
+//        if ( name == null ) {
+//            guardeeEntity = null;
+//            guardeeName = null;
+//
+//            clearTarget();
+//            return true;
+//        }
 
         if ( onlyCheckAllPlayers ) {
 
@@ -1376,13 +1378,13 @@ public class SentryTrait extends Trait {
     }
 
     /**
-     * convenience method to reduce repetition - calls setTarget( null, false )
+     * Clears the target of the Sentry's attack, and returns it to following/looking status.
      * <p>
      * will hopefully be replaced with a better method at some point.
      */
     void clearTarget() {
         
-        myStatus = SentryStatus.isLOOKING;
+        myStatus = SentryStatus.isFOLLOWING;
         attackTarget = null;
         _projTargetLostLoc = null;
         
@@ -1618,10 +1620,8 @@ public class SentryTrait extends Trait {
         return null;
     }
 
-
     @EventHandler
     public void onCitReload( CitizensReloadEvent event ) {
-
         cancelRunnable();
     }
 

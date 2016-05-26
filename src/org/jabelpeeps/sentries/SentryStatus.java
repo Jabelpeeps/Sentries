@@ -30,41 +30,12 @@ import net.citizensnpcs.api.npc.NPC;
  * */
 enum SentryStatus {
 
-    /** Sentries with this status will be respawned after the configured time. */
-    isDEAD {
-
-        @Override
-        boolean update( SentryTrait inst ) {
-
-            if (    System.currentTimeMillis() > inst.isRespawnable
-                    && inst.respawnDelay > 0
-                    && inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,
-                                                                    inst.spawnLocation.getBlockZ() >> 4 ) ) {
-
-                NPC npc = inst.getNPC();
-                
-                if ( Sentries.debug )
-                    Sentries.debugLog( "respawning" + npc.getName() );
-
-                inst.myStatus = SentryStatus.isSPAWNING;
-
-                if ( inst.guardeeEntity == null )
-                    npc.spawn( inst.spawnLocation );
-                else
-                    npc.spawn( inst.guardeeEntity.getLocation().add( 2, 0, 2 ) );
-
-                return true;
-            }
-            return false;
-        }
-    },
-
     /** Sentries with this status will have their death's handled, along with any drops, and then 
      * various items tidied up before having their status set to {@link#isDEAD}*/
     isDYING {
 
         @Override
-        boolean update( SentryTrait inst ) {
+        SentryStatus update( SentryTrait inst ) {
 
             LivingEntity myEntity = inst.getMyEntity();
 
@@ -166,46 +137,75 @@ enum SentryStatus {
             else
                 inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
 
-            inst.myStatus = SentryStatus.isDEAD;
-            return false;
-        }
-    },
-
-    isSPAWNING {
-
-        @Override
-        boolean update( SentryTrait inst ) {
-            
-            if ( inst.getNPC().isSpawned() )
-                inst.myStatus = SentryStatus.isLOOKING;
-            return false;
+            return SentryStatus.isDEAD;
         }
     },
     
-    /** Sentries with this status will first look for and navigate to the entities they are guarding (if set) 
-     * and will then scan for possible targets to attack. */
-    isLOOKING {
+    /** Sentries with this status will be re-spawned after the configured time. */
+    isDEAD {
 
         @Override
-        boolean update( SentryTrait inst ) {
+        SentryStatus update( SentryTrait inst ) {
+
+            if (    System.currentTimeMillis() > inst.isRespawnable
+                    && inst.respawnDelay > 0
+                    && inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,
+                                                                    inst.spawnLocation.getBlockZ() >> 4 ) ) {
+
+                NPC npc = inst.getNPC();
+                
+                if ( Sentries.debug )
+                    Sentries.debugLog( "respawning" + npc.getName() );
+
+                if ( inst.guardeeEntity == null )
+                    npc.spawn( inst.spawnLocation );
+                else
+                    npc.spawn( inst.guardeeEntity.getLocation().add( 2, 0, 2 ) );
+                
+                return SentryStatus.isSPAWNING;
+            }
+            return this;
+        }
+    },
+    
+    isSPAWNING {
+
+        @Override
+        SentryStatus update( SentryTrait inst ) {
+            
+            if ( inst.getNPC().isSpawned() ) {
+                // TODO spawn mount if Sentry has one.
+                if ( inst.guardeeName == null)
+                    return SentryStatus.isLOOKING;
+                
+                return SentryStatus.isFOLLOWING;
+            }
+            return this;
+        }
+    },
+    
+    /** Sentries with this status will look for and navigate to the entities they are guarding (if set). */
+    isFOLLOWING {
+
+        @Override
+        SentryStatus update( SentryTrait inst ) {
             
             LivingEntity myEntity = inst.getMyEntity();
+            
             NPC npc = inst.getNPC();
 
-            if ( inst.getNavigator().isPaused() ) {
-                inst.getNavigator().setPaused( false );
-            }
+            if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
 
-            if ( myEntity.isInsideVehicle() == true )
-                inst.faceAlignWithVehicle();
+            if ( myEntity.isInsideVehicle() ) inst.faceAlignWithVehicle();
 
             if (    inst.guardeeEntity instanceof Player
                     && !((Player) inst.guardeeEntity).isOnline() ) {
                 inst.guardeeEntity = null;
+                // TODO With no-one to guard, what should the Sentry do now?
             }
             else if ( inst.guardeeName != null 
                     && inst.guardeeEntity == null
-                    && inst.findGuardEntity( inst.guardeeName, false ) ) {
+                    && !inst.findGuardEntity( inst.guardeeName, false ) ) {
                 inst.findGuardEntity( inst.guardeeName, true );
             }
 
@@ -222,68 +222,73 @@ enum SentryStatus {
                     if ( Util.CanWarp( inst.guardeeEntity, worldname ) ) {
                         
                         inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
+                        return SentryStatus.isLOOKING;
                     }
-                    else {
-                        ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
-                        inst.guardeeEntity = null;
-                    }
-                }
-                else {
-                    Navigator navigator = inst.getNavigator();
                     
-                    boolean isNavigating = navigator.isNavigating();
-                    double dist = npcLoc.distanceSquared( guardEntLoc );
-
-                    if ( Sentries.debug )
-                        Sentries.debugLog( npc.getName() + ": following " + navigator.getEntityTarget().getTarget().getName() );
-
-                    if ( dist > 1024 ) {
-                        inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
-                    }
-                    else if ( dist > inst.followDistance && !isNavigating ) {
-                        navigator.setTarget( inst.guardeeEntity, false );
-                        navigator.getLocalParameters().stationaryTicks( 3 * 20 );
-                    }
-                    else if ( dist < inst.followDistance && isNavigating ) {
-                        navigator.cancelNavigation();
-                    }
+                    ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
+                    inst.guardeeEntity = null;
+                    // TODO add a period of inactivity for the guard, to avoid running these checks too often.
+                    return this;
                 }
-            }
+                
+                Navigator navigator = inst.getNavigator();
+                boolean isNavigating = navigator.isNavigating();
+                double dist = npcLoc.distanceSquared( guardEntLoc );
 
-            LivingEntity target = null;
+                if ( Sentries.debug )
+                    Sentries.debugLog( npc.getName() + ": following " + navigator.getEntityTarget().getTarget().getName() );
 
-            if ( inst.targetFlags > 0 ) {
-                target = inst.findTarget( inst.sentryRange );
+                if ( dist > 1024 ) {
+                    inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
+                }
+                else if ( dist > inst.followDistance && !isNavigating ) {
+                    navigator.setTarget( inst.guardeeEntity, false );
+                    navigator.getLocalParameters().stationaryTicks( 3 * 20 );
+                    return this;
+                }
+                else if ( dist < inst.followDistance && isNavigating ) {
+                    navigator.cancelNavigation();
+                }
+                return SentryStatus.isLOOKING;
             }
-
-            if ( target != null ) {
-                inst.oktoreasses = System.currentTimeMillis() + 3000;
-                inst.setAttackTarget( target );
-            }
-            return false;
+            return this;
         }
     },
     
-    isATTACKING {
+    isLOOKING {
 
         @Override
-        boolean update( SentryTrait inst ) {
+        SentryStatus update( SentryTrait inst ) {
             
-            if ( !inst.isMyChunkLoaded() ) {
-                inst.clearTarget();
-                return false;
-            }
+            LivingEntity target = null;
 
             // find and set a target to attack (if no current target)
             if (    inst.targetFlags > 0 
                     && inst.attackTarget == null
                     && System.currentTimeMillis() > inst.oktoreasses ) {
 
-                LivingEntity target = inst.findTarget( inst.sentryRange );
-                inst.setAttackTarget( target );
-                inst.oktoreasses = System.currentTimeMillis() + 3000;
+                target = inst.findTarget( inst.sentryRange );
+                
+                if ( target != null ) {
+                    inst.oktoreasses = System.currentTimeMillis() + 3000;
+                    inst.setAttackTarget( target );
+                    return SentryStatus.isATTACKING;
+                }
             }
+            return this;
+        }
+    },
+    
+    isATTACKING {
+
+        @Override
+        SentryStatus update( SentryTrait inst ) {
             
+            if ( !inst.isMyChunkLoaded() ) {
+                inst.clearTarget();
+                return SentryStatus.isFOLLOWING;
+            }
+
             LivingEntity myEntity = inst.getMyEntity();
 
             // attack the current target
@@ -318,7 +323,7 @@ enum SentryStatus {
                     if ( inst.attackTarget != null )
                         inst._projTargetLostLoc = inst.attackTarget.getLocation();
 
-                    return true;
+                    return this;
                 }
                 
                 // section for brawlers only
@@ -328,16 +333,16 @@ enum SentryStatus {
                 double dist = inst.attackTarget.getLocation().distance( myEntity.getLocation() );
                 // block if in range
                 inst.draw( dist < 3 );
-                // Did it get away?
-                if ( dist > inst.sentryRange )
-                    inst.clearTarget();
+                // is it still in range? then keep attacking...
+                if ( dist <= inst.sentryRange )
+                    return this;
             }
-            else
-                // somehow we failed to attack the chosen target, so lets clear it.
-                inst.clearTarget();
-            return false;
+            
+            // somehow we failed to attack the chosen target, so lets clear it, and look for another.
+            inst.clearTarget();
+            return SentryStatus.isFOLLOWING;
         }
     };
 
-    abstract boolean update( SentryTrait inst );
+    abstract SentryStatus update( SentryTrait inst );
 }

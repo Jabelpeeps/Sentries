@@ -19,8 +19,6 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -82,15 +80,15 @@ public class Sentries extends JavaPlugin {
     PluginManager pluginManager = getServer().getPluginManager();
 
     static Logger logger;
-    static Plugin sentryPlugin;
+    static Plugin plugin;
     static DenizenHook denizenHook;
 
     @Override
     public void onEnable() {
 
-        if ( sentryPlugin != null ) return;
+        if ( plugin != null ) return;
 
-        sentryPlugin = this;
+        plugin = this;
         logger = getLogger();
 
         if ( !checkPlugin( S.CITIZENS ) ) {
@@ -162,7 +160,7 @@ public class Sentries extends JavaPlugin {
 
         CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
-        pluginManager.registerEvents( new SentryListener( this ), this );
+        pluginManager.registerEvents( new SentryListener(), this );
 
         final Runnable removeArrows = new Runnable() {
 
@@ -271,22 +269,6 @@ public class Sentries extends JavaPlugin {
         return true;
     }
 
-    public SentryTrait getSentryInstance( Entity ent ) {
-
-        if ( ent != null && ent instanceof LivingEntity ) {
-            return getSentryInstance( CitizensAPI.getNPCRegistry().getNPC( ent ) );
-        }
-        return null;
-    }
-
-    public SentryTrait getSentryInstance( NPC npc ) {
-
-        if ( npc != null && npc.hasTrait( SentryTrait.class ) ) {
-            return npc.getTrait( SentryTrait.class );
-        }
-        return null;
-    }
-
     @Override
     public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
 
@@ -298,7 +280,7 @@ public class Sentries extends JavaPlugin {
 
         logger.log( Level.INFO, " v" + getDescription().getVersion() + " disabled." );
         Bukkit.getScheduler().cancelTasks( this );
-        sentryPlugin = null;
+        plugin = null;
     }
 
     public void loadIntoSet( FileConfiguration config, String key, Set<Material> set ) {
@@ -429,10 +411,10 @@ public class Sentries extends JavaPlugin {
     }
 
     /**
-     * @return the current instance of Sentries, for calls that cannot be made
-     *         statically.
-     */
-    public static Plugin getSentry() {
-        return sentryPlugin;
-    }
+//     * @return the current instance of Sentries, for calls that cannot be made
+//     *         statically.
+//     */
+//    public static Plugin getSentry() {
+//        return plugin;
+//    }
 }
