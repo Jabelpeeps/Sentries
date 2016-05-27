@@ -20,18 +20,19 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.npc.NPC;
 
 /** 
  * An Enum of states that a Sentry can be in.
  * <p>
- * Calling {@link#update(SentryTrait)} will carry out the appropriate actions, returning an updated state (if needed).
- * */
+ * Calling {@link #update(SentryTrait)} on the current status will carry out the appropriate 
+ * actions, returning an updated state (if needed). */
 enum SentryStatus {
 
     /** Sentries with this status will have their death's handled, along with any drops, and then 
-     * various items tidied up before having their status set to {@link#isDEAD}*/
+     * various items tidied up before having their status set to {@link SentryStatus#isDEAD} */
     isDYING {
 
         @Override
@@ -174,20 +175,19 @@ enum SentryStatus {
         SentryStatus update( SentryTrait inst ) {
             
             if ( inst.getNPC().isSpawned() ) {
+                
                 inst.tryToHeal();
                 inst.reMountMount();
-                // TODO spawn mount if Sentry has one.
-                if ( inst.guardeeName == null)
-                    return SentryStatus.isLOOKING;
-                
-                return SentryStatus.isFOLLOWING;
+
+                return isGuard( inst );
             }
             return this;
         }
     },
     
     /** Sentries with this status will look for and navigate to the entities they are guarding (if set). 
-     *  Once reunited with the guardee (or none it set), the status will be changed to {@link#isLOOKING()} */
+     *  Once reunited with the guardee (or none it set), the status will be changed to 
+     *  {@link SentryStatus#isLOOKING} */
     isFOLLOWING {
 
         @Override
@@ -260,7 +260,7 @@ enum SentryStatus {
     },
     
     /** Sentries with this status will search for possible targets, and be receptive to events 
-     *  within their detection range.  The will also heal whilst in this state. */
+     *  within their detection range. <p>  They will also heal whilst in this state. */
     isLOOKING {
 
         @Override
@@ -295,7 +295,7 @@ enum SentryStatus {
             
             if ( !inst.isMyChunkLoaded() ) {
                 inst.clearTarget();
-                return SentryStatus.isFOLLOWING;
+                return SentryStatus.isGuard( inst );
             }
 
             LivingEntity myEntity = inst.getMyEntity();
@@ -305,15 +305,17 @@ enum SentryStatus {
                     && !inst.attackTarget.isDead()
                     && inst.attackTarget.getWorld() == myEntity.getLocation().getWorld() ) {
 
+                Navigator navigator = inst.getNavigator();
+                
+                if ( !navigator.isNavigating() )
+                    inst.faceEntity( myEntity, inst.attackTarget );
+                
                 if ( inst.myAttacks != AttackType.brawler ) {
 
                     if ( inst._projTargetLostLoc == null )
                         inst._projTargetLostLoc = inst.attackTarget.getLocation();
 
-                    Navigator navigator = inst.getNavigator();
-                    
-                    if ( !navigator.isNavigating() )
-                        inst.faceEntity( myEntity, inst.attackTarget );
+
 
                     if ( !navigator.isPaused() ) {
                         navigator.setPaused( true );
@@ -331,11 +333,24 @@ enum SentryStatus {
 
                     if ( inst.attackTarget != null )
                         inst._projTargetLostLoc = inst.attackTarget.getLocation();
-
-                    return this;
+                }
+                else {
+                    // check if the desired target is already the current destination.
+                    if (    navigator.getEntityTarget() == null
+                            || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
+                        
+                        GoalController goalController = inst.getGoalController();
+                        // pause goalcontroller to keep sentry focused on this attack
+                        if ( !goalController.isPaused() )
+                            goalController.setPaused( true );
+    
+                        navigator.setTarget( inst.attackTarget, true );
+                        navigator.getLocalParameters().speedModifier( inst.getSpeed() );
+                        navigator.getLocalParameters().stuckAction( inst.giveup );
+                        navigator.getLocalParameters().stationaryTicks( 5 * 20 );
+                    }
                 }
                 
-                // section for brawlers only
                 if ( inst.hasMount() )
                     inst.faceEntity( myEntity, inst.attackTarget );
 
@@ -349,7 +364,7 @@ enum SentryStatus {
             
             // somehow we failed to attack the chosen target, so lets clear it, and look for another.
             inst.clearTarget();
-            return SentryStatus.isFOLLOWING;
+            return SentryStatus.isGuard( inst );
         }
     };
 
@@ -357,4 +372,14 @@ enum SentryStatus {
      *  @param inst - the SentryTrait instance to be updated.
      *  @return a new state when a change is needed. */
     abstract SentryStatus update( SentryTrait inst );
+    
+    /** Convenience method that returns {@link SentryStatus#isFOLLOWING} for guards, 
+     *  and {@link SentryStatus#isLOOKING} for non-guards. */
+    static SentryStatus isGuard( SentryTrait inst ) {
+        
+        if ( inst.guardeeName == null )
+            return SentryStatus.isLOOKING;
+        
+        return SentryStatus.isFOLLOWING;
+    }
 }

@@ -138,11 +138,12 @@ SpeedBuffs:
  #- IRON_BOOTS -0.1
 
 # Apply potion effects on hit for various weapon types. Multiple effects allowed. 
-# Use format: [item name] [potion name/id:duration in ticks:level] There are 20 ticks in a second. 
+# Use format: [item name] [potion name:duration in ticks:level] There are 20 ticks in a second. 
 # Duration and Level are optional, default duration is 20, level is 1.
 # Valid potion names: 
 # speed, slow, fast_digging, slow_digging, increase_damage, heal, harm, jump, confusion, 
-# regeneration, damage_resistance, fire_resistance, water_breating, blindness, hunger, weakness, poison
+# regeneration, damage_resistance, fire_resistance, water_breathing, blindness, hunger, weakness, 
+# poison, wither, health_boost, absorption, saturation, glowing, levitation, luck, unluck
 WeaponEffects:
  - SNOW_BALL slow:20
  #- GOLD_SWORD poison:60:2 confusion

@@ -28,7 +28,6 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class DenizenHook {
 
     static Denizen denizenPlugin;
-    static Sentries sentryPlugin;
     static boolean sentryHealthByDenizen = false;
     static boolean npcDeathTriggerActive = false;
     static boolean npcDeathTriggerOwnerActive = false;
@@ -37,9 +36,8 @@ public class DenizenHook {
 
     DenizenHook() {}
 
-    DenizenHook( Denizen denizen, Sentries sentry ) {
+    DenizenHook( Denizen denizen ) {
         denizenPlugin = denizen;
-        sentryPlugin = sentry;
 
         setupHooks( this );
     }
@@ -52,7 +50,7 @@ public class DenizenHook {
 
     static void setupHooks( DenizenHook hook ) {
 
-        ConfigurationSection config = sentryPlugin.getConfig().getConfigurationSection( "DenizenIntegration" );
+        ConfigurationSection config = Sentries.plugin.getConfig().getConfigurationSection( "DenizenIntegration" );
         
         if ( config.getBoolean( "SentryHealthByDenizen", true ) ) {
             sentryHealthByDenizen = true;
@@ -137,7 +135,7 @@ public class DenizenHook {
                     dB.log( db );
 
                     if ( inst != null ) {
-                        inst.myStatus = SentryStatus.isFOLLOWING;
+                        inst.myStatus = SentryStatus.isGuard( inst );
 
                         if ( deaggro )
                             inst.clearTarget();

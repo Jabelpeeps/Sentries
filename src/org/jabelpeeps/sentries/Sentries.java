@@ -77,8 +77,6 @@ public class Sentries extends JavaPlugin {
 
     public Queue<Projectile> arrows = new LinkedList<Projectile>();
 
-    PluginManager pluginManager = getServer().getPluginManager();
-
     static Logger logger;
     static Plugin plugin;
     static DenizenHook denizenHook;
@@ -90,6 +88,7 @@ public class Sentries extends JavaPlugin {
 
         plugin = this;
         logger = getLogger();
+        PluginManager pluginManager = Bukkit.getPluginManager();
 
         if ( !checkPlugin( S.CITIZENS ) ) {
             logger.log( Level.SEVERE, S.ERROR_NO_CITIZENS );
@@ -103,7 +102,7 @@ public class Sentries extends JavaPlugin {
 
             if ( vers.startsWith( "0.9" ) ) {
 
-                denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( S.DENIZEN ), this );
+                denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( S.DENIZEN ) );
                 denizenActive = DenizenHook.npcDeathTriggerActive || DenizenHook.npcDeathTriggerOwnerActive;
             }
             else {
@@ -195,7 +194,7 @@ public class Sentries extends JavaPlugin {
         loadIntoMaterialMap( config, "StrengthBuffs", strengthBuffs );
         loadIntoMaterialMap( config, "SpeedBuffs", speedBuffs );
 
-        loadPotions( config, "WeaponEffects", weaponEffects );
+        loadWeaponEffects( config, "WeaponEffects", weaponEffects );
 
         loadIntoSet( config, "Helmets", helmets );
         loadIntoSet( config, "Chestplates", chestplates );
@@ -327,7 +326,7 @@ public class Sentries extends JavaPlugin {
         map.putAll( (Map<String, T>) config.getConfigurationSection( node ).getValues( false ) );
     }
 
-    private void loadPotions( FileConfiguration config, String path, Map<Material, List<PotionEffect>> map ) {
+    private void loadWeaponEffects( FileConfiguration config, String path, Map<Material, List<PotionEffect>> map ) {
         map.clear();
 
         for ( String each : config.getStringList( path ) ) {
@@ -395,6 +394,8 @@ public class Sentries extends JavaPlugin {
 
         if ( S.SCORE.equals( name ) ) return true;
 
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
         if (    pluginManager.getPlugin( name ) != null
                 && pluginManager.getPlugin( name ).isEnabled() ) {
 
@@ -408,12 +409,4 @@ public class Sentries extends JavaPlugin {
 
         return false;
     }
-
-//    /**
-//     * @return the current instance of Sentries, for calls that cannot be made
-//     *         statically.
-//     */
-//    public static Plugin getSentry() {
-//        return plugin;
-//    }
 }

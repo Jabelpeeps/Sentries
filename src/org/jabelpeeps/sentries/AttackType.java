@@ -30,14 +30,15 @@ enum AttackType {
     warlock1(   "Warlock1",     Material.ENDER_PEARL,       EnderPearl.class ), 
     warlock2(   "Warlock2",     Material.SKULL_ITEM,        WitherSkull.class ),
     // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled  for now.
-    witchdoctor( "WitchDoctor", Material.POTION,            ThrownPotion.class ),
+    witchdoctor( "WitchDoctor", Material.SPLASH_POTION,     ThrownPotion.class ),
     
     brawler(     "Brawler",     Material.AIR,               null ) {
 
         @Override
         Material getWeapon( SentryTrait sentry ) {
-            return ((HumanEntity) sentry.getMyEntity()).getInventory()
-                    .getItemInMainHand().getType();
+            return ((HumanEntity) sentry.getMyEntity())
+                                        .getInventory()
+                                        .getItemInMainHand().getType();
         }
     };
 
@@ -61,7 +62,6 @@ enum AttackType {
         lightningLevel = ll;
     }
 
-    @SuppressWarnings( "unused" )
     // the argument for this method is only used in the override for the  'brawler' instance.
     Material getWeapon( SentryTrait sentry ) {
         return weapon;
