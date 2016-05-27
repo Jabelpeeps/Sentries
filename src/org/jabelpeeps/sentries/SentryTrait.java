@@ -13,8 +13,6 @@ import org.bukkit.Effect;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_9_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_9_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Creeper;
@@ -356,7 +354,7 @@ public class SentryTrait extends Trait {
 
         faceForward();
 
-        healAnimation = new PacketPlayOutAnimation( ((CraftEntity) myEntity).getHandle(), 6 );
+        healAnimation = new PacketPlayOutAnimation( NMS.getHandle( myEntity ), 6 );
 
         if ( guardeeName == null )
             npc.teleport( spawnLocation, TeleportCause.PLUGIN );
@@ -386,11 +384,10 @@ public class SentryTrait extends Trait {
         updateAttackType();
 
         if ( taskID == 0 ) {
-            taskID = Bukkit.getScheduler()
-                           .scheduleSyncRepeatingTask( sentry, 
-                                                       this, 
-                                                       40 + npc.getId(), 
-                                                       Sentries.logicTicks );
+            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
+                                                                      this, 
+                                                                      40 + npc.getId(), 
+                                                                      Sentries.logicTicks );
         }
     }
 
@@ -426,7 +423,9 @@ public class SentryTrait extends Trait {
                     return true;
 
                 // As this is an NPC and we haven't decided whether to ignore it yet, let check the ignores of the owner.
-                return isIgnoring( (LivingEntity) Bukkit.getOfflinePlayer( targetNpc.getTrait( Owner.class ).getOwnerId() ) );
+                LivingEntity player = Bukkit.getPlayer( targetNpc.getTrait( Owner.class ).getOwnerId() );
+                
+                if ( player != null ) return isIgnoring( player );
             }
         }
         else if ( aTarget instanceof Player ) {
@@ -473,7 +472,6 @@ public class SentryTrait extends Trait {
             if ( hasTargetType( allnpcs ) ) return true;
 
             NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
-
             String targetName = targetNpc.getName();
 
             if (    hasTargetType( namednpcs )
@@ -481,10 +479,10 @@ public class SentryTrait extends Trait {
                 return true;
 
             // As we are checking an NPC and haven't decided whether to attack it yet, lets check the owner.
-            return isTarget( 
-                    (LivingEntity) Bukkit.getOfflinePlayer( targetNpc.getTrait( Owner.class ).getOwnerId() ) );
+            LivingEntity player = Bukkit.getPlayer( targetNpc.getTrait( Owner.class ).getOwnerId() );
+            
+            if ( player != null ) return isTarget( player );            
         }
-        
         else if ( aTarget instanceof Player ) {
 
             if ( hasTargetType( allplayers ) ) return true;
@@ -558,26 +556,6 @@ public class SentryTrait extends Trait {
     void faceEntity( Entity from, Entity at ) {
         
         NMS.look( NMS.getHandle( from ), NMS.getHandle( at ) );
-
-//        if ( from.getWorld() != at.getWorld() ) return;
-//        
-//        Location fromLoc = from.getLocation();
-//        Location atLoc = at.getLocation();
-//
-//        double xDiff = atLoc.getX() - fromLoc.getX();
-//        double yDiff = atLoc.getY() - fromLoc.getY();
-//        double zDiff = atLoc.getZ() - fromLoc.getZ();
-//
-//        double distanceXZSquared = xDiff * xDiff + zDiff * zDiff;
-//        double distanceY = Math.sqrt( distanceXZSquared + yDiff * yDiff );
-//
-//        double yaw = Math.acos( xDiff / Math.sqrt( distanceXZSquared ) ) * 180 / Math.PI;
-//        double pitch = (Math.acos( yDiff / distanceY ) * 180 / Math.PI) - 90;
-//
-//        if ( zDiff < 0.0 ) {
-//            yaw = yaw + (Math.abs( 180 - yaw ) * 2);
-//        }
-//        NMS.look( from, (float) yaw - 90, (float) pitch );
     }
 
     private void faceForward() {
@@ -670,7 +648,8 @@ public class SentryTrait extends Trait {
     }
 
     public void draw( boolean on ) {
-        ((CraftLivingEntity) getMyEntity()).getHandle().b( on ); 
+        
+        NMS.getHandle( getMyEntity() ).b( on );
         // TODO: - IS THIS CORRECT?  What does it do?
     }
 
@@ -795,20 +774,9 @@ public class SentryTrait extends Trait {
 
                 if (    myProjectile == ThrownPotion.class 
                         && potionItem != null ) {
-                    ThrownPotion potion = myEntity.getWorld().spawn( myLocation, ThrownPotion.class );
-                    potion.setItem( potionItem.clone() );
                     
-//                    NMS.addToWorld( myEntity.getWorld(), PotionType.getByEffect(  weaponSpecialEffects.get( 0 ) ) , SpawnReason.CUSTOM );
-//                   
-//                    World nmsWorld = ((CraftWorld) myEntity.getWorld()).getHandle();
-//                    EntityPotion ent = new EntityPotion( nmsWorld,
-//                                                         myLocation.getX(), 
-//                                                         myLocation.getY(),
-//                                                         myLocation.getZ(),
-//                                                         CraftItemStack.asNMSCopy( potionItem ) );
-//                    nmsWorld.addEntity( ent );
-                    
-                    projectile = potion;
+                    projectile = myEntity.getWorld().spawn( myLocation, ThrownPotion.class );
+                    ((ThrownPotion) projectile).setItem( potionItem.clone() );
                 }
                 else if ( myProjectile == EnderPearl.class )
                     projectile = myEntity.launchProjectile( myProjectile );
