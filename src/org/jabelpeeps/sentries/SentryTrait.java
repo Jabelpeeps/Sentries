@@ -58,6 +58,7 @@ import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
+import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
@@ -115,6 +116,7 @@ public class SentryTrait extends Trait {
 
     Set<TargetType> targets = new HashSet<>();
     Set<TargetType> ignores = new HashSet<>();
+    
     Set<String> ignoreTargets = new HashSet<>();
     Set<String> validTargets = new HashSet<>();
 
@@ -1178,6 +1180,39 @@ public class SentryTrait extends Trait {
         if ( health > sentryMaxHealth ) health = sentryMaxHealth;
 
         myEntity.setHealth( health );
+    }
+    
+    boolean equip( ItemStack newEquipment ) {
+
+        Equipment equipment = npc.getTrait( Equipment.class );
+        if ( equipment == null ) return false;
+        // the npc's entity type does not support equipment.
+
+        if ( newEquipment == null ) {
+
+            for ( int i = 0; i < 5; i++ ) {
+
+                if (    equipment.get( i ) != null
+                        && equipment.get( i ).getType() != Material.AIR ) {
+                    equipment.set( i, null );
+                }
+            }
+            return true;
+        }
+        int slot = 0;
+        Material type = newEquipment.getType();
+
+        // First, determine the slot to edit
+        if ( Sentries.helmets.contains( type ) ) slot = 1;
+        else if ( Sentries.chestplates.contains( type ) ) slot = 2;
+        else if ( Sentries.leggings.contains( type ) ) slot = 3;
+        else if ( Sentries.boots.contains( type ) ) slot = 4;
+
+        equipment.set( slot, newEquipment );
+
+        if ( slot == 0 ) updateAttackType();
+
+        return true;
     }
 
     /**

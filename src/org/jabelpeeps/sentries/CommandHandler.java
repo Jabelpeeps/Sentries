@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.trait.trait.Owner;
@@ -23,16 +22,6 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public abstract class CommandHandler {
 
     public static Pattern colon = Pattern.compile( ":" );
-    static Pattern initialDoubleQuote = Pattern.compile( "^\"" );
-    static Pattern endDoubleQuote = Pattern.compile( "\"$" );
-    static Pattern initialSingleQuote = Pattern.compile( "^'" );
-    static Pattern endSingleQuote = Pattern.compile( "'$" );
-
-    static String guardCommandHelp;
-    static String equipCommandHelp;
-    static String targetCommandHelp;
-    static String ignoreCommandHelp;
-    static String mainHelpOutro;
 
     /**
      * Convenience method to check perms on Command usage. The method includes
@@ -73,45 +62,6 @@ public abstract class CommandHandler {
     }
 
     /**
-     * Convenience method to send a formatted message to the player regarding
-     * the respawn status of the npc.
-     * 
-     * @param value
-     *            - the number of seconds set as the respawn value.
-     * @param npc
-     *            - the npc
-     * @param player
-     *            - the player who sent the command.
-     */
-    private static void respawnCommandMessage( int value, NPC npc, CommandSender player ) {
-
-        if ( value == 0 )
-            player.sendMessage( String.join( "", S.Col.GOLD, npc.getName(), S.NPC_NO_AUTO_RESPAWN ) );
-        if ( value == -1 )
-            player.sendMessage( String.join( "", S.Col.GOLD, npc.getName(), S.NPC_DELETE_ON_DEATH ) );
-        if ( value > 0 )
-            player.sendMessage( String.join( "", S.Col.GOLD, npc.getName(), S.NPC_RESPAWN_AFTER, String.valueOf( value ), S.SECONDS ) );
-    }
-
-    /**
-     * Convenience method that removes single and double quotes from the ends of
-     * the supplied string.
-     * 
-     * @param input
-     *            - the string to be parsed
-     * @return - the string without quotes
-     */
-    private static String sanitiseString( String input ) {
-
-        input = initialDoubleQuote.matcher( input ).replaceAll( "" );
-        input = endDoubleQuote.matcher( input ).replaceAll( "" );
-        input = initialSingleQuote.matcher( input ).replaceAll( "" );
-        input = endSingleQuote.matcher( input ).replaceAll( "" );
-
-        return input;
-    }
-
-    /**
      * Concatenates the supplied String[] starting at the position indicated.
      * 
      * @param startFrom
@@ -130,127 +80,6 @@ public abstract class CommandHandler {
         return joiner.toString();
     }
 
-    /**
-     *  Returns the formatted help string for the guard command, lazily initialising it if needed.   
-     */
-    private static String guardCommandHelp() {
-        
-        if ( guardCommandHelp == null ) {
-
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
-
-            joiner.add( String.join( "", S.Col.GOLD, "do '/sentry guard'", S.Col.RESET ) );
-            joiner.add( "  to discover what a sentry is guarding" );
-            joiner.add( String.join( "", S.Col.GOLD, "do '/sentry guard clear'", S.Col.RESET ) );
-            joiner.add( "  to clear the player/npc being guarded" );
-            joiner.add( String.join( "", S.Col.GOLD, "do '/sentry guard (-p/l) <EntityName>'", S.Col.RESET ) );
-            joiner.add( "  to have a sentry guard a player, or another NPC" );
-            joiner.add( String.join( "", S.Col.GOLD, "    -p ", S.Col.RESET, "-> only search player names" ) );
-            joiner.add( String.join( "", S.Col.GOLD, "    -l ", S.Col.RESET, "-> only search local entities" ) );
-            joiner.add( "       -> only use one of -p or -l (or omit)" );
-
-            guardCommandHelp = joiner.toString();
-        }
-        return guardCommandHelp;
-    }
-    
-    /**
-     *  Returns the formatted help string for the equip command, lazily initialising it if needed.   
-     */
-    private static String equipCommandHelp() {
-
-        if ( equipCommandHelp == null ) {
-
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
-
-            joiner.add( String.join( "", S.Col.GOLD, "do '/sentry equip <ItemName>'", S.Col.RESET ) );
-            joiner.add( "  to give the named item to the sentry" );
-            joiner.add( "  item names are the offical MC item names" );
-            joiner.add( String.join( "", S.Col.GOLD, "do '/sentry equip clearall'", S.Col.RESET ) );
-            joiner.add( "  to clear all equipment slots." );
-            joiner.add( String.join( "", S.Col.GOLD, "do '/sentry equip clear <slot>'", S.Col.RESET ) );
-            joiner.add( "  to clear the specified slot, where slot can be one of: hand, helmet, chestplate, leggings or boots." );
-
-            equipCommandHelp = joiner.toString();
-        }
-        return equipCommandHelp;
-    }
-
-    private static String targetCommandHelp() {
-
-        if ( targetCommandHelp == null ) {
-
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
-
-            joiner.add( String.join( "", S.Col.GOLD, S.HELP_COMMAND_TARGET, S.Col.RESET ) );
-            joiner.add( String.join( " ", S.Col.GOLD, "", S.LIST, S.Col.RESET, S.HELP_LIST, S.TARGETS ) );
-            joiner.add( String.join( " ", S.Col.GOLD, "", S.CLEAR, S.Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
-            joiner.add( String.join( " ", S.Col.GOLD, S.HELP_ADD_TYPE, S.Col.RESET, S.HELP_ADD ) );
-            joiner.add( String.join( " ", S.Col.GOLD, S.HELP_REMOVE_TYPE, S.Col.RESET, S.HELP_REMOVE ) );
-            joiner.add( S.HELP_ADD_REMOVE_TYPES );
-            joiner.add( getAdditionalTargets() );
-
-            targetCommandHelp = joiner.toString();
-        }
-        return targetCommandHelp;
-    }
-
-    private static String ignoreCommandHelp() {
-
-        if ( ignoreCommandHelp == null ) {
-
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ) .add( "" );
-
-            joiner.add( String.join( "", S.Col.GOLD, S.HELP_COMMAND_IGNORE, S.Col.RESET ) );
-            joiner.add( String.join( " ", S.Col.GOLD, "", S.LIST, S.Col.RESET, S.HELP_LIST, S.IGNORES ) );
-            joiner.add( String.join( " ", S.Col.GOLD, "", S.CLEAR, S.Col.RESET, S.HELP_CLEAR, S.IGNORES ) );
-            joiner.add( String.join( " ", S.Col.GOLD, S.HELP_ADD_TYPE, S.Col.RESET, S.HELP_ADD ) );
-            joiner.add( String.join( " ", S.Col.GOLD, S.HELP_REMOVE_TYPE, S.Col.RESET, S.HELP_REMOVE ) );
-            joiner.add( S.HELP_ADD_REMOVE_TYPES );
-            joiner.add( getAdditionalTargets() );
-
-            ignoreCommandHelp = joiner.toString();
-        }
-        return ignoreCommandHelp;
-    }
-
-    /**
-     * iterates over the activated PluginBridges, polling each one for command
-     * help text.
-     * 
-     * @return - the concatenated help Strings
-     */
-    private static String getAdditionalTargets() {
-        String outString = "";
-
-        if ( !Sentries.activePlugins.isEmpty() ) {
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-
-            joiner.add( "You may also use these additional types:- " );
-
-            for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                joiner.add( each.getCommandHelp() );
-            }
-            outString = joiner.toString();
-        }
-        return outString;
-    }
-    private static String mainHelpOutro() {
-        
-        if ( mainHelpOutro == null ) {
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-    
-            joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-            joiner.add( String.join( "", "If '...' is shown do ", S.Col.GOLD, "/sentry help <command>", S.Col.RESET, " for further help" ) );
-            joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-            joiner.add( String.join( "", "Select NPC's with ", S.Col.GOLD, "'/npc sel'", S.Col.RESET, " before running commands, or use ",
-                    S.Col.GOLD, "/sentry #npcid <command> [args]", S.Col.RESET, " to run command on the sentry with the given npcid number." ) );
-            joiner.add( String.join( "", S.Col.GOLD, "-------------------------------", S.Col.RESET ) );
-    
-            mainHelpOutro = joiner.toString();
-        }
-        return mainHelpOutro;
-    }
     // ------------------------------------------------------------------------------------
     /**
      * The only accessible method of this class. It parses the arguments and
@@ -263,8 +92,7 @@ public abstract class CommandHandler {
      */
     static boolean call( CommandSender player, String[] inargs, Sentries sentry ) {
 
-        if ( !enoughArgs( 1, inargs, player ) )
-            return true;
+        if ( !enoughArgs( 1, inargs, player ) ) return true;
 
         // ----------------------------------- help command -----------------
         if ( S.HELP.equalsIgnoreCase( inargs[0] ) ) {
@@ -272,16 +100,16 @@ public abstract class CommandHandler {
             if ( inargs.length > 1 ) {
 
                 if ( checkCommandPerm( S.PERM_TARGET, player ) && S.TARGET.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( targetCommandHelp() );
+                    player.sendMessage( S.targetCommandHelp() );
                 }
                 else if ( checkCommandPerm( S.PERM_IGNORE, player ) && S.IGNORE.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( ignoreCommandHelp() );
+                    player.sendMessage( S.ignoreCommandHelp() );
                 }
                 else if ( checkCommandPerm( S.PERM_EQUIP, player ) && S.EQUIP.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( equipCommandHelp() );
+                    player.sendMessage( S.equipCommandHelp() );
                 }
                 else if ( checkCommandPerm( S.PERM_GUARD, player ) && S.GUARD.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( guardCommandHelp() );
+                    player.sendMessage( S.guardCommandHelp() );
                 }
                 else player.sendMessage( S.ERROR_NO_MORE_HELP );
             }
@@ -289,17 +117,13 @@ public abstract class CommandHandler {
                 player.sendMessage( String.join( "", System.lineSeparator(), S.Col.GOLD, "---------- Sentries Commands ----------", S.Col.RESET  ) );
 
                 if ( checkCommandPerm( S.PERM_TARGET, player ) )
-                    player.sendMessage(
-                            String.join( " ", S.Col.GOLD, "/sentry target ...", S.Col.RESET, "set targets to attack." ) );
+                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry target ...", S.Col.RESET, "set targets to attack." ) );
                 if ( checkCommandPerm( S.PERM_IGNORE, player ) )
-                    player.sendMessage(
-                            String.join( " ", S.Col.GOLD, "/sentry ignore ...", S.Col.RESET, "set targets to ignore." ) );
+                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry ignore ...", S.Col.RESET, "set targets to ignore." ) );
                 if ( checkCommandPerm( S.PERM_EQUIP, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry equip ...", S.Col.RESET,
-                            "set the equipment a sentry is using" ) );
+                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry equip ...", S.Col.RESET, "set the equipment a sentry is using" ) );
                 if ( checkCommandPerm( S.PERM_GUARD, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry guard ...", S.Col.RESET,
-                            "tell the sentry what to guard" ) );
+                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry guard ...", S.Col.RESET, "tell the sentry what to guard" ) );
 
                 if ( checkCommandPerm( S.PERM_SPEED, player ) ) {
                     player.sendMessage( S.Col.GOLD + "/sentry speed [0-1.5]" );
@@ -395,7 +219,7 @@ public abstract class CommandHandler {
                 if ( checkCommandPerm( S.PERM_RELOAD, player ) )
                     player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, " - Reloads the config file" ) );
                 
-                player.sendMessage( mainHelpOutro() );
+                player.sendMessage( S.mainHelpOutro() );
             }
             return true;
         }
@@ -428,14 +252,13 @@ public abstract class CommandHandler {
         // if a positive number was found, the next argument to parse will be at position 1, otherwise 0.
         int nextArg = (npcid > 0) ? 1 : 0;
 
-        if ( !enoughArgs( 1 + nextArg, inargs, player ) )
-            return true;
+        if ( !enoughArgs( 1 + nextArg, inargs, player ) ) return true;
 
         NPC thisNPC;
         // check to see whether the value saved is an npc ID, and save a reference if so.
         if ( npcid == -1 ) {
 
-            thisNPC = ((CitizensPlugin) CitizensAPI.getPlugin()).getDefaultNPCSelector().getSelected( player );
+            thisNPC = CitizensAPI.getDefaultNPCSelector().getSelected( player );
 
             if ( thisNPC == null ) {
                 player.sendMessage( S.ERROR.concat( S.ERROR_NO_NPC ) );
@@ -461,6 +284,7 @@ public abstract class CommandHandler {
         // We need to check that the player sending the command has the authority to use it.
         // First lets be sure we are dealing with an actual player, not a player type npc.
         if (    player instanceof Player
+                && !player.isOp()
                 && !CitizensAPI.getNPCRegistry().isNPC( (Entity) player ) ) {
 
             // TODO consider changing this section to allow admins to modify other players' npcs.
@@ -471,15 +295,13 @@ public abstract class CommandHandler {
                 if ( !((Player) player).hasPermission( S.PERM_CITS_ADMIN ) ) {
                     // player is not an admin either.
 
-                    player.sendMessage( S.Col.RED.concat(
-                            "You must be the owner of this Sentries to execute commands." ) );
+                    player.sendMessage( S.Col.RED.concat( "You must be the owner of this Sentries to execute commands." ) );
                     return true;
                 }
                 if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
                     // not server-owned NPC
 
-                    player.sendMessage( S.Col.RED.concat(
-                            "You, or the server, must be the owner of this Sentries to execute commands." ) );
+                    player.sendMessage( S.Col.RED.concat( "You, or the server, must be the owner of this Sentries to execute commands." ) );
                     return true;
                 }
             }
@@ -523,9 +345,7 @@ public abstract class CommandHandler {
 
                 inst.invincible = (set == null) ? !inst.invincible : set;
 
-                player.sendMessage(
-                        String.join( " ", S.Col.GREEN, npcName, inst.invincible
-                                ? "is now INVINCIBLE" : "now takes damage" ) );
+                player.sendMessage( String.join( " ", S.Col.GREEN, npcName, inst.invincible ? "is now INVINCIBLE" : "now takes damage" ) );
             }
             return true;
         }
@@ -534,12 +354,10 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_RETALIATE, player ) ) {
 
-                inst.iWillRetaliate = (set == null) ? !inst.iWillRetaliate
-                                                    : set;
+                inst.iWillRetaliate = (set == null) ? !inst.iWillRetaliate : set;
 
-                player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                        inst.iWillRetaliate ? "will retalitate against all attackers"
-                                            : "will not retaliate when attacked" ) );
+                player.sendMessage( String.join( " ", S.Col.GREEN, npcName, inst.iWillRetaliate ? "will retalitate against all attackers"
+                                                                                                : "will not retaliate when attacked" ) );
             }
             return true;
         }
@@ -548,13 +366,10 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_CRITICAL_HITS, player ) ) {
 
-                inst.acceptsCriticals = (set == null) ? !inst.acceptsCriticals
-                                                      : set;
+                inst.acceptsCriticals = (set == null) ? !inst.acceptsCriticals : set;
 
-                player.sendMessage(
-                        String.join( " ", S.Col.GREEN, npcName,
-                                inst.acceptsCriticals ? "will take critical hits"
-                                                      : "will take normal damage" ) );
+                player.sendMessage( String.join( " ", S.Col.GREEN, npcName, inst.acceptsCriticals ? "will take critical hits"
+                                                                                                  : "will take normal damage" ) );
             }
             return true;
         }
@@ -565,9 +380,8 @@ public abstract class CommandHandler {
 
                 inst.dropInventory = (set == null) ? !inst.dropInventory : set;
 
-                player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                        inst.dropInventory ? "will drop items"
-                                           : "will not drop items" ) );
+                player.sendMessage( String.join( " ", S.Col.GREEN, npcName, inst.dropInventory ? "will drop items"
+                                                                                               : "will not drop items" ) );
             }
             return true;
         }
@@ -576,12 +390,10 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_KILLDROPS, player ) ) {
 
-                inst.killsDropInventory = (set == null)
-                        ? !inst.killsDropInventory : set;
+                inst.killsDropInventory = (set == null) ? !inst.killsDropInventory : set;
 
-                player.sendMessage( String.join( "", S.Col.GREEN, npcName,
-                        inst.killsDropInventory ? "'s kills will drop items or exp"
-                                                : "'s kills will not drop items or exp" ) );
+                player.sendMessage( String.join( "", S.Col.GREEN, npcName, inst.killsDropInventory ? "'s kills will drop items or exp"
+                                                                                                   : "'s kills will not drop items or exp" ) );
             }
             return true;
         }
@@ -594,9 +406,8 @@ public abstract class CommandHandler {
 
                 thisNPC.data().set( NPC.TARGETABLE_METADATA, inst.targetable );
 
-                player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                        inst.targetable ? "will be targeted by mobs"
-                                        : "will not be targeted by mobs" ) );
+                player.sendMessage( String.join( " ", S.Col.GREEN, npcName, inst.targetable ? "will be targeted by mobs"
+                                                                                            : "will not be targeted by mobs" ) );
             }
             return true;
         }
@@ -651,13 +462,8 @@ public abstract class CommandHandler {
     
                         String arg = joinArgs( start + nextArg, inargs );
     
-                        if ( !playersonly ) {
-                            ok = inst.findGuardEntity( arg, false );
-                        }
-    
-                        if ( !localonly ) {
-                            ok = inst.findGuardEntity( arg, true );
-                        }
+                        if ( !playersonly ) ok = inst.findGuardEntity( arg, false );   
+                        if ( !localonly ) ok = inst.findGuardEntity( arg, true );
     
                         if ( ok )
                             player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now guarding", arg ) );
@@ -669,12 +475,9 @@ public abstract class CommandHandler {
                 if ( inst.guardeeName == null )
                     player.sendMessage( S.Col.GREEN.concat( "Guarding: My Surroundings" ) );
                 else if ( inst.guardeeEntity == null )
-                    player.sendMessage( 
-                            String.join( " ", S.Col.GREEN, npcName, "is configured to guard",
-                                         inst.guardeeName, "but cannot find them at the moment" ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is configured to guard", inst.guardeeName, "but cannot find them at the moment" ) );
                 else
-                    player.sendMessage( 
-                            String.join( " ", S.Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
+                    player.sendMessage( String.join( " ", S.Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
 
             }
             return true;
@@ -685,8 +488,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_FOLLOW_DIST, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( 
-                            String.join( "", S.Col.GOLD, npcName, "'s Follow Distance is ", String.valueOf( inst.followDistance ) ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Follow Distance is ", String.valueOf( inst.followDistance ) ) );
                     player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry follow [#]. Default is 4. " ) );
                 }
                 else {
@@ -696,11 +498,10 @@ public abstract class CommandHandler {
                         return true;
                     }
 
-                    if ( dist > 32 )
-                        dist = 32;
+                    if ( dist > 32 ) dist = 32;
+                    
                     inst.followDistance = dist * dist;
-                    player.sendMessage( 
-                            String.join( " ", S.Col.GREEN, npcName, "follow distance set to", String.valueOf( dist ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "follow distance set to", String.valueOf( dist ) ) );
                 }
             }
             return true;
@@ -711,25 +512,21 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_HEALTH, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( 
-                            String.join( "", S.Col.GOLD, npcName, "'s Health is ", String.valueOf( inst.sentryMaxHealth ) ) );
-                    player.sendMessage( 
-                            S.Col.GOLD.concat( "Usage: /sentry health [#]   note: Typically players have 20 HPs when fully healed" ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Health is ", String.valueOf( inst.sentryMaxHealth ) ) );
+                    player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry health [#]   note: Typically players have 20 HPs when fully healed" ) );
                 }
                 else {
                     int HPs = Util.string2Int( inargs[nextArg + 1] );
                     if ( HPs < 1 ) {
-                        player.sendMessage( String.join( "", S.ERROR,
-                                inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
+                        player.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
                         return true;
                     }
 
-                    if ( HPs > 2000000 )
-                        HPs = 2000000;
+                    if ( HPs > 2000000 ) HPs = 2000000;
+                    
                     inst.sentryMaxHealth = HPs;
                     inst.setHealth( HPs );
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "health set to", String.valueOf( HPs ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "health set to", String.valueOf( HPs ) ) );
                 }
             }
             return true;
@@ -741,10 +538,8 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Armour is ",
-                            String.valueOf( inst.armourValue ) ) );
-                    player.sendMessage(
-                            S.Col.GOLD.concat( "Usage: /sentry armour [#] " ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Armour is ", String.valueOf( inst.armourValue ) ) );
+                    player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry armour [#] " ) );
                 }
                 else {
                     int armour = Util.string2Int( inargs[nextArg + 1] );
@@ -753,11 +548,10 @@ public abstract class CommandHandler {
                         return true;
                     }
 
-                    if ( armour > 2000000 )
-                        armour = 2000000;
+                    if ( armour > 2000000 ) armour = 2000000;
+                    
                     inst.armourValue = armour;
-                    player.sendMessage( 
-                            String.join( " ", S.Col.GREEN, npcName, "armour set to", String.valueOf( armour ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "armour set to", String.valueOf( armour ) ) );
                 }
             }
             return true;
@@ -779,11 +573,10 @@ public abstract class CommandHandler {
                         return true;
                     }
 
-                    if ( strength > 2000000 )
-                        strength = 2000000;
+                    if ( strength > 2000000 ) strength = 2000000;
+                    
                     inst.strength = strength;
-                    player.sendMessage( 
-                            String.join( " ", S.Col.GREEN, npcName, "strength set to", String.valueOf( strength ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "strength set to", String.valueOf( strength ) ) );
                 }
             }
             return true;
@@ -802,15 +595,13 @@ public abstract class CommandHandler {
                 else {
                     int vision = Util.string2Int( inargs[nextArg + 1] );
                     if ( vision < 0 ) {
-                        player.sendMessage( String.join( "", S.ERROR,
-                                inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
+                        player.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
                         return true;
                     }
-                    if ( vision > 16 )
-                        vision = 16;
+                    if ( vision > 16 ) vision = 16;
+                    
                     inst.nightVision = vision;
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "Night Vision set to", String.valueOf( vision ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Night Vision set to", String.valueOf( vision ) ) );
                 }
             }
             return true;
@@ -821,7 +612,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_RESPAWN_DELAY, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    respawnCommandMessage( inst.respawnDelay, thisNPC, player );
+                    S.respawnCommandMessage( inst.respawnDelay, thisNPC, player );
 
                     player.sendMessage( S.Col.GOLD + "Usage: /sentry respawn [-1 - 2000000] " );
                     player.sendMessage( S.Col.GOLD + "Usage: set to 0 to prevent automatic respawn" );
@@ -834,10 +625,10 @@ public abstract class CommandHandler {
                         return true;
                     }
 
-                    if ( respawn > 2000000 )
-                        respawn = 2000000;
+                    if ( respawn > 2000000 ) respawn = 2000000;
+                    
                     inst.respawnDelay = respawn;
-                    respawnCommandMessage( inst.respawnDelay, thisNPC, player );
+                    S.respawnCommandMessage( inst.respawnDelay, thisNPC, player );
                 }
             }
             return true;
@@ -858,8 +649,8 @@ public abstract class CommandHandler {
                         return true;
                     }
 
-                    if ( speed > 2.0 )
-                        speed = 2.0f;
+                    if ( speed > 2.0 ) speed = 2.0f;
+                    
                     inst.sentrySpeed = speed;
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "speed set to", String.valueOf( speed ) ) );
                 }
@@ -872,8 +663,8 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_ATTACK_RATE, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( S.Col.GOLD + npcName + "'s Projectile Attack Rate is " + inst.attackRate
-                            + "seconds between shots." );
+                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Projectile Attack Rate is ", 
+                                        String.valueOf( inst.attackRate), " seconds between shots." ) );
                     player.sendMessage( S.Col.GOLD + "Usage: /sentry attackrate [0.0 - 30.0]" );
                 }
                 else {
@@ -883,11 +674,10 @@ public abstract class CommandHandler {
                         return true;
                     }
 
-                    if ( attackrate > 30.0 )
-                        attackrate = 30.0;
+                    if ( attackrate > 30.0 ) attackrate = 30.0;
+                    
                     inst.attackRate = attackrate;
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "Projectile Attack Rate set to", String.valueOf( attackrate ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Projectile Attack Rate set to", String.valueOf( attackrate ) ) );
                 }
             }
             return true;
@@ -905,16 +695,14 @@ public abstract class CommandHandler {
                 else {
                     double healrate = Util.string2Double( inargs[nextArg + 1] );
                     if ( healrate < 0.0 ) {
-                        player.sendMessage( String.join( "", S.ERROR,
-                                inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
+                        player.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
                         return true;
                     }
 
-                    if ( healrate > 300.0 )
-                        healrate = 300.0;
+                    if ( healrate > 300.0 ) healrate = 300.0;
+                    
                     inst.healRate = healrate;
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "Heal Rate set to", String.valueOf( healrate ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Heal Rate set to", String.valueOf( healrate ) ) );
                 }
             }
             return true;
@@ -931,16 +719,14 @@ public abstract class CommandHandler {
                 else {
                     int range = Util.string2Int( inargs[nextArg + 1] );
                     if ( range < 1 ) {
-                        player.sendMessage( String.join( "", S.ERROR,
-                                inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
+                        player.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
                         return true;
                     }
 
-                    if ( range > 100 )
-                        range = 100;
+                    if ( range > 100 ) range = 100;
+                    
                     inst.sentryRange = range;
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "range set to", String.valueOf( range ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "range set to", String.valueOf( range ) ) );
                 }
             }
             return true;
@@ -957,16 +743,14 @@ public abstract class CommandHandler {
                 else {
                     int range = Util.string2Int( inargs[nextArg + 1] );
                     if ( range < 0 ) {
-                        player.sendMessage( String.join( "", S.ERROR,
-                                inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
+                        player.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
                         return true;
                     }
 
-                    if ( range > 50 )
-                        range = 50;
+                    if ( range > 50 ) range = 50;
+                    
                     inst.warningRange = range;
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName,
-                            "warning range set to", String.valueOf( range ) ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "warning range set to", String.valueOf( range ) ) );
                 }
             }
             return true;
@@ -978,51 +762,46 @@ public abstract class CommandHandler {
 
                 if ( inargs.length <= 1 + nextArg ) {
                     player.sendMessage( String.join( "", S.ERROR, "More arguments needed.") );
-                    player.sendMessage( equipCommandHelp() );
+                    player.sendMessage( S.equipCommandHelp() );
+                    return true;
                 }
                 
+                EntityType type = thisNPC.getEntity().getType();
                 // TODO figure out why zombies and skele's are not included here.
-                else if ( thisNPC.getEntity().getType() == EntityType.ENDERMAN
-                        || thisNPC.getEntity().getType() == EntityType.PLAYER ) {
+                if ( type == EntityType.ENDERMAN || type == EntityType.PLAYER ) {
 
-                    if ( "clearall".equalsIgnoreCase( inargs[nextArg + 1] ) ) {
+                    if ( S.CLEARALL.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
 
-                        // remove equipment
-                        sentry.equip( thisNPC, inst, null );
-                        player.sendMessage( String.join( "", S.Col.YELLOW,
-                                npcName, "'s equipment cleared" ) );
+                        inst.equip( null );
+                        player.sendMessage( String.join( "", S.Col.YELLOW, npcName, "'s equipment cleared" ) );
                     }
                     else if ( S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
 
                         for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() )
 
                             if ( each.getKey().equalsIgnoreCase( inargs[nextArg + 2] ) ) {
-                                thisNPC.getTrait( Equipment.class )
-                                       .set( each.getValue(),
-                                             new ItemStack( Material.AIR ) );
-                            player.sendMessage( String.join( "", S.Col.GREEN, "removed ", npcName, "'s ", inargs[nextArg +2] ) );
+                                
+                                thisNPC.getTrait( Equipment.class ).set( each.getValue(), new ItemStack( Material.AIR ) );                                
+                                player.sendMessage( String.join( "", S.Col.GREEN, "removed ", npcName, "'s ", inargs[nextArg +2] ) );
                             }
                     }
                     else {
-                        Material mat = Material.getMaterial( inargs[nextArg + 1] );
+                        Material mat = Material.matchMaterial( inargs[nextArg + 1] );
 
                         if ( mat == null ) {
-                            player.sendMessage( S.Col.RED.concat(
-                                    "Could not equip: item name not recognised" ) );
+                            player.sendMessage( S.Col.RED.concat( "Could not equip: item name not recognised" ) );
                             return true;
                         }
 
                         ItemStack item = new ItemStack( mat );
 
-                        if ( sentry.equip( thisNPC, inst, item ) )
-                            player.sendMessage(
-                                    String.join( " ", S.Col.GREEN, "equipped", mat.toString(), "on", npcName ) );
+                        if ( inst.equip( item ) )
+                            player.sendMessage( String.join( " ", S.Col.GREEN, "equipped", mat.toString(), "on", npcName ) );
                         else
                             player.sendMessage( S.Col.RED.concat( "Could not equip: invalid mob type?" ) );
                     }
                 }
-                else
-                    player.sendMessage( S.Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
+                else player.sendMessage( S.Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
             }
             return true;
         }
@@ -1033,15 +812,15 @@ public abstract class CommandHandler {
 
                 if ( inargs.length >= 2 + nextArg ) {
 
-                    String str = sanitiseString( joinArgs( 1 + nextArg, inargs ) );
+                    String str = Util.sanitiseString( joinArgs( 1 + nextArg, inargs ) );
 
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Warning message set to", S.Col.RESET, 
-                            ChatColor.translateAlternateColorCodes( '&', str ) ) );
+                                                        ChatColor.translateAlternateColorCodes( '&', str ) ) );
                     inst.warningMsg = str;
                 }
                 else {
                     player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Warning Message is: ", S.Col.RESET, 
-                            ChatColor.translateAlternateColorCodes( '&', inst.warningMsg ) ) );
+                                                        ChatColor.translateAlternateColorCodes( '&', inst.warningMsg ) ) );
 
                     player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry warning 'The Text to use'" ) );
                 }
@@ -1055,15 +834,15 @@ public abstract class CommandHandler {
 
                 if ( inargs.length >= 2 + nextArg ) {
 
-                    String str = sanitiseString( joinArgs( 1 + nextArg, inargs ) );
+                    String str = Util.sanitiseString( joinArgs( 1 + nextArg, inargs ) );
 
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Greeting message set to", S.Col.RESET,
-                            ChatColor.translateAlternateColorCodes( '&', str ) ) );
+                                                        ChatColor.translateAlternateColorCodes( '&', str ) ) );
                     inst.greetingMsg = str;
                 }
                 else {
                     player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Greeting Message is: ", S.Col.RESET,
-                            ChatColor.translateAlternateColorCodes( '&', inst.greetingMsg ) ) );
+                                                        ChatColor.translateAlternateColorCodes( '&', inst.greetingMsg ) ) );
 
                     player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry greeting 'The Text to use'" ) );
                 }
@@ -1078,10 +857,10 @@ public abstract class CommandHandler {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
                 joiner.add( String.join( "", S.Col.GOLD, "------- Sentries Info for ", npcName, " (npcid - ",
-                        String.valueOf( thisNPC.getId() ), ") ", "------" ) );
+                                            String.valueOf( thisNPC.getId() ), ") ", "------" ) );
                 
-                joiner.add( String.join( "", S.Col.RED, "[HP]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/",
-                        String.valueOf( inst.sentryMaxHealth ),
+                joiner.add( String.join( "", 
+                        S.Col.RED, "[HP]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.sentryMaxHealth ),
                         S.Col.RED, " [AP]:", S.Col.WHITE, String.valueOf( inst.getArmor() ),
                         S.Col.RED, " [STR]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
                         S.Col.RED, " [SPD]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
@@ -1092,15 +871,12 @@ public abstract class CommandHandler {
                         S.Col.RED, " [WARN]:", S.Col.WHITE, String.valueOf( inst.warningRange ),
                         S.Col.RED, " [FOL]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
-                joiner.add( String.join( "", S.Col.GREEN, 
-                        "Invincible: ", String.valueOf( inst.invincible ), 
-                        "  Retaliate: ", String.valueOf( inst.iWillRetaliate ) ) );
-                joiner.add( String.join( "", S.Col.GREEN, 
-                        "Drops Items: ", String.valueOf( inst.dropInventory ), 
-                        "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
-                joiner.add( String.join( "", S.Col.GREEN, 
-                        "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
-                        "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
+                joiner.add( String.join( "", S.Col.GREEN, "Invincible: ", String.valueOf( inst.invincible ), 
+                                                        "  Retaliate: ", String.valueOf( inst.iWillRetaliate ) ) );
+                joiner.add( String.join( "", S.Col.GREEN, "Drops Items: ", String.valueOf( inst.dropInventory ), 
+                                                        "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
+                joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
+                                                        "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
                 joiner.add( String.join( "", S.Col.BLUE, "Currently: ", inst.getNPC().isSpawned() ? "Spawned" 
                                                                                                   : "Not Spawned" ) );
                 joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
@@ -1140,7 +916,7 @@ public abstract class CommandHandler {
                     player.sendMessage( parseTargetOrIgnore( inargs, nextArg, npcName, inst, true ) );
                     return true;
                 }
-                player.sendMessage( targetCommandHelp() );
+                player.sendMessage( S.targetCommandHelp() );
             }
         }
         // ----------------------------------------------------ignore command-----------
@@ -1149,8 +925,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_IGNORE, player ) ) {
 
                 if ( S.LIST.equals( inargs[nextArg + 1] ) ) {
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Current Ignores:",
-                            inst.ignoreTargets.toString() ) );
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Current Ignores:", inst.ignoreTargets.toString() ) );
                     return true;
                 }
                 if ( S.CLEAR.equals( inargs[nextArg + 1] ) ) {
@@ -1166,7 +941,7 @@ public abstract class CommandHandler {
                     player.sendMessage( parseTargetOrIgnore( inargs, nextArg, npcName, inst, false ) );
                     return true;
                 }
-                player.sendMessage( ignoreCommandHelp() );
+                player.sendMessage( S.ignoreCommandHelp() );
             }
         }
         return false;
@@ -1177,12 +952,10 @@ public abstract class CommandHandler {
         String[] typeArgs = new String[inargs.length - (2 + nextArg)];
         System.arraycopy( inargs, 2 + nextArg, typeArgs, 0, inargs.length - (2 + nextArg) );
 
-        if ( Sentries.debug )
-            Sentries.debugLog( "Target types list is:- " + joinArgs( 0, typeArgs ) );
+        if ( Sentries.debug ) Sentries.debugLog( "Target types list is:- " + joinArgs( 0, typeArgs ) );
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-        Set<String> setOfTargets = forTargets ? inst.validTargets
-                                              : inst.ignoreTargets;
+        Set<String> setOfTargets = forTargets ? inst.validTargets : inst.ignoreTargets;
 
         if ( S.ADD.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
 
@@ -1207,13 +980,11 @@ public abstract class CommandHandler {
 
                     if ( !messageSent ) {
                         if ( opSucceeded )
-                            joiner.add( String.join( " ", S.Col.GREEN, npcName,
-                                    forTargets ? "Target added. Now targeting:-"
-                                               : "Ignore added. Now ignoring:-",
-                                    setOfTargets.toString() ) );
+                            joiner.add( String.join( " ", S.Col.GREEN, npcName, forTargets ? "Target added. Now targeting:-"
+                                                                                           : "Ignore added. Now ignoring:-",
+                                                                                           setOfTargets.toString() ) );
                         else
-                            joiner.add( String.join( " ", S.Col.GREEN, arg, S.ALLREADY_ON_LIST,
-                                    forTargets ? S.TARGETS : S.IGNORES ) );
+                            joiner.add( String.join( " ", S.Col.GREEN, arg, S.ALLREADY_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
                     }
                 }
             }
@@ -1240,14 +1011,11 @@ public abstract class CommandHandler {
 
                     if ( !messageSent ) {
                         if ( opSucceeded )
-                            joiner.add( String.join( " ", S.Col.GREEN, npcName,
-                                    forTargets
-                                            ? "Target removed. Now targeting:-"
-                                            : "Ignore removed. Now ignoring:-",
-                                    setOfTargets.toString() ) );
+                            joiner.add( String.join( " ", S.Col.GREEN, npcName, forTargets ? "Target removed. Now targeting:-"
+                                                                                           : "Ignore removed. Now ignoring:-",
+                                                                                           setOfTargets.toString() ) );
                         else
-                            joiner.add( String.join( " ", S.Col.GREEN, arg, S.NOT_FOUND_ON_LIST,
-                                    forTargets ? S.TARGETS : S.IGNORES ) );
+                            joiner.add( String.join( " ", S.Col.GREEN, arg, S.NOT_FOUND_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
                     }
                 }
             }

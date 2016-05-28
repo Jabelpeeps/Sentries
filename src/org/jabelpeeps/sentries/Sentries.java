@@ -20,7 +20,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Projectile;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,9 +28,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import net.aufdemrand.denizen.Denizen;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
-import net.citizensnpcs.api.trait.trait.Equipment;
 
 public class Sentries extends JavaPlugin {
 
@@ -233,50 +230,13 @@ public class Sentries extends JavaPlugin {
         logger.info( s );
     }
 
-    // TODO move this to SentryTrait, it really makes no sense having it here.
-    boolean equip( NPC npc, SentryTrait inst, ItemStack newEquipment ) {
-
-        Equipment equipment = npc.getTrait( Equipment.class );
-        if ( equipment == null ) return false;
-        // the npc's entity type does not support equipment.
-
-        if ( newEquipment == null ) {
-
-            for ( int i = 0; i < 5; i++ ) {
-
-                if (    equipment.get( i ) != null
-                        && equipment.get( i ).getType() != Material.AIR ) {
-                    equipment.set( i, null );
-                }
-            }
-            return true;
-        }
-        int slot = 0;
-        Material type = newEquipment.getType();
-
-        // First, determine the slot to edit
-        if ( helmets.contains( type ) ) slot = 1;
-        else if ( chestplates.contains( type ) ) slot = 2;
-        else if ( leggings.contains( type ) ) slot = 3;
-        else if ( boots.contains( type ) ) slot = 4;
-
-        equipment.set( slot, newEquipment );
-
-        if ( slot == 0 )
-            inst.updateAttackType();
-
-        return true;
-    }
-
     @Override
     public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
-
         return CommandHandler.call( player, inargs, this );
     }
 
     @Override
     public void onDisable() {
-
         logger.log( Level.INFO, " v" + getDescription().getVersion() + " disabled." );
         Bukkit.getScheduler().cancelTasks( this );
         plugin = null;
@@ -289,8 +249,8 @@ public class Sentries extends JavaPlugin {
             List<String> strings = config.getStringList( key );
 
             if ( strings.size() > 0 ) {
-                if ( debug )
-                    debugLog( strings.toString() );
+                if ( debug ) debugLog( strings.toString() );
+                
                 set.clear();
 
                 for ( String each : strings )
@@ -303,8 +263,7 @@ public class Sentries extends JavaPlugin {
         map.clear();
 
         for ( String each : config.getStringList( node ) ) {
-            if ( debug )
-                debugLog( each );
+            if ( debug ) debugLog( each );
 
             String[] args = each.trim().split( " " );
 
@@ -346,17 +305,14 @@ public class Sentries extends JavaPlugin {
 
                 PotionEffect val = getPotionEffect( string );
 
-                if ( val != null )
-                    list.add( val );
+                if ( val != null ) list.add( val );
             }
-            if ( !list.isEmpty() )
-                map.put( item, list );
+            if ( !list.isEmpty() ) map.put( item, list );
         }
     }
 
     private PotionEffect getPotionEffect( String string ) {
-        if ( string == null )
-            return null;
+        if ( string == null ) return null;
 
         String[] args = string.trim().split( ":" );
 
@@ -400,13 +356,11 @@ public class Sentries extends JavaPlugin {
         if (    pluginManager.getPlugin( name ) != null
                 && pluginManager.getPlugin( name ).isEnabled() ) {
 
-            if ( debug )
-                debugLog( name + " found by bukkit/spigot." );
+            if ( debug ) debugLog( name + " found by bukkit/spigot." );
 
             return true;
         }
-        if ( debug )
-            debugLog( S.ERROR_PLUGIN_NOT_FOUND.concat( name ) );
+        if ( debug ) debugLog( S.ERROR_PLUGIN_NOT_FOUND.concat( name ) );
 
         return false;
     }

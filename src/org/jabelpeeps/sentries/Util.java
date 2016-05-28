@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries;
 
+import java.util.regex.Pattern;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -154,7 +156,30 @@ public abstract class Util {
 
         return input;
     }
+    
+    static Pattern initialDoubleQuote = Pattern.compile( "^\"" );
+    static Pattern endDoubleQuote = Pattern.compile( "\"$" );
+    static Pattern initialSingleQuote = Pattern.compile( "^'" );
+    static Pattern endSingleQuote = Pattern.compile( "'$" );
 
+    /**
+     * Convenience method that removes single and double quotes from the ends of
+     * the supplied string.
+     * 
+     * @param input
+     *            - the string to be parsed
+     * @return - the string without quotes
+     */
+    static String sanitiseString( String input ) {
+
+        input = initialDoubleQuote.matcher( input ).replaceAll( "" );
+        input = endDoubleQuote.matcher( input ).replaceAll( "" );
+        input = initialSingleQuote.matcher( input ).replaceAll( "" );
+        input = endSingleQuote.matcher( input ).replaceAll( "" );
+
+        return input;
+    }
+    
     /**
      * Returns the name of the material or item matching the supplied ID, or
      * "Hand".
