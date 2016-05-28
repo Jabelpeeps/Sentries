@@ -11,11 +11,8 @@ import net.citizensnpcs.util.NMS;
 public class SpiderAttackStrategy implements AttackStrategy {
 
     private Random random = new Random();
-    // Sentries sentry;
 
-    public SpiderAttackStrategy() { // Sentries plugin ) {
-        // sentry = plugin;
-    }
+    public SpiderAttackStrategy() {}
 
     @Override
     public boolean handle( LivingEntity attacker, LivingEntity target ) {

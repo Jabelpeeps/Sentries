@@ -382,7 +382,7 @@ enum SentryStatus {
         
         return SentryStatus.isFOLLOWING;
     }
-    static boolean deadOrDieing( SentryTrait inst ) {
-        return inst.myStatus == isDEAD || inst.myStatus == isDIEING;
+    boolean isDeadOrDieing() {
+        return this == isDEAD || this == isDIEING;
     }
 }

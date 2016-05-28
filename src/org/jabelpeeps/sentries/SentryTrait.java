@@ -64,8 +64,6 @@ import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
-import net.minecraft.server.v1_9_R2.Packet;
-import net.minecraft.server.v1_9_R2.PacketPlayOutAnimation;
 
 public class SentryTrait extends Trait {
 
@@ -113,7 +111,7 @@ public class SentryTrait extends Trait {
     String guardeeName;
     DamageCause causeOfDeath;
 
-    Packet<?> healAnimation;
+//   Packet<?> healAnimation;
 
     Set<TargetType> targets = new HashSet<>();
     Set<TargetType> ignores = new HashSet<>();
@@ -234,10 +232,69 @@ public class SentryTrait extends Trait {
             try {
                 load( new MemoryDataKey() );
 
-            } catch ( NPCLoadException e ) {
-            }
+            } catch ( NPCLoadException e ) { e.printStackTrace(); }
         }
-        initialize();
+        
+        LivingEntity myEntity = getMyEntity();
+
+        // check for illegal values
+        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
+        if ( attackRate > 30 ) attackRate = 30.0;
+        if ( sentryMaxHealth < 0 ) sentryMaxHealth = 0;
+        if ( sentryRange < 1 ) sentryRange = 1;
+        if ( sentryRange > 200 ) sentryRange = 200;
+        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
+        if ( respawnDelay < -1 ) respawnDelay = -1;
+        if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
+
+        // Allow Denizen to handle the sentry's health if it is active.
+        if ( DenizenHook.sentryHealthByDenizen ) {
+            if ( npc.hasTrait( HealthTrait.class ) )
+                npc.removeTrait( HealthTrait.class );
+        }
+
+        // disable citizens respawning, because Sentries doesn't always raise EntityDeath
+        npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
+
+        setHealth( sentryMaxHealth );
+        _myDamamgers.clear();
+        faceForward();
+
+//        healAnimation = new PacketPlayOutAnimation( NMS.getHandle( myEntity ), 6 );
+
+        if ( guardeeName == null )
+            npc.teleport( spawnLocation, TeleportCause.PLUGIN );
+
+        NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
+        float myRange = navigatorParams.range();
+
+        if ( myRange < sentryRange + 5 ) {
+            myRange = sentryRange + 5;
+        }
+
+        npc.setProtected( false );
+        npc.data().set( NPC.TARGETABLE_METADATA, targetable );
+
+        navigatorParams.range( myRange );
+        navigatorParams.stationaryTicks( 5 * 20 );
+        navigatorParams.useNewPathfinder( false );
+
+        if ( myEntity instanceof Creeper )
+            navigatorParams.attackStrategy( new CreeperAttackStrategy() );
+        else if ( myEntity instanceof Spider )
+            navigatorParams.attackStrategy( new SpiderAttackStrategy() );
+
+        // TODO check this hasn't broken anything.
+        // processTargets();
+
+        updateAttackType();
+
+        if ( taskID == 0 ) {
+            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
+                                                                      this, 
+                                                                      40 + npc.getId(), 
+                                                                      Sentries.logicTicks );
+        }
     }
     
     @Override
@@ -256,7 +313,6 @@ public class SentryTrait extends Trait {
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
 
         isRespawnable = System.currentTimeMillis() + respawnDelay * 1000;
-//        myStatus = SentryStatus.isDEAD;
         dismount();
     }
     
@@ -325,72 +381,6 @@ public class SentryTrait extends Trait {
             }
         };
         Bukkit.getScheduler().scheduleSyncDelayedTask( sentry, cloneInstance, 10 );
-    }
-    
-    public void initialize() {
-
-        LivingEntity myEntity = getMyEntity();
-
-        // check for illegal values
-        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
-        if ( attackRate > 30 ) attackRate = 30.0;
-        if ( sentryMaxHealth < 0 ) sentryMaxHealth = 0;
-        if ( sentryRange < 1 ) sentryRange = 1;
-        if ( sentryRange > 200 ) sentryRange = 200;
-        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
-        if ( respawnDelay < -1 ) respawnDelay = -1;
-        if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
-
-        // Allow Denizen to handle the sentry's health if it is active.
-        if ( DenizenHook.sentryHealthByDenizen ) {
-            if ( npc.hasTrait( HealthTrait.class ) )
-                npc.removeTrait( HealthTrait.class );
-        }
-
-        // disable citizens respawning, because Sentries doesn't always raise EntityDeath
-        npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
-
-        setHealth( sentryMaxHealth );
-
-        _myDamamgers.clear();
-
-        faceForward();
-
-        healAnimation = new PacketPlayOutAnimation( NMS.getHandle( myEntity ), 6 );
-
-        if ( guardeeName == null )
-            npc.teleport( spawnLocation, TeleportCause.PLUGIN );
-
-        NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
-        float myRange = navigatorParams.range();
-
-        if ( myRange < sentryRange + 5 ) {
-            myRange = sentryRange + 5;
-        }
-
-        npc.setProtected( false );
-        npc.data().set( NPC.TARGETABLE_METADATA, targetable );
-
-        navigatorParams.range( myRange );
-        navigatorParams.stationaryTicks( 5 * 20 );
-        navigatorParams.useNewPathfinder( false );
-
-        if ( myEntity instanceof Creeper )
-            navigatorParams.attackStrategy( new CreeperAttackStrategy() );
-        else if ( myEntity instanceof Spider )
-            navigatorParams.attackStrategy( new SpiderAttackStrategy() );
-
-        // TODO check this hasn't broken anything.
-        // processTargets();
-
-        updateAttackType();
-
-        if ( taskID == 0 ) {
-            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
-                                                                      this, 
-                                                                      40 + npc.getId(), 
-                                                                      Sentries.logicTicks );
-        }
     }
 
     public void cancelRunnable() {
@@ -543,9 +533,7 @@ public class SentryTrait extends Trait {
     public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
         // most of the former contents of this method have been moved to the SentryStatus state machine.
 
-        if (    myStatus == SentryStatus.isDIEING
-                || myStatus == SentryStatus.isDEAD )
-            return;
+        if ( myStatus.isDeadOrDieing() ) return;
 
         causeOfDeath = cause;
 
@@ -904,7 +892,7 @@ public class SentryTrait extends Trait {
         // not called for fall damage, or for lightning on stormcallers,
         // or for fire on pyromancers & stormcallers, or for poison on witchdoctors.
         
-        if ( SentryStatus.deadOrDieing( this ) ) return;
+        if ( myStatus.isDeadOrDieing() ) return;
 
         if ( npc == null || !npc.isSpawned() || invincible ) return;
 
@@ -1081,9 +1069,13 @@ public class SentryTrait extends Trait {
                     heal = (0.5 / healRate);
 
                 setHealth( getHealth() + heal );
+                LivingEntity myEntity = getMyEntity();
+                
+                // idk what this effect looks like, so lets see if it looks ok in-game.
+                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.VILLAGER_PLANT_GROW, 20 );
 
-                if ( healAnimation != null )
-                    NMS.sendPacketNearby( null, getMyEntity().getLocation(), healAnimation );
+//                if ( healAnimation != null )
+//                    NMS.sendPacketNearby( null, getMyEntity().getLocation(), healAnimation );
 
                 if ( getHealth() >= sentryMaxHealth )
                     _myDamamgers.clear();
@@ -1288,7 +1280,7 @@ public class SentryTrait extends Trait {
 
         LivingEntity myEntity = getMyEntity();
 
-        if ( myEntity == null || theEntity == myEntity ) return;
+        if ( myEntity == null || theEntity == myEntity || theEntity == guardeeEntity ) return;
 
         if ( guardeeName != null && guardeeEntity == null )
             theEntity = null; // dont go aggro when bodyguard target isnt around.
@@ -1301,9 +1293,6 @@ public class SentryTrait extends Trait {
             clearTarget();
             return;
         }
-
-        if ( theEntity == guardeeEntity ) return;
-
         attackTarget = theEntity;
         myStatus = SentryStatus.isATTACKING;
     }

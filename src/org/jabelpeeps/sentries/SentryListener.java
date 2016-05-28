@@ -412,7 +412,7 @@ public class SentryListener implements Listener {
                 
                 int armour = instVictim.getArmor();
 
-                if ( damage > 0 ) {
+                if ( damager != null && damage > 0 ) {
 
                     // knockback
                     npc.getEntity().setVelocity( 

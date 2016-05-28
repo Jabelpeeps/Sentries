@@ -42,31 +42,31 @@ public class Sentries extends JavaPlugin {
     static boolean ignoreListIsInvincible = true;
 
     static boolean denizenActive = false;
-    static Map<String, PluginBridge> activePlugins = new HashMap<String, PluginBridge>();
+    static Map<String, PluginBridge> activePlugins = new HashMap<>();
 
     // Lists of various armour items that will be accepted, by default.
-    public Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, 
+    static Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, 
             Material.IRON_BOOTS, Material.DIAMOND_BOOTS, Material.GOLD_BOOTS );
 
-    public Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, Material.CHAINMAIL_CHESTPLATE, 
+    static Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, Material.CHAINMAIL_CHESTPLATE, 
             Material.IRON_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.GOLD_CHESTPLATE );
 
-    public Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET, Material.CHAINMAIL_HELMET, Material.IRON_HELMET,
+    static Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET, Material.CHAINMAIL_HELMET, Material.IRON_HELMET,
             Material.DIAMOND_HELMET, Material.GOLD_HELMET, Material.PUMPKIN, Material.JACK_O_LANTERN );
 
-    public Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
+    static Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
 
-    static Map<String, Integer> equipmentSlots = new HashMap<String, Integer>();
+    static Map<String, Integer> equipmentSlots = new HashMap<>();
 
-    Map<Material, Double> armorBuffs = new EnumMap<Material, Double>( Material.class );
-    Map<Material, Double> speedBuffs = new EnumMap<Material, Double>( Material.class );
-    Map<Material, Double> strengthBuffs = new EnumMap<Material, Double>( Material.class );
-    Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<Material, List<PotionEffect>>( Material.class );
+    Map<Material, Double> armorBuffs = new EnumMap<>( Material.class );
+    Map<Material, Double> speedBuffs = new EnumMap<>( Material.class );
+    Map<Material, Double> strengthBuffs = new EnumMap<>( Material.class );
+    Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<>( Material.class );
 
-    Map<String, Boolean> defaultBooleans = new HashMap<String, Boolean>();
-    Map<String, Integer> defaultIntegers = new HashMap<String, Integer>();
-    Map<String, Double> defaultDoubles = new HashMap<String, Double>();
+    Map<String, Boolean> defaultBooleans = new HashMap<>();
+    Map<String, Integer> defaultIntegers = new HashMap<>();
+    Map<String, Double> defaultDoubles = new HashMap<>();
     List<String> defaultTargets;
     List<String> defaultIgnores;
     String defaultGreeting = "";
@@ -75,7 +75,7 @@ public class Sentries extends JavaPlugin {
     static int logicTicks = 10;
     static int sentryEXP = 5;
 
-    public Queue<Projectile> arrows = new LinkedList<Projectile>();
+    public Queue<Projectile> arrows = new LinkedList<>();
 
     static Logger logger;
     static Plugin plugin;
@@ -233,6 +233,7 @@ public class Sentries extends JavaPlugin {
         logger.info( s );
     }
 
+    // TODO move this to SentryTrait, it really makes no sense having it here.
     boolean equip( NPC npc, SentryTrait inst, ItemStack newEquipment ) {
 
         Equipment equipment = npc.getTrait( Equipment.class );
@@ -339,7 +340,7 @@ public class Sentries extends JavaPlugin {
 
             if ( item == null ) continue;
 
-            List<PotionEffect> list = new ArrayList<PotionEffect>();
+            List<PotionEffect> list = new ArrayList<>();
 
             for ( String string : args ) {
 
