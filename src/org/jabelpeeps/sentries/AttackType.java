@@ -31,6 +31,7 @@ enum AttackType {
     warlock2(   "Warlock2",     Material.SKULL_ITEM,        WitherSkull.class ),
     // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled  for now.
     witchdoctor( "WitchDoctor", Material.SPLASH_POTION,     ThrownPotion.class ),
+    creeper(     "Creeper",     Material.SULPHUR,           null ),  
     
     brawler(     "Brawler",     Material.AIR,               null ) {
 

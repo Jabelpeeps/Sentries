@@ -33,7 +33,7 @@ enum SentryStatus {
 
     /** Sentries with this status will have their death's handled, along with any drops, and then 
      * various items tidied up before having their status set to {@link SentryStatus#isDEAD} */
-    isDYING {
+    isDIEING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
@@ -310,7 +310,7 @@ enum SentryStatus {
                 if ( !navigator.isNavigating() )
                     inst.faceEntity( myEntity, inst.attackTarget );
                 
-                if ( inst.myAttacks != AttackType.brawler ) {
+                if ( inst.myAttack != AttackType.brawler ) {
 
                     if ( inst._projTargetLostLoc == null )
                         inst._projTargetLostLoc = inst.attackTarget.getLocation();
@@ -381,5 +381,8 @@ enum SentryStatus {
             return SentryStatus.isLOOKING;
         
         return SentryStatus.isFOLLOWING;
+    }
+    static boolean deadOrDieing( SentryTrait inst ) {
+        return inst.myStatus == isDEAD || inst.myStatus == isDIEING;
     }
 }

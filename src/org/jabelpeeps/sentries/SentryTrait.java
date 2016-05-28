@@ -105,8 +105,8 @@ public class SentryTrait extends Trait {
     String greetingMsg = "";
     String warningMsg = "";
 
-    private Map<Player, Long> warningsGiven = new HashMap<Player, Long>();
-    Set<Player> _myDamamgers = new HashSet<Player>();
+    private Map<Player, Long> warningsGiven = new HashMap<>();
+    Set<Player> _myDamamgers = new HashSet<>();
 
     LivingEntity guardeeEntity;
     LivingEntity attackTarget;
@@ -115,11 +115,13 @@ public class SentryTrait extends Trait {
 
     Packet<?> healAnimation;
 
-    Set<String> ignoreTargets = new HashSet<String>();
-    Set<String> validTargets = new HashSet<String>();
+    Set<TargetType> targets = new HashSet<>();
+    Set<TargetType> ignores = new HashSet<>();
+    Set<String> ignoreTargets = new HashSet<>();
+    Set<String> validTargets = new HashSet<>();
 
-    Set<String> _ignoreTargets = new HashSet<String>();
-    Set<String> _validTargets = new HashSet<String>();
+    Set<String> _ignoreTargets = new HashSet<>();
+    Set<String> _validTargets = new HashSet<>();
 
     // TODO why are we saving four instances of the system time?
     long isRespawnable = System.currentTimeMillis();
@@ -133,7 +135,7 @@ public class SentryTrait extends Trait {
     Random random = new Random();
 
     SentryStatus myStatus = SentryStatus.isSPAWNING;
-    AttackType myAttacks;
+    AttackType myAttack;
 
     private int taskID = 0;
 
@@ -541,13 +543,13 @@ public class SentryTrait extends Trait {
     public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
         // most of the former contents of this method have been moved to the SentryStatus state machine.
 
-        if (    myStatus == SentryStatus.isDYING
+        if (    myStatus == SentryStatus.isDIEING
                 || myStatus == SentryStatus.isDEAD )
             return;
 
         causeOfDeath = cause;
 
-        myStatus = SentryStatus.isDYING;
+        myStatus = SentryStatus.isDIEING;
 
         if ( runscripts && Sentries.denizenActive )
             DenizenHook.sentryDeath( _myDamamgers, npc );
@@ -656,7 +658,7 @@ public class SentryTrait extends Trait {
     public void fire( LivingEntity theTarget ) {
 
         LivingEntity myEntity = getMyEntity();
-        Class<? extends Projectile> myProjectile = myAttacks.getProjectile();
+        Class<? extends Projectile> projectileClazz = myAttack.getProjectile();
         Effect effect = null;
 
         double v = 34;
@@ -664,16 +666,16 @@ public class SentryTrait extends Trait {
 
         boolean ballistics = true;
 
-        if ( myProjectile == Arrow.class ) {
+        if ( projectileClazz == Arrow.class ) {
             effect = Effect.BOW_FIRE;
         }
-        else if ( myProjectile == SmallFireball.class
-                || myProjectile == Fireball.class
-                || myProjectile == WitherSkull.class ) {
+        else if ( projectileClazz == SmallFireball.class
+                || projectileClazz == Fireball.class
+                || projectileClazz == WitherSkull.class ) {
             effect = Effect.BLAZE_SHOOT;
             ballistics = false;
         }
-        else if ( myProjectile == ThrownPotion.class ) {
+        else if ( projectileClazz == ThrownPotion.class ) {
             v = 21;
             g = 20;
         }
@@ -707,14 +709,13 @@ public class SentryTrait extends Trait {
         double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
         elev = victor.getY();
 
-        if ( dist == 0 )
-            return;
+        if ( dist == 0 ) return;
 
         if ( !hasLOS( theTarget ) ) {
             clearTarget();
             return;
         }
-        if ( myAttacks.lightningLevel > 0 ) {
+        if ( myAttack.lightningLevel > 0 ) {
             ballistics = false;
             effect = null;
         }
@@ -743,8 +744,8 @@ public class SentryTrait extends Trait {
 
             // victor = victor.add(noise);
 
-            if ( myProjectile == Arrow.class
-                    || myProjectile == ThrownPotion.class )
+            if ( projectileClazz == Arrow.class
+                    || projectileClazz == ThrownPotion.class )
                 v += (1.188 * Math.pow( hangtime, 2 ));
             else
                 v += (0.5 * Math.pow( hangtime, 2 ));
@@ -755,7 +756,7 @@ public class SentryTrait extends Trait {
             victor = victor.multiply( v / 20.0 );
 
         }
-        switch ( myAttacks.lightningLevel ) {
+        switch ( myAttack.lightningLevel ) {
 
             case 1:
                 to.getWorld().strikeLightningEffect( to );
@@ -770,46 +771,46 @@ public class SentryTrait extends Trait {
                 break;
             default:
                 // not lightning
-                Projectile projectile;
+                Projectile projectile = myEntity.getWorld().spawn( myLocation, projectileClazz );
 
-                if (    myProjectile == ThrownPotion.class 
+                if (    projectileClazz == ThrownPotion.class 
                         && potionItem != null ) {
                     
                     projectile = myEntity.getWorld().spawn( myLocation, ThrownPotion.class );
                     ((ThrownPotion) projectile).setItem( potionItem.clone() );
                 }
-                else if ( myProjectile == EnderPearl.class )
-                    projectile = myEntity.launchProjectile( myProjectile );
-                else
-                    projectile = myEntity.getWorld().spawn( myLocation, myProjectile );
-
-                if (    myProjectile == Fireball.class
-                        || myProjectile == WitherSkull.class ) {
+                else if (    projectileClazz == Fireball.class
+                        || projectileClazz == WitherSkull.class ) {
                     victor = victor.multiply( 1 / 1000000000 );
                 }
-                else if ( myProjectile == SmallFireball.class ) {
+                else if ( projectileClazz == SmallFireball.class ) {
 
                     victor = victor.multiply( 1 / 1000000000 );
-                    ((SmallFireball) projectile).setIsIncendiary( myAttacks.incendiary );
+                    ((SmallFireball) projectile).setIsIncendiary( myAttack.incendiary );
 
-                    if ( !myAttacks.incendiary ) {
+                    if ( !myAttack.incendiary ) {
                         ((SmallFireball) projectile).setFireTicks( 0 );
                         ((SmallFireball) projectile).setYield( 0 );
                     }
                 }
+                else if ( projectileClazz == EnderPearl.class ) {
 
-                // TODO why are we counting enderpearls?
-                else if ( myProjectile == EnderPearl.class ) {
+                    // TODO why are we counting enderpearls?
                     epCount++;
                     if ( epCount > Integer.MAX_VALUE - 1 )
                         epCount = 0;
-                    if ( Sentries.debug )
-                        Sentries.debugLog( epCount + "" );
+                    
+                    if ( Sentries.debug ) Sentries.debugLog( "epCount: " + String.valueOf( epCount ) );
                 }
 
-                sentry.arrows.add( projectile );
+                if ( projectileClazz == Arrow.class ) sentry.arrows.add( projectile );
+                
                 projectile.setShooter( myEntity );
-                projectile.setVelocity( victor );
+                
+                if ( projectile instanceof Fireball ) 
+                    ((Fireball) projectile).setDirection( victor );
+                else
+                    projectile.setVelocity( victor );
         }
 
         if ( effect != null )
@@ -817,7 +818,7 @@ public class SentryTrait extends Trait {
 
         faceEntity( getMyEntity(), theTarget );
 
-        if ( myProjectile == Arrow.class )
+        if ( projectileClazz == Arrow.class )
             draw( false );
         else if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );
@@ -888,21 +889,22 @@ public class SentryTrait extends Trait {
         return (int) (strength + mod);
     }
 
-    static Set<AttackType> pyros = EnumSet.of( AttackType.pyro1, AttackType.pyro2, AttackType.pyro3 );
-    static Set<AttackType> stormCallers = EnumSet.of( AttackType.sc1, AttackType.sc2, AttackType.sc3 );
+    static Set<AttackType> pyros = EnumSet.range( AttackType.pyro1, AttackType.pyro3 );
+    static Set<AttackType> stormCallers = EnumSet.range( AttackType.sc1, AttackType.sc3 );
+    static Set<AttackType> notFlammable = EnumSet.range( AttackType.pyro1, AttackType.sc3 );
 
-    public boolean isPyromancer() { return pyros.contains( myAttacks ); }
-    public boolean isPyromancer1() { return myAttacks == AttackType.pyro1; }
-    public boolean isStormcaller() { return stormCallers.contains( myAttacks ); }
-    public boolean isWarlock1() { return myAttacks == AttackType.warlock1; }
-    public boolean isWitchDoctor() { return myAttacks == AttackType.witchdoctor; }
-    public boolean isNotFlammable() { return isPyromancer() || isStormcaller(); }
+    public boolean isPyromancer() { return pyros.contains( myAttack ); }
+    public boolean isPyromancer1() { return myAttack == AttackType.pyro1; }
+    public boolean isStormcaller() { return stormCallers.contains( myAttack ); }
+    public boolean isWarlock1() { return myAttack == AttackType.warlock1; }
+    public boolean isWitchDoctor() { return myAttack == AttackType.witchdoctor; }
+    public boolean isFlammable() { return !notFlammable.contains( myAttack ); }
 
    public void onEnvironmentDamage( NPCDamageEvent event ) {
         // not called for fall damage, or for lightning on stormcallers,
         // or for fire on pyromancers & stormcallers, or for poison on witchdoctors.
         
-        if ( myStatus == SentryStatus.isDYING ) return;
+        if ( SentryStatus.deadOrDieing( this ) ) return;
 
         if ( npc == null || !npc.isSpawned() || invincible ) return;
 
@@ -1179,17 +1181,15 @@ public class SentryTrait extends Trait {
 
         if ( myEntity == null ) return;
 
-        if ( myEntity.getMaxHealth() != sentryMaxHealth )
-            myEntity.setMaxHealth( sentryMaxHealth );
+        myEntity.setMaxHealth( sentryMaxHealth );
 
-        if ( health > sentryMaxHealth )
-            health = sentryMaxHealth;
+        if ( health > sentryMaxHealth ) health = sentryMaxHealth;
 
         myEntity.setHealth( health );
     }
 
     /**
-     * Updates the Attacktype reference in myAttacks field, according to the
+     * Updates the Attacktype reference in myAttack field, according to the
      * item being held by the NPC.
      * <p>
      * Also sets potion effects, and potion types if appropriate.
@@ -1204,21 +1204,22 @@ public class SentryTrait extends Trait {
             item = ((HumanEntity) myEntity).getInventory().getItemInMainHand();
             weapon = item.getType();
 
-            myAttacks = AttackType.find( weapon );
+            myAttack = AttackType.find( weapon );
 
-            if ( myAttacks != AttackType.witchdoctor )
+            if ( myAttack != AttackType.witchdoctor )
                 item.setDurability( (short) 0 );
             
         }
-        else if ( myEntity instanceof Skeleton ) myAttacks = AttackType.archer;
-        else if ( myEntity instanceof Ghast ) myAttacks = AttackType.pyro3;
-        else if ( myEntity instanceof Snowman ) myAttacks = AttackType.magi;
-        else if ( myEntity instanceof Wither ) myAttacks = AttackType.warlock2;
-        else if ( myEntity instanceof Witch ) myAttacks = AttackType.witchdoctor;
-        else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttacks = AttackType.pyro2;
-        else myAttacks = AttackType.brawler;
+        else if ( myEntity instanceof Skeleton ) myAttack = AttackType.archer;
+        else if ( myEntity instanceof Ghast ) myAttack = AttackType.pyro3;
+        else if ( myEntity instanceof Snowman ) myAttack = AttackType.magi;
+        else if ( myEntity instanceof Wither ) myAttack = AttackType.warlock2;
+        else if ( myEntity instanceof Witch ) myAttack = AttackType.witchdoctor;
+        else if ( myEntity instanceof Creeper ) myAttack = AttackType.creeper;
+        else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttack = AttackType.pyro2;
+        else myAttack = AttackType.brawler;
 
-        if ( myAttacks == AttackType.witchdoctor ) {
+        if ( myAttack == AttackType.witchdoctor ) {
             if ( item == null ) {
                 item = new ItemStack( Material.SPLASH_POTION, 1, (short) 16396 );
                 // TODO send message to owner about equipping a proper potion.
@@ -1239,8 +1240,7 @@ public class SentryTrait extends Trait {
 
     /**
      * Clears the target of the Sentry's attack, and returns it to following/looking status.
-     * <p>
-     * will hopefully be replaced with a better method at some point.
+     * 
      */
     void clearTarget() {
         

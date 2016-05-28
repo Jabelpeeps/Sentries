@@ -202,7 +202,7 @@ public class SentryListener implements Listener {
 
                 case FIRE:
                 case FIRE_TICK:
-                    if ( !inst.isPyromancer() && !inst.isStormcaller() )
+                    if ( inst.isFlammable() )
                         inst.onEnvironmentDamage( event );
                     break;
 
@@ -335,7 +335,7 @@ public class SentryListener implements Listener {
 
             if (    (   event.getCause() == DamageCause.FIRE
                     ||  event.getCause() == DamageCause.FIRE_TICK )
-               &&   instVictim.isNotFlammable() )
+               &&   instVictim.isFlammable() )
                 return;
 
             // only bodyguards obey pvp-protection
@@ -364,7 +364,7 @@ public class SentryListener implements Listener {
 
                 
 
-//                    if ( myStatus == SentryStatus.isDYING || invincible ) return;
+//                    if ( myStatus == SentryStatus.isDIEING || invincible ) return;
 //
 //                    if ( npc == null || !npc.isSpawned() ) return;
 //
