@@ -1199,14 +1199,7 @@ public class SentryTrait extends Trait {
             }
             return true;
         }
-        int slot = 0;
-        Material type = newEquipment.getType();
-
-        // First, determine the slot to edit
-        if ( Sentries.helmets.contains( type ) ) slot = 1;
-        else if ( Sentries.chestplates.contains( type ) ) slot = 2;
-        else if ( Sentries.leggings.contains( type ) ) slot = 3;
-        else if ( Sentries.boots.contains( type ) ) slot = 4;
+        int slot = Sentries.getSlot( newEquipment.getType() );
 
         equipment.set( slot, newEquipment );
 

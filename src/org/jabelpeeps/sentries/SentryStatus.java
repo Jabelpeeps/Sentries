@@ -37,6 +37,8 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+            
+            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
 
             LivingEntity myEntity = inst.getMyEntity();
 
@@ -147,6 +149,8 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+            
+            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
 
             if (    System.currentTimeMillis() > inst.isRespawnable
                     && inst.respawnDelay > 0
@@ -174,6 +178,8 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
+            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
+            
             if ( inst.getNPC().isSpawned() ) {
                 
                 inst.tryToHeal();
@@ -192,6 +198,8 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+            
+            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
             
             LivingEntity myEntity = inst.getMyEntity();
             
@@ -266,6 +274,8 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
+            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
+            
             inst.tryToHeal();
             
             LivingEntity target = null;
@@ -292,6 +302,8 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+            
+            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
             
             if ( !inst.isMyChunkLoaded() ) {
                 inst.clearTarget();

@@ -55,7 +55,14 @@ public class Sentries extends JavaPlugin {
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
 
     static Map<String, Integer> equipmentSlots = new HashMap<>();
-
+    static {
+        equipmentSlots.put( "hand", 0 );
+        equipmentSlots.put( "helmet", 1 );
+        equipmentSlots.put( "chestplate", 2 );
+        equipmentSlots.put( "leggings", 3 );
+        equipmentSlots.put( "boots", 4 );
+    }
+    
     Map<Material, Double> armorBuffs = new EnumMap<>( Material.class );
     Map<Material, Double> speedBuffs = new EnumMap<>( Material.class );
     Map<Material, Double> strengthBuffs = new EnumMap<>( Material.class );
@@ -106,11 +113,7 @@ public class Sentries extends JavaPlugin {
                 logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
             }
         }
-        equipmentSlots.put( "hand", 0 );
-        equipmentSlots.put( "helmet", 1 );
-        equipmentSlots.put( "chestplate", 2 );
-        equipmentSlots.put( "leggings", 3 );
-        equipmentSlots.put( "boots", 4 );
+
 
         int targetBitFlag = SentryTrait.bridges;
 
@@ -154,28 +157,24 @@ public class Sentries extends JavaPlugin {
 
             activePlugins.put( each, bridge );
         }
-
         CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
         pluginManager.registerEvents( new SentryListener(), this );
-
-        final Runnable removeArrows = new Runnable() {
-
-            @Override
-            public void run() {
-
-                while ( arrows.size() > 200 ) {
-                    Projectile arrow = arrows.remove();
-
-                    if ( arrow != null ) arrow.remove();
-                }
-            }
-        };
+        
         Bukkit.getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
-
         reloadMyConfig();
     }
-
+    
+    final Runnable removeArrows = new Runnable() {
+        @Override
+        public void run() {
+            while ( arrows.size() > 200 ) {
+                Projectile arrow = arrows.remove();
+                if ( arrow != null ) arrow.remove();
+            }
+        }
+    };
+    
     private void helpfulReflectionError( String name ) {
         logger.log( Level.WARNING, "Error loading PluginBridge for the plugin: '" + name + "' from config.yml. " );
     }
@@ -215,19 +214,6 @@ public class Sentries extends JavaPlugin {
         defaultIgnores = config.getStringList( S.DEFAULT_IGNORES );
         defaultWarning = config.getString( "DefaultTexts.Warning" );
         defaultGreeting = config.getString( "DefaultTexts.Greeting" );
-    }
-
-    /**
-     * Sends a message to the logger associated with this plugin.
-     * <p>
-     * The caller should check the boolean Sentries.debug is true before calling -
-     * to avoid the overhead of compiling the String if it is not needed.
-     * 
-     * @param s
-     *            - the message to log.
-     */
-    public static void debugLog( String s ) {
-        logger.info( s );
     }
 
     @Override
@@ -281,7 +267,6 @@ public class Sentries extends JavaPlugin {
 
     @SuppressWarnings( "unchecked" )
     private <T> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
-
         map.clear();
         map.putAll( (Map<String, T>) config.getConfigurationSection( node ).getValues( false ) );
     }
@@ -364,4 +349,32 @@ public class Sentries extends JavaPlugin {
 
         return false;
     }
+    
+    /** Returns the slot number appropriate to hold the supplied material, as defined in 
+     * the config.yml (or the default config).  If the supplied material does not match any of
+     * the configured armour types, then this method will return 0 (the slot number for the main hand). */
+    static int getSlot( Material equipment ) {
+        int slot = 0;
+        
+        if ( helmets.contains( equipment ) ) slot = 1;
+        else if ( chestplates.contains( equipment ) ) slot = 2;
+        else if ( leggings.contains( equipment ) ) slot = 3;
+        else if ( boots.contains( equipment ) ) slot = 4;
+        
+        return slot;
+    }
+    
+    /**
+     * Sends a message to the logger associated with this plugin.
+     * <p>
+     * The caller should check the boolean Sentries.debug is true before calling -
+     * to avoid the overhead of compiling the String if it is not needed.
+     * 
+     * @param s
+     *            - the message to log.
+     */
+    public static void debugLog( String s ) {
+        logger.info( s );
+    }
+
 }

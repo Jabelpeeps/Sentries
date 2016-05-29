@@ -282,7 +282,6 @@ public abstract class CommandHandler {
         // OK, we have a sentry to modify.
 
         // We need to check that the player sending the command has the authority to use it.
-        // First lets be sure we are dealing with an actual player, not a player type npc.
         if (    player instanceof Player
                 && !player.isOp()
                 && !CitizensAPI.getNPCRegistry().isNPC( (Entity) player ) ) {
@@ -307,8 +306,7 @@ public abstract class CommandHandler {
             }
         }
 
-        // We now know that player is either the owner, or an admin with a server-owned npc. 
-        // Lets save a reference to the SentryTrait of the npc before continuing.
+        // We now know that player is either the owner, op'ed, or an admin with a server-owned npc. 
         SentryTrait inst = thisNPC.getTrait( SentryTrait.class );
         String npcName = thisNPC.getName();
 
@@ -329,12 +327,12 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.SPAWN, player ) ) {
 
-                if ( thisNPC.getEntity() == null ) {
+                if ( thisNPC.getEntity() == null ) 
                     player.sendMessage( S.Col.RED.concat( "Cannot set spawn while a sentry is dead" ) );
-                    return true;
+                else {
+                    inst.spawnLocation = thisNPC.getEntity().getLocation();
+                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "will respawn at its present location" ) );
                 }
-                inst.spawnLocation = thisNPC.getEntity().getLocation();
-                player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "will respawn at its present location" ) );
             }
             return true;
         }
@@ -781,12 +779,12 @@ public abstract class CommandHandler {
 
                             if ( each.getKey().equalsIgnoreCase( inargs[nextArg + 2] ) ) {
                                 
-                                thisNPC.getTrait( Equipment.class ).set( each.getValue(), new ItemStack( Material.AIR ) );                                
+                                thisNPC.getTrait( Equipment.class ).set( each.getValue(), null );                                
                                 player.sendMessage( String.join( "", S.Col.GREEN, "removed ", npcName, "'s ", inargs[nextArg +2] ) );
                             }
                     }
                     else {
-                        Material mat = Material.matchMaterial( inargs[nextArg + 1] );
+                        Material mat = Material.matchMaterial( joinArgs( nextArg + 1, inargs ) );
 
                         if ( mat == null ) {
                             player.sendMessage( S.Col.RED.concat( "Could not equip: item name not recognised" ) );
@@ -900,23 +898,24 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_TARGET, player ) ) {
 
+                if ( inargs.length <= nextArg + 1 ) {
+                    player.sendMessage( S.targetCommandHelp() );
+                    return true;
+                }
                 if ( S.LIST.equals( inargs[nextArg + 1] ) ) {
                     player.sendMessage( String.join( "", S.Col.GREEN, "Targets: ", inst.validTargets.toString() ) );
                     return true;
                 }
                 if ( S.CLEAR.equals( inargs[nextArg + 1] ) ) {
-
                     inst.validTargets.clear();
                     inst.targetFlags = 0;
                     player.sendMessage( String.join( "", S.Col.GREEN, npcName, ": ALL Targets cleared" ) );
                     return true;
                 }
                 if ( inargs.length > 2 + nextArg ) {
-
                     player.sendMessage( parseTargetOrIgnore( inargs, nextArg, npcName, inst, true ) );
                     return true;
-                }
-                player.sendMessage( S.targetCommandHelp() );
+                }                
             }
         }
         // ----------------------------------------------------ignore command-----------
@@ -924,12 +923,15 @@ public abstract class CommandHandler {
 
             if ( checkCommandPerm( S.PERM_IGNORE, player ) ) {
 
+                if ( inargs.length <= nextArg + 1 ) {
+                    player.sendMessage( S.ignoreCommandHelp() );
+                    return true;
+                }                    
                 if ( S.LIST.equals( inargs[nextArg + 1] ) ) {
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Current Ignores:", inst.ignoreTargets.toString() ) );
                     return true;
                 }
                 if ( S.CLEAR.equals( inargs[nextArg + 1] ) ) {
-
                     inst.ignoreTargets.clear();
                     inst.ignoreFlags = 0;
                     inst.clearTarget();
@@ -937,11 +939,9 @@ public abstract class CommandHandler {
                     return true;
                 }
                 if ( inargs.length > 2 + nextArg ) {
-
                     player.sendMessage( parseTargetOrIgnore( inargs, nextArg, npcName, inst, false ) );
                     return true;
                 }
-                player.sendMessage( S.ignoreCommandHelp() );
             }
         }
         return false;

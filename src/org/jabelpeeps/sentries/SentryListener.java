@@ -44,9 +44,11 @@ public class SentryListener implements Listener {
     public void kill( EntityDeathEvent event ) {
 
         LivingEntity deceased = event.getEntity();
-
+        
         if ( deceased == null ) return;
 
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + deceased.toString() );
+        
         // don't mess with player death.
         if ( deceased instanceof Player && !deceased.hasMetadata( "NPC" ) )
             return;
@@ -87,6 +89,8 @@ public class SentryListener implements Listener {
     @EventHandler( ignoreCancelled = true )
     public void despawn( NPCDespawnEvent event ) {
         // don't despawn active bodyguards on chunk unload
+        
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
 
         SentryTrait inst = Util.getSentryTrait( event.getNPC() );
 
@@ -174,6 +178,8 @@ public class SentryListener implements Listener {
     public void EnvDamage( NPCDamageEvent event ) {
 
         if ( event instanceof NPCDamageByEntityEvent ) return;
+        
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
 
         SentryTrait inst = Util.getSentryTrait( event.getNPC() );
 
@@ -226,7 +232,7 @@ public class SentryListener implements Listener {
         Entity victim = event.getEntity();
 
         if ( Sentries.debug )
-            Sentries.debugLog( "Damage: from:" + damagerEnt + " to:" + victim
+            Sentries.debugLog( "Damage: from:" + damagerEnt.getName() + " to:" + victim.getName()
                     + " cancelled:[" + event.isCancelled() + "] damage:["
                     + event.getDamage() + "] cause:" + event.getCause() );
         
@@ -322,6 +328,8 @@ public class SentryListener implements Listener {
         NPC npc = event.getNPC();
         SentryTrait instVictim = Util.getSentryTrait( npc );
         
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + npc.getFullName() );
+  
         // tests if the victim is also a sentry
         if ( instVictim != null ) {
             
@@ -347,7 +355,7 @@ public class SentryListener implements Listener {
             // don't take damage from the entity the sentry is guarding.
             if ( damager == instVictim.guardeeEntity ) return;
 
-            SentryTrait instDamager = Util.getSentryTrait( event.getDamager() );
+            SentryTrait instDamager = Util.getSentryTrait( damager );
             
             if (    damager != null 
                     && instDamager != null
@@ -415,9 +423,9 @@ public class SentryListener implements Listener {
                 if ( damager != null && damage > 0 ) {
 
                     // knockback
-                    npc.getEntity().setVelocity( 
-                                damager.getLocation().getDirection()
-                                       .multiply( 1.0 / ( instVictim.sentryWeight + (armour / 5) ) ) 
+                    npc.getEntity().setVelocity( damager.getLocation()
+                                                        .getDirection()
+                                                        .multiply( 1.0 / ( instVictim.sentryWeight + (armour / 5) ) ) 
                     );
                     // Apply armour
                     damage -= armour;
@@ -471,7 +479,9 @@ public class SentryListener implements Listener {
         
         LivingEntity victim = (LivingEntity) event.getEntity();
         LivingEntity damager = (LivingEntity) event.getDamager();
-       
+ 
+        if ( Sentries.debug ) Sentries.debugLog( "processEventForTargets() called for:- " + victim.getName() );
+        
         if (    damager != victim
                 && event.getDamage() > 0 ) {
 
@@ -545,6 +555,8 @@ public class SentryListener implements Listener {
         // TODO why not have it handle all sentry deaths?
         
         final NPC mount = event.getNPC();
+
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + mount.getFullName() );
 
         // if the mount dies carry aggression over.
         for ( NPC each : CitizensAPI.getNPCRegistry() ) {
