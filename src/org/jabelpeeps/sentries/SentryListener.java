@@ -24,7 +24,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -66,14 +65,9 @@ public class SentryListener implements Listener {
                 // re-allocate killer to reference new entity
                 killer = ((EntityDamageByEntityEvent) ev).getDamager();
 
-                // check if new entity is a projectile, and was shot by a third entity.
-                if (    killer instanceof Projectile 
-                        && ((Projectile) killer).getShooter() instanceof Entity )
+                killer = Util.getArcher( killer );
 
-                    // make killer reference the shooter
-                    killer = (Entity) ((Projectile) killer).getShooter();
-
-                // TODO consider what should happen if last 'if' returns false
+                // TODO consider what to do if killer is not a living entity.
                 // (e.g. it is possible killer references a projectile shot by a
                 // dispenser.)
             }
@@ -226,52 +220,38 @@ public class SentryListener implements Listener {
     @EventHandler( priority = EventPriority.HIGHEST )
     public void onDamage( EntityDamageByEntityEvent event ) {
 
-        Entity damagerEnt = event.getDamager();
-        // a duplicate reference, as the original may get changed to refer to a projectile's shooter.
-        Entity _damager = damagerEnt;
-        Entity victim = event.getEntity();
-
+        Entity entity = event.getEntity();
+        if ( !(entity instanceof LivingEntity) ) return;
+        
+        LivingEntity victim = (LivingEntity) entity;
+        
+        Entity damagerEnt = event.getDamager();        
+        LivingEntity shooter = (LivingEntity) Util.getArcher( damagerEnt );
+        
         if ( Sentries.debug )
-            Sentries.debugLog( "Damage: from:" + damagerEnt.getName() + " to:" + victim.getName() + " cancelled:[" + event.isCancelled() 
+            Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " cancelled:[" + event.isCancelled() 
                                 + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );
         
-//        if ( damagerEnt == victim ) {
-//            event.setCancelled( true );
-//            return;
-//        }
-
-        // following 'if' statements change damager to refer to the shooter of a projectile.
-        if ( damagerEnt instanceof Projectile ) {
-
-            ProjectileSource source = ((Projectile) damagerEnt).getShooter();
-
-            if ( source instanceof Entity )
-                damagerEnt = (Entity) source;
-        }
-
-        SentryTrait instDamager = Util.getSentryTrait( damagerEnt );
+        SentryTrait instDamager = Util.getSentryTrait( shooter );
         SentryTrait instVictim = Util.getSentryTrait( victim );
-        LivingEntity damager = (LivingEntity) damagerEnt;
 
         if ( instDamager != null ) {
 
             // projectiles go through ignore targets.
-            // TODO consider whether this is wanted behaviour?
-            // or maybe cancelling the event is enough?
-            if ( _damager instanceof Projectile
-                    && victim instanceof LivingEntity
-                    && instDamager.isIgnoring( (LivingEntity) victim ) ) {
+            // TODO consider whether this is wanted behaviour? or maybe cancelling the event is enough?
+            if (    damagerEnt instanceof Projectile
+                    && instDamager.isIgnoring( victim ) ) {
 
                 event.setCancelled( true );
-                _damager.remove();
+                damagerEnt.remove();
 
-                Projectile newProjectile = (Projectile) damager.getWorld().spawnEntity(
-                                                        _damager.getLocation().add( _damager.getVelocity() ),
-                                                        _damager.getType() );
+                Projectile newProjectile = (Projectile) shooter.getWorld().spawnEntity(
+                                                    damagerEnt.getLocation().add( damagerEnt.getVelocity() ),
+                                                    damagerEnt.getType() );
 
-                newProjectile.setVelocity( _damager.getVelocity() );
-                newProjectile.setShooter( damager );
-                newProjectile.setTicksLived( _damager.getTicksLived() );
+                newProjectile.setVelocity( damagerEnt.getVelocity() );
+                newProjectile.setShooter( shooter );
+                newProjectile.setTicksLived( damagerEnt.getTicksLived() );
                 return;
             }
 
@@ -298,7 +278,7 @@ public class SentryListener implements Listener {
             // apply potion effects
             if (    instDamager.weaponSpecialEffects != null
                     && !event.isCancelled() ) {
-                ((LivingEntity) victim).addPotionEffects( instDamager.weaponSpecialEffects );
+                victim.addPotionEffects( instDamager.weaponSpecialEffects );
             }
 
             // warlock 1 should do no direct damage, except to sentries who take fall damage.
@@ -323,32 +303,30 @@ public class SentryListener implements Listener {
         NPC npc = event.getNPC();
         SentryTrait instVictim = Util.getSentryTrait( npc );
         
-        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + npc.getFullName() );
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + npc.getName() );
   
-        // tests if the victim is also a sentry
+        // tests if the victim is a sentry
         if ( instVictim != null ) {
             
             // Damage to a sentry cannot be handled by the server. Always cancel the event here.
             event.setCancelled( true );
+
+            LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
+            
+            // don't take damage from the entity the sentry is guarding.
+            if ( damager == instVictim.guardeeEntity ) return;  
             
             // handle class protections
-            if (    event.getCause() == DamageCause.LIGHTNING
+            DamageCause cause = event.getCause();
+            
+            if (    cause == DamageCause.LIGHTNING
                     && instVictim.isStormcaller() )
                 return;
 
-            if (    (   event.getCause() == DamageCause.FIRE
-                    ||  event.getCause() == DamageCause.FIRE_TICK )
+            if (    (   cause == DamageCause.FIRE
+                    ||  cause == DamageCause.FIRE_TICK )
                &&   instVictim.isFlammable() )
                 return;
-
-            // only bodyguards obey pvp-protection
-//            if ( instVictim.guardeeName == null )
-//                event.setCancelled( false );
-
-            LivingEntity damager = (LivingEntity) event.getDamager();
-            
-            // don't take damage from the entity the sentry is guarding.
-            if ( damager == instVictim.guardeeEntity ) return;
 
             SentryTrait instDamager = Util.getSentryTrait( damager );
             
@@ -361,114 +339,68 @@ public class SentryListener implements Listener {
                 // don't take damage from co-guards.
                 return;
             }
+             
+            Hits hit = Hits.Hit;
+            double damage = event.getDamage();
 
-//            // process damage from event internally.
-//            if ( !event.isCancelled() ) {
+            if ( instVictim.acceptsCriticals ) {
 
-                
+                hit = Hits.getHit();
+                damage = Math.round( damage * hit.damageModifier );
+            }
+            
+            int armour = instVictim.getArmor();
+            Entity myEntity = npc.getEntity();
+            
+            if ( damager != null && damage > 0 ) {
 
-//                    if ( myStatus == SentryStatus.isDIEING || invincible ) return;
-//
-//                    if ( npc == null || !npc.isSpawned() ) return;
-//
-//                    if ( guardeeName != null && guardeeEntity == null ) return;
-//
-//                    if ( System.currentTimeMillis() < okToTakedamage + 500 ) return;
-//
-//                    okToTakedamage = System.currentTimeMillis();
-//
-//                    event.getEntity().setLastDamageCause( event );
-//
-//                    LivingEntity attacker = null;
-//                    Entity damager = event.getDamager();
-//
-//                    // Find the attacker
-//                    if (    damager instanceof Projectile
-//                            && ((Projectile) damager).getShooter() instanceof LivingEntity )
-//                        attacker = (LivingEntity) ((Projectile) damager).getShooter();
-//
-//                    else if ( damager instanceof LivingEntity )
-//                        attacker = (LivingEntity) damager;
-//
-//                    if (    attacker == null 
-//                            || (    Sentries.ignoreListIsInvincible 
-//                                    && isIgnoring( attacker ) ) ) {
-//                        return;
-//                    }    
-//                    if (    iWillRetaliate
-//                            && (    !(damager instanceof Projectile) 
-//                                    || CitizensAPI.getNPCRegistry().getNPC( attacker ) == null) ) {
-//
-//                        attackTarget = attacker;
-//                        setAttackTarget( attacker );
-//                    }
-//                    
-                    
-                Hits hit = Hits.Hit;
-                double damage = event.getDamage();
+                // do knockback
+                myEntity.setVelocity( damager.getLocation()
+                                             .getDirection()
+                                             .multiply( 1.0 / ( instVictim.sentryWeight + (armour / 5) ) ) 
+                );
+                // Apply armour
+                damage -= armour;
 
-                if ( instVictim.acceptsCriticals ) {
-
-                    hit = Hits.getHit();
-                    damage = Math.round( damage * hit.damageModifier );
-                }
-                
-                int armour = instVictim.getArmor();
-
-                if ( damager != null && damage > 0 ) {
-
-                    // knockback
-                    npc.getEntity().setVelocity( damager.getLocation()
-                                                        .getDirection()
-                                                        .multiply( 1.0 / ( instVictim.sentryWeight + (armour / 5) ) ) 
-                    );
-                    // Apply armour
-                    damage -= armour;
-
-                    // there was damage before armour.
-                    if ( damage <= 0 ) {
-                        npc.getEntity().getWorld().playEffect( npc.getEntity().getLocation(),
-                                                               Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
-                        hit = Hits.Block;
-                    }
-                }
-
-                if (    damager instanceof Player
-                        && !CitizensAPI.getNPCRegistry().isNPC( damager ) ) {
-
-                    Player player = (Player) damager;
-                    instVictim._myDamamgers.add( player );
-
-                    String msg = hit.message;
-
-                    if ( msg != null && !msg.isEmpty() ) {
-                        String formatted = Util.format( msg,
-                                                        npc,
-                                                        damager, 
-                                                        player.getInventory().getItemInMainHand().getType(),
-                                                        String.valueOf( damage ) );
-                        player.sendMessage( formatted );
-                        
-                        if ( Sentries.debug ) Sentries.debugLog( formatted );                               
-                    }
-                }
-
-                if ( damage > 0 ) {
-                    npc.getEntity().playEffect( EntityEffect.HURT );
-
-                    LivingEntity victim = instVictim.getMyEntity();
-                    if ( victim != null ) 
-                        victim.damage( damage, damager );
-                    
-                    // is he dead?
-                    if ( instVictim.getHealth() - damage <= 0 ) {
-
-                        instVictim.die( true, event.getCause() );
-                    }
+                // there was damage before armour.
+                if ( damage <= 0 ) {
+                    myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
+                    hit = Hits.Block;
                 }
             }
-        }  
-//    }
+
+            if (    damager instanceof Player
+                    && !CitizensAPI.getNPCRegistry().isNPC( damager ) ) {
+
+                Player player = (Player) damager;
+                instVictim._myDamamgers.add( player );
+
+                String msg = hit.message;
+
+                if ( msg != null && !msg.isEmpty() ) {
+                    String formatted = Util.format( msg,
+                                                    npc,
+                                                    damager, 
+                                                    player.getInventory().getItemInMainHand().getType(),
+                                                    String.valueOf( damage ) );
+                    player.sendMessage( formatted );
+                    
+                    if ( Sentries.debug ) Sentries.debugLog( formatted );                               
+                }
+            }
+
+            if ( damage > 0 ) {
+                
+                myEntity.playEffect( EntityEffect.HURT );
+                ((LivingEntity) myEntity).damage( damage, damager );
+                
+                // is he dead?
+                if ( instVictim.getHealth() - damage <= 0 )
+                    instVictim.die( true, cause );
+
+            }
+        }
+    }  
     
     @EventHandler( priority = EventPriority.MONITOR )
     public void processEventForTargets( EntityDamageByEntityEvent event ) {
@@ -477,7 +409,7 @@ public class SentryListener implements Listener {
         LivingEntity victim = (LivingEntity) event.getEntity();
         LivingEntity damager = (LivingEntity) event.getDamager();
  
-        if ( Sentries.debug ) Sentries.debugLog( "processEventForTargets() called for:- " + victim.getName() );
+        if ( Sentries.debug ) Sentries.debugLog( "processEventForTargets() called for:- " + damager.getName() + " Vs " + victim.getName() );
         
         if (    damager != victim
                 && event.getDamage() > 0 ) {
@@ -493,13 +425,16 @@ public class SentryListener implements Listener {
                     continue; 
                 }
 
+                // is the sentry guarding the victim?
                 if (    inst.guardeeEntity == victim ) {
                     inst.setAttackTarget( damager );
                     continue;
                 }
 
+                // is the sentry set to retaliate, or was its mount the victim?
                 if (    inst.iWillRetaliate
-                        ||  (   inst.hasMount()
+                        ||  (   inst.iWillRetaliate
+                                && inst.hasMount()
                                 && inst.getMountNPC().getEntity() == victim ) ) {
                     inst.setAttackTarget( damager );
                     continue;
@@ -572,11 +507,7 @@ public class SentryListener implements Listener {
                     if (    ev != null
                             && ev instanceof EntityDamageByEntityEvent ) {
 
-                        killer = ((EntityDamageByEntityEvent) ev).getDamager();
-
-                        if (    killer instanceof Projectile
-                                && ((Projectile) killer).getShooter() instanceof Entity )
-                            killer = (Entity) ((Projectile) killer).getShooter();
+                        killer = Util.getArcher( ((EntityDamageByEntityEvent) ev).getDamager() );
                     }
                 }
 
@@ -586,19 +517,8 @@ public class SentryListener implements Listener {
                     DenizenHook.denizenAction( each, "mount death", (perp instanceof Player) ? (Player) perp 
                                                                                              : null );
                 }
-
-                if ( perp == null || inst.isIgnoring( perp ) ) return;
-
-                // prepare a task to send to the scheduler.
-                final Runnable getThePerp = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        inst.setAttackTarget( perp );
-                    }
-                };
-                // delay so the mount is gone.
-                Bukkit.getScheduler().scheduleSyncDelayedTask( Sentries.plugin, getThePerp, 2 );
+                if ( perp != null && !inst.isIgnoring( perp ) ) inst.setAttackTarget( perp );
+                
                 break;
             }
         }

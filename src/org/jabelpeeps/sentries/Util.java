@@ -9,6 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -263,5 +265,17 @@ public abstract class Util {
             return npc.getTrait( SentryTrait.class );
         }
         return null;
+    }
+    
+    static Entity getArcher( Entity damager ) {
+        
+        if ( damager instanceof Projectile ) {
+
+            ProjectileSource source = ((Projectile) damager).getShooter();
+
+            if ( source instanceof Entity )
+                damager = (Entity) source;
+        }      
+        return damager;   
     }
 }
