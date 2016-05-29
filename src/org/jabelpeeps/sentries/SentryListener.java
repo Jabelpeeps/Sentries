@@ -219,7 +219,8 @@ public class SentryListener implements Listener {
 
     @EventHandler( priority = EventPriority.HIGHEST )
     public void onDamage( EntityDamageByEntityEvent event ) {
-
+        // handles damage inflicted by Sentries
+        
         Entity entity = event.getEntity();
         if ( !(entity instanceof LivingEntity) ) return;
         
@@ -227,11 +228,7 @@ public class SentryListener implements Listener {
         
         Entity damagerEnt = event.getDamager();        
         LivingEntity shooter = (LivingEntity) Util.getArcher( damagerEnt );
-        
-        if ( Sentries.debug )
-            Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " cancelled:[" + event.isCancelled() 
-                                + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );
-        
+               
         SentryTrait instDamager = Util.getSentryTrait( shooter );
         SentryTrait instVictim = Util.getSentryTrait( victim );
 
@@ -294,20 +291,27 @@ public class SentryListener implements Listener {
 
                 victim.setVelocity( new Vector( 0, v / 20, 0 ) );
             }
+            
+            if ( Sentries.debug )
+                Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " cancelled:[" + event.isCancelled() 
+                                    + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
         }
     }
     
     @EventHandler( priority = EventPriority.HIGHEST )
     public void processNPCdamage( NPCDamageByEntityEvent event ) {
-        
+        // handles damage to sentries (including critical hits - if enabled)
+
         NPC npc = event.getNPC();
         SentryTrait instVictim = Util.getSentryTrait( npc );
         
-        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + npc.getName() );
-  
         // tests if the victim is a sentry
-        if ( instVictim != null ) {
+        if ( instVictim != null ) { 
             
+            // stop repeated calls to this event handler for the same NPC
+            if ( System.currentTimeMillis() < instVictim.okToTakedamage + 500 ) return;
+            instVictim.okToTakedamage = System.currentTimeMillis();
+                        
             // Damage to a sentry cannot be handled by the server. Always cancel the event here.
             event.setCancelled( true );
 
@@ -399,6 +403,9 @@ public class SentryListener implements Listener {
                     instVictim.die( true, cause );
 
             }
+            if ( Sentries.debug )
+                Sentries.debugLog( "Damage: from:" + damager.getName() + " to:" + npc.getName() + " cancelled:[" + event.isCancelled() 
+                                    + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
         }
     }  
     

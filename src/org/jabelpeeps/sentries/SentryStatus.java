@@ -150,8 +150,6 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
-            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
-
             if (    System.currentTimeMillis() > inst.isRespawnable
                     && inst.respawnDelay > 0
                     && inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,
@@ -159,8 +157,7 @@ enum SentryStatus {
 
                 NPC npc = inst.getNPC();
                 
-                if ( Sentries.debug )
-                    Sentries.debugLog( "respawning" + npc.getName() );
+                if ( Sentries.debug ) Sentries.debugLog( "respawning" + npc.getName() );
 
                 if ( inst.guardeeEntity == null )
                     npc.spawn( inst.spawnLocation );
