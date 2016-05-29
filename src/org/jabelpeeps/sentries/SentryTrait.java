@@ -1037,7 +1037,7 @@ public class SentryTrait extends Trait {
     }
 
     @Override
-    public boolean isRunImplemented() { return true; }
+    public boolean isRunImplemented() { return false; }
     
     @Override
     public void run() {

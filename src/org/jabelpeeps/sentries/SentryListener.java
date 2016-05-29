@@ -45,7 +45,7 @@ public class SentryListener implements Listener {
 
         LivingEntity deceased = event.getEntity();
         
-        if ( deceased == null ) return;
+//        if ( deceased == null ) return;
 
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + deceased.toString() );
         
@@ -179,7 +179,7 @@ public class SentryListener implements Listener {
 
         if ( event instanceof NPCDamageByEntityEvent ) return;
         
-        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
+        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getName() );
 
         SentryTrait inst = Util.getSentryTrait( event.getNPC() );
 
@@ -232,14 +232,13 @@ public class SentryListener implements Listener {
         Entity victim = event.getEntity();
 
         if ( Sentries.debug )
-            Sentries.debugLog( "Damage: from:" + damagerEnt.getName() + " to:" + victim.getName()
-                    + " cancelled:[" + event.isCancelled() + "] damage:["
-                    + event.getDamage() + "] cause:" + event.getCause() );
+            Sentries.debugLog( "Damage: from:" + damagerEnt.getName() + " to:" + victim.getName() + " cancelled:[" + event.isCancelled() 
+                                + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );
         
-        if ( damagerEnt == victim ) {
-            event.setCancelled( true );
-            return;
-        }
+//        if ( damagerEnt == victim ) {
+//            event.setCancelled( true );
+//            return;
+//        }
 
         // following 'if' statements change damager to refer to the shooter of a projectile.
         if ( damagerEnt instanceof Projectile ) {
@@ -294,8 +293,7 @@ public class SentryListener implements Listener {
                 }
             }
             // don't hurt guard target.
-            if ( victim == instDamager.guardeeEntity )
-                event.setCancelled( true );
+            if ( victim == instDamager.guardeeEntity ) event.setCancelled( true );
 
             // apply potion effects
             if (    instDamager.weaponSpecialEffects != null
@@ -306,16 +304,13 @@ public class SentryListener implements Listener {
             // warlock 1 should do no direct damage, except to sentries who take fall damage.
             if ( instDamager.isWarlock1() && !event.isCancelled() ) {
 
-                if ( instVictim == null )
-                    event.setCancelled( true );
+                if ( instVictim == null ) event.setCancelled( true );
 
                 double h = instDamager.getStrength() + 3;
                 double v = 7.7 * Math.sqrt( h ) + 0.2;
 
-                if ( h <= 3 )
-                    v -= 2;
-                if ( v > 150 )
-                    v = 150;
+                if ( h <= 3 ) v -= 2;
+                if ( v > 150 ) v = 150;
 
                 victim.setVelocity( new Vector( 0, v / 20, 0 ) );
             }
@@ -447,12 +442,14 @@ public class SentryListener implements Listener {
                     String msg = hit.message;
 
                     if ( msg != null && !msg.isEmpty() ) {
-                        player.sendMessage( 
-                                Util.format( msg,
-                                             npc,
-                                             damager, 
-                                             player.getInventory().getItemInMainHand().getType(),
-                                             String.valueOf( damage ) ) );
+                        String formatted = Util.format( msg,
+                                                        npc,
+                                                        damager, 
+                                                        player.getInventory().getItemInMainHand().getType(),
+                                                        String.valueOf( damage ) );
+                        player.sendMessage( formatted );
+                        
+                        if ( Sentries.debug ) Sentries.debugLog( formatted );                               
                     }
                 }
 
@@ -473,7 +470,7 @@ public class SentryListener implements Listener {
         }  
 //    }
     
-    @EventHandler( priority = EventPriority.MONITOR, ignoreCancelled = true )
+    @EventHandler( priority = EventPriority.MONITOR )
     public void processEventForTargets( EntityDamageByEntityEvent event ) {
         // event to check each sentry for events that need a response.
         
@@ -502,8 +499,8 @@ public class SentryListener implements Listener {
                 }
 
                 if (    inst.iWillRetaliate
-                        && inst.hasMount()
-                        && inst.getMountNPC().getEntity() == victim ) {
+                        ||  (   inst.hasMount()
+                                && inst.getMountNPC().getEntity() == victim ) ) {
                     inst.setAttackTarget( damager );
                     continue;
                 }
