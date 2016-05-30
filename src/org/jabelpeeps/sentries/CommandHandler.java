@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -212,8 +213,8 @@ public abstract class CommandHandler {
                 if ( checkCommandPerm( S.PERM_INFO, player ) )
                     player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, " - View all attributes of a sentry NPC" ) );
                 
-                if ( checkCommandPerm( S.PERM_DEBUG, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the display debug info on the console",
+                if ( player instanceof ConsoleCommandSender )
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the debug display on the console",
                             System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
 
                 if ( checkCommandPerm( S.PERM_RELOAD, player ) )
@@ -224,13 +225,11 @@ public abstract class CommandHandler {
             return true;
         }
         // ------------------------------------- Debug Command --------------
-        if ( "debug".equalsIgnoreCase( inargs[0] ) ) {
+        if (    player instanceof ConsoleCommandSender 
+                && "debug".equalsIgnoreCase( inargs[0] ) ) {
 
-            if ( checkCommandPerm( S.PERM_DEBUG, player ) ) {
-
-                Sentries.debug = !Sentries.debug;
-                player.sendMessage( S.Col.GREEN + "Debug is now: " + (Sentries.debug ? S.ON : S.OFF) );
-            }
+            Sentries.debug = !Sentries.debug;
+            player.sendMessage( S.Col.GREEN + "Debug is now: " + (Sentries.debug ? S.ON : S.OFF) );
             return true;
         }
         // -------------------------------------- Reload Command ------------

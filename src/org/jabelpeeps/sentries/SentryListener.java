@@ -298,6 +298,7 @@ public class SentryListener implements Listener {
         }
     }
     
+    @SuppressWarnings( "null" )
     @EventHandler( priority = EventPriority.HIGHEST )
     public void processNPCdamage( NPCDamageByEntityEvent event ) {
         // handles damage to sentries (including critical hits - if enabled)
