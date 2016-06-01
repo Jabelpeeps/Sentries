@@ -1038,14 +1038,16 @@ public class SentryTrait extends Trait {
 
     @Override
     public boolean isRunImplemented() { return false; }
+    // The above method needs to return false, otherwise the citizens API calls run() every 
+    // tick, instead of the configured LogicTicks value.
     
     @Override
     public void run() {
 
-        LivingEntity myEntity = getMyEntity();
-
-        if ( myEntity == null ) 
-            myStatus = SentryStatus.isDEAD;
+//        LivingEntity myEntity = getMyEntity();
+//
+//        if ( myEntity == null ) 
+//            myStatus = SentryStatus.isDEAD;
       
         myStatus = myStatus.update( this );
     }

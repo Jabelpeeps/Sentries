@@ -27,7 +27,9 @@ public interface TargetType {
     /** 
      * Method to define the targets that a TargetType will encompass.
      * <p>
-     * The supplied string argument should be retained unmodified so that it can be retrieved 
+     * The String may be parsed to define targets, or a constructor used to pass typed objects directly.
+     * <p>
+     * In either case, the supplied string argument should be retained unmodified so that it can be retrieved 
      * by {@link #getTargetString()}
      * 
      * @param type - a string that can be parsed to provide a definition of the desired targets.

@@ -9,7 +9,6 @@ softdepend: [Denizen, Vault, Towny, Factions, War, SimpleClans]
 
 commands:
   sentry:
-    alias: sentries
     description: Lists sentry commands.
     usage: /sentry help
 
@@ -17,7 +16,6 @@ permissions:
   sentry.*:
     default: op
     children:
-       sentry.debug: true
        sentry.target: true
        sentry.ignore: true
        sentry.stats.*: true
@@ -66,8 +64,6 @@ permissions:
      deafult: op
   sentry.warning:
      deafult: op
-  sentry.debug:
-     default: op
   sentry.reload:
      deafult: op
   sentry.greeting:

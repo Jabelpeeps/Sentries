@@ -53,8 +53,9 @@ public class SentryListener implements Listener {
             return;
 
         Entity killer = deceased.getKiller();
+        
         if ( killer == null ) {
-            // death might have been caused by a projectile, or environmental harm.
+            // lets try another route to find the killer...
 
             // let start by getting the specific damage event.
             EntityDamageEvent ev = deceased.getLastDamageCause();
@@ -415,7 +416,7 @@ public class SentryListener implements Listener {
         // event to check each sentry for events that need a response.
         
         LivingEntity victim = (LivingEntity) event.getEntity();
-        LivingEntity damager = (LivingEntity) event.getDamager();
+        LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
  
         if ( Sentries.debug ) Sentries.debugLog( "processEventForTargets() called for:- " + damager.getName() + " Vs " + victim.getName() );
         

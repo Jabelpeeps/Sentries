@@ -312,7 +312,7 @@ enum SentryStatus {
             // attack the current target
             if (    inst.attackTarget != null 
                     && !inst.attackTarget.isDead()
-                    && inst.attackTarget.getWorld() == myEntity.getLocation().getWorld() ) {
+                    && inst.attackTarget.getWorld() == myEntity.getWorld() ) {
 
                 Navigator navigator = inst.getNavigator();
                 
@@ -323,8 +323,6 @@ enum SentryStatus {
 
                     if ( inst._projTargetLostLoc == null )
                         inst._projTargetLostLoc = inst.attackTarget.getLocation();
-
-
 
                     if ( !navigator.isPaused() ) {
                         navigator.setPaused( true );
@@ -359,15 +357,13 @@ enum SentryStatus {
                         navigator.getLocalParameters().stationaryTicks( 5 * 20 );
                     }
                 }
-                
-                if ( inst.hasMount() )
-                    inst.faceEntity( myEntity, inst.attackTarget );
+                inst.faceEntity( myEntity, inst.attackTarget );
 
-                double dist = inst.attackTarget.getLocation().distance( myEntity.getLocation() );
+                double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
                 // block if in range
-                inst.draw( dist < 3 );
+                inst.draw( dist < 9 );
                 // is it still in range? then keep attacking...
-                if ( dist <= inst.sentryRange )
+                if ( dist <= inst.sentryRange * inst.sentryRange )
                     return this;
             }
             
