@@ -38,8 +38,6 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
-            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
-
             LivingEntity myEntity = inst.getMyEntity();
 
             inst.clearTarget();
@@ -157,8 +155,6 @@ enum SentryStatus {
 
                 NPC npc = inst.getNPC();
                 
-                if ( Sentries.debug ) Sentries.debugLog( "respawning" + npc.getName() );
-
                 if ( inst.guardeeEntity == null )
                     npc.spawn( inst.spawnLocation );
                 else
@@ -174,8 +170,6 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
-            
-            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
             
             if ( inst.getNPC().isSpawned() ) {
                 
@@ -195,8 +189,6 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
-            
-            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
             
             LivingEntity myEntity = inst.getMyEntity();
             
@@ -271,8 +263,6 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
-            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
-            
             inst.tryToHeal();
             
             LivingEntity target = null;
@@ -299,8 +289,6 @@ enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
-            
-            if ( Sentries.debug ) Sentries.debugLog( inst.getNPC().getName() + " " + this.name() );
             
             if ( !inst.isMyChunkLoaded() ) {
                 inst.clearTarget();
@@ -353,7 +341,7 @@ enum SentryStatus {
     
                         navigator.setTarget( inst.attackTarget, true );
                         navigator.getLocalParameters().speedModifier( inst.getSpeed() );
-                        navigator.getLocalParameters().stuckAction( inst.giveup );
+                        navigator.getLocalParameters().stuckAction( SentryTrait.giveup );
                         navigator.getLocalParameters().stationaryTicks( 5 * 20 );
                     }
                 }

@@ -42,6 +42,8 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.attackstrategies.CreeperAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
@@ -52,6 +54,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
+import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.event.CitizensReloadEvent;
 import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.event.NPCDamageEvent;
@@ -73,36 +76,16 @@ public class SentryTrait extends Trait {
     Location _projTargetLostLoc;
     Location spawnLocation;
 
-    int strength;
-    int armourValue;
-    int epCount;
-    int nightVision;
-    int respawnDelay;
-    int sentryRange;
-    int followDistance;
-    int mountID;
-    int warningRange;
-
+    int strength, armourValue, epCount, nightVision, respawnDelay;
+    int sentryRange, followDistance, warningRange, mountID;
     float sentrySpeed;
+    double attackRate, healRate, sentryWeight, sentryMaxHealth;
+    boolean killsDropInventory, dropInventory, targetable, invincible, loaded;
+    boolean acceptsCriticals, iWillRetaliate, ignoreLOS;
 
-    double attackRate;
-    double healRate;
-    double sentryWeight;
-    double sentryMaxHealth;
+    static GiveUpStuckAction giveup = new GiveUpStuckAction();
 
-    boolean killsDropInventory;
-    boolean dropInventory;
-    boolean targetable;
-    boolean invincible;
-    boolean loaded;
-    boolean acceptsCriticals;
-    boolean iWillRetaliate;
-    boolean ignoreLOS;
-
-    GiveUpStuckAction giveup = new GiveUpStuckAction( this );
-
-    String greetingMsg = "";
-    String warningMsg = "";
+    String greetingMsg = "", warningMsg = "";
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> _myDamamgers = new HashSet<>();
@@ -123,7 +106,6 @@ public class SentryTrait extends Trait {
     Set<String> _ignoreTargets = new HashSet<>();
     Set<String> _validTargets = new HashSet<>();
 
-    // TODO why are we saving four instances of the system time?
     long isRespawnable = System.currentTimeMillis();
     long oktoFire = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
@@ -135,9 +117,11 @@ public class SentryTrait extends Trait {
     Random random = new Random();
 
     SentryStatus myStatus = SentryStatus.isSPAWNING;
+    SentryStatus oldStatus;
     AttackType myAttack;
 
-    private int taskID = 0;
+//    private int taskID = 0;
+    private BukkitTask tickMe;
 
     public final int myID;
     private static int nextID;
@@ -291,26 +275,49 @@ public class SentryTrait extends Trait {
 
         updateAttackType();
 
-        if ( taskID == 0 ) {
-            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
-                                                                      this, 
-                                                                      40 + npc.getId(), 
-                                                                      Sentries.logicTicks );
+        if ( tickMe == null ) {
+            tickMe = new BukkitRunnable() {                
+                    @SuppressWarnings( "synthetic-access" )
+                    @Override
+                    public void run() {                      
+                        if ( Sentries.debug && oldStatus != myStatus ) {
+                            Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
+                            oldStatus = myStatus;
+                        }
+                        myStatus = myStatus.update( SentryTrait.this );                    
+                    }
+            }.runTaskTimer( sentry, 40 + myID, Sentries.logicTicks );
+//                    Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
+//                                                                      this, 
+//                                                                      40 + myID, 
+//                                                                      Sentries.logicTicks );
         }
     }
-    
+
+//    @Override
+//    public boolean isRunImplemented() { return false; }
+//    // The above method needs to return false, otherwise the citizens API calls run() every 
+//    // tick, instead of the configured LogicTicks value.
+//    
+//    @Override
+//    public void run() {      
+//        
+//    }
+
     @Override
-    public void onRemove() {
-        
+    public void onRemove() {        
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
 
         cancelRunnable();
     }
     
+    public void cancelRunnable() {
+        if ( tickMe != null ) tickMe.cancel();;
+    }
+    
     @Override
     public void onDespawn() {
-
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
 
@@ -320,7 +327,6 @@ public class SentryTrait extends Trait {
     
     @Override
     public void save( DataKey key ) {
-
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
         
@@ -374,20 +380,13 @@ public class SentryTrait extends Trait {
  
         // the new npc is not in the new location immediately.
         // TODO is this really needed?
-        final Runnable cloneInstance = new Runnable() {
-
+        new BukkitRunnable() {
             @SuppressWarnings( "synthetic-access" )
             @Override
             public void run() {
                 spawnLocation = npc.getEntity().getLocation();
             }
-        };
-        Bukkit.getScheduler().scheduleSyncDelayedTask( sentry, cloneInstance, 10 );
-    }
-
-    public void cancelRunnable() {
-        if ( taskID != 0 )
-            Bukkit.getScheduler().cancelTask( taskID );
+        }.runTaskLater( sentry, 10 );
     }
 
     public boolean hasTargetType( int type ) { 
@@ -1036,22 +1035,6 @@ public class SentryTrait extends Trait {
         return false;
     }
 
-    @Override
-    public boolean isRunImplemented() { return false; }
-    // The above method needs to return false, otherwise the citizens API calls run() every 
-    // tick, instead of the configured LogicTicks value.
-    
-    @Override
-    public void run() {
-
-//        LivingEntity myEntity = getMyEntity();
-//
-//        if ( myEntity == null ) 
-//            myStatus = SentryStatus.isDEAD;
-      
-        myStatus = myStatus.update( this );
-    }
-
     void reMountMount() {
            
         if (    npc.isSpawned() 
@@ -1118,14 +1101,6 @@ public class SentryTrait extends Trait {
     public boolean findGuardEntity( String name, boolean onlyCheckAllPlayers ) {
 
         if ( npc == null || name == null ) return false;
-
-//        if ( name == null ) {
-//            guardeeEntity = null;
-//            guardeeName = null;
-//
-//            clearTarget();
-//            return true;
-//        }
 
         if ( onlyCheckAllPlayers ) {
 
@@ -1248,11 +1223,6 @@ public class SentryTrait extends Trait {
             }
             potionItem = item;
             weaponSpecialEffects = null;
-            
-//            if ( item.getItemMeta() instanceof PotionMeta ) {
-//                PotionMeta meta = (PotionMeta) item.getItemMeta();
-//                PotionType type = meta.getBasePotionData().getType();
-//          }
         }
         else {
             potionItem = null;
@@ -1349,9 +1319,7 @@ public class SentryTrait extends Trait {
     }
 
     NPC ifMountedGetMount() {
-//        if ( Sentries.debug )
-//            Sentries.debugLog( String.join( "", S.Col.RED, "ifMountedGetMount(): mountID = ", String.valueOf( mountID ) ) ) ;
-        
+       
         NPC mount = getMountNPC();
         
         if ( mount != null && mount.isSpawned() && getMyEntity().isInsideVehicle() ) {
@@ -1490,4 +1458,23 @@ public class SentryTrait extends Trait {
 
     @Override
     public int hashCode() { return myID; }
+    
+    
+    static class GiveUpStuckAction implements StuckAction {
+        @Override
+        public boolean run( NPC npc, Navigator navigator ) {
+
+            if ( !npc.isSpawned() ) return false;
+
+            Location target = navigator.getTargetAsLocation();
+            Location present = npc.getEntity().getLocation();
+
+            if ( target.getWorld() == present.getWorld()
+                    && present.distanceSquared( target ) <= 4 ) {
+                return true;
+            }
+            Util.getSentryTrait( npc ).clearTarget();
+            return false;
+        }
+    }
 }
