@@ -76,12 +76,11 @@ public class SentryTrait extends Trait {
     Location _projTargetLostLoc;
     Location spawnLocation;
 
-    int strength, armourValue, epCount, nightVision, respawnDelay;
-    int sentryRange, followDistance, warningRange, mountID;
-    float sentrySpeed;
+    int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, warningRange, mountID;
+    int activeStrength, activeArmour;
+    float speed, activeSpeed;
     double attackRate, healRate, sentryWeight, sentryMaxHealth;
-    boolean killsDropInventory, dropInventory, targetable, invincible, loaded;
-    boolean acceptsCriticals, iWillRetaliate, ignoreLOS;
+    boolean killsDropInventory, dropInventory, targetable, invincible, loaded, acceptsCriticals, iWillRetaliate, ignoreLOS;
 
     static GiveUpStuckAction giveup = new GiveUpStuckAction();
 
@@ -120,7 +119,6 @@ public class SentryTrait extends Trait {
     SentryStatus oldStatus;
     AttackType myAttack;
 
-//    private int taskID = 0;
     private BukkitTask tickMe;
 
     public final int myID;
@@ -154,7 +152,7 @@ public class SentryTrait extends Trait {
         ignoreLOS = key.getBoolean( S.IGNORE_LOS, sentry.defaultBooleans.get( S.IGNORE_LOS ) );
         targetable = key.getBoolean( S.TARGETABLE, sentry.defaultBooleans.get( S.TARGETABLE ) );
 
-        armourValue = key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
+        armour = key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
         strength = key.getInt( S.STRENGTH, sentry.defaultIntegers.get( S.STRENGTH ) );
         sentryRange = key.getInt( S.RANGE, sentry.defaultIntegers.get( S.RANGE ) );
         respawnDelay = key.getInt( S.RESPAWN_DELAY, sentry.defaultIntegers.get( S.RESPAWN_DELAY ) );
@@ -163,7 +161,7 @@ public class SentryTrait extends Trait {
         nightVision = key.getInt( S.NIGHT_VISION, sentry.defaultIntegers.get( S.NIGHT_VISION ) );
         mountID = key.getInt( S.MOUNTID, -1 );
 
-        sentrySpeed = (float) key.getDouble( S.SPEED, sentry.defaultDoubles.get( S.SPEED ) );
+        speed = (float) key.getDouble( S.SPEED, sentry.defaultDoubles.get( S.SPEED ) );
         sentryWeight = key.getDouble( S.WEIGHT, sentry.defaultDoubles.get( S.WEIGHT ) );
         sentryMaxHealth = key.getDouble( S.HEALTH, sentry.defaultDoubles.get( S.HEALTH ) );
         attackRate = key.getDouble( S.ATTACK_RATE, sentry.defaultDoubles.get( S.ATTACK_RATE ) );
@@ -287,22 +285,8 @@ public class SentryTrait extends Trait {
                         myStatus = myStatus.update( SentryTrait.this );                    
                     }
             }.runTaskTimer( sentry, 40 + myID, Sentries.logicTicks );
-//                    Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
-//                                                                      this, 
-//                                                                      40 + myID, 
-//                                                                      Sentries.logicTicks );
         }
     }
-
-//    @Override
-//    public boolean isRunImplemented() { return false; }
-//    // The above method needs to return false, otherwise the citizens API calls run() every 
-//    // tick, instead of the configured LogicTicks value.
-//    
-//    @Override
-//    public void run() {      
-//        
-//    }
 
     @Override
     public void onRemove() {        
@@ -353,10 +337,10 @@ public class SentryTrait extends Trait {
         key.setDouble( S.HEALTH, sentryMaxHealth );
         key.setInt( S.RANGE, sentryRange );
         key.setInt( S.RESPAWN_DELAY, respawnDelay );
-        key.setDouble( S.SPEED, sentrySpeed );
+        key.setDouble( S.SPEED, speed );
         key.setDouble( S.WEIGHT, sentryWeight );
         key.setDouble( S.HEALRATE, healRate );
-        key.setInt( S.ARMOR, armourValue );
+        key.setInt( S.ARMOR, armour );
         key.setInt( S.STRENGTH, strength );
         key.setInt( S.WARNING_RANGE, warningRange );
         key.setDouble( S.ATTACK_RATE, attackRate );
@@ -532,7 +516,6 @@ public class SentryTrait extends Trait {
     }
 
     public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
-        // most of the former contents of this method have been moved to the SentryStatus state machine.
 
         if ( myStatus.isDeadOrDieing() ) return;
 
@@ -544,8 +527,7 @@ public class SentryTrait extends Trait {
             DenizenHook.sentryDeath( _myDamamgers, npc );
     }
 
-    void faceEntity( Entity from, Entity at ) {
-        
+    void faceEntity( Entity from, Entity at ) {        
         NMS.look( NMS.getHandle( from ), NMS.getHandle( at ) );
     }
 
@@ -592,7 +574,6 @@ public class SentryTrait extends Trait {
                     if ( hasLOS( aTarget ) ) {
 
                         if (    warningRange > 0 && !warningMsg.isEmpty()
-                                && myStatus == SentryStatus.isLOOKING
                                 && aTarget instanceof Player
                                 && dist > (range - warningRange) 
                                 && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
@@ -618,7 +599,6 @@ public class SentryTrait extends Trait {
                 }
             }
             else if ( warningRange > 0 && !greetingMsg.isEmpty()
-                    && myStatus == SentryStatus.isLOOKING
                     && aTarget instanceof Player
                     && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
@@ -813,10 +793,17 @@ public class SentryTrait extends Trait {
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );
     }
 
+    public double getHealth() {
+        LivingEntity myEntity = getMyEntity();
+        if ( npc == null || myEntity == null ) return 0;
+
+        return myEntity.getHealth();
+    }
+    
     public int getArmor() {
 
         if ( sentry.armorBuffs.isEmpty() )
-            return armourValue;
+            return armour;
 
         double mod = 0;
 
@@ -828,24 +815,16 @@ public class SentryTrait extends Trait {
                     mod += sentry.armorBuffs.get( item );
             }
         }
-        return (int) (armourValue + mod);
-    }
-
-    public double getHealth() {
-        LivingEntity myEntity = getMyEntity();
-        if ( npc == null || myEntity == null )
-            return 0;
-
-        return myEntity.getHealth();
+        return (int) (armour + mod);
     }
 
     public float getSpeed() {
-        if ( !npc.isSpawned() )
-            return sentrySpeed;
+
+        LivingEntity myEntity = getMyEntity();
+        
+        if ( myEntity == null ) return speed;
 
         double mod = 0;
-        LivingEntity myEntity = getMyEntity();
-
         if ( !sentry.speedBuffs.isEmpty() ) {
 
             if ( myEntity instanceof Player ) {
@@ -857,7 +836,7 @@ public class SentryTrait extends Trait {
                 }
             }
         }
-        return (float) (sentrySpeed + mod) * (myEntity.isInsideVehicle() ? 2 : 1);
+        return (float) ( speed + mod ) * ( myEntity.isInsideVehicle() ? 2 : 1 );
     }
 
     public int getStrength() {
@@ -1059,7 +1038,7 @@ public class SentryTrait extends Trait {
                 LivingEntity myEntity = getMyEntity();
                 
                 // idk what this effect looks like, so lets see if it looks ok in-game.
-                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.VILLAGER_PLANT_GROW, 20 );
+                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.VILLAGER_PLANT_GROW, 100 );
 
 //                if ( healAnimation != null )
 //                    NMS.sendPacketNearby( null, getMyEntity().getLocation(), healAnimation );
@@ -1242,37 +1221,37 @@ public class SentryTrait extends Trait {
         
         draw( false );
         
-        GoalController goalController = getGoalController();
-        Navigator navigator = getNavigator();
-        
-        if ( guardeeEntity == null ) {
-            // not a guard or entity to be guarded is not spawned.
-            navigator.cancelNavigation();
-
-            faceForward();
-
-            // allow new goals to be added.
-            if ( goalController.isPaused() )
-                goalController.setPaused( false );
-        }
-        else {
-            goalController.setPaused( true );
-
-            if (    navigator.getEntityTarget() == null 
-                    || navigator.getEntityTarget().getTarget() != guardeeEntity ) {
-                
-                LivingEntity myEntity = getMyEntity();
-
-                if (    myEntity != null 
-                        && guardeeEntity.getLocation().getWorld() != myEntity.getLocation().getWorld() ) {
-                    npc.despawn();
-                    npc.spawn( guardeeEntity.getLocation().add( 1, 0, 1 ) );
-                    return;
-                }
-                navigator.setTarget( guardeeEntity, false );
-                navigator.getLocalParameters().stationaryTicks( 3 * 20 );
-            }
-        }
+//        GoalController goalController = getGoalController();
+//        Navigator navigator = getNavigator();
+//        
+//        if ( guardeeEntity == null ) {
+//            // not a guard or entity to be guarded is not spawned.
+//            navigator.cancelNavigation();
+//
+//            faceForward();
+//
+//            // allow new goals to be added.
+//            if ( goalController.isPaused() )
+//                goalController.setPaused( false );
+//        }
+//        else {
+//            goalController.setPaused( true );
+//
+//            if (    navigator.getEntityTarget() == null 
+//                    || navigator.getEntityTarget().getTarget() != guardeeEntity ) {
+//                
+//                LivingEntity myEntity = getMyEntity();
+//
+//                if (    myEntity != null 
+//                        && guardeeEntity.getLocation().getWorld() != myEntity.getLocation().getWorld() ) {
+//                    npc.despawn();
+//                    npc.spawn( guardeeEntity.getLocation().add( 1, 0, 1 ) );
+//                    return;
+//                }
+//                navigator.setTarget( guardeeEntity, false );
+//                navigator.getLocalParameters().stationaryTicks( 3 * 20 );
+//            }
+//        }
         return;
     }
 
@@ -1282,17 +1261,18 @@ public class SentryTrait extends Trait {
 
         if ( myEntity == null || theEntity == myEntity || theEntity == guardeeEntity ) return;
 
+        // don't attack when bodyguard target isn't around.
         if ( guardeeName != null && guardeeEntity == null )
-            theEntity = null; // dont go aggro when bodyguard target isnt around.
-
-        if ( theEntity == null ) {
-            // no target to be attacked
-            if ( Sentries.debug )
-                Sentries.debugLog( npc.getName() + " - Set Target Null? " );
-
-            clearTarget();
+//            theEntity = null; 
+//
+//        if ( theEntity == null ) {
+//            // no target to be attacked
+//            if ( Sentries.debug )
+//                Sentries.debugLog( npc.getName() + " - Set Target Null? " );
+//
+//            clearTarget();
             return;
-        }
+//        }
         attackTarget = theEntity;
         myStatus = SentryStatus.isATTACKING;
     }

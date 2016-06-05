@@ -43,14 +43,11 @@ public class SentryListener implements Listener {
     public void kill( EntityDeathEvent event ) {
 
         LivingEntity deceased = event.getEntity();
-        
-//        if ( deceased == null ) return;
 
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + deceased.toString() );
         
         // don't mess with player death.
-        if ( deceased instanceof Player && !deceased.hasMetadata( "NPC" ) )
-            return;
+        if ( deceased instanceof Player && !deceased.hasMetadata( "NPC" ) ) return;
 
         Entity killer = deceased.getKiller();
         

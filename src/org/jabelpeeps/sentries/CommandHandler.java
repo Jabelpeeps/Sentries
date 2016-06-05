@@ -535,7 +535,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Armour is ", String.valueOf( inst.armourValue ) ) );
+                    player.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Armour is ", String.valueOf( inst.armour ) ) );
                     player.sendMessage( S.Col.GOLD.concat( "Usage: /sentry armour [#] " ) );
                 }
                 else {
@@ -547,7 +547,7 @@ public abstract class CommandHandler {
 
                     if ( armour > 2000000 ) armour = 2000000;
                     
-                    inst.armourValue = armour;
+                    inst.armour = armour;
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "armour set to", String.valueOf( armour ) ) );
                 }
             }
@@ -636,7 +636,7 @@ public abstract class CommandHandler {
             if ( checkCommandPerm( S.PERM_SPEED, player ) ) {
 
                 if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( S.Col.GOLD + npcName + "'s Speed is " + inst.sentrySpeed );
+                    player.sendMessage( S.Col.GOLD + npcName + "'s Speed is " + inst.speed );
                     player.sendMessage( S.Col.GOLD + "Usage: /sentry speed [0.0 - 2.0]" );
                 }
                 else {
@@ -648,7 +648,7 @@ public abstract class CommandHandler {
 
                     if ( speed > 2.0 ) speed = 2.0f;
                     
-                    inst.sentrySpeed = speed;
+                    inst.speed = speed;
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "speed set to", String.valueOf( speed ) ) );
                 }
             }
