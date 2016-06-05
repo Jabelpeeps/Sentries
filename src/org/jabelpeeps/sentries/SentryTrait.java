@@ -105,10 +105,10 @@ public class SentryTrait extends Trait {
     Set<String> _ignoreTargets = new HashSet<>();
     Set<String> _validTargets = new HashSet<>();
 
-    long isRespawnable = System.currentTimeMillis();
+    long respawnTime = System.currentTimeMillis();
     long oktoFire = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
-    long oktoreasses = System.currentTimeMillis();
+    long reassesTime = System.currentTimeMillis();
     long okToTakedamage = 0;
 
     List<PotionEffect> weaponSpecialEffects;
@@ -300,13 +300,25 @@ public class SentryTrait extends Trait {
         if ( tickMe != null ) tickMe.cancel();;
     }
     
+    public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
+
+        if ( myStatus.isDeadOrDieing() ) return;
+        
+        respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
+        causeOfDeath = cause;
+        myStatus = SentryStatus.DIEING;
+
+        if ( runscripts && Sentries.denizenActive )
+            DenizenHook.sentryDeath( _myDamamgers, npc );
+    }
+
     @Override
     public void onDespawn() {
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
 
-        isRespawnable = System.currentTimeMillis() + respawnDelay * 1000;
         dismount();
+        myStatus = SentryStatus.NOT_SPAWNED;
     }
     
     @Override
@@ -513,18 +525,6 @@ public class SentryTrait extends Trait {
      */
     public boolean targetsContain( String theTarget ) {
         return _validTargets.contains( theTarget.toUpperCase().intern() );
-    }
-
-    public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
-
-        if ( myStatus.isDeadOrDieing() ) return;
-
-        causeOfDeath = cause;
-
-        myStatus = SentryStatus.DIEING;
-
-        if ( runscripts && Sentries.denizenActive )
-            DenizenHook.sentryDeath( _myDamamgers, npc );
     }
 
     void faceEntity( Entity from, Entity at ) {        
@@ -1014,15 +1014,6 @@ public class SentryTrait extends Trait {
         return false;
     }
 
-    void reMountMount() {
-           
-        if (    npc.isSpawned() 
-                && !getMyEntity().isInsideVehicle() 
-                && hasMount()
-                && isMyChunkLoaded() )
-            mount();
-    }
-    
     void tryToHeal() {
         
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
@@ -1170,7 +1161,7 @@ public class SentryTrait extends Trait {
      * <p>
      * Also sets potion effects, and potion types if appropriate.
      */
-    public void updateAttackType() {
+    void updateAttackType() {
 
         Material weapon = Material.AIR;
         ItemStack item = null;
@@ -1255,7 +1246,7 @@ public class SentryTrait extends Trait {
         return;
     }
 
-    public void setAttackTarget( LivingEntity theEntity ) {
+    void setAttackTarget( LivingEntity theEntity ) {
 
         LivingEntity myEntity = getMyEntity();
 
@@ -1287,7 +1278,7 @@ public class SentryTrait extends Trait {
     
     //--------------------------------methods dealing with Mounts----------
     /** Returns true if mountID >= 0 */
-    public boolean hasMount() { return mountID >= 0; }
+    boolean hasMount() { return mountID >= 0; }
  
     /** Returns the NPC with the current mountID or null if the id = -1 (the default) */
     // TODO convert to use uuid's
@@ -1308,22 +1299,7 @@ public class SentryTrait extends Trait {
         return npc;
     }
 
-    public void dismount() {
-
-        LivingEntity myEntity = getMyEntity();
-        
-        if ( myEntity != null && myEntity.isInsideVehicle() ) {
-
-            NPC mount = getMountNPC();
-
-            if ( mount != null ) {
-                myEntity.getVehicle().setPassenger( null );
-                mount.despawn( DespawnReason.PENDING_RESPAWN );
-            }
-        }
-    }
-
-    public void mount() {
+    void mount() {
         if ( npc.isSpawned() ) {
 
             LivingEntity myEntity = getMyEntity();
@@ -1365,7 +1341,7 @@ public class SentryTrait extends Trait {
     /** 
      * Spawns and returns a mountNPC, creating a new NPC of type horse if the sentry does not already have a mount.
      * The method will do nothing and return null if the Sentries is not spawned.  */
-    public NPC spawnMount() {
+    NPC spawnMount() {
         if ( Sentries.debug ) Sentries.debugLog( "Creating mount for " + npc.getName() );
 
         if ( npc.isSpawned() ) {
@@ -1400,6 +1376,31 @@ public class SentryTrait extends Trait {
         }
         return null;
     }
+
+    void dismount() {
+
+        LivingEntity myEntity = getMyEntity();
+        
+        if ( myEntity != null && myEntity.isInsideVehicle() ) {
+
+            NPC mount = getMountNPC();
+
+            if ( mount != null ) {
+                myEntity.getVehicle().setPassenger( null );
+                mount.despawn( DespawnReason.PENDING_RESPAWN );
+            }
+        }
+    }
+
+    void reMountMount() {
+           
+        if (    npc.isSpawned() 
+                && !getMyEntity().isInsideVehicle() 
+                && hasMount()
+                && isMyChunkLoaded() )
+            mount();
+    }
+    
     //------------------------------------------end of methods for mounts
     
     public boolean hasLOS( Entity other ) {

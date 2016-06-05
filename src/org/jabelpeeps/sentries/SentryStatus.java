@@ -136,7 +136,7 @@ enum SentryStatus {
                 inst.getNPC().destroy();
             }
             else
-                inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
+                inst.respawnTime = System.currentTimeMillis() + inst.respawnDelay * 1000;
 
             return SentryStatus.DEAD;
         }
@@ -148,7 +148,7 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
-            if (    System.currentTimeMillis() > inst.isRespawnable
+            if (    System.currentTimeMillis() > inst.respawnTime
                     && inst.respawnDelay > 0
                     && inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,
                                                                     inst.spawnLocation.getBlockZ() >> 4 ) ) {
@@ -171,11 +171,11 @@ enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
+            inst.tryToHeal();  
+            
             if ( inst.getNPC().isSpawned() ) {
-                
-                inst.tryToHeal();
-                inst.reMountMount();
 
+                inst.reMountMount();
                 return is_A_Guard( inst );
             }
             return this;
@@ -217,7 +217,7 @@ enum SentryStatus {
                 if (    guardEntLoc.getWorld() != npcLoc.getWorld()
                         || !inst.isMyChunkLoaded() ) {
 
-                    if ( System.currentTimeMillis() > inst.oktoreasses ) {
+                    if ( System.currentTimeMillis() > inst.reassesTime ) {
                         String worldname = inst.guardeeEntity.getWorld().getName();
                     
                         if ( Util.CanWarp( inst.guardeeEntity, worldname ) ) {
@@ -228,7 +228,7 @@ enum SentryStatus {
                         
                         ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
                         inst.guardeeEntity = null;
-                        inst.oktoreasses = System.currentTimeMillis() + 3000;
+                        inst.reassesTime = System.currentTimeMillis() + 3000;
                     }
                     return this;
                 }
@@ -270,12 +270,12 @@ enum SentryStatus {
             // find and set a target to attack (if no current target)
             if (    inst.targetFlags > 0 
                     && inst.attackTarget == null
-                    && System.currentTimeMillis() > inst.oktoreasses ) {
+                    && System.currentTimeMillis() > inst.reassesTime ) {
 
                 target = inst.findTarget( inst.sentryRange );
                 
                 if ( target != null ) {
-                    inst.oktoreasses = System.currentTimeMillis() + 3000;
+                    inst.reassesTime = System.currentTimeMillis() + 3000;
                     inst.setAttackTarget( target );
                     return SentryStatus.ATTACKING;
                 }
