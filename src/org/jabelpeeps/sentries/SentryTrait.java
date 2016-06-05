@@ -115,7 +115,7 @@ public class SentryTrait extends Trait {
     ItemStack potionItem;
     Random random = new Random();
 
-    SentryStatus myStatus = SentryStatus.isSPAWNING;
+    SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
     AttackType myAttack;
 
@@ -521,7 +521,7 @@ public class SentryTrait extends Trait {
 
         causeOfDeath = cause;
 
-        myStatus = SentryStatus.isDIEING;
+        myStatus = SentryStatus.DIEING;
 
         if ( runscripts && Sentries.denizenActive )
             DenizenHook.sentryDeath( _myDamamgers, npc );
@@ -1215,7 +1215,7 @@ public class SentryTrait extends Trait {
      */
     void clearTarget() {
         
-        myStatus = SentryStatus.isGuard( this );
+        myStatus = SentryStatus.is_A_Guard( this );
         attackTarget = null;
         _projTargetLostLoc = null;
         
@@ -1274,7 +1274,7 @@ public class SentryTrait extends Trait {
             return;
 //        }
         attackTarget = theEntity;
-        myStatus = SentryStatus.isATTACKING;
+        myStatus = SentryStatus.ATTACKING;
     }
 
     Navigator getNavigator() {

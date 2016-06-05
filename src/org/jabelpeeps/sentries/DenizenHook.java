@@ -135,7 +135,7 @@ public class DenizenHook {
                     dB.log( db );
 
                     if ( inst != null ) {
-                        inst.myStatus = SentryStatus.isGuard( inst );
+                        inst.myStatus = SentryStatus.is_A_Guard( inst );
 
                         if ( deaggro )
                             inst.clearTarget();

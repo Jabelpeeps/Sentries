@@ -90,7 +90,7 @@ public class SentryListener implements Listener {
                 && event.getReason() == DespawnReason.CHUNK_UNLOAD
                 && inst.guardeeEntity != null ) {
             event.setCancelled( true );
-            inst.myStatus = SentryStatus.isFOLLOWING;
+            inst.myStatus = SentryStatus.FOLLOWING;
         }
     }
 
@@ -447,7 +447,7 @@ public class SentryListener implements Listener {
                 }
 
                 if (    inst.hasTargetType( SentryTrait.events )
-                        && inst.myStatus == SentryStatus.isLOOKING
+                        && inst.myStatus == SentryStatus.LOOKING
                         && damager instanceof Player
                         && !CitizensAPI.getNPCRegistry().isNPC( damager )
                         && !inst.isIgnoring( damager ) ) {

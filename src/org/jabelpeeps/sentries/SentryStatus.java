@@ -32,8 +32,8 @@ import net.citizensnpcs.api.npc.NPC;
 enum SentryStatus {
 
     /** Sentries with this status will have their death's handled, along with any drops, and then 
-     * various items tidied up before having their status set to {@link SentryStatus#isDEAD} */
-    isDIEING {
+     * various items tidied up before having their status set to {@link SentryStatus#DEAD} */
+    DIEING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
@@ -138,12 +138,12 @@ enum SentryStatus {
             else
                 inst.isRespawnable = System.currentTimeMillis() + inst.respawnDelay * 1000;
 
-            return SentryStatus.isDEAD;
+            return SentryStatus.DEAD;
         }
     },
     
     /** Sentries with this status will be re-spawned after the configured time. */
-    isDEAD {
+    DEAD {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
@@ -160,13 +160,13 @@ enum SentryStatus {
                 else
                     npc.spawn( inst.guardeeEntity.getLocation().add( 2, 0, 2 ) );
                 
-                return SentryStatus.isSPAWNING;
+                return SentryStatus.NOT_SPAWNED;
             }
             return this;
         }
     },
     
-    isSPAWNING {
+    NOT_SPAWNED {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
@@ -176,7 +176,7 @@ enum SentryStatus {
                 inst.tryToHeal();
                 inst.reMountMount();
 
-                return isGuard( inst );
+                return is_A_Guard( inst );
             }
             return this;
         }
@@ -184,8 +184,8 @@ enum SentryStatus {
     
     /** Sentries with this status will look for and navigate to the entities they are guarding (if set). 
      *  Once reunited with the guardee (or none it set), the status will be changed to 
-     *  {@link SentryStatus#isLOOKING} */
-    isFOLLOWING {
+     *  {@link SentryStatus#LOOKING} */
+    FOLLOWING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
@@ -223,7 +223,7 @@ enum SentryStatus {
                         if ( Util.CanWarp( inst.guardeeEntity, worldname ) ) {
                             
                             inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
-                            return SentryStatus.isLOOKING;
+                            return SentryStatus.LOOKING;
                         }
                         
                         ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
@@ -250,7 +250,7 @@ enum SentryStatus {
                 else if ( dist < inst.followDistance && isNavigating ) {
                     navigator.cancelNavigation();
                 }
-                return SentryStatus.isLOOKING;
+                return SentryStatus.LOOKING;
             }
             return this;
         }
@@ -258,7 +258,7 @@ enum SentryStatus {
     
     /** Sentries with this status will search for possible targets, and be receptive to events 
      *  within their detection range. <p>  They will also heal whilst in this state. */
-    isLOOKING {
+    LOOKING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
@@ -277,7 +277,7 @@ enum SentryStatus {
                 if ( target != null ) {
                     inst.oktoreasses = System.currentTimeMillis() + 3000;
                     inst.setAttackTarget( target );
-                    return SentryStatus.isATTACKING;
+                    return SentryStatus.ATTACKING;
                 }
             }
             return this;
@@ -285,14 +285,14 @@ enum SentryStatus {
     },
     
     /** The status for Sentries who are attacking! */
-    isATTACKING {
+    ATTACKING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
             
             if ( !inst.isMyChunkLoaded() ) {
                 inst.clearTarget();
-                return SentryStatus.isGuard( inst );
+                return SentryStatus.is_A_Guard( inst );
             }
 
             LivingEntity myEntity = inst.getMyEntity();
@@ -357,7 +357,7 @@ enum SentryStatus {
             
             // somehow we failed to attack the chosen target, so lets clear it, and look for another.
             inst.clearTarget();
-            return SentryStatus.isGuard( inst );
+            return SentryStatus.is_A_Guard( inst );
         }
     };
 
@@ -366,16 +366,16 @@ enum SentryStatus {
      *  @return a new state when a change is needed. */
     abstract SentryStatus update( SentryTrait inst );
     
-    /** Convenience method that returns {@link SentryStatus#isFOLLOWING} for guards, 
-     *  and {@link SentryStatus#isLOOKING} for non-guards. */
-    static SentryStatus isGuard( SentryTrait inst ) {
+    /** Convenience method that returns {@link SentryStatus#FOLLOWING} for guards, 
+     *  and {@link SentryStatus#LOOKING} for non-guards. */
+    static SentryStatus is_A_Guard( SentryTrait inst ) {
         
         if ( inst.guardeeName == null )
-            return SentryStatus.isLOOKING;
+            return SentryStatus.LOOKING;
         
-        return SentryStatus.isFOLLOWING;
+        return SentryStatus.FOLLOWING;
     }
     boolean isDeadOrDieing() {
-        return this == isDEAD || this == isDIEING;
+        return this == DEAD || this == DIEING;
     }
 }
