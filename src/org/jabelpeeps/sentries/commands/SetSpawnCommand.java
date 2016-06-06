@@ -1,37 +1,32 @@
 package org.jabelpeeps.sentries.commands;
 
 import org.bukkit.command.CommandSender;
-import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.S;
-import org.jabelpeeps.sentries.SentriesCommand;
+import org.jabelpeeps.sentries.SentriesComplexCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 
 import net.citizensnpcs.api.npc.NPC;
 
 
-public class SetSpawnCommand implements SentriesCommand {
+public class SetSpawnCommand implements SentriesComplexCommand {
 
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, Boolean set, int nextArg, String... args ) {
+    public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
-        if ( CommandHandler.checkCommandPerm( S.SPAWN, sender ) ) {
-
-            if ( npc.getEntity() == null ) 
-                sender.sendMessage( S.Col.RED.concat( "Cannot set spawn while a sentry is dead" ) );
-            else {
-                inst.spawnLocation = npc.getEntity().getLocation();
-                sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "will respawn at its present location" ) );
-            }
-            return true;
+        if ( npc.getEntity() == null ) 
+            sender.sendMessage( S.Col.RED.concat( "Cannot set spawn while a sentry is dead" ) );
+        else {
+            inst.spawnLocation = npc.getEntity().getLocation();
+            sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "will respawn at its present location" ) );
         }
-        return false;
+        return true;
     }
     
     @Override
     public String getShortHelp() {
-        return "";
+        return "set sentry's spawn point";
     }
     
     @Override

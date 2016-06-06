@@ -9,19 +9,18 @@ import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.jabelpeeps.sentries.commands.EquipCommand;
+import org.jabelpeeps.sentries.commands.GuardCommand;
+import org.jabelpeeps.sentries.commands.IgnoreCommand;
 import org.jabelpeeps.sentries.commands.SetSpawnCommand;
 import org.jabelpeeps.sentries.commands.TargetComand;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.trait.trait.Owner;
 
 public abstract class CommandHandler {
@@ -31,7 +30,14 @@ public abstract class CommandHandler {
 
     static {
         commandMap.put( S.TARGET, new TargetComand() );
+        commandMap.put( S.IGNORE, new IgnoreCommand() );
+        commandMap.put( S.EQUIP, new EquipCommand() );
+        commandMap.put( S.GUARD, new GuardCommand() );
         commandMap.put( S.SPAWN, new SetSpawnCommand() );
+    }
+    
+    public static void addCommand( String name, SentriesCommand command ) {
+        commandMap.put( name, command );
     }
     
     /**
@@ -72,29 +78,9 @@ public abstract class CommandHandler {
         return false;
     }
 
-    /**
-     * Concatenates the supplied String[] starting at the position indicated.
-     * 
-     * @param startFrom
-     *            - the starting position (zero-based)
-     * @param args
-     *            - the String[] to be joined
-     * @return - the resulting String.
-     */
-    private static String joinArgs( int startFrom, String[] args ) {
-
-        StringJoiner joiner = new StringJoiner( " " );
-
-        for ( int i = startFrom; i < args.length; i++ ) {
-            joiner.add( args[i] );
-        }
-        return joiner.toString();
-    }
-
     // ------------------------------------------------------------------------------------
     /**
-     * The only accessible method of this class. It parses the arguments and
-     * responds accordingly.
+     * Parses the arguments and responds accordingly.
      * 
      * @param player
      * @param inargs
@@ -110,148 +96,124 @@ public abstract class CommandHandler {
 
             if ( inargs.length > 1 ) {
                 
-                for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {
-
-                    SentriesCommand command = each.getValue();
+                String commandName = inargs[1].toLowerCase();
+                
+                if ( commandMap.containsKey( commandName ) ) {
                     
-                    if ( each.getKey().equalsIgnoreCase( inargs[1] ) && checkCommandPerm( command.getPerm(), player ) ) {
+                    SentriesCommand command = commandMap.get( commandName );
+                    
+                    if ( checkCommandPerm( command.getPerm(), player ) ) {
+                        
                         player.sendMessage( command.getLongHelp() );
                         return true;
                     }
                 }
-
-//                if ( checkCommandPerm( S.PERM_TARGET, player ) && S.TARGET.equalsIgnoreCase( inargs[1] ) ) {
-//                    player.sendMessage( S.targetCommandHelp() );
-//                }
-//                else 
-                    if ( checkCommandPerm( S.PERM_IGNORE, player ) && S.IGNORE.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( S.ignoreCommandHelp() );
-                }
-                else if ( checkCommandPerm( S.PERM_EQUIP, player ) && S.EQUIP.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( S.equipCommandHelp() );
-                }
-                else if ( checkCommandPerm( S.PERM_GUARD, player ) && S.GUARD.equalsIgnoreCase( inargs[1] ) ) {
-                    player.sendMessage( S.guardCommandHelp() );
-                }
-                else player.sendMessage( S.ERROR_NO_MORE_HELP );
+                player.sendMessage( S.ERROR_NO_MORE_HELP );
+                return true;
             }
-            else {
-                player.sendMessage( String.join( "", System.lineSeparator(), S.Col.GOLD, "---------- Sentries Commands ----------", S.Col.RESET  ) );
+            player.sendMessage( String.join( "", System.lineSeparator(), S.Col.GOLD, "---------- Sentries Commands ----------", S.Col.RESET  ) );
 
-//                if ( checkCommandPerm( S.PERM_TARGET, player ) )
-//                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry target ...", S.Col.RESET, "set targets to attack." ) );
-                if ( checkCommandPerm( S.PERM_IGNORE, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry ignore ...", S.Col.RESET, "set targets to ignore." ) );
-                if ( checkCommandPerm( S.PERM_EQUIP, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry equip ...", S.Col.RESET, "set the equipment a sentry is using" ) );
-                if ( checkCommandPerm( S.PERM_GUARD, player ) )
-                    player.sendMessage( String.join( " ", S.Col.GOLD, "/sentry guard ...", S.Col.RESET, "tell the sentry what to guard" ) );
-
-                for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {
-                    
-                    SentriesCommand command = each.getValue();
-                    
-                    if ( checkCommandPerm( command.getPerm(), player ) ) {
-                        player.sendMessage( String.join( "", S.Col.GOLD, "/sentry ", each.getKey(), " ... ", S.Col.RESET, command.getShortHelp() ) );
-                    }
-                }
-//                if ( checkCommandPerm( S.PERM_SPAWN, player ) ) {
-//                    player.sendMessage( S.Col.GOLD + "/sentry spawn" );
-//                    player.sendMessage( "  Set the sentry to respawn at its current location" );
-//                }
-                if ( checkCommandPerm( S.PERM_SPEED, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry speed [0-1.5]" );
-                    player.sendMessage( "  Sets speed of the Sentries when attacking" );
-                }
-                if ( checkCommandPerm( S.PERM_HEALTH, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry health [1-2000000]" );
-                    player.sendMessage( "  Sets the Sentries's Health" );
-                }
-                if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry armor [0-2000000]" );
-                    player.sendMessage( "  Sets the Sentries's Armor" );
-                }
-                if ( checkCommandPerm( S.PERM_STRENGTH, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry strength [0-2000000]" );
-                    player.sendMessage( "  Sets the Sentries's Strength" );
-                }
-                if ( checkCommandPerm( S.PERM_ATTACK_RATE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry attackrate [0.0-30.0]" );
-                    player.sendMessage( "  Sets the time between the Sentries's projectile attacks" );
-                }
-                if ( checkCommandPerm( S.PERM_HEAL_RATE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry healrate [0.0-300.0]" );
-                    player.sendMessage( "  Sets the frequency the sentry will heal 1 point. 0 to disable." );
-                }
-                if ( checkCommandPerm( S.PERM_RANGE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry range [1-100]" );
-                    player.sendMessage( "  Sets the Sentries's detection range" );
-                }
-                if ( checkCommandPerm( S.PERM_WARNING_RANGE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry warningrange [0-50]" );
-                    player.sendMessage( "  How far beyond the detection range, that the Sentries will warn targets." );
-                }
-                if ( checkCommandPerm( S.PERM_NIGHTVISION, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry nightvision [0-16] " );
-                    player.sendMessage( "  0 = See nothing, 16 = See everything. " );
-                }
-                if ( checkCommandPerm( S.PERM_RESPAWN_DELAY, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry respawn [-1-2000000]" );
-                    player.sendMessage( "  Sets the number of seconds after death the Sentries will respawn." );
-                }
-                if ( checkCommandPerm( S.PERM_FOLLOW_DIST, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry follow [0-32]" );
-                    player.sendMessage( "  Sets the number of block away a bodyguard will follow. Default is 4" );
-                }
-                if ( checkCommandPerm( S.PERM_INVINCIBLE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry invincible" );
-                    player.sendMessage( "  Toggle the Sentries to take no damage or knockback." );
-                }
-                if ( checkCommandPerm( S.PERM_RETALIATE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry retaliate" );
-                    player.sendMessage( "  Toggle the Sentries to always attack an attacker." );
-                }
-                if ( checkCommandPerm( S.PERM_CRITICAL_HITS, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry criticalhits" );
-                    player.sendMessage( "  Toggle the Sentries to take critical hits and misses" );
-                }
-                if ( checkCommandPerm( S.PERM_DROPS, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry drops" );
-                    player.sendMessage( "  Toggle the Sentries to drop equipped items on death" );
-                }
-                if ( checkCommandPerm( S.PERM_KILLDROPS, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry killdrops" );
-                    player.sendMessage( "  Toggle whether or not the sentry's victims drop items and exp" );
-                }
-                if ( checkCommandPerm( S.PERM_MOUNT, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry mount" );
-                    player.sendMessage( "  Toggle whether or not the sentry rides a mount" );
-                }
-                if ( checkCommandPerm( S.PERM_TARGETABLE, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry targetable" );
-                    player.sendMessage( "  Toggle whether or not the sentry is attacked by hostile mobs" );
-                }
+            for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {
                 
-                if ( checkCommandPerm( S.PERM_WARNING, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry warning <text to use>" );
-                    player.sendMessage( "  Change the warning text. <NPC> and <PLAYER> can be used as placeholders" );
-                }
-                if ( checkCommandPerm( S.PERM_GREETING, player ) ) {
-                    player.sendMessage( S.Col.GOLD + "/sentry greeting <text to use>" );
-                    player.sendMessage( "  Change the greeting text. <NPC> and <PLAYER> can be used as placeholders" );
-                }
-                if ( checkCommandPerm( S.PERM_INFO, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, " - View all attributes of a sentry NPC" ) );
+                SentriesCommand command = each.getValue();
                 
-                if ( player instanceof ConsoleCommandSender )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the debug display on the console",
-                            System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
-
-                if ( checkCommandPerm( S.PERM_RELOAD, player ) )
-                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, " - Reloads the config file" ) );
-                
-                player.sendMessage( S.mainHelpOutro() );
+                if ( checkCommandPerm( command.getPerm(), player ) ) {
+                    player.sendMessage( String.join( "", S.Col.GOLD, "/sentry ", each.getKey(), " ... ", S.Col.RESET, command.getShortHelp() ) );
+                }
             }
+
+            if ( checkCommandPerm( S.PERM_SPEED, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry speed [0-1.5]" );
+                player.sendMessage( "  Sets speed of the Sentries when attacking" );
+            }
+            if ( checkCommandPerm( S.PERM_HEALTH, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry health [1-2000000]" );
+                player.sendMessage( "  Sets the Sentries's Health" );
+            }
+            if ( checkCommandPerm( S.PERM_ARMOUR, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry armor [0-2000000]" );
+                player.sendMessage( "  Sets the Sentries's Armor" );
+            }
+            if ( checkCommandPerm( S.PERM_STRENGTH, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry strength [0-2000000]" );
+                player.sendMessage( "  Sets the Sentries's Strength" );
+            }
+            if ( checkCommandPerm( S.PERM_ATTACK_RATE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry attackrate [0.0-30.0]" );
+                player.sendMessage( "  Sets the time between the Sentries's projectile attacks" );
+            }
+            if ( checkCommandPerm( S.PERM_HEAL_RATE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry healrate [0.0-300.0]" );
+                player.sendMessage( "  Sets the frequency the sentry will heal 1 point. 0 to disable." );
+            }
+            if ( checkCommandPerm( S.PERM_RANGE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry range [1-100]" );
+                player.sendMessage( "  Sets the Sentries's detection range" );
+            }
+            if ( checkCommandPerm( S.PERM_WARNING_RANGE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry warningrange [0-50]" );
+                player.sendMessage( "  How far beyond the detection range, that the Sentries will warn targets." );
+            }
+            if ( checkCommandPerm( S.PERM_NIGHTVISION, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry nightvision [0-16] " );
+                player.sendMessage( "  0 = See nothing, 16 = See everything. " );
+            }
+            if ( checkCommandPerm( S.PERM_RESPAWN_DELAY, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry respawn [-1-2000000]" );
+                player.sendMessage( "  Sets the number of seconds after death the Sentries will respawn." );
+            }
+            if ( checkCommandPerm( S.PERM_FOLLOW_DIST, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry follow [0-32]" );
+                player.sendMessage( "  Sets the number of block away a bodyguard will follow. Default is 4" );
+            }
+            if ( checkCommandPerm( S.PERM_INVINCIBLE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry invincible" );
+                player.sendMessage( "  Toggle the Sentries to take no damage or knockback." );
+            }
+            if ( checkCommandPerm( S.PERM_RETALIATE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry retaliate" );
+                player.sendMessage( "  Toggle the Sentries to always attack an attacker." );
+            }
+            if ( checkCommandPerm( S.PERM_CRITICAL_HITS, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry criticalhits" );
+                player.sendMessage( "  Toggle the Sentries to take critical hits and misses" );
+            }
+            if ( checkCommandPerm( S.PERM_DROPS, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry drops" );
+                player.sendMessage( "  Toggle the Sentries to drop equipped items on death" );
+            }
+            if ( checkCommandPerm( S.PERM_KILLDROPS, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry killdrops" );
+                player.sendMessage( "  Toggle whether or not the sentry's victims drop items and exp" );
+            }
+            if ( checkCommandPerm( S.PERM_MOUNT, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry mount" );
+                player.sendMessage( "  Toggle whether or not the sentry rides a mount" );
+            }
+            if ( checkCommandPerm( S.PERM_TARGETABLE, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry targetable" );
+                player.sendMessage( "  Toggle whether or not the sentry is attacked by hostile mobs" );
+            }
+            
+            if ( checkCommandPerm( S.PERM_WARNING, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry warning <text to use>" );
+                player.sendMessage( "  Change the warning text. <NPC> and <PLAYER> can be used as placeholders" );
+            }
+            if ( checkCommandPerm( S.PERM_GREETING, player ) ) {
+                player.sendMessage( S.Col.GOLD + "/sentry greeting <text to use>" );
+                player.sendMessage( "  Change the greeting text. <NPC> and <PLAYER> can be used as placeholders" );
+            }
+            if ( checkCommandPerm( S.PERM_INFO, player ) )
+                player.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, " - View all attributes of a sentry NPC" ) );
+            
+            if ( player instanceof ConsoleCommandSender )
+                player.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the debug display on the console",
+                        System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
+
+            if ( checkCommandPerm( S.PERM_RELOAD, player ) )
+                player.sendMessage( String.join( "", S.Col.GOLD, "/sentry reload", S.Col.RESET, " - Reloads the config file" ) );
+            
+            player.sendMessage( S.mainHelpOutro() );
             return true;
         }
         // ------------------------------------- Debug Command --------------
@@ -275,6 +237,7 @@ public abstract class CommandHandler {
 
         // the remaining commands all deal with npc's
         // -------------------------------------------------------------------------------------
+        
         // did player specify an integer as the first argument?
         int npcid = Util.string2Int( inargs[0] );
 
@@ -352,29 +315,22 @@ public abstract class CommandHandler {
                 set = false;
         }
         
-        for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {
+        // ------------------------------ handle commands from separate classes -----
+        String commandName = inargs[nextArg].toLowerCase();
+        
+        if ( commandMap.containsKey( commandName ) ) {
+            SentriesCommand command = commandMap.get( commandName );
             
-            if ( each.getKey().equalsIgnoreCase( inargs[nextArg] ) ) {
-                each.getValue().call( player, thisNPC, npcName, inst, set, nextArg, inargs );
-                return true;
+            if ( checkCommandPerm( command.getPerm(), player ) ) {
+                
+                if ( command instanceof SentriesComplexCommand )
+                    ((SentriesComplexCommand) commandMap.get( commandName )).call( player, thisNPC, npcName, inst, nextArg, inargs ); 
+                else
+                    ((SentriesToggleCommand) commandMap.get( commandName )).call( player, npcName, inst, set );
             }
+            return true;
         }
-        
-        // ------------------------------------- spawn command --------------
-        
-//        if ( S.SPAWN.equalsIgnoreCase( inargs[nextArg] ) ) {
-//
-//            if ( checkCommandPerm( S.SPAWN, player ) ) {
-//
-//                if ( thisNPC.getEntity() == null ) 
-//                    player.sendMessage( S.Col.RED.concat( "Cannot set spawn while a sentry is dead" ) );
-//                else {
-//                    inst.spawnLocation = thisNPC.getEntity().getLocation();
-//                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "will respawn at its present location" ) );
-//                }
-//            }
-//            return true;
-//        }
+
         // ------------------------------------ invincible command ------------
         if ( S.INVINCIBLE.equalsIgnoreCase( inargs[nextArg] ) ) {
 
@@ -469,56 +425,7 @@ public abstract class CommandHandler {
             }
             return true;
         }
-        // -----------------------------------------guard command -------------
 
-        // TODO add help text for this command.
-        if ( S.GUARD.equalsIgnoreCase( inargs[nextArg] ) ) {
-
-            if ( checkCommandPerm( S.PERM_GUARD, player ) ) {
-
-                if ( inargs.length > nextArg + 1 ) {
-                    
-                    if ( S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-                        inst.findGuardEntity( null, false );
-                    }
-                    else {
-                        boolean localonly = false;
-                        boolean playersonly = false;
-                        int start = 1;
-                        boolean ok = false;
-    
-                        if ( inargs[nextArg + 1].equalsIgnoreCase( "-p" ) ) {
-                            start = 2;
-                            playersonly = true;
-                        }
-    
-                        if ( inargs[nextArg + 1].equalsIgnoreCase( "-l" ) ) {
-                            start = 2;
-                            localonly = true;
-                        }
-    
-                        String arg = joinArgs( start + nextArg, inargs );
-    
-                        if ( !playersonly ) ok = inst.findGuardEntity( arg, false );   
-                        if ( !localonly ) ok = inst.findGuardEntity( arg, true );
-    
-                        if ( ok )
-                            player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now guarding", arg ) );
-                        else
-                            player.sendMessage( String.join( " ", S.Col.RED, npcName, "could not find", arg ) );
-                        return true;
-                    }
-                }
-                if ( inst.guardeeName == null )
-                    player.sendMessage( S.Col.GREEN.concat( "Guarding: My Surroundings" ) );
-                else if ( inst.guardeeEntity == null )
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is configured to guard", inst.guardeeName, "but cannot find them at the moment" ) );
-                else
-                    player.sendMessage( String.join( " ", S.Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
-
-            }
-            return true;
-        }
         // ----------------------------------------------follow command -------------------
         if ( S.FOLLOW.equalsIgnoreCase( inargs[nextArg] ) ) {
 
@@ -792,56 +699,7 @@ public abstract class CommandHandler {
             }
             return true;
         }
-        // -------------------------------------------------equip command-------------
-        if ( S.EQUIP.equalsIgnoreCase( inargs[nextArg] ) ) {
-
-            if ( checkCommandPerm( S.PERM_EQUIP, player ) ) {
-
-                if ( inargs.length <= 1 + nextArg ) {
-                    player.sendMessage( String.join( "", S.ERROR, "More arguments needed.") );
-                    player.sendMessage( S.equipCommandHelp() );
-                    return true;
-                }
-                
-                EntityType type = thisNPC.getEntity().getType();
-                // TODO figure out why zombies and skele's are not included here.
-                if ( type == EntityType.ENDERMAN || type == EntityType.PLAYER ) {
-
-                    if ( S.CLEARALL.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-
-                        inst.equip( null );
-                        player.sendMessage( String.join( "", S.Col.YELLOW, npcName, "'s equipment cleared" ) );
-                    }
-                    else if ( S.CLEAR.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-
-                        for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() )
-
-                            if ( each.getKey().equalsIgnoreCase( inargs[nextArg + 2] ) ) {
-                                
-                                thisNPC.getTrait( Equipment.class ).set( each.getValue(), null );                                
-                                player.sendMessage( String.join( "", S.Col.GREEN, "removed ", npcName, "'s ", inargs[nextArg +2] ) );
-                            }
-                    }
-                    else {
-                        Material mat = Material.matchMaterial( joinArgs( nextArg + 1, inargs ) );
-
-                        if ( mat == null ) {
-                            player.sendMessage( S.Col.RED.concat( "Could not equip: item name not recognised" ) );
-                            return true;
-                        }
-
-                        ItemStack item = new ItemStack( mat );
-
-                        if ( inst.equip( item ) )
-                            player.sendMessage( String.join( " ", S.Col.GREEN, "equipped", mat.toString(), "on", npcName ) );
-                        else
-                            player.sendMessage( S.Col.RED.concat( "Could not equip: invalid mob type?" ) );
-                    }
-                }
-                else player.sendMessage( S.Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
-            }
-            return true;
-        }
+        
         // ----------------------------------------warning command-----------
         if ( S.WARNING.equalsIgnoreCase( inargs[nextArg] ) ) {
 
@@ -849,7 +707,7 @@ public abstract class CommandHandler {
 
                 if ( inargs.length >= 2 + nextArg ) {
 
-                    String str = Util.sanitiseString( joinArgs( 1 + nextArg, inargs ) );
+                    String str = Util.sanitiseString( Util.joinArgs( 1 + nextArg, inargs ) );
 
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Warning message set to", S.Col.RESET, 
                                                         ChatColor.translateAlternateColorCodes( '&', str ) ) );
@@ -871,7 +729,7 @@ public abstract class CommandHandler {
 
                 if ( inargs.length >= 2 + nextArg ) {
 
-                    String str = Util.sanitiseString( joinArgs( 1 + nextArg, inargs ) );
+                    String str = Util.sanitiseString( Util.joinArgs( 1 + nextArg, inargs ) );
 
                     player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Greeting message set to", S.Col.RESET,
                                                         ChatColor.translateAlternateColorCodes( '&', str ) ) );
@@ -914,8 +772,6 @@ public abstract class CommandHandler {
                                                         "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
                 joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
                                                         "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
-//                joiner.add( String.join( "", S.Col.BLUE, "Currently: ", inst.getNPC().isSpawned() ? "Spawned" 
-//                                                                                                  : "Not Spawned" ) );
                 joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 
                 if ( inst.attackTarget == null )
@@ -932,37 +788,7 @@ public abstract class CommandHandler {
             }
             return true;
         }
-        // ---------------------------------------------target command---------
-//        if ( S.TARGET.equalsIgnoreCase( inargs[nextArg] ) ) {
-//
-//            
-//        }
-        // ----------------------------------------------------ignore command-----------
-        if ( S.IGNORE.equalsIgnoreCase( inargs[nextArg] ) ) {
 
-            if ( checkCommandPerm( S.PERM_IGNORE, player ) ) {
-
-                if ( inargs.length <= nextArg + 1 ) {
-                    player.sendMessage( S.ignoreCommandHelp() );
-                    return true;
-                }                    
-                if ( S.LIST.equals( inargs[nextArg + 1] ) ) {
-                    player.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Current Ignores:", inst.ignoreTargets.toString() ) );
-                    return true;
-                }
-                if ( S.CLEAR.equals( inargs[nextArg + 1] ) ) {
-                    inst.ignoreTargets.clear();
-                    inst.ignoreFlags = 0;
-                    inst.clearTarget();
-                    player.sendMessage( String.join( "", S.Col.GREEN, npcName, ": ALL Ignores cleared" ) );
-                    return true;
-                }
-                if ( inargs.length > 2 + nextArg ) {
-                    player.sendMessage( parseTargetOrIgnore( inargs, nextArg, npcName, inst, false ) );
-                    return true;
-                }
-            }
-        }
         return false;
     }
 
@@ -971,7 +797,7 @@ public abstract class CommandHandler {
         String[] typeArgs = new String[inargs.length - (2 + nextArg)];
         System.arraycopy( inargs, 2 + nextArg, typeArgs, 0, inargs.length - (2 + nextArg) );
 
-        if ( Sentries.debug ) Sentries.debugLog( "Target types list is:- " + joinArgs( 0, typeArgs ) );
+        if ( Sentries.debug ) Sentries.debugLog( "Target types list is:- " + Util.joinArgs( 0, typeArgs ) );
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         Set<String> setOfTargets = forTargets ? inst.validTargets : inst.ignoreTargets;

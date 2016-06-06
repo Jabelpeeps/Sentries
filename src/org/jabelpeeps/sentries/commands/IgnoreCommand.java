@@ -12,9 +12,9 @@ import org.jabelpeeps.sentries.SentryTrait;
 import net.citizensnpcs.api.npc.NPC;
 
 
-public class TargetComand implements SentriesComplexCommand {
+public class IgnoreCommand implements SentriesComplexCommand {
 
-    private String targetCommandHelp;
+    String ignoreCommandHelp;
 
     @Override
     public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -22,51 +22,53 @@ public class TargetComand implements SentriesComplexCommand {
         if ( args.length <= nextArg + 1 ) {
             sender.sendMessage( getLongHelp() );
             return true;
-        }
+        }                    
         if ( S.LIST.equals( args[nextArg + 1] ) ) {
-            sender.sendMessage( String.join( "", S.Col.GREEN, "Targets: ", inst.validTargets.toString() ) );
+            sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Current Ignores:", inst.ignoreTargets.toString() ) );
             return true;
         }
         if ( S.CLEAR.equals( args[nextArg + 1] ) ) {
-            inst.validTargets.clear();
-            inst.targetFlags = 0;
-            sender.sendMessage( String.join( "", S.Col.GREEN, npcName, ": ALL Targets cleared" ) );
+            inst.ignoreTargets.clear();
+            inst.ignoreFlags = 0;
+            inst.clearTarget();
+            sender.sendMessage( String.join( "", S.Col.GREEN, npcName, ": ALL Ignores cleared" ) );
             return true;
         }
         if ( args.length > 2 + nextArg ) {
-            sender.sendMessage( CommandHandler.parseTargetOrIgnore( args, nextArg, npcName, inst, true ) );
+            sender.sendMessage( CommandHandler.parseTargetOrIgnore( args, nextArg, npcName, inst, false ) );
             return true;
-        }                
+        }
         return false;
     }
 
     @Override
     public String getShortHelp() {
-        return "set targets to attack.";
+        return "set entities to ignore";
     }
 
     @Override
     public String getLongHelp() {
-        
-        if ( targetCommandHelp == null ) {
 
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
+        if ( ignoreCommandHelp == null ) {
 
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry target <option>' where <option> is:-", Col.RESET ) );
-            joiner.add( String.join( " ", Col.GOLD, "", S.LIST, Col.RESET, S.HELP_LIST, S.TARGETS ) );
-            joiner.add( String.join( " ", Col.GOLD, "", S.CLEAR, Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
+            StringJoiner joiner = new StringJoiner( System.lineSeparator() ) .add( "" );
+
+            joiner.add( String.join( "", Col.GOLD, "do '/sentry ignore <option>' where <option is:-", Col.RESET ) );
+            joiner.add( String.join( " ", Col.GOLD, "", S.LIST, Col.RESET, S.HELP_LIST, S.IGNORES ) );
+            joiner.add( String.join( " ", Col.GOLD, "", S.CLEAR, Col.RESET, S.HELP_CLEAR, S.IGNORES ) );
             joiner.add( String.join( " ", Col.GOLD, S.HELP_ADD_TYPE, Col.RESET, S.HELP_ADD ) );
             joiner.add( String.join( " ", Col.GOLD, S.HELP_REMOVE_TYPE, Col.RESET, S.HELP_REMOVE ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );
             joiner.add( S.getAdditionalTargets() );
 
-            targetCommandHelp = joiner.toString();
-        }       
-        return targetCommandHelp;
+            ignoreCommandHelp = joiner.toString();
+        }
+        return ignoreCommandHelp;
     }
 
     @Override
     public String getPerm() {
-        return S.PERM_TARGET;
+        return S.PERM_IGNORE;
     }
+
 }

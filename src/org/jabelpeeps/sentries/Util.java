@@ -1,5 +1,6 @@
 package org.jabelpeeps.sentries;
 
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
@@ -277,5 +278,24 @@ public abstract class Util {
                 damager = (Entity) source;
         }      
         return damager;   
+    }
+
+    /**
+     * Concatenates the supplied String[] starting at the position indicated.
+     * 
+     * @param startFrom
+     *            - the starting position (zero-based)
+     * @param args
+     *            - the String[] to be joined
+     * @return - the resulting String.
+     */
+    public static String joinArgs( int startFrom, String[] args ) {
+    
+        StringJoiner joiner = new StringJoiner( " " );
+    
+        for ( int i = startFrom; i < args.length; i++ ) {
+            joiner.add( args[i] );
+        }
+        return joiner.toString();
     }
 }

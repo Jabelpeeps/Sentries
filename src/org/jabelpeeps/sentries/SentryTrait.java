@@ -89,9 +89,9 @@ public class SentryTrait extends Trait {
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> _myDamamgers = new HashSet<>();
 
-    LivingEntity guardeeEntity;
+    public LivingEntity guardeeEntity;
     LivingEntity attackTarget;
-    String guardeeName;
+    public String guardeeName;
     DamageCause causeOfDeath;
 
 //   Packet<?> healAnimation;
@@ -99,7 +99,7 @@ public class SentryTrait extends Trait {
     Set<TargetType> targets = new HashSet<>();
     Set<TargetType> ignores = new HashSet<>();
     
-    Set<String> ignoreTargets = new HashSet<>();
+    public Set<String> ignoreTargets = new HashSet<>();
     public Set<String> validTargets = new HashSet<>();
 
     Set<String> _ignoreTargets = new HashSet<>();
@@ -925,7 +925,7 @@ public class SentryTrait extends Trait {
     static final int bridges = 512;
 
     public int targetFlags = none;
-    int ignoreFlags = none;
+    public int ignoreFlags = none;
 
 
     /**
@@ -1129,7 +1129,7 @@ public class SentryTrait extends Trait {
         myEntity.setHealth( health );
     }
     
-    boolean equip( ItemStack newEquipment ) {
+    public boolean equip( ItemStack newEquipment ) {
 
         Equipment equipment = npc.getTrait( Equipment.class );
         if ( equipment == null ) return false;
@@ -1204,7 +1204,7 @@ public class SentryTrait extends Trait {
      * Clears the target of the Sentry's attack, and returns it to following/looking status.
      * 
      */
-    void clearTarget() {
+    public void clearTarget() {
         
         myStatus = SentryStatus.is_A_Guard( this );
         attackTarget = null;

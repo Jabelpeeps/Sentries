@@ -54,7 +54,7 @@ public class Sentries extends JavaPlugin {
     static Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
 
-    static Map<String, Integer> equipmentSlots = new HashMap<>();
+    public static Map<String, Integer> equipmentSlots = new HashMap<>();
     static {
         equipmentSlots.put( "hand", 0 );
         equipmentSlots.put( "helmet", 1 );
