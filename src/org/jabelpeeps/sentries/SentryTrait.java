@@ -74,7 +74,7 @@ public class SentryTrait extends Trait {
     Sentries sentry;
 
     Location _projTargetLostLoc;
-    Location spawnLocation;
+    public Location spawnLocation;
 
     int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, warningRange, mountID;
     int activeStrength, activeArmour;
@@ -100,7 +100,7 @@ public class SentryTrait extends Trait {
     Set<TargetType> ignores = new HashSet<>();
     
     Set<String> ignoreTargets = new HashSet<>();
-    Set<String> validTargets = new HashSet<>();
+    public Set<String> validTargets = new HashSet<>();
 
     Set<String> _ignoreTargets = new HashSet<>();
     Set<String> _validTargets = new HashSet<>();
@@ -924,7 +924,7 @@ public class SentryTrait extends Trait {
 
     static final int bridges = 512;
 
-    int targetFlags = none;
+    public int targetFlags = none;
     int ignoreFlags = none;
 
 

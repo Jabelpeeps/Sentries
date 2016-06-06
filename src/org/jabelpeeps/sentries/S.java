@@ -83,6 +83,7 @@ public abstract class S {
     public final static String CLEAR = "clear";
     public final static String CLEARALL = "clearall";
     public final static String JOIN = "join";
+    public final static String RELOAD = "reload";
 
     // Strings used as keys for config values, and npc attributes for saving.
     public final static String RESPAWN_DELAY = "RespawnDelay";
@@ -220,26 +221,6 @@ public abstract class S {
         return equipCommandHelp;
     }
     
-    static String targetCommandHelp;
-
-    static String targetCommandHelp() {
-
-        if ( targetCommandHelp == null ) {
-
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
-
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry target <option>' where <option> is:-", Col.RESET ) );
-            joiner.add( String.join( " ", Col.GOLD, "", LIST, Col.RESET, HELP_LIST, TARGETS ) );
-            joiner.add( String.join( " ", Col.GOLD, "", CLEAR, Col.RESET, HELP_CLEAR, TARGETS ) );
-            joiner.add( String.join( " ", Col.GOLD, HELP_ADD_TYPE, Col.RESET, HELP_ADD ) );
-            joiner.add( String.join( " ", Col.GOLD, HELP_REMOVE_TYPE, Col.RESET, HELP_REMOVE ) );
-            joiner.add( HELP_ADD_REMOVE_TYPES );
-            joiner.add( getAdditionalTargets() );
-
-            targetCommandHelp = joiner.toString();
-        }
-        return targetCommandHelp;
-    }
     
     static String ignoreCommandHelp;
 
@@ -268,7 +249,7 @@ public abstract class S {
      * 
      * @return - the concatenated help Strings
      */
-    private static String getAdditionalTargets() {
+    public static String getAdditionalTargets() {
         String outString = "";
 
         if ( !Sentries.activePlugins.isEmpty() ) {
@@ -302,4 +283,5 @@ public abstract class S {
         }
         return mainHelpOutro;
     }
+    
 }

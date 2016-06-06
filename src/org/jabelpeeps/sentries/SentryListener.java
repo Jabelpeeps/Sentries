@@ -412,9 +412,11 @@ public class SentryListener implements Listener {
     public void processEventForTargets( EntityDamageByEntityEvent event ) {
         // event to check each sentry for events that need a response.
         
-        LivingEntity victim = (LivingEntity) event.getEntity();
+        Entity victim = event.getEntity();        
+        if ( !(victim instanceof LivingEntity) ) return;
+        
         LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
- 
+        
         if ( Sentries.debug ) Sentries.debugLog( "processEventForTargets() called for:- " + damager.getName() + " Vs " + victim.getName() );
         
         if (    damager != victim
