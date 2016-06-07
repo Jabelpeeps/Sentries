@@ -72,6 +72,9 @@ public abstract class S {
     public final static String MOBS_ATTACK = "mobsattack";
     public final static String MOUNT = "mount";
     public final static String RELOAD = "reload";
+    public final static String GREETING = "greeting";
+    public final static String WARNING = "warning";
+    public final static String FOLLOW = "follow";
     
     // a random selection of single words.
     public final static String SPAWN = "spawn";
@@ -79,7 +82,6 @@ public abstract class S {
     public final static String HELP = "help";
     public final static String TARGETS = "Targets";
     public final static String IGNORES = "Ignores";
-    public final static String FOLLOW = "follow";
     public final static String TRUE = "true";
     public final static String FALSE = "false";
     public final static String ON = "On";
@@ -92,7 +94,7 @@ public abstract class S {
     public final static String CLEAR = "clear";
     public final static String CLEARALL = "clearall";
     public final static String JOIN = "join";
-
+    
     // Strings used as keys for config values, and npc attributes for saving.
     public final static String RESPAWN_DELAY = "RespawnDelay";
     public final static String WARNING_RANGE = "WarningRange";
@@ -108,8 +110,6 @@ public abstract class S {
     public final static String DEFAULT_TARGETS = "DefaultTargets";
     public final static String DEFAULT_IGNORES = "DefaultIgnores";
     public final static String IGNORE_LOS = "IgnoreLOS";
-    public final static String GREETING = "Greeting";
-    public final static String WARNING = "Warning";
     public final static String HEALTH = "Health";
     public final static String RANGE = "Range";
     public final static String RESPAWN = "Respawn";

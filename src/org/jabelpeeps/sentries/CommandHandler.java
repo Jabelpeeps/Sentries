@@ -1,10 +1,13 @@
 package org.jabelpeeps.sentries;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
@@ -12,12 +15,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.commands.CriticalsCommand;
 import org.jabelpeeps.sentries.commands.DropsCommand;
 import org.jabelpeeps.sentries.commands.EquipCommand;
+import org.jabelpeeps.sentries.commands.FollowDistanceCommand;
 import org.jabelpeeps.sentries.commands.GreetingCommand;
 import org.jabelpeeps.sentries.commands.GuardCommand;
 import org.jabelpeeps.sentries.commands.IgnoreCommand;
@@ -35,7 +40,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
 
-public class CommandHandler implements CommandExecutor {
+public class CommandHandler implements CommandExecutor, TabCompleter {
     
     public static Pattern colon = Pattern.compile( ":" );
     private static Map<String, SentriesCommand> commandMap = new TreeMap<>();
@@ -56,6 +61,7 @@ public class CommandHandler implements CommandExecutor {
         commandMap.put( S.INFO,         new InfoCommand() );
         commandMap.put( S.GREETING,     new GreetingCommand() );
         commandMap.put( S.WARNING,      new WarningCommand() );
+        commandMap.put( S.FOLLOW,       new FollowDistanceCommand() );
     }
     
     /**
@@ -107,6 +113,21 @@ public class CommandHandler implements CommandExecutor {
         return false;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        
+        List<String> tabs = new ArrayList<>( commandMap.keySet() );
+        
+        tabs.removeIf( new Predicate<String>() {
+            @Override
+            public boolean test( String t ) {
+                return !t.startsWith( args[args.length - 1] );
+            }            
+        });
+        
+        return tabs;       
+    }
+    
     @Override
     public boolean onCommand(CommandSender sender, Command com, String label, String[] inargs) {
         
@@ -308,41 +329,22 @@ public class CommandHandler implements CommandExecutor {
                     }                   
                     ((SentriesToggleCommand) command).call( sender, npcName, inst, set );
                 }
+                
                 else if ( command instanceof SentriesNumberCommand ) {
                     
                     if ( inargs.length > nextArg + 2 )
                         sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, "Only one number value can be processesd." ) );
-                    else 
-                        ((SentriesNumberCommand) command).call( sender, npcName, inst, inargs[nextArg + 1] );
-                }
-            }
-            return true;
-        }
-
-        // ----------------------------------------------follow command -------------------
-        if ( S.FOLLOW.equalsIgnoreCase( inargs[nextArg] ) ) {
-
-            if ( checkCommandPerm( S.PERM_FOLLOW_DIST, sender ) ) {
-
-                if ( inargs.length <= 1 + nextArg ) {
-                    sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Follow Distance is ", String.valueOf( inst.followDistance ) ) );
-                    sender.sendMessage( S.Col.GOLD.concat( "Usage: /sentry follow [#]. Default is 4. " ) );
-                }
-                else {
-                    int dist = Util.string2Int( inargs[nextArg + 1] );
-                    if ( dist < 0 ) {
-                        sender.sendMessage( String.join( "", S.ERROR, inargs[nextArg + 1], S.ERROR_NOT_NUMBER ) );
-                        return true;
+                    else {
+                        String number = null;
+                        if ( inargs.length == nextArg + 2 ) number = inargs[nextArg + 1];
+                        
+                        ((SentriesNumberCommand) command).call( sender, npcName, inst, number );                    
                     }
-
-                    if ( dist > 32 ) dist = 32;
-                    
-                    inst.followDistance = dist * dist;
-                    sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "follow distance set to", String.valueOf( dist ) ) );
                 }
             }
             return true;
         }
+
         // --------------------------------------------health command -------------------
         if ( S.HEALTH.equalsIgnoreCase( inargs[nextArg] ) ) {
 
