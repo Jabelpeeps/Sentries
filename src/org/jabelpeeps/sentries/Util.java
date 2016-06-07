@@ -209,7 +209,7 @@ public abstract class Util {
      *            - the string to be converted
      * @return the int value represented by the string.
      */
-    static int string2Int( String value ) {
+    public static int string2Int( String value ) {
         try {
             return Integer.parseInt( value );
         } catch ( NumberFormatException e ) {
