@@ -116,7 +116,6 @@ public class Sentries extends JavaPlugin {
             }
         }
 
-
         int targetBitFlag = SentryTrait.bridges;
 
         for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
@@ -217,11 +216,6 @@ public class Sentries extends JavaPlugin {
         defaultWarning = config.getString( "DefaultTexts.Warning" );
         defaultGreeting = config.getString( "DefaultTexts.Greeting" );
     }
-
-//    @Override
-//    public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
-//        return CommandHandler.call( player, inargs );
-//    }
 
     @Override
     public void onDisable() {
@@ -378,5 +372,4 @@ public class Sentries extends JavaPlugin {
     public static void debugLog( String s ) {
         logger.info( s );
     }
-
 }

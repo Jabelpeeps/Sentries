@@ -1,11 +1,11 @@
 package org.jabelpeeps.sentries;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
@@ -36,7 +36,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class CommandHandler implements CommandExecutor {
     
     public static Pattern colon = Pattern.compile( ":" );
-    private static Map<String, SentriesCommand> commandMap = new HashMap<>();
+    private static Map<String, SentriesCommand> commandMap = new TreeMap<>();
 
     static {
         commandMap.put( S.TARGET,       new TargetComand() );
@@ -105,19 +105,6 @@ public class CommandHandler implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command com, String label, String[] inargs) {
         
-//        return call( sender, inargs );
-//    }
-//    // ------------------------------------------------------------------------------------
-//    /**
-//     * Parses the arguments and responds accordingly.
-//     * 
-//     * @param sender
-//     * @param inargs
-//     * @param sentry
-//     * @return - true if the command has been successfully handled.
-//     */
-//    static boolean call( CommandSender sender, String[] inargs ) {
-
         if ( !enoughArgs( 1, inargs, sender ) ) return true;
 
         // ----------------------------------- help command -----------------
