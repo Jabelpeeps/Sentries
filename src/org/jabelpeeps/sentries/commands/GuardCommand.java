@@ -9,15 +9,13 @@ import org.jabelpeeps.sentries.SentriesComplexCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
 
-import net.citizensnpcs.api.npc.NPC;
-
 
 public class GuardCommand implements SentriesComplexCommand {
 
     private String guardCommandHelp;
     
     @Override
-    public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length > nextArg + 1 ) {
             

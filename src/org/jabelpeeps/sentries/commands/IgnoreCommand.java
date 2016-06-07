@@ -9,15 +9,13 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentriesComplexCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 
-import net.citizensnpcs.api.npc.NPC;
-
 
 public class IgnoreCommand implements SentriesComplexCommand {
 
     String ignoreCommandHelp;
 
     @Override
-    public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= nextArg + 1 ) {
             sender.sendMessage( getLongHelp() );

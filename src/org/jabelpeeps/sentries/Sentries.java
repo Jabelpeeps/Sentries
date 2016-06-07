@@ -16,8 +16,6 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Projectile;
 import org.bukkit.plugin.Plugin;
@@ -93,6 +91,10 @@ public class Sentries extends JavaPlugin {
         plugin = this;
         logger = getLogger();
         PluginManager pluginManager = Bukkit.getPluginManager();
+        
+        CommandHandler handler = new CommandHandler();
+        getCommand( "sentry" ).setExecutor( handler );
+        getCommand( "sentries" ).setExecutor( handler );
 
         if ( !checkPlugin( S.CITIZENS ) ) {
             logger.log( Level.SEVERE, S.ERROR_NO_CITIZENS );
@@ -216,10 +218,10 @@ public class Sentries extends JavaPlugin {
         defaultGreeting = config.getString( "DefaultTexts.Greeting" );
     }
 
-    @Override
-    public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
-        return CommandHandler.call( player, inargs, this );
-    }
+//    @Override
+//    public boolean onCommand( CommandSender player, Command cmd, String cmdLabel, String[] inargs ) {
+//        return CommandHandler.call( player, inargs );
+//    }
 
     @Override
     public void onDisable() {

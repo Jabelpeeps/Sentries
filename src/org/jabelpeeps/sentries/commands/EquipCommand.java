@@ -23,14 +23,14 @@ public class EquipCommand implements SentriesComplexCommand {
     private String equipCommandHelp;  
     
     @Override
-    public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= 1 + nextArg ) {
             sender.sendMessage( String.join( "", S.ERROR, "More arguments needed.") );
             sender.sendMessage( getLongHelp());
             return true;
         }
-        
+        NPC npc = inst.getNPC();
         EntityType type = npc.getEntity().getType();
         
         // TODO figure out why zombies and skele's are not included here.

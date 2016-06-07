@@ -1,11 +1,11 @@
 package org.jabelpeeps.sentries.commands;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.S;
+import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentriesComplexCommand;
 import org.jabelpeeps.sentries.SentryTrait;
-
-import net.citizensnpcs.api.npc.NPC;
 
 
 public class SetSpawnCommand implements SentriesComplexCommand {
@@ -13,13 +13,15 @@ public class SetSpawnCommand implements SentriesComplexCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, NPC npc, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
-        if ( npc.getEntity() == null ) 
-            sender.sendMessage( S.Col.RED.concat( "Cannot set spawn while a sentry is dead" ) );
+        LivingEntity entity = inst.getMyEntity();
+        
+        if ( entity == null ) 
+            sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is dead" ) );
         else {
-            inst.spawnLocation = npc.getEntity().getLocation();
-            sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "will respawn at its present location" ) );
+            inst.spawnLocation = entity.getLocation();
+            sender.sendMessage( String.join( " ", Col.GREEN, npcName, "will respawn at its present location" ) );
         }
         return true;
     }
@@ -33,13 +35,13 @@ public class SetSpawnCommand implements SentriesComplexCommand {
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", S.Col.GOLD, "/sentry spawn", S.Col.RESET, " to set the sentry's spawn point to its current location" );
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry spawn", Col.RESET, " to set the sentry's spawn point to its current location" );
         }
         return helpTxt;
     }
 
     @Override
     public String getPerm() {
-        return S.PERM_SPAWN;
+        return S.PERM_SET_SPAWN;
     }
 }

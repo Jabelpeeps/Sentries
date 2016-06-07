@@ -58,18 +58,28 @@ public abstract class S {
     public final static String HELP_ADD_REMOVE_TYPES = "  <type:name> can be any of the following: entity:<MobName>, "
                                                         + "entity:monster, entity:player, entity:all, player:<PlayerName>";  
 
+    // words used as command options, keep all lower case.
+    public final static String SET_SPAWN = "setspawn";
+    public final static String TARGET = "target";
+    public final static String IGNORE = "ignore";
+    public final static String EQUIP = "equip";
+    public final static String GUARD = "guard";
+    public final static String RETALIATE = "retaliate";
+    public final static String INVINCIBLE = "invincible";
+    public final static String DROPS = "drops";
+    public final static String KILLSDROP = "killsdrop";
+    public final static String CRITICALS = "criticals";
+    public final static String MOBS_ATTACK = "mobsattack";
+    public final static String MOUNT = "mount";
+    public final static String RELOAD = "reload";
+    
     // a random selection of single words.
+    public final static String SPAWN = "spawn";
     public final static String SECONDS = "seconds";
     public final static String HELP = "help";
-    public final static String TARGET = "target";
     public final static String TARGETS = "Targets";
-    public final static String IGNORE = "ignore";
     public final static String IGNORES = "Ignores";
     public final static String FOLLOW = "follow";
-    public final static String MOUNT = "mount";
-    public final static String GUARD = "guard";
-    public final static String DROPS = "drops";
-    public final static String SPAWN = "spawn";
     public final static String TRUE = "true";
     public final static String FALSE = "false";
     public final static String ON = "On";
@@ -77,13 +87,11 @@ public abstract class S {
     public final static String YET = " yet.";
     public final static String ADD = "add";
     public final static String REMOVE = "remove";
-    public final static String EQUIP = "equip";
     public final static String INFO = "info";
     public final static String LIST = "list";
     public final static String CLEAR = "clear";
     public final static String CLEARALL = "clearall";
     public final static String JOIN = "join";
-    public final static String RELOAD = "reload";
 
     // Strings used as keys for config values, and npc attributes for saving.
     public final static String RESPAWN_DELAY = "RespawnDelay";
@@ -96,8 +104,6 @@ public abstract class S {
     public final static String DROP_INVENTORY = "DropInventory";
     public final static String KILLS_DROP = "KillDrops";
     public final static String TARGETABLE = "Targetable";
-    public final static String RETALIATE = "Retaliate";
-    public final static String INVINCIBLE = "Invincible";
     public final static String CRITICAL_HITS = "CriticalHits";
     public final static String DEFAULT_TARGETS = "DefaultTargets";
     public final static String DEFAULT_IGNORES = "DefaultIgnores";
@@ -127,7 +133,7 @@ public abstract class S {
     public final static String PERM_EQUIP = "sentry.equip";
     public final static String PERM_RELOAD = "sentry.reload";
     public final static String PERM_DEBUG = "sentry.debug";
-    public final static String PERM_SPAWN = "sentry.spawn";
+    public final static String PERM_SET_SPAWN = "sentry.setspawn";
     public final static String PERM_GUARD = "sentry.guard";
     public final static String PERM_WARNING = "sentry.warning";
     public final static String PERM_GREETING = "sentry.greeting";

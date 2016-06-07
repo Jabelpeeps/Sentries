@@ -8,8 +8,11 @@ depend: [Citizens]
 softdepend: [Denizen, Vault, Towny, Factions, War, SimpleClans]
 
 commands:
+  sentries: 
+    description: Lists Sentries commands.
+    usage: /sentries help
   sentry:
-    description: Lists sentry commands.
+    description: Lists Sentries commands.
     usage: /sentry help
 
 permissions:
@@ -20,7 +23,7 @@ permissions:
        sentry.ignore: true
        sentry.stats.*: true
        sentry.options.*: true
-       sentry.spawn: true
+       sentry.setspawn: true
        sentry.guard: true
        sentry.info: true
        sentry.warning: true
@@ -52,7 +55,7 @@ permissions:
        sentry.options.criticals: true
        sentry.options.mount: true
        sentry.options.targetable: true
-  sentry.spawn:
+  sentry.setspawn:
      deafult: op
   sentry.target:
      deafult: op

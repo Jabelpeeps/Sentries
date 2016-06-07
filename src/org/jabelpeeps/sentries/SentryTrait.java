@@ -76,11 +76,15 @@ public class SentryTrait extends Trait {
     Location _projTargetLostLoc;
     public Location spawnLocation;
 
-    int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, warningRange, mountID;
+    public int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, warningRange, mountID;
     int activeStrength, activeArmour;
     float speed, activeSpeed;
-    double attackRate, healRate, sentryWeight, sentryMaxHealth;
-    boolean killsDropInventory, dropInventory, targetable, invincible, loaded, acceptsCriticals, iWillRetaliate, ignoreLOS;
+    public double attackRate, healRate, sentryWeight, sentryMaxHealth;
+    public boolean killsDropInventory, dropInventory, targetable, invincible, iWillRetaliate, acceptsCriticals;
+    
+    boolean loaded;
+
+    boolean ignoreLOS;
 
     static GiveUpStuckAction giveup = new GiveUpStuckAction();
 
@@ -93,8 +97,6 @@ public class SentryTrait extends Trait {
     LivingEntity attackTarget;
     public String guardeeName;
     DamageCause causeOfDeath;
-
-//   Packet<?> healAnimation;
 
     Set<TargetType> targets = new HashSet<>();
     Set<TargetType> ignores = new HashSet<>();
@@ -244,8 +246,6 @@ public class SentryTrait extends Trait {
         _myDamamgers.clear();
         faceForward();
 
-//        healAnimation = new PacketPlayOutAnimation( NMS.getHandle( myEntity ), 6 );
-
         if ( guardeeName == null )
             npc.teleport( spawnLocation, TeleportCause.PLUGIN );
 
@@ -267,9 +267,6 @@ public class SentryTrait extends Trait {
             navigatorParams.attackStrategy( new CreeperAttackStrategy() );
         else if ( myEntity instanceof Spider )
             navigatorParams.attackStrategy( new SpiderAttackStrategy() );
-
-        // TODO check this hasn't broken anything.
-        // processTargets();
 
         updateAttackType();
 
@@ -1278,7 +1275,7 @@ public class SentryTrait extends Trait {
     
     //--------------------------------methods dealing with Mounts----------
     /** Returns true if mountID >= 0 */
-    boolean hasMount() { return mountID >= 0; }
+    public boolean hasMount() { return mountID >= 0; }
  
     /** Returns the NPC with the current mountID or null if the id = -1 (the default) */
     // TODO convert to use uuid's
@@ -1299,7 +1296,7 @@ public class SentryTrait extends Trait {
         return npc;
     }
 
-    void mount() {
+    public void mount() {
         if ( npc.isSpawned() ) {
 
             LivingEntity myEntity = getMyEntity();
