@@ -32,7 +32,7 @@ public class MountCommand implements SentriesToggleCommand {
 
     @Override
     public String getShortHelp() {
-        return "set whether the Sentry is mounted";
+        return "set whether the sentry is mounted";
     }
 
     @Override

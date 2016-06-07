@@ -21,14 +21,14 @@ public class SetSpawnCommand implements SentriesComplexCommand {
             sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is dead" ) );
         else {
             inst.spawnLocation = entity.getLocation();
-            sender.sendMessage( String.join( " ", Col.GREEN, npcName, "will respawn at its present location" ) );
+            sender.sendMessage( String.join( "", Col.GREEN, npcName, " will respawn at its present location" ) );
         }
         return true;
     }
     
     @Override
     public String getShortHelp() {
-        return "set sentry's spawn point";
+        return "set the sentry's spawn point";
     }
     
     @Override

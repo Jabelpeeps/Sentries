@@ -28,7 +28,7 @@ public class MobsAttackCommand implements SentriesToggleCommand {
 
     @Override
     public String getShortHelp() {
-        return "set whether mobs attack the Sentry";
+        return "set whether mobs attack the sentry";
     }
 
     @Override

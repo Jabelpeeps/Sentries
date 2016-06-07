@@ -22,7 +22,7 @@ public class CriticalsCommand implements SentriesToggleCommand {
 
     @Override
     public String getShortHelp() {
-        return "control Critcal hits";
+        return "control critcal hits to the sentry";
     }
 
     @Override

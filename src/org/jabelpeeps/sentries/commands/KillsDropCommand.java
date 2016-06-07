@@ -23,7 +23,7 @@ public class KillsDropCommand implements SentriesToggleCommand {
 
     @Override
     public String getShortHelp() {
-        return "set drops from those killed by the Sentry";
+        return "set drops from those killed by the sentry";
     }
 
     @Override

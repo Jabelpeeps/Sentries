@@ -73,7 +73,7 @@ public class EquipCommand implements SentriesComplexCommand {
 
     @Override
     public String getShortHelp() {
-        return "set the equipment a sentry is using";
+        return "adjust the equipment a sentry is using";
     }
 
     @Override
@@ -90,6 +90,7 @@ public class EquipCommand implements SentriesComplexCommand {
             joiner.add( "  to clear all equipment slots." );
             joiner.add( String.join( "", Col.GOLD, "do '/sentry equip clear <slot>'", Col.RESET ) );
             joiner.add( "  to clear the specified slot, where slot can be one of: hand, helmet, chestplate, leggings or boots." );
+            joiner.add( "NOTE: equiped armour is currently only cosmetic. Use '/sentry armour' to add protection from attacks." );
 
             equipCommandHelp = joiner.toString();
         }
