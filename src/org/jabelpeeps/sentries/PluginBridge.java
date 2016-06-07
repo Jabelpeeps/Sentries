@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries;
 
+import java.util.StringJoiner;
+
 import org.bukkit.entity.Player;
 
 /**
@@ -152,4 +154,26 @@ public abstract class PluginBridge {
      * @return true - if the SentryTrait is listed.
      */
     public abstract boolean isListed( SentryTrait inst, boolean asTarget );
+
+    /**
+     * Static method to iterate over the activated PluginBridges, polling each one for command
+     * help text.
+     * 
+     * @return - the concatenated help Strings
+     */
+    public static String getAdditionalTargets() {
+        String outString = "";
+    
+        if ( !Sentries.activePlugins.isEmpty() ) {
+            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+    
+            joiner.add( "You may also use these additional types:- " );
+    
+            for ( PluginBridge each : Sentries.activePlugins.values() ) {
+                joiner.add( each.getCommandHelp() );
+            }
+            outString = joiner.toString();
+        }
+        return outString;
+    }
 }

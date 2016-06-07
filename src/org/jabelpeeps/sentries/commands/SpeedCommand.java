@@ -1,0 +1,56 @@
+package org.jabelpeeps.sentries.commands;
+
+import org.bukkit.command.CommandSender;
+import org.jabelpeeps.sentries.S;
+import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Util;
+
+
+public class SpeedCommand implements SentriesNumberCommand {
+
+    private String helpTxt;
+    
+    @Override
+    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+
+        if ( number == null ) {
+            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s Speed is:- " + inst.speed ) );
+        }
+        else {
+            float speed = Util.string2Float( number );
+            if ( speed < 0.0 ) {
+                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
+                return true;
+            }
+
+            if ( speed > 2.0 ) speed = 2.0f;
+            
+            inst.speed = speed;
+            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s speed set to:- ", String.valueOf( speed ) ) );
+        }
+        return true;
+    }
+
+    @Override
+    public String getShortHelp() {
+        return "adjust a sentry's speed";
+    }
+
+    @Override
+    public String getLongHelp() {
+
+        if ( helpTxt == null ) {
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.SPEED, " (#)", Col.RESET, System.lineSeparator(),
+            "  where # is the speed multiplier (0-2.0) for the sentry to use when attacking.",
+            System.lineSeparator(), "If no number is given the current value is shown.");
+        }
+        return helpTxt;
+    }
+
+    @Override
+    public String getPerm() {
+        return S.PERM_SPEED;
+    }
+}
+

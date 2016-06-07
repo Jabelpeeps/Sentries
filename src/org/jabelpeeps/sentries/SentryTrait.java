@@ -78,7 +78,9 @@ public class SentryTrait extends Trait {
 
     public int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, warningRange, mountID;
     int activeStrength, activeArmour;
-    float speed, activeSpeed;
+    public float speed;
+
+    float activeSpeed;
     public double attackRate, healRate, sentryWeight, sentryMaxHealth;
     public boolean killsDropInventory, dropInventory, targetable, invincible, iWillRetaliate, acceptsCriticals;
     

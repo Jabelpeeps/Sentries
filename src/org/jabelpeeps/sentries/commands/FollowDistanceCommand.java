@@ -42,7 +42,7 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
         if ( helpTxt == null ) {
             helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.FOLLOW, " (#)", Col.RESET, System.lineSeparator(),
                     "  where # is the number (0-32) of blocks that sentries configured to guard will follow behind their guardees.",
-                    System.lineSeparator(), "  The default value is 4.  If no number is given the current value is shown.");
+                    System.lineSeparator(), "  If no number is given the current value is shown. (Default = 4)");
         }
         return helpTxt;
     }

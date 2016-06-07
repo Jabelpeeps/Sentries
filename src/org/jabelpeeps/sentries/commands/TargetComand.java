@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.CommandHandler;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -55,7 +56,7 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( " ", Col.GOLD, S.HELP_ADD_TYPE, Col.RESET, S.HELP_ADD ) );
             joiner.add( String.join( " ", Col.GOLD, S.HELP_REMOVE_TYPE, Col.RESET, S.HELP_REMOVE ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );
-            joiner.add( S.getAdditionalTargets() );
+            joiner.add( PluginBridge.getAdditionalTargets() );
 
             targetCommandHelp = joiner.toString();
         }       

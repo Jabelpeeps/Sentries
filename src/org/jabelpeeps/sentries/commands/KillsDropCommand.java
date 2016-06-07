@@ -14,7 +14,7 @@ public class KillsDropCommand implements SentriesToggleCommand {
 
         inst.killsDropInventory = (set == null) ? !inst.killsDropInventory : set;
 
-        sender.sendMessage( String.join( "", S.Col.GREEN, npcName, 
+        sender.sendMessage( String.join( "", Col.GREEN, npcName, 
                             inst.killsDropInventory ? "'s kills will drop items or exp"
                                                     : "'s kills will not drop items or exp" ) );
         return true;
@@ -29,7 +29,7 @@ public class KillsDropCommand implements SentriesToggleCommand {
     public String getLongHelp() {
         
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.KILLSDROP, " (on|off| ) ", Col.RESET,
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.KILLS_DROP, " (on|off| ) ", Col.RESET,
                     "to set whether the Sentry's victims will drop items",
                     " (Specify 'on' or 'off', or leave blank to toggle state.)" );
         }      

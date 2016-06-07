@@ -1,11 +1,6 @@
 package org.jabelpeeps.sentries;
 
-import java.util.StringJoiner;
-
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-
-import net.citizensnpcs.api.npc.NPC;
 
 /**
  * A container to externalise the Strings used by Sentries.
@@ -67,7 +62,7 @@ public abstract class S {
     public final static String RETALIATE = "retaliate";
     public final static String INVINCIBLE = "invincible";
     public final static String DROPS = "drops";
-    public final static String KILLSDROP = "killsdrop";
+    public final static String KILLS_DROP = "killsdrop";
     public final static String CRITICALS = "criticals";
     public final static String MOBS_ATTACK = "mobsattack";
     public final static String MOUNT = "mount";
@@ -75,6 +70,17 @@ public abstract class S {
     public final static String GREETING = "greeting";
     public final static String WARNING = "warning";
     public final static String FOLLOW = "follow";
+    public final static String HEALTH = "health";
+    public final static String NIGHT_VISION = "nightvision";
+    public final static String ARMOUR = "armour";
+    public final static String ARMOR = "armor";
+    public final static String STRENGTH = "strength";
+    public final static String RESPAWN = "respawn";
+    public final static String SPEED = "speed";
+    public final static String ARROW_RATE = "arrowrate";
+    public final static String HEALRATE = "healrate";
+    public final static String RANGE = "range";
+    public final static String VOICE_RANGE = "voicerange";
     
     // a random selection of single words.
     public final static String SPAWN = "spawn";
@@ -99,25 +105,15 @@ public abstract class S {
     public final static String RESPAWN_DELAY = "RespawnDelay";
     public final static String WARNING_RANGE = "WarningRange";
     public final static String ATTACK_RATE = "AttackRate";
-    public final static String NIGHT_VISION = "NightVision";
-    public final static String HEALRATE = "HealRate";
     public final static String FOLLOW_DISTANCE = "FollowDistance";
     public final static String GUARD_TARGET = "GuardTarget";
     public final static String DROP_INVENTORY = "DropInventory";
-    public final static String KILLS_DROP = "KillDrops";
     public final static String TARGETABLE = "Targetable";
     public final static String CRITICAL_HITS = "CriticalHits";
     public final static String DEFAULT_TARGETS = "DefaultTargets";
     public final static String DEFAULT_IGNORES = "DefaultIgnores";
     public final static String IGNORE_LOS = "IgnoreLOS";
-    public final static String HEALTH = "Health";
-    public final static String RANGE = "Range";
-    public final static String RESPAWN = "Respawn";
-    public final static String SPEED = "Speed";
     public final static String WEIGHT = "Weight";
-    public final static String ARMOR = "Armor";
-    public final static String ARMOUR = "Armour";
-    public final static String STRENGTH = "Strength";
     public final static String MOUNTID = "MountID";
 
     // Some strings to hold the names of external plugins in one location (in case of future changes to the names.)
@@ -157,67 +153,4 @@ public abstract class S {
     public final static String PERM_INVINCIBLE = "sentry.options.invincible";
     public final static String PERM_BODYGUARD = "sentry.bodyguard."; // be sure to leave the last '.'
     public final static String PERM_CITS_ADMIN = "citizens.admin";
-
-    /**
-     * Convenience method to send a formatted message to the player regarding
-     * the respawn status of the npc.
-     * 
-     * @param value
-     *            - the number of seconds set as the respawn value.
-     * @param npc
-     *            - the npc
-     * @param player
-     *            - the player who sent the command.
-     */
-    static void respawnCommandMessage( int value, NPC npc, CommandSender player ) {
-
-        if ( value == -1 )
-            player.sendMessage( String.join( "", Col.GOLD, npc.getName(), " will be deleted upon death" ) );
-        if ( value == 0 )
-            player.sendMessage( String.join( "", Col.GOLD, npc.getName(), " will not automatically respawn" ) );
-        if ( value > 0 )
-            player.sendMessage( String.join( "", Col.GOLD, npc.getName(), " respawns after ", String.valueOf( value ), SECONDS ) );
-    }
-    
-    /**
-     * iterates over the activated PluginBridges, polling each one for command
-     * help text.
-     * 
-     * @return - the concatenated help Strings
-     */
-    public static String getAdditionalTargets() {
-        String outString = "";
-
-        if ( !Sentries.activePlugins.isEmpty() ) {
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-
-            joiner.add( "You may also use these additional types:- " );
-
-            for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                joiner.add( each.getCommandHelp() );
-            }
-            outString = joiner.toString();
-        }
-        return outString;
-    }
-    
-    static String mainHelpOutro;
-
-    static String mainHelpOutro() {
-        
-        if ( mainHelpOutro == null ) {
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-    
-            joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
-            joiner.add( String.join( "", "If '...' is shown do ", Col.GOLD, "/sentry help <command>", Col.RESET, " for further help" ) );
-            joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
-            joiner.add( String.join( "", "Select NPC's with ", Col.GOLD, "'/npc sel'", Col.RESET, " before running commands, or use ",
-                    Col.GOLD, "/sentry #npcid <command> [args]", Col.RESET, " to run command on the sentry with the given npcid number." ) );
-            joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
-    
-            mainHelpOutro = joiner.toString();
-        }
-        return mainHelpOutro;
-    }
-    
 }

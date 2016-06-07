@@ -226,7 +226,7 @@ public abstract class Util {
      *            - the string to be converted
      * @return the float value represented by the string.
      */
-    static float string2Float( String value ) {
+    public static float string2Float( String value ) {
         try {
             return Float.parseFloat( value );
         } catch ( NumberFormatException e ) {
@@ -243,7 +243,7 @@ public abstract class Util {
      *            - the string to be converted
      * @return the double value represented by the string.
      */
-    static double string2Double( String value ) {
+    public static double string2Double( String value ) {
         try {
             return Double.parseDouble( value );
         } catch ( NumberFormatException e ) {
