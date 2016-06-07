@@ -3,7 +3,6 @@ package org.jabelpeeps.sentries.commands;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.SentriesNumberCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
 
@@ -41,8 +40,9 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
-            helpTxt = "";
-            Col.GOLD.concat( "Usage: /sentry follow [#]. Default is 4. " );
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.FOLLOW, " (#)", Col.RESET, System.lineSeparator(),
+                    "  where # is the number (0-32) of blocks that sentries configured to guard will follow behind their guardees.",
+                    System.lineSeparator(), "  The default value is 4.  If no number is given the current value is shown.");
         }
         return helpTxt;
     }

@@ -3,7 +3,6 @@ package org.jabelpeeps.sentries.commands;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.SentriesToggleCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 
 

@@ -32,6 +32,10 @@ import org.jabelpeeps.sentries.commands.KillsDropCommand;
 import org.jabelpeeps.sentries.commands.MobsAttackCommand;
 import org.jabelpeeps.sentries.commands.MountCommand;
 import org.jabelpeeps.sentries.commands.RetaliateCommand;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
+import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
+import org.jabelpeeps.sentries.commands.SentriesNumberCommand;
+import org.jabelpeeps.sentries.commands.SentriesToggleCommand;
 import org.jabelpeeps.sentries.commands.SetSpawnCommand;
 import org.jabelpeeps.sentries.commands.TargetComand;
 import org.jabelpeeps.sentries.commands.WarningCommand;
@@ -198,11 +202,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage( S.Col.GOLD + "/sentry respawn [-1-2000000]" );
                 sender.sendMessage( "  Sets the number of seconds after death the Sentries will respawn." );
             }
-            if ( checkCommandPerm( S.PERM_FOLLOW_DIST, sender ) ) {
-                sender.sendMessage( S.Col.GOLD + "/sentry follow [0-32]" );
-                sender.sendMessage( "  Sets the number of block away a bodyguard will follow. Default is 4" );
-            }
-            
+
             if ( sender instanceof ConsoleCommandSender )
                 sender.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the debug display on the console",
                         System.lineSeparator(), S.Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );

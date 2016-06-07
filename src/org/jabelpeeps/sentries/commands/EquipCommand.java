@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
-import org.jabelpeeps.sentries.SentriesComplexCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
 

@@ -6,7 +6,6 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.SentriesComplexCommand;
 import org.jabelpeeps.sentries.SentryTrait;
 
 

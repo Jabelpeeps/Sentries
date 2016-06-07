@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentries;
+package org.jabelpeeps.sentries.commands;
 
 /**
  *  Base interface for Sentries Plugin commands.
