@@ -88,13 +88,13 @@ public class SentryTrait extends Trait {
 
     static GiveUpStuckAction giveup = new GiveUpStuckAction();
 
-    String greetingMsg = "", warningMsg = "";
+    public String greetingMsg = "", warningMsg = "";
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> _myDamamgers = new HashSet<>();
 
     public LivingEntity guardeeEntity;
-    LivingEntity attackTarget;
+    public LivingEntity attackTarget;
     public String guardeeName;
     DamageCause causeOfDeath;
 
@@ -117,7 +117,7 @@ public class SentryTrait extends Trait {
     ItemStack potionItem;
     Random random = new Random();
 
-    SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
+    public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
     AttackType myAttack;
 

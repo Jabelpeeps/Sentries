@@ -1,6 +1,5 @@
 package org.jabelpeeps.sentries;
 
-import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -9,18 +8,20 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.commands.CriticalsCommand;
 import org.jabelpeeps.sentries.commands.DropsCommand;
 import org.jabelpeeps.sentries.commands.EquipCommand;
+import org.jabelpeeps.sentries.commands.GreetingCommand;
 import org.jabelpeeps.sentries.commands.GuardCommand;
 import org.jabelpeeps.sentries.commands.IgnoreCommand;
+import org.jabelpeeps.sentries.commands.InfoCommand;
 import org.jabelpeeps.sentries.commands.InvincibleCommand;
 import org.jabelpeeps.sentries.commands.KillsDropCommand;
 import org.jabelpeeps.sentries.commands.MobsAttackCommand;
@@ -28,6 +29,7 @@ import org.jabelpeeps.sentries.commands.MountCommand;
 import org.jabelpeeps.sentries.commands.RetaliateCommand;
 import org.jabelpeeps.sentries.commands.SetSpawnCommand;
 import org.jabelpeeps.sentries.commands.TargetComand;
+import org.jabelpeeps.sentries.commands.WarningCommand;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -51,6 +53,9 @@ public class CommandHandler implements CommandExecutor {
         commandMap.put( S.KILLSDROP,    new KillsDropCommand() ); 
         commandMap.put( S.MOBS_ATTACK,  new MobsAttackCommand() );
         commandMap.put( S.MOUNT,        new MountCommand() );
+        commandMap.put( S.INFO,         new InfoCommand() );
+        commandMap.put( S.GREETING,     new GreetingCommand() );
+        commandMap.put( S.WARNING,      new WarningCommand() );
     }
     
     /**
@@ -112,23 +117,16 @@ public class CommandHandler implements CommandExecutor {
 
             if ( inargs.length > 1 ) {
                 
-                String commandName = inargs[1].toLowerCase();
+                SentriesCommand command = commandMap.get( inargs[1].toLowerCase() );
                 
-                if ( commandMap.containsKey( commandName ) ) {
-                    
-                    SentriesCommand command = commandMap.get( commandName );
-                    
-                    if ( checkCommandPerm( command.getPerm(), sender ) ) {
-                        
-                        sender.sendMessage( command.getLongHelp() );
-                        return true;
-                    }
-                }
-                sender.sendMessage( S.ERROR_NO_MORE_HELP );
+                if ( command != null && checkCommandPerm( command.getPerm(), sender ) )               
+                    sender.sendMessage( command.getLongHelp() );
+                else 
+                    sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
                 return true;
             }
             
-            sender.sendMessage( String.join( "", System.lineSeparator(), S.Col.GOLD, "---------- Sentries Commands ----------", S.Col.RESET  ) );
+            sender.sendMessage( String.join( "", S.Col.GOLD, "---------- Sentries Commands ----------", S.Col.RESET  ) );
 
             for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {
                 
@@ -183,17 +181,6 @@ public class CommandHandler implements CommandExecutor {
                 sender.sendMessage( S.Col.GOLD + "/sentry follow [0-32]" );
                 sender.sendMessage( "  Sets the number of block away a bodyguard will follow. Default is 4" );
             }
-            
-            if ( checkCommandPerm( S.PERM_WARNING, sender ) ) {
-                sender.sendMessage( S.Col.GOLD + "/sentry warning <text to use>" );
-                sender.sendMessage( "  Change the warning text. <NPC> and <PLAYER> can be used as placeholders" );
-            }
-            if ( checkCommandPerm( S.PERM_GREETING, sender ) ) {
-                sender.sendMessage( S.Col.GOLD + "/sentry greeting <text to use>" );
-                sender.sendMessage( "  Change the greeting text. <NPC> and <PLAYER> can be used as placeholders" );
-            }
-            if ( checkCommandPerm( S.PERM_INFO, sender ) )
-                sender.sendMessage( String.join( "", S.Col.GOLD, "/sentry info", S.Col.RESET, " - View all attributes of a sentry NPC" ) );
             
             if ( sender instanceof ConsoleCommandSender )
                 sender.sendMessage( String.join( "", S.Col.GOLD, "/sentry debug", S.Col.RESET, " - toggles the debug display on the console",
@@ -291,18 +278,6 @@ public class CommandHandler implements CommandExecutor {
         SentryTrait inst = thisNPC.getTrait( SentryTrait.class );
         String npcName = thisNPC.getName();
 
-        // hold the state of the third argument (if it holds a boolean value) in a field for later use. 
-        // This is held as an object not a primitive to allow for a third state - 'null'.
-        Boolean set = null;
-
-        if ( inargs.length == 2 + nextArg ) {
-            if (    S.TRUE.equalsIgnoreCase( inargs[1 + nextArg] )
-                    || S.ON.equalsIgnoreCase( inargs[1 + nextArg] ) )
-                set = true;
-            if (    S.FALSE.equalsIgnoreCase( inargs[1 + nextArg] )
-                    || S.OFF.equalsIgnoreCase( inargs[1 + nextArg] ) )
-                set = false;
-        }
         
         // ------------------------------ handle commands from separate classes -----    
         SentriesCommand command = commandMap.get( inargs[nextArg].toLowerCase() );
@@ -312,8 +287,34 @@ public class CommandHandler implements CommandExecutor {
                 
                 if ( command instanceof SentriesComplexCommand )
                     ((SentriesComplexCommand) command).call( sender, npcName, inst, nextArg, inargs ); 
-                else
+                
+                else if ( command instanceof SentriesToggleCommand ) {
+                    
+                    // This is held as an object not a primitive to allow for a third state - 'null'.
+                    Boolean set = null;
+                    
+                    if ( inargs.length > nextArg + 2 ) {
+                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, "This command accepts 1 argument (at most)." ) );
+                        return true;
+                    }
+                    else if ( inargs.length == 2 + nextArg ) {
+                        String arg = inargs[1 + nextArg];
+                        if (    S.TRUE.equalsIgnoreCase( arg )
+                                || S.ON.equalsIgnoreCase( arg ) )
+                            set = true;
+                        if (    S.FALSE.equalsIgnoreCase( arg )
+                                || S.OFF.equalsIgnoreCase( arg ) )
+                            set = false;
+                    }                   
                     ((SentriesToggleCommand) command).call( sender, npcName, inst, set );
+                }
+                else if ( command instanceof SentriesNumberCommand ) {
+                    
+                    if ( inargs.length > nextArg + 2 )
+                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, "Only one number value can be processesd." ) );
+                    else 
+                        ((SentriesNumberCommand) command).call( sender, npcName, inst, inargs[nextArg + 1] );
+                }
             }
             return true;
         }
@@ -592,95 +593,6 @@ public class CommandHandler implements CommandExecutor {
             return true;
         }
         
-        // ----------------------------------------warning command-----------
-        if ( S.WARNING.equalsIgnoreCase( inargs[nextArg] ) ) {
-
-            if ( checkCommandPerm( S.PERM_WARNING, sender ) ) {
-
-                if ( inargs.length >= 2 + nextArg ) {
-
-                    String str = Util.sanitiseString( Util.joinArgs( 1 + nextArg, inargs ) );
-
-                    sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Warning message set to", S.Col.RESET, 
-                                                        ChatColor.translateAlternateColorCodes( '&', str ) ) );
-                    inst.warningMsg = str;
-                }
-                else {
-                    sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Warning Message is: ", S.Col.RESET, 
-                                                        ChatColor.translateAlternateColorCodes( '&', inst.warningMsg ) ) );
-
-                    sender.sendMessage( S.Col.GOLD.concat( "Usage: /sentry warning 'The Text to use'" ) );
-                }
-            }
-            return true;
-        }
-        // ----------------------------------------greeting command----------
-        if ( S.GREETING.equalsIgnoreCase( inargs[nextArg] ) ) {
-
-            if ( checkCommandPerm( S.PERM_GREETING, sender ) ) {
-
-                if ( inargs.length >= 2 + nextArg ) {
-
-                    String str = Util.sanitiseString( Util.joinArgs( 1 + nextArg, inargs ) );
-
-                    sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "Greeting message set to", S.Col.RESET,
-                                                        ChatColor.translateAlternateColorCodes( '&', str ) ) );
-                    inst.greetingMsg = str;
-                }
-                else {
-                    sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Greeting Message is: ", S.Col.RESET,
-                                                        ChatColor.translateAlternateColorCodes( '&', inst.greetingMsg ) ) );
-
-                    sender.sendMessage( S.Col.GOLD.concat( "Usage: /sentry greeting 'The Text to use'" ) );
-                }
-            }
-            return true;
-        }
-        // ---------------------------------------------info command-----------
-        if ( S.INFO.equalsIgnoreCase( inargs[nextArg] ) ) {
-
-            if ( checkCommandPerm( S.PERM_INFO, sender ) ) {
-
-                StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-
-                joiner.add( String.join( "", S.Col.GOLD, "------- Sentries Info for ", npcName, " (npcid - ",
-                                            String.valueOf( thisNPC.getId() ), ") ", "------" ) );
-                
-                joiner.add( String.join( "", 
-                        S.Col.RED, "[Health]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.sentryMaxHealth ),
-                        S.Col.RED, " [Armour]:", S.Col.WHITE, String.valueOf( inst.getArmor() ),
-                        S.Col.RED, " [Strength]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
-                        S.Col.RED, " [Speed]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
-                        S.Col.RED, " [Range]:", S.Col.WHITE, String.valueOf( inst.sentryRange ),
-                        S.Col.RED, " [AttackRate]:", S.Col.WHITE, String.valueOf( inst.attackRate ),
-                        S.Col.RED, " [NightVision]:", S.Col.WHITE, String.valueOf( inst.nightVision ),
-                        S.Col.RED, " [HealRate]:", S.Col.WHITE, String.valueOf( inst.healRate ),
-                        S.Col.RED, " [WarningRange]:", S.Col.WHITE, String.valueOf( inst.warningRange ),
-                        S.Col.RED, " [FollowDistance]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
-
-                joiner.add( String.join( "", S.Col.GREEN, "Invincible: ", String.valueOf( inst.invincible ), 
-                                                        "  Retaliate: ", String.valueOf( inst.iWillRetaliate ) ) );
-                joiner.add( String.join( "", S.Col.GREEN, "Drops Items: ", String.valueOf( inst.dropInventory ), 
-                                                        "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
-                joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
-                                                        "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
-                joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
-
-                if ( inst.attackTarget == null )
-                    joiner.add( S.Col.BLUE.concat( "Current Target: None" ) );
-                else
-                    joiner.add( String.join( "", S.Col.BLUE, "Current Target: ", inst.attackTarget.getName() ) );
-
-                if ( inst.guardeeEntity == null )
-                    joiner.add( S.Col.BLUE.concat( "Guarding: My Surroundings" ) );
-                else
-                    joiner.add( String.join( "", S.Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() ) );
-
-                sender.sendMessage( joiner.toString() );
-            }
-            return true;
-        }
-
         return false;
     }
 

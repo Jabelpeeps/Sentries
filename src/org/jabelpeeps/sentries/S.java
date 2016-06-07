@@ -38,7 +38,7 @@ public abstract class S {
     public final static String ERROR_NO_NPC = "You must have an NPC selected or provide an NPC #id";
     public final static String ERROR_ID_INVALID = "Could not find an NPC with #id of ";
     public final static String ERROR_NO_COMMAND_PERM = "You do not have permission for that command";
-    public final static String ERROR_NO_MORE_HELP = "No further help is available for this command";
+    public final static String ERROR_UNKNOWN_COMMAND = "The command name was not recognised";
 
     public final static String GET_COMMAND_HELP = "Use /sentry help for command reference";
     public final static String CANT_FOLLOW = " cannot follow you to ";

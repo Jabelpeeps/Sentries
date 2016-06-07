@@ -29,7 +29,7 @@ import net.citizensnpcs.api.npc.NPC;
  * <p>
  * Calling {@link #update(SentryTrait)} on the current status will carry out the appropriate 
  * actions, returning an updated state (if needed). */
-enum SentryStatus {
+public enum SentryStatus {
 
     /** Sentries with this status will have their death's handled, along with any drops, and then 
      * various items tidied up before having their status set to {@link SentryStatus#DEAD} */

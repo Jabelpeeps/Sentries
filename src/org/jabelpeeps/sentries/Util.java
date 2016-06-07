@@ -3,7 +3,6 @@ package org.jabelpeeps.sentries;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -155,7 +154,7 @@ public abstract class Util {
         input = input.replace( "<ITEM>", (item == null) ? "" : Util.getLocalItemName( item ) );
         input = input.replace( "<AMOUNT>", (amount == null) ? "" : amount );
 
-        input = ChatColor.translateAlternateColorCodes( '&', input );
+//        input = ChatColor.translateAlternateColorCodes( '&', input );
 
         return input;
     }
@@ -173,7 +172,7 @@ public abstract class Util {
      *            - the string to be parsed
      * @return - the string without quotes
      */
-    static String sanitiseString( String input ) {
+    public static String removeQuotes( String input ) {
 
         input = initialDoubleQuote.matcher( input ).replaceAll( "" );
         input = endDoubleQuote.matcher( input ).replaceAll( "" );
