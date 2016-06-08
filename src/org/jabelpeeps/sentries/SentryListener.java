@@ -71,7 +71,7 @@ public class SentryListener implements Listener {
         }
         SentryTrait inst = Util.getSentryTrait( killer );
 
-        if ( inst != null && !inst.killsDropInventory ) {
+        if ( inst != null && !inst.killsDrop ) {
             event.getDrops().clear();
             event.setDroppedExp( 0 );
         }
@@ -359,7 +359,7 @@ public class SentryListener implements Listener {
                 // do knockback
                 myEntity.setVelocity( damager.getLocation()
                                              .getDirection()
-                                             .multiply( 1.0 / ( instVictim.sentryWeight + (armour / 5) ) ) 
+                                             .multiply( 1.0 / ( instVictim.weight + (armour / 5) ) ) 
                 );
                 // Apply armour
                 damage -= armour;
@@ -439,8 +439,8 @@ public class SentryListener implements Listener {
                 }
 
                 // is the sentry set to retaliate, or was its mount the victim?
-                if (    inst.iWillRetaliate
-                        ||  (   inst.iWillRetaliate
+                if (    inst.iRetaliate
+                        ||  (   inst.iRetaliate
                                 && inst.hasMount()
                                 && inst.getMountNPC().getEntity() == victim ) ) {
                     inst.setAttackTarget( damager );
@@ -455,8 +455,8 @@ public class SentryListener implements Listener {
 
                     Location npcLoc = npc.getEntity().getLocation();
                     // is the event within range of the sentry?
-                    if (    (   npcLoc.distance( victim.getLocation() ) <= inst.sentryRange
-                            ||  npcLoc.distance( damager.getLocation() ) <= inst.sentryRange )
+                    if (    (   npcLoc.distance( victim.getLocation() ) <= inst.range
+                            ||  npcLoc.distance( damager.getLocation() ) <= inst.range )
 
                         // is it too dark for the sentry to see?
                         &&  (   inst.nightVision >= damager.getLocation().getBlock().getLightLevel()

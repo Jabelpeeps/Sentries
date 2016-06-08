@@ -16,7 +16,7 @@ public class RangeCommand implements SentriesNumberCommand {
 
         if ( number == null ) {
             sender.sendMessage( 
-                String.join( "", Col.GOLD, npcName, "'s attack range is:- ", String.valueOf( inst.sentryRange ) ) );
+                String.join( "", Col.GOLD, npcName, "'s attack range is:- ", String.valueOf( inst.range ) ) );
         }
         else {
             int range = Util.string2Int( number );
@@ -26,7 +26,7 @@ public class RangeCommand implements SentriesNumberCommand {
             }
             if ( range > 100 ) range = 100;
             
-            inst.sentryRange = range;
+            inst.range = range;
             sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s attack range set to:- ", String.valueOf( range ) ) );
         }
         return true;

@@ -271,7 +271,7 @@ public enum SentryStatus {
                     && inst.attackTarget == null
                     && System.currentTimeMillis() > inst.reassesTime ) {
 
-                target = inst.findTarget( inst.sentryRange );
+                target = inst.findTarget( inst.range );
                 
                 if ( target != null ) {
                     inst.reassesTime = System.currentTimeMillis() + 3000;
@@ -350,7 +350,7 @@ public enum SentryStatus {
                 // block if in range
                 inst.draw( dist < 9 );
                 // is it still in range? then keep attacking...
-                if ( dist <= inst.sentryRange * inst.sentryRange )
+                if ( dist <= inst.range * inst.range )
                     return this;
             }
             

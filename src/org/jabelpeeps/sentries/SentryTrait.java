@@ -76,13 +76,13 @@ public class SentryTrait extends Trait {
     Location _projTargetLostLoc;
     public Location spawnLocation;
 
-    public int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, voiceRange, mountID;
+    public int strength, armour, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
     int activeStrength, activeArmour;
     public float speed;
 
     float activeSpeed;
-    public double arrowRate, healRate, sentryWeight, sentryMaxHealth;
-    public boolean killsDropInventory, dropInventory, targetable, invincible, iWillRetaliate, acceptsCriticals;
+    public double arrowRate, healRate, weight, maxHealth;
+    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
     
     boolean loaded;
 
@@ -148,34 +148,34 @@ public class SentryTrait extends Trait {
         if ( key.keyExists( "traits" ) ) 
             key = key.getRelative( "traits" );
 
-        iWillRetaliate = key.getBoolean( S.RETALIATE, sentry.defaultBooleans.get( S.RETALIATE ) );
-        invincible = key.getBoolean( S.INVINCIBLE, sentry.defaultBooleans.get( S.INVINCIBLE ) );
-        dropInventory = key.getBoolean( S.DROP_INVENTORY, sentry.defaultBooleans.get( S.DROP_INVENTORY ) );
-        acceptsCriticals = key.getBoolean( S.CRITICAL_HITS, sentry.defaultBooleans.get( S.CRITICAL_HITS ) );
-        killsDropInventory = key.getBoolean( S.KILLS_DROP, sentry.defaultBooleans.get( S.KILLS_DROP ) );
-        ignoreLOS = key.getBoolean( S.IGNORE_LOS, sentry.defaultBooleans.get( S.IGNORE_LOS ) );
-        targetable = key.getBoolean( S.TARGETABLE, sentry.defaultBooleans.get( S.TARGETABLE ) );
+        iRetaliate = key.getBoolean( S.CON_RETALIATION, sentry.defaultBooleans.get( S.CON_RETALIATION ) );
+        invincible = key.getBoolean( S.CON_INVINCIBLE, sentry.defaultBooleans.get( S.CON_INVINCIBLE ) );
+        dropInventory = key.getBoolean( S.CON_DROP_INV, sentry.defaultBooleans.get( S.CON_DROP_INV ) );
+        acceptsCriticals = key.getBoolean( S.CON_CRIT_HITS, sentry.defaultBooleans.get( S.CON_CRIT_HITS ) );
+        killsDrop = key.getBoolean( S.CON_KILLS_DROP, sentry.defaultBooleans.get( S.CON_KILLS_DROP ) );
+        ignoreLOS = key.getBoolean( S.CON_IGNORE_LOS, sentry.defaultBooleans.get( S.CON_IGNORE_LOS ) );
+        targetable = key.getBoolean( S.CON_MOBS_ATTACK, sentry.defaultBooleans.get( S.CON_MOBS_ATTACK ) );
 
-        armour = key.getInt( S.ARMOR, sentry.defaultIntegers.get( S.ARMOR ) );
-        strength = key.getInt( S.STRENGTH, sentry.defaultIntegers.get( S.STRENGTH ) );
-        sentryRange = key.getInt( S.RANGE, sentry.defaultIntegers.get( S.RANGE ) );
-        respawnDelay = key.getInt( S.RESPAWN_DELAY, sentry.defaultIntegers.get( S.RESPAWN_DELAY ) );
-        followDistance = key.getInt( S.FOLLOW_DISTANCE, sentry.defaultIntegers.get( S.FOLLOW_DISTANCE ) );
-        voiceRange = key.getInt( S.WARNING_RANGE, sentry.defaultIntegers.get( S.WARNING_RANGE ) );
-        nightVision = key.getInt( S.NIGHT_VISION, sentry.defaultIntegers.get( S.NIGHT_VISION ) );
-        mountID = key.getInt( S.MOUNTID, -1 );
+        armour = key.getInt( S.CON_ARMOUR, sentry.defaultIntegers.get( S.CON_ARMOUR ) );
+        strength = key.getInt( S.CON_STRENGTH, sentry.defaultIntegers.get( S.CON_STRENGTH ) );
+        range = key.getInt( S.CON_RANGE, sentry.defaultIntegers.get( S.CON_RANGE ) );
+        respawnDelay = key.getInt( S.CON_RESPAWN_DELAY, sentry.defaultIntegers.get( S.CON_RESPAWN_DELAY ) );
+        followDistance = key.getInt( S.CON_FOLLOW_DIST, sentry.defaultIntegers.get( S.CON_FOLLOW_DIST ) );
+        voiceRange = key.getInt( S.CON_VOICE_RANGE, sentry.defaultIntegers.get( S.CON_VOICE_RANGE ) );
+        nightVision = key.getInt( S.CON_NIGHT_VIS, sentry.defaultIntegers.get( S.CON_NIGHT_VIS ) );
+        mountID = key.getInt( S.PERSIST_MOUNT, -1 );
 
-        speed = (float) key.getDouble( S.SPEED, sentry.defaultDoubles.get( S.SPEED ) );
-        sentryWeight = key.getDouble( S.WEIGHT, sentry.defaultDoubles.get( S.WEIGHT ) );
-        sentryMaxHealth = key.getDouble( S.HEALTH, sentry.defaultDoubles.get( S.HEALTH ) );
-        arrowRate = key.getDouble( S.ATTACK_RATE, sentry.defaultDoubles.get( S.ATTACK_RATE ) );
-        healRate = key.getDouble( S.HEALRATE, sentry.defaultDoubles.get( S.HEALRATE ) );
+        speed = (float) key.getDouble( S.CON_SPEED, sentry.defaultDoubles.get( S.CON_SPEED ) );
+        weight = key.getDouble( S.CON_WEIGHT, sentry.defaultDoubles.get( S.CON_WEIGHT ) );
+        maxHealth = key.getDouble( S.CON_HEALTH, sentry.defaultDoubles.get( S.CON_HEALTH ) );
+        arrowRate = key.getDouble( S.CON_ARROW_RATE, sentry.defaultDoubles.get( S.CON_ARROW_RATE ) );
+        healRate = key.getDouble( S.CON_HEAL_RATE, sentry.defaultDoubles.get( S.CON_HEAL_RATE ) );
 
-        guardeeName = key.getString( S.GUARD_TARGET, null );
-        greetingMsg = key.getString( S.GREETING, sentry.defaultGreeting );
-        warningMsg = key.getString( S.WARNING, sentry.defaultWarning );
+        guardeeName = key.getString( S.PERSIST_GUARDEE, null );
+        greetingMsg = key.getString( S.CON_GREETING, sentry.defaultGreeting );
+        warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
-        if ( key.keyExists( "Spawn" ) ) {
+        if ( key.keyExists( S.PERSIST_SPAWN ) ) {
             try {
                 spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
                                              key.getDouble( "Spawn.x" ), 
@@ -226,12 +226,11 @@ public class SentryTrait extends Trait {
         LivingEntity myEntity = getMyEntity();
 
         // check for illegal values
-        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
+        if ( weight <= 0 ) weight = 1.0;
         if ( arrowRate > 30 ) arrowRate = 30.0;
-        if ( sentryMaxHealth < 0 ) sentryMaxHealth = 0;
-        if ( sentryRange < 1 ) sentryRange = 1;
-        if ( sentryRange > 200 ) sentryRange = 200;
-        if ( sentryWeight <= 0 ) sentryWeight = 1.0;
+        if ( maxHealth < 0 ) maxHealth = 0;
+        if ( range < 1 ) range = 1;
+        if ( range > 200 ) range = 200;
         if ( respawnDelay < -1 ) respawnDelay = -1;
         if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
 
@@ -244,7 +243,7 @@ public class SentryTrait extends Trait {
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
 
-        setHealth( sentryMaxHealth );
+        setHealth( maxHealth );
         _myDamamgers.clear();
         faceForward();
 
@@ -254,8 +253,8 @@ public class SentryTrait extends Trait {
         NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
         float myRange = navigatorParams.range();
 
-        if ( myRange < sentryRange + 5 ) {
-            myRange = sentryRange + 5;
+        if ( myRange < range + 5 ) {
+            myRange = range + 5;
         }
 
         npc.setProtected( false );
@@ -328,14 +327,14 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
         
-        key.setBoolean( S.RETALIATE, iWillRetaliate );
-        key.setBoolean( S.INVINCIBLE, invincible );
-        key.setBoolean( S.DROP_INVENTORY, dropInventory );
-        key.setBoolean( S.KILLS_DROP, killsDropInventory );
-        key.setBoolean( S.TARGETABLE, targetable );
-        key.setInt( S.MOUNTID, mountID );
-        key.setBoolean( S.CRITICAL_HITS, acceptsCriticals );
-        key.setBoolean( S.IGNORE_LOS, ignoreLOS );
+        key.setBoolean( S.CON_RETALIATION, iRetaliate );
+        key.setBoolean( S.CON_INVINCIBLE, invincible );
+        key.setBoolean( S.CON_DROP_INV, dropInventory );
+        key.setBoolean( S.CON_KILLS_DROP, killsDrop );
+        key.setBoolean( S.CON_MOBS_ATTACK, targetable );
+        key.setInt( S.PERSIST_MOUNT, mountID );
+        key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
+        key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
 
@@ -348,26 +347,26 @@ public class SentryTrait extends Trait {
             key.setDouble( "Spawn.pitch", spawnLocation.getPitch() );
         }
 
-        key.setDouble( S.HEALTH, sentryMaxHealth );
-        key.setInt( S.RANGE, sentryRange );
-        key.setInt( S.RESPAWN_DELAY, respawnDelay );
-        key.setDouble( S.SPEED, speed );
-        key.setDouble( S.WEIGHT, sentryWeight );
-        key.setDouble( S.HEALRATE, healRate );
-        key.setInt( S.ARMOR, armour );
-        key.setInt( S.STRENGTH, strength );
-        key.setInt( S.WARNING_RANGE, voiceRange );
-        key.setDouble( S.ATTACK_RATE, arrowRate );
-        key.setInt( S.NIGHT_VISION, nightVision );
-        key.setInt( S.FOLLOW_DISTANCE, followDistance );
+        key.setDouble( S.CON_HEALTH, maxHealth );
+        key.setInt( S.CON_RANGE, range );
+        key.setInt( S.CON_RESPAWN_DELAY, respawnDelay );
+        key.setDouble( S.CON_SPEED, speed );
+        key.setDouble( S.CON_WEIGHT, weight );
+        key.setDouble( S.CON_HEAL_RATE, healRate );
+        key.setInt( S.CON_ARMOUR, armour );
+        key.setInt( S.CON_STRENGTH, strength );
+        key.setInt( S.CON_VOICE_RANGE, voiceRange );
+        key.setDouble( S.CON_ARROW_RATE, arrowRate );
+        key.setInt( S.CON_NIGHT_VIS, nightVision );
+        key.setInt( S.CON_FOLLOW_DIST, followDistance );
 
         if ( guardeeName != null )
-            key.setString( S.GUARD_TARGET, guardeeName );
-        else if ( key.keyExists( S.GUARD_TARGET ) )
-            key.removeKey( S.GUARD_TARGET );
+            key.setString( S.PERSIST_GUARDEE, guardeeName );
+        else if ( key.keyExists( S.PERSIST_GUARDEE ) )
+            key.removeKey( S.PERSIST_GUARDEE );
 
-        key.setString( S.WARNING, warningMsg );
-        key.setString( S.GREETING, greetingMsg );
+        key.setString( S.CON_WARNING, warningMsg );
+        key.setString( S.CON_GREETING, greetingMsg );
     }
     
     @Override
@@ -705,7 +704,7 @@ public class SentryTrait extends Trait {
             effect = null;
         }
 
-        if ( dist > sentryRange ) {
+        if ( dist > range ) {
             clearTarget();
             return;
         }
@@ -1030,7 +1029,7 @@ public class SentryTrait extends Trait {
         
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
 
-            if ( getHealth() < sentryMaxHealth ) {
+            if ( getHealth() < maxHealth ) {
 
                 double heal = 1;
 
@@ -1046,7 +1045,7 @@ public class SentryTrait extends Trait {
 //                if ( healAnimation != null )
 //                    NMS.sendPacketNearby( null, getMyEntity().getLocation(), healAnimation );
 
-                if ( getHealth() >= sentryMaxHealth )
+                if ( getHealth() >= maxHealth )
                     _myDamamgers.clear();
 
             }
@@ -1075,7 +1074,7 @@ public class SentryTrait extends Trait {
      * @param onlyCheckAllPlayers
      *            - if true, the search is conducted on all online Players<br>
      * @param onlyCheckAllPlayers
-     *            - if false, all LivingEntities within sentryRange are checked.
+     *            - if false, all LivingEntities within range are checked.
      * 
      * @return true if an Entity with the supplied name is found, otherwise
      *         returns false.
@@ -1099,7 +1098,7 @@ public class SentryTrait extends Trait {
             }
         }
         else {
-            for ( Entity each : getMyEntity().getNearbyEntities( sentryRange, sentryRange, sentryRange ) ) {
+            for ( Entity each : getMyEntity().getNearbyEntities( range, range, range ) ) {
 
                 String ename = null;
 
@@ -1134,9 +1133,9 @@ public class SentryTrait extends Trait {
 
         if ( myEntity == null ) return;
 
-        myEntity.setMaxHealth( sentryMaxHealth );
+        myEntity.setMaxHealth( maxHealth );
 
-        if ( health > sentryMaxHealth ) health = sentryMaxHealth;
+        if ( health > maxHealth ) health = maxHealth;
 
         myEntity.setHealth( health );
     }

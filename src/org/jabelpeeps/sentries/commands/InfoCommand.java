@@ -21,11 +21,11 @@ public class InfoCommand implements SentriesComplexCommand {
                                     String.valueOf( inst.getNPC().getId() ), ") ", "------" ) );
         
         joiner.add( String.join( "", 
-                S.Col.RED, "[Health]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.sentryMaxHealth ),
+                S.Col.RED, "[Health]:", S.Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.maxHealth ),
                 S.Col.RED, " [Armour]:", S.Col.WHITE, String.valueOf( inst.getArmor() ),
                 S.Col.RED, " [Strength]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
                 S.Col.RED, " [Speed]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
-                S.Col.RED, " [Range]:", S.Col.WHITE, String.valueOf( inst.sentryRange ),
+                S.Col.RED, " [Range]:", S.Col.WHITE, String.valueOf( inst.range ),
                 S.Col.RED, " [ArrowRate]:", S.Col.WHITE, String.valueOf( inst.arrowRate ),
                 S.Col.RED, " [NightVision]:", S.Col.WHITE, String.valueOf( inst.nightVision ),
                 S.Col.RED, " [HealRate]:", S.Col.WHITE, String.valueOf( inst.healRate ),
@@ -33,10 +33,10 @@ public class InfoCommand implements SentriesComplexCommand {
                 S.Col.RED, " [FollowDistance]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
         joiner.add( String.join( "", S.Col.GREEN, "Invincible: ", String.valueOf( inst.invincible ), 
-                                                "  Retaliate: ", String.valueOf( inst.iWillRetaliate ) ) );
+                                                "  Retaliate: ", String.valueOf( inst.iRetaliate ) ) );
         joiner.add( String.join( "", S.Col.GREEN, "Drops Items: ", String.valueOf( inst.dropInventory ), 
                                                 "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
-        joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ", String.valueOf( inst.killsDropInventory ), 
+        joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ", String.valueOf( inst.killsDrop ), 
                                                 "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
         joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 

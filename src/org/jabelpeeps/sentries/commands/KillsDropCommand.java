@@ -12,10 +12,10 @@ public class KillsDropCommand implements SentriesToggleCommand {
     @Override
     public boolean call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
 
-        inst.killsDropInventory = (set == null) ? !inst.killsDropInventory : set;
+        inst.killsDrop = (set == null) ? !inst.killsDrop : set;
 
         sender.sendMessage( String.join( "", Col.GREEN, npcName, 
-                            inst.killsDropInventory ? "'s kills will drop items or exp"
+                            inst.killsDrop ? "'s kills will drop items or exp"
                                                     : "'s kills will not drop items or exp" ) );
         return true;
     }

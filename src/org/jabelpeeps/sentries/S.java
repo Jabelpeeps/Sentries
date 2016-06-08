@@ -81,18 +81,6 @@ public abstract class S {
     public final static String HEALRATE = "healrate";
     public final static String RANGE = "range";
     public final static String VOICE_RANGE = "voicerange";
-    
-    // a random selection of single words.
-    public final static String SPAWN = "spawn";
-    public final static String SECONDS = "seconds";
-    public final static String HELP = "help";
-    public final static String TARGETS = "Targets";
-    public final static String IGNORES = "Ignores";
-    public final static String TRUE = "true";
-    public final static String FALSE = "false";
-    public final static String ON = "On";
-    public final static String OFF = "Off";
-    public final static String YET = " yet.";
     public final static String ADD = "add";
     public final static String REMOVE = "remove";
     public final static String INFO = "info";
@@ -100,21 +88,46 @@ public abstract class S {
     public final static String CLEAR = "clear";
     public final static String CLEARALL = "clearall";
     public final static String JOIN = "join";
+    public final static String HELP = "help";
+    
+    // a random selection of single words.
+    public final static String SECONDS = "seconds";
+    public final static String TRUE = "true";
+    public final static String FALSE = "false";
+    public final static String ON = "On";
+    public final static String OFF = "Off";
+    public final static String YET = " yet.";
     
     // Strings used as keys for config values, and npc attributes for saving.
-    public final static String RESPAWN_DELAY = "RespawnDelay";
-    public final static String WARNING_RANGE = "WarningRange";
-    public final static String ATTACK_RATE = "AttackRate";
-    public final static String FOLLOW_DISTANCE = "FollowDistance";
-    public final static String GUARD_TARGET = "GuardTarget";
-    public final static String DROP_INVENTORY = "DropInventory";
-    public final static String TARGETABLE = "Targetable";
-    public final static String CRITICAL_HITS = "CriticalHits";
+    // these need to correspond exactly with the key Strings in the config.yml 
+    public final static String CON_STRENGTH = "Strength";
+    public final static String CON_ARMOUR = "Armour";
+    public final static String CON_NIGHT_VIS = "NightVision";
+    public final static String CON_RANGE = "Range";
+    public final static String CON_VOICE_RANGE = "VoiceRange";
+    public final static String CON_RESPAWN_DELAY = "RespawnDelay";
+    public final static String CON_FOLLOW_DIST = "FollowDistance";
+    public final static String CON_SPEED = "Speed";
+    public final static String CON_HEALTH = "Health";
+    public final static String CON_ARROW_RATE = "ArrowRate";
+    public final static String CON_HEAL_RATE = "HealRate";
+    public final static String CON_WEIGHT = "Weight";
+    public final static String CON_DROP_INV = "DropInventory";
+    public final static String CON_KILLS_DROP = "KillsDrop";
+    public final static String CON_CRIT_HITS = "CriticalHits";
+    public final static String CON_INVINCIBLE = "Invincible";
+    public final static String CON_RETALIATION = "Retaliation";
+    public final static String CON_MOBS_ATTACK = "MobsAttack";
+    public final static String CON_IGNORE_LOS = "IgnoreLOS";
     public final static String DEFAULT_TARGETS = "DefaultTargets";
     public final static String DEFAULT_IGNORES = "DefaultIgnores";
-    public final static String IGNORE_LOS = "IgnoreLOS";
-    public final static String WEIGHT = "Weight";
-    public final static String MOUNTID = "MountID";
+    public final static String PERSIST_MOUNT = "MountID";
+    public final static String PERSIST_GUARDEE = "PersistGuardee";
+    public final static String CON_WARNING = "Warning";
+    public final static String CON_GREETING = "Greeting";
+    public final static String PERSIST_SPAWN = "Spawn";
+    public final static String TARGETS = "Targets";
+    public final static String IGNORES = "Ignores";
 
     // Some strings to hold the names of external plugins in one location (in case of future changes to the names.)
     public final static String CITIZENS = "Citizens";

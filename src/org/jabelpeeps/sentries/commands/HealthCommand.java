@@ -15,7 +15,7 @@ public class HealthCommand implements SentriesNumberCommand {
     public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s Health is:- ", String.valueOf( inst.sentryMaxHealth ) ) );
+            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s Health is:- ", String.valueOf( inst.maxHealth ) ) );
         }
         else {
             int HPs = Util.string2Int( number );
@@ -25,7 +25,7 @@ public class HealthCommand implements SentriesNumberCommand {
             }
             if ( HPs > 2000000 ) HPs = 2000000;
             
-            inst.sentryMaxHealth = HPs;
+            inst.maxHealth = HPs;
             inst.setHealth( HPs );
             sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) ) );
         }

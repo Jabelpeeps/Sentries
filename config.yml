@@ -8,7 +8,7 @@ Server:
  ExpValue: 5
  # This is how often, in ticks, the Sentry performs his interal logic looking for targets, etc. Increasing this value may lighten
  # server load, but will decrease Sentries responsiveness and maximum rate of fire.
- LogicTicks: 10
+ LogicTicks: 5
  # Whether or not Sentries in bodyguard mode always deal damage regardless of other protection plugins.
  BodyguardsObeyProtection: true
  # Whether or not Sentries are immune to damage from entites on their ignore list. Immunity to damage also prevents retaliation.
@@ -17,29 +17,29 @@ Server:
 # Default stats for new Sentries
 DefaultStats:
  Strength: 1
- Armor: 0
+ Armour: 0
  NightVision: 16
  Range: 10
- WarningRange: 0
+ VoiceRange: 0
  RespawnDelay: 10
  FollowDistance: 4
 # More default stats...
 DefaultValues:
  Speed: 1.0
  Health: 20.0
- AttackRate: 2.0
+ ArrowRate: 2.0
  HealRate: 0.0
- Weight: 1.0 
+ Weight: 1.0     # used in knockback calculation
  
 # Default options for new Sentries
 DefaultOptions:
  DropInventory: false     # on death
- KillDrops: true          # when killing others
+ KillsDrop: true          # when killing others
  CriticalHits: true
  Invincible: false
- Retaliate: true
- FriendlyFire: false
- Targetable: true
+ Retaliation: true
+ FriendlyFire: false   # unused?
+ MobsAttack: true
  IgnoreLOS: false
  
 # Default texts for new Sentries. You can use <NPC> and <PLAYER> as placeholders.

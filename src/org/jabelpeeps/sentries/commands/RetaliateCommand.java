@@ -13,9 +13,9 @@ public class RetaliateCommand implements SentriesToggleCommand {
     @Override
     public boolean call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
         
-        inst.iWillRetaliate = (set == null) ? !inst.iWillRetaliate : set;
+        inst.iRetaliate = (set == null) ? !inst.iRetaliate : set;
 
-        sender.sendMessage( String.join( " ", Col.GREEN, npcName, inst.iWillRetaliate ? "will retalitate against all attackers" : "will not retaliate when attacked" ) );
+        sender.sendMessage( String.join( " ", Col.GREEN, npcName, inst.iRetaliate ? "will retalitate against all attackers" : "will not retaliate when attacked" ) );
 
         return true;
     }
