@@ -167,7 +167,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 
                 SentriesCommand command = commandMap.get( inargs[1].toLowerCase() );
                 
-                if ( command != null && checkCommandPerm( command.getPerm(), sender ) )               
+                if ( command != null && sender.hasPermission( command.getPerm() ) )               
                     sender.sendMessage( command.getLongHelp() );
                 else 
                     sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
@@ -176,23 +176,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             
             sender.sendMessage( String.join( "", Col.GOLD, "---------- Sentries Commands ----------", Col.RESET  ) );
 
-            for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {
+            for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {                
+                if ( S.ARMOR.equals( each.getKey() ) ) continue;
                 
                 SentriesCommand command = each.getValue();
                 
-                if ( checkCommandPerm( command.getPerm(), sender ) ) {
+                if ( sender.hasPermission( command.getPerm() ) ) {
                     sender.sendMessage( String.join( "", Col.GOLD, "/sentry ", each.getKey(), " ... ", Col.RESET, command.getShortHelp() ) );
                 }
             }
 
             // two special commands to add to the list...
-            if ( sender instanceof ConsoleCommandSender )
-                sender.sendMessage( String.join( "", Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console",
-                        System.lineSeparator(), Col.RED, "Reduces performance! DO NOT enable unless you need it!" ) );
-
             if ( checkCommandPerm( S.PERM_RELOAD, sender ) )
                 sender.sendMessage( String.join( "", Col.GOLD, "/sentry reload", Col.RESET, " - Reloads the config file" ) );
             
+            if ( sender instanceof ConsoleCommandSender )
+                sender.sendMessage( String.join( "", Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console",
+                        System.lineSeparator(), Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!" ) );
+
             // lazy initialiser
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );

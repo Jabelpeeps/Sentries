@@ -76,12 +76,12 @@ public class SentryTrait extends Trait {
     Location _projTargetLostLoc;
     public Location spawnLocation;
 
-    public int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, warningRange, mountID;
+    public int strength, armour, epCount, nightVision, respawnDelay, sentryRange, followDistance, voiceRange, mountID;
     int activeStrength, activeArmour;
     public float speed;
 
     float activeSpeed;
-    public double attackRate, healRate, sentryWeight, sentryMaxHealth;
+    public double arrowRate, healRate, sentryWeight, sentryMaxHealth;
     public boolean killsDropInventory, dropInventory, targetable, invincible, iWillRetaliate, acceptsCriticals;
     
     boolean loaded;
@@ -161,14 +161,14 @@ public class SentryTrait extends Trait {
         sentryRange = key.getInt( S.RANGE, sentry.defaultIntegers.get( S.RANGE ) );
         respawnDelay = key.getInt( S.RESPAWN_DELAY, sentry.defaultIntegers.get( S.RESPAWN_DELAY ) );
         followDistance = key.getInt( S.FOLLOW_DISTANCE, sentry.defaultIntegers.get( S.FOLLOW_DISTANCE ) );
-        warningRange = key.getInt( S.WARNING_RANGE, sentry.defaultIntegers.get( S.WARNING_RANGE ) );
+        voiceRange = key.getInt( S.WARNING_RANGE, sentry.defaultIntegers.get( S.WARNING_RANGE ) );
         nightVision = key.getInt( S.NIGHT_VISION, sentry.defaultIntegers.get( S.NIGHT_VISION ) );
         mountID = key.getInt( S.MOUNTID, -1 );
 
         speed = (float) key.getDouble( S.SPEED, sentry.defaultDoubles.get( S.SPEED ) );
         sentryWeight = key.getDouble( S.WEIGHT, sentry.defaultDoubles.get( S.WEIGHT ) );
         sentryMaxHealth = key.getDouble( S.HEALTH, sentry.defaultDoubles.get( S.HEALTH ) );
-        attackRate = key.getDouble( S.ATTACK_RATE, sentry.defaultDoubles.get( S.ATTACK_RATE ) );
+        arrowRate = key.getDouble( S.ATTACK_RATE, sentry.defaultDoubles.get( S.ATTACK_RATE ) );
         healRate = key.getDouble( S.HEALRATE, sentry.defaultDoubles.get( S.HEALRATE ) );
 
         guardeeName = key.getString( S.GUARD_TARGET, null );
@@ -227,7 +227,7 @@ public class SentryTrait extends Trait {
 
         // check for illegal values
         if ( sentryWeight <= 0 ) sentryWeight = 1.0;
-        if ( attackRate > 30 ) attackRate = 30.0;
+        if ( arrowRate > 30 ) arrowRate = 30.0;
         if ( sentryMaxHealth < 0 ) sentryMaxHealth = 0;
         if ( sentryRange < 1 ) sentryRange = 1;
         if ( sentryRange > 200 ) sentryRange = 200;
@@ -353,8 +353,8 @@ public class SentryTrait extends Trait {
         key.setDouble( S.HEALRATE, healRate );
         key.setInt( S.ARMOR, armour );
         key.setInt( S.STRENGTH, strength );
-        key.setInt( S.WARNING_RANGE, warningRange );
-        key.setDouble( S.ATTACK_RATE, attackRate );
+        key.setInt( S.WARNING_RANGE, voiceRange );
+        key.setDouble( S.ATTACK_RATE, arrowRate );
         key.setInt( S.NIGHT_VISION, nightVision );
         key.setInt( S.FOLLOW_DISTANCE, followDistance );
 
@@ -543,7 +543,7 @@ public class SentryTrait extends Trait {
     public LivingEntity findTarget( Integer range ) {
 
         LivingEntity myEntity = getMyEntity();
-        range += warningRange;
+        range += voiceRange;
 
         List<Entity> entitiesInRange = myEntity.getNearbyEntities( range, range / 2, range );
         LivingEntity theTarget = null;
@@ -572,9 +572,9 @@ public class SentryTrait extends Trait {
 
                     if ( hasLOS( aTarget ) ) {
 
-                        if (    warningRange > 0 && !warningMsg.isEmpty()
+                        if (    voiceRange > 0 && !warningMsg.isEmpty()
                                 && aTarget instanceof Player
-                                && dist > (range - warningRange) 
+                                && dist > (range - voiceRange) 
                                 && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
                             if (    !warningsGiven.containsKey( aTarget ) 
@@ -597,7 +597,7 @@ public class SentryTrait extends Trait {
                     }
                 }
             }
-            else if ( warningRange > 0 && !greetingMsg.isEmpty()
+            else if ( voiceRange > 0 && !greetingMsg.isEmpty()
                     && aTarget instanceof Player
                     && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
 
@@ -739,12 +739,13 @@ public class SentryTrait extends Trait {
                 break;
             default:
                 // not lightning
-                Projectile projectile = myEntity.getWorld().spawn( myLocation, projectileClazz );
+                Projectile projectile = myEntity.launchProjectile( projectileClazz );
+                //myEntity.getWorld().spawn( myLocation, projectileClazz );
 
                 if (    projectileClazz == ThrownPotion.class 
                         && potionItem != null ) {
                     
-                    projectile = myEntity.getWorld().spawn( myLocation, ThrownPotion.class );
+ //                   projectile = myEntity.getWorld().spawn( myLocation, ThrownPotion.class );
                     ((ThrownPotion) projectile).setItem( potionItem.clone() );
                 }
                 else if (    projectileClazz == Fireball.class
@@ -779,6 +780,7 @@ public class SentryTrait extends Trait {
                     ((Fireball) projectile).setDirection( victor );
                 else
                     projectile.setVelocity( victor );
+                
         }
 
         if ( effect != null )

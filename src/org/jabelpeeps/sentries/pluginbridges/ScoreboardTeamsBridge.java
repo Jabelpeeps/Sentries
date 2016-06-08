@@ -6,24 +6,32 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
+import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
+import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 
 public class ScoreboardTeamsBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<Team>> friends = new HashMap<SentryTrait, Set<Team>>();
-    Map<SentryTrait, Set<Team>> enemies = new HashMap<SentryTrait, Set<Team>>();
+    Map<SentryTrait, Set<Team>> friends = new HashMap<>();
+    Map<SentryTrait, Set<Team>> enemies = new HashMap<>();
     Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+    SentriesCommand command = new ScoreboardTeamsCommand( this );
 
     public ScoreboardTeamsBridge( int flag ) { super( flag ); }
 
     @Override
-    public boolean activate() { return true; }
+    public boolean activate() {
+        CommandHandler.addCommand( "scoreboard", command );
+        return true; 
+    }
 
     @Override
     public String getPrefix() { return "TEAM"; }
@@ -35,19 +43,19 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
 
     @Override
-    public boolean isTarget( Player player, SentryTrait inst ) {
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
 
         if ( !enemies.containsKey( inst ) ) return false;
 
-        return enemies.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
+        return enemies.get( inst ).contains( scoreboard.getEntryTeam( entity.getName() ) );
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryTrait inst ) {
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
 
         if ( !friends.containsKey( inst ) ) return false;
 
-        return friends.get( inst ).contains( scoreboard.getEntryTeam( player.getName() ) );
+        return friends.get( inst ).contains( scoreboard.getEntryTeam( entity.getName() ) );
     }
 
     @Override
@@ -105,7 +113,48 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     @Override
     public boolean isListed( SentryTrait inst, boolean asTarget ) {
 
-        return (asTarget ? enemies.containsKey( inst )
-                         : friends.containsKey( inst ));
+        return ( asTarget ? enemies.containsKey( inst )
+                          : friends.containsKey( inst ) );
+    }
+    
+    public class ScoreboardTeamsCommand implements SentriesComplexCommand {
+        
+        private PluginBridge bridge;
+        private String helpTxt;
+        
+        ScoreboardTeamsCommand( PluginBridge pb ) {
+            bridge = pb;
+        }
+        
+        @Override
+        public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+            // TODO implement parsing of arguments to identify the intention of the sender.
+            // TODO implement calling of methods in parent class to achieve target adding.
+            // TODO don't forget to add TEAM:<TeamName> style tags to inst.validtargets or inst.ignoretargets
+            return false;
+        }
+        
+        @Override
+        public String getShortHelp() {
+            return "manage scoreboard-defined targets";
+        }
+
+        @Override
+        public String getLongHelp() {
+
+            if ( helpTxt == null ) {
+                helpTxt = String.join( "", Col.RED, "Non-functional, for testing only!", Col.RESET,
+                        System.lineSeparator(), "do ", Col.GOLD, "/sentry scoreboard <add|remove> <target|ignore> <TeamName> ",
+                        Col.RESET, "to have a sentry consider MC scoreboard membership when selecting targets.",
+                        System.lineSeparator(), 
+                        Col.GOLD, "  <TeamName> ", Col.RESET, "must be a currently existing scoreboard team." );
+            }
+            return helpTxt;
+        }
+
+        @Override
+        public String getPerm() {
+            return "sentry.scoreboardteams";
+        }
     }
 }

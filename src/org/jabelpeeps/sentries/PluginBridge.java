@@ -2,7 +2,7 @@ package org.jabelpeeps.sentries;
 
 import java.util.StringJoiner;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 
 /**
  * An abstract class to act as a bridge between Sentries and other Server plugins.
@@ -64,7 +64,7 @@ public abstract class PluginBridge {
      *            - the SentryTrait that is asking.
      * @return true - if the player is a valid target.
      */
-    public abstract boolean isTarget( Player player, SentryTrait inst );
+    public abstract boolean isTarget( LivingEntity entity, SentryTrait inst );
 
     /**
      * Determines whether the supplied Player should be ignored as a possible
@@ -79,7 +79,7 @@ public abstract class PluginBridge {
      *            - the SentryTrait that is asking.
      * @return true - if the player should be ignored.
      */
-    public abstract boolean isIgnoring( Player player, SentryTrait inst );
+    public abstract boolean isIgnoring( LivingEntity entity, SentryTrait inst );
 
     /**
      * Adds an entity - identified by the supplied string - as either a target

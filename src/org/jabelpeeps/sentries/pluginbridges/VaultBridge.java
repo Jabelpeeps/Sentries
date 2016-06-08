@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jabelpeeps.sentries.CommandHandler;
@@ -17,8 +18,8 @@ import net.milkbowl.vault.permission.Permission;
 
 public class VaultBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<String>> friends = new HashMap<SentryTrait, Set<String>>();
-    Map<SentryTrait, Set<String>> enemies = new HashMap<SentryTrait, Set<String>>();
+    Map<SentryTrait, Set<String>> friends = new HashMap<>();
+    Map<SentryTrait, Set<String>> enemies = new HashMap<>();
 
     private String activationMsg = "";
     static Permission perms = null;
@@ -66,19 +67,19 @@ public class VaultBridge extends PluginBridge {
     public String getActivationMessage() { return activationMsg; }
 
     @Override
-    public boolean isTarget( Player player, SentryTrait inst ) {
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
 
         if ( !enemies.containsKey( inst ) ) return false;
 
-        return checkGroups( enemies.get( inst ), player );
+        return checkGroups( enemies.get( inst ), (Player) entity );
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryTrait inst ) {
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
 
         if ( !friends.containsKey( inst ) ) return false;
 
-        return checkGroups( friends.get( inst ), player );
+        return checkGroups( friends.get( inst ), (Player) entity );
     }
 
     private boolean checkGroups( Set<String> set, Player player ) {

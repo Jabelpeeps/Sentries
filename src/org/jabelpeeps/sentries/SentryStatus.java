@@ -322,7 +322,7 @@ public enum SentryStatus {
 
                     if ( System.currentTimeMillis() > inst.oktoFire ) {
 
-                        inst.oktoFire = (long) (System.currentTimeMillis() + inst.attackRate * 1000.0);
+                        inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
                         inst.fire( inst.attackTarget );
                     }
 

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
@@ -17,8 +17,8 @@ import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 
 public class SimpleClansBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<Clan>> allies = new HashMap<SentryTrait, Set<Clan>>();
-    Map<SentryTrait, Set<Clan>> rivals = new HashMap<SentryTrait, Set<Clan>>();
+    Map<SentryTrait, Set<Clan>> allies = new HashMap<>();
+    Map<SentryTrait, Set<Clan>> rivals = new HashMap<>();
     ClanManager clanManager = SimpleClans.getInstance().getClanManager();
 
     public SimpleClansBridge( int flag ) { super( flag ); }
@@ -36,19 +36,19 @@ public class SimpleClansBridge extends PluginBridge {
     public String getPrefix() { return "CLAN"; }
 
     @Override
-    public boolean isTarget( Player player, SentryTrait inst ) {
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
 
         if ( !rivals.containsKey( inst ) ) return false;
 
-        return rivals.get( inst ).contains( clanManager.getClanByPlayerName( player.getName() ) );
+        return rivals.get( inst ).contains( clanManager.getClanByPlayerName( entity.getName() ) );
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryTrait inst ) {
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
 
         if ( !allies.containsKey( inst ) ) return false;
 
-        return allies.get( inst ).contains( clanManager.getClanByPlayerName( player.getName() ) );
+        return allies.get( inst ).contains( clanManager.getClanByPlayerName( entity.getName() ) );
     }
 
     @Override

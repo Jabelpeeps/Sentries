@@ -26,10 +26,10 @@ public class InfoCommand implements SentriesComplexCommand {
                 S.Col.RED, " [Strength]:", S.Col.WHITE, String.valueOf( inst.getStrength() ),
                 S.Col.RED, " [Speed]:", S.Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
                 S.Col.RED, " [Range]:", S.Col.WHITE, String.valueOf( inst.sentryRange ),
-                S.Col.RED, " [AttackRate]:", S.Col.WHITE, String.valueOf( inst.attackRate ),
+                S.Col.RED, " [ArrowRate]:", S.Col.WHITE, String.valueOf( inst.arrowRate ),
                 S.Col.RED, " [NightVision]:", S.Col.WHITE, String.valueOf( inst.nightVision ),
                 S.Col.RED, " [HealRate]:", S.Col.WHITE, String.valueOf( inst.healRate ),
-                S.Col.RED, " [WarningRange]:", S.Col.WHITE, String.valueOf( inst.warningRange ),
+                S.Col.RED, " [VoiceRange]:", S.Col.WHITE, String.valueOf( inst.voiceRange ),
                 S.Col.RED, " [FollowDistance]:", S.Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
         joiner.add( String.join( "", S.Col.GREEN, "Invincible: ", String.valueOf( inst.invincible ), 

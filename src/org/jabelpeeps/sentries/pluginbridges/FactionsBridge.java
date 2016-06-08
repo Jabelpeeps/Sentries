@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
@@ -19,9 +19,9 @@ import com.massivecraft.factions.entity.MPlayer;
 
 public class FactionsBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<Faction>> friendlyFactions = new HashMap<SentryTrait, Set<Faction>>();
-    Map<SentryTrait, Set<Faction>> rivalFactions = new HashMap<SentryTrait, Set<Faction>>();
-    Map<SentryTrait, Faction> myFaction = new HashMap<SentryTrait, Faction>();
+    Map<SentryTrait, Set<Faction>> friendlyFactions = new HashMap<>();
+    Map<SentryTrait, Set<Faction>> rivalFactions = new HashMap<>();
+    Map<SentryTrait, Faction> myFaction = new HashMap<>();
     String commandHelp;
 
     public FactionsBridge( int flag ) {
@@ -59,9 +59,9 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isTarget( Player player, SentryTrait inst ) {
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
 
-        Faction target = MPlayer.get( player ).getFaction();
+        Faction target = MPlayer.get( entity ).getFaction();
 
         if ( myFaction.containsKey( inst )
                 && myFaction.get( inst ).getRelationTo( target ) == Rel.ENEMY )
@@ -75,9 +75,9 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryTrait inst ) {
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
 
-        Faction ignore = MPlayer.get( player ).getFaction();
+        Faction ignore = MPlayer.get( entity ).getFaction();
 
         if ( myFaction.containsKey( inst )
                 && myFaction.get( inst ).getRelationTo( ignore ) == Rel.ALLY )

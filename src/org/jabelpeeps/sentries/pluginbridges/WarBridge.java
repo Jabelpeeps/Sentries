@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
@@ -18,8 +18,8 @@ import com.tommytony.war.Warzone;
 
 public class WarBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<Team>> friends = new HashMap<SentryTrait, Set<Team>>();
-    Map<SentryTrait, Set<Team>> enemies = new HashMap<SentryTrait, Set<Team>>();
+    Map<SentryTrait, Set<Team>> friends = new HashMap<>();
+    Map<SentryTrait, Set<Team>> enemies = new HashMap<>();
 
     public WarBridge( int flag ) { super( flag ); }
 
@@ -36,21 +36,21 @@ public class WarBridge extends PluginBridge {
     public String getCommandHelp() { return "War:<TeamName> for a War Team."; }
 
     @Override
-    public boolean isTarget( Player player, SentryTrait inst ) {
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
 
         if ( !enemies.containsKey( inst ) )
             return false;
 
-        return enemies.get( inst ).contains( Team.getTeamByPlayerName( player.getName() ) );
+        return enemies.get( inst ).contains( Team.getTeamByPlayerName( entity.getName() ) );
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryTrait inst ) {
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
 
         if ( !friends.containsKey( inst ) )
             return false;
 
-        return friends.get( inst ).contains( Team.getTeamByPlayerName( player.getName() ) );
+        return friends.get( inst ).contains( Team.getTeamByPlayerName( entity.getName() ) );
     }
 
     @Override

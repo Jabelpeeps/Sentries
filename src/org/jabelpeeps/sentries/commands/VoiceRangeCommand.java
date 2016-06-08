@@ -15,7 +15,7 @@ public class VoiceRangeCommand implements SentriesNumberCommand {
     public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s voice range is:- " + inst.warningRange ) );
+            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s voice range is:- " + inst.voiceRange ) );
         }
         else {
             int range = Util.string2Int( number );
@@ -25,7 +25,7 @@ public class VoiceRangeCommand implements SentriesNumberCommand {
             }
             if ( range > 50 ) range = 50;
             
-            inst.warningRange = range;
+            inst.voiceRange = range;
             sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s voice range set to:- ", String.valueOf( range ) ) );
         }
         return true;

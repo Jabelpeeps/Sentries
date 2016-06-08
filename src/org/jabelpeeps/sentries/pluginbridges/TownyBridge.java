@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.PluginBridge;
-import org.jabelpeeps.sentries.S;
+import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
@@ -26,7 +26,7 @@ public class TownyBridge extends PluginBridge {
      * (taken from http://towny.palmergames.com/towny/757-2/#How_Towny_Controls_PVP_Combat )
      */
 
-    Map<SentryTrait, Town> myTown = new HashMap<SentryTrait, Town>();
+    Map<SentryTrait, Town> myTown = new HashMap<>();
     String commandHelp;
 
     public TownyBridge( int flag ) { super( flag ); }
@@ -55,13 +55,13 @@ public class TownyBridge extends PluginBridge {
     }
 
     @Override
-    public boolean isTarget( Player player, SentryTrait inst ) {
-        return !CombatUtil.preventDamageCall( inst.getMyEntity(), player );
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
+        return !CombatUtil.preventDamageCall( inst.getMyEntity(), entity );
     }
 
     @Override
-    public boolean isIgnoring( Player player, SentryTrait inst ) {
-        return CombatUtil.preventDamageCall( inst.getMyEntity(), player );
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
+        return CombatUtil.preventDamageCall( inst.getMyEntity(), entity );
     }
 
     @Override
@@ -74,15 +74,15 @@ public class TownyBridge extends PluginBridge {
         } catch ( NotRegisteredException e ) {}
         
         if ( town == null  ) {
-            outstring = S.Col.RED.concat( "Town not found." );
+            outstring = Col.RED.concat( "Town not found." );
         }
         else if ( isListed( inst, false ) ) {
-            outstring = String.join( "", S.Col.GREEN, "The Sentries has left ", 
+            outstring = String.join( "", Col.GREEN, "The Sentries has left ", 
                     myTown.replace( inst, town ).getName(), " and joined ", target );
         }
         else {
             myTown.put( inst, town );
-            outstring = String.join( "", S.Col.GREEN, "The Sentries has joined ", target ); 
+            outstring = String.join( "", Col.GREEN, "The Sentries has joined ", target ); 
         }
         return outstring;
     }
@@ -93,11 +93,11 @@ public class TownyBridge extends PluginBridge {
         
         if (    !isListed( inst, false ) 
                 || !myTown.get( inst ).getName().equalsIgnoreCase( entity ) ) {;
-            outstring = String.join( "", S.Col.RED, inst.getNPC().getName(), " is not a member of ", entity );
+            outstring = String.join( "", Col.RED, inst.getNPC().getName(), " is not a member of ", entity );
         }
         else {
             myTown.remove( inst );
-            outstring = String.join( "", S.Col.GREEN, inst.getNPC().getName(), " has left ", entity );
+            outstring = String.join( "", Col.GREEN, inst.getNPC().getName(), " has left ", entity );
         }
         return outstring;
     }

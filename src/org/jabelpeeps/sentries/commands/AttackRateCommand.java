@@ -15,7 +15,7 @@ public class AttackRateCommand implements SentriesNumberCommand {
     public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
             sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s ranged attack rate is:- ", 
-                                String.valueOf( inst.attackRate), " seconds between shots." ) );
+                                String.valueOf( inst.arrowRate), " seconds between shots." ) );
         }
         else {
             double attackrate = Util.string2Double( number );
@@ -25,7 +25,7 @@ public class AttackRateCommand implements SentriesNumberCommand {
             }
             if ( attackrate > 30.0 ) attackrate = 30.0;
             
-            inst.attackRate = attackrate;
+            inst.arrowRate = attackrate;
             sender.sendMessage( String.join( "", S.Col.GREEN, npcName, "'s ranged attack rate set to:- ", String.valueOf( attackrate ) ) );
         }
         return true;
@@ -40,8 +40,8 @@ public class AttackRateCommand implements SentriesNumberCommand {
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARROW_RATE, " (#)", Col.RESET, System.lineSeparator(),
-            "  where # is the number of seconds (0-30) to wait between ranged (projectile) attacks.",
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARROW_RATE, " #", Col.RESET, System.lineSeparator(),
+            "  where # is the number of seconds (0-30) to wait between ranged (all projectiles) attacks.",
             System.lineSeparator(), "  If no number is given the current value is shown.");
         }
         return helpTxt;
