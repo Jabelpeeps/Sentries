@@ -50,7 +50,6 @@ import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.SpiderAttackStrategy;
 
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
-import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
@@ -555,12 +554,12 @@ public class SentryTrait extends Trait {
         NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
     }
 
-    public LivingEntity findTarget( Integer range ) {
+    public LivingEntity findTarget() {
 
         LivingEntity myEntity = getMyEntity();
-        range += voiceRange;
+        int combinedRange = range + voiceRange;
 
-        List<Entity> entitiesInRange = myEntity.getNearbyEntities( range, range / 2, range );
+        List<Entity> entitiesInRange = myEntity.getNearbyEntities( combinedRange, combinedRange / 2, combinedRange );
         LivingEntity theTarget = null;
         Double distanceToBeat = 99999.0;
 
@@ -587,10 +586,11 @@ public class SentryTrait extends Trait {
 
                     if ( hasLOS( aTarget ) ) {
 
-                        if (    voiceRange > 0 && !warningMsg.isEmpty()
+                        if (    voiceRange > 0 
+                                && !warningMsg.isEmpty()
+                                && dist > range 
                                 && aTarget instanceof Player
-                                && dist > (range - voiceRange) 
-                                && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
+                                && !aTarget.hasMetadata( "NPC" ) ) {
 
                             if (    !warningsGiven.containsKey( aTarget ) 
                                     || System.currentTimeMillis() > warningsGiven.get( aTarget ) + 60000 ) {
@@ -612,13 +612,14 @@ public class SentryTrait extends Trait {
                     }
                 }
             }
-            else if ( voiceRange > 0 && !greetingMsg.isEmpty()
+            else if ( voiceRange > 0 
+                    && !greetingMsg.isEmpty()
                     && aTarget instanceof Player
-                    && !CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
+                    && !aTarget.hasMetadata( "NPC" ) ) {
 
-                if (    myEntity.hasLineOfSight( aTarget )
+                if (    hasLOS( aTarget )
                         && (    !warningsGiven.containsKey( aTarget )
-                                || System.currentTimeMillis() > warningsGiven .get( aTarget ) + 60000) ) {
+                                || System.currentTimeMillis() > warningsGiven.get( aTarget ) + 60000) ) {
 
                     Player player = (Player) aTarget;
 
@@ -795,8 +796,7 @@ public class SentryTrait extends Trait {
                 if ( projectile instanceof Fireball ) 
                     ((Fireball) projectile).setDirection( victor );
                 else
-                    projectile.setVelocity( victor );
-                
+                    projectile.setVelocity( victor ); 
         }
 
         if ( effect != null )

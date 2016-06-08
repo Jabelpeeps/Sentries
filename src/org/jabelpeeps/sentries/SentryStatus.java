@@ -271,7 +271,7 @@ public enum SentryStatus {
                     && inst.attackTarget == null
                     && System.currentTimeMillis() > inst.reassesTime ) {
 
-                target = inst.findTarget( inst.range );
+                target = inst.findTarget();
                 
                 if ( target != null ) {
                     inst.reassesTime = System.currentTimeMillis() + 3000;
