@@ -100,8 +100,8 @@ public class SentryTrait extends Trait {
     public String guardeeName;
     DamageCause causeOfDeath;
 
-    Set<TargetType> targets = new HashSet<>();
-    Set<TargetType> ignores = new HashSet<>();
+    public Set<TargetType> targets = new HashSet<>();
+    public Set<TargetType> ignores = new HashSet<>();
     
     public Set<String> ignoreTargets = new HashSet<>();
     public Set<String> validTargets = new HashSet<>();
@@ -205,7 +205,7 @@ public class SentryTrait extends Trait {
             ignoreTargets.addAll( sentry.defaultIgnores );
 
         loaded = true;
-        processTargetStrings();
+        processTargetStrings( true );
 
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
@@ -292,6 +292,9 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug )
             Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
 
+        if ( hasMount() )
+            Util.removeMount( mountID );
+        
         cancelRunnable();
     }
     
@@ -394,6 +397,13 @@ public class SentryTrait extends Trait {
 
     public boolean isIgnoring( LivingEntity aTarget ) {
 
+        // block for new Target handling
+        for ( TargetType each : ignores ) {
+            if ( each.includes( aTarget ) )
+                return true;
+        }
+        
+        // old method follows
         if ( aTarget == guardeeEntity ) return true;
         if ( ignoreFlags == none ) return false;
         if ( hasIgnoreType( all ) ) return true;
@@ -451,8 +461,14 @@ public class SentryTrait extends Trait {
 
     public boolean isTarget( LivingEntity aTarget ) {
 
+        // block for new target handling
+        for ( TargetType each : targets ) {
+            if ( each.includes( aTarget ) )
+                return true;
+        }
+        
+        // old method follows
         if ( targetFlags == none || targetFlags == events ) return false;
-
         if ( hasTargetType( all ) ) return true;
 
         if ( aTarget.hasMetadata("NPC") ) {
@@ -930,12 +946,6 @@ public class SentryTrait extends Trait {
     public int ignoreFlags = none;
 
 
-    /**
-     * Convenience method that calls {@link#processTargetStrings( boolean )} with the arg 'true';
-     */
-    void processTargetStrings() {
-        processTargetStrings( true );
-    }
     /**
      * Scans the strings lists "validTargets" & "ignoreTargets", and sets the
      * "targets" and "ignores" bit-filter int's accordingly.

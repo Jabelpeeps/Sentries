@@ -8,6 +8,7 @@ import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.TargetType;
 
 
 public class TargetComand implements SentriesComplexCommand {
@@ -22,13 +23,22 @@ public class TargetComand implements SentriesComplexCommand {
             return true;
         }
         if ( S.LIST.equals( args[nextArg + 1] ) ) {
-            sender.sendMessage( String.join( "", S.Col.GREEN, "Targets: ", inst.validTargets.toString() ) );
+            StringJoiner joiner = new StringJoiner( ", " );
+            
+            for ( TargetType each : inst.targets ) {
+                joiner.add( each.getTargetString() );
+            }
+            joiner.add( inst.validTargets.toString() );
+            
+            sender.sendMessage( String.join( "", Col.GREEN, "Targets: ", joiner.toString() ) );
             return true;
         }
-        if ( S.CLEAR.equals( args[nextArg + 1] ) ) {
+        if ( S.CLEARALL.equals( args[nextArg + 1] ) ) {
+            inst.targets.clear();
             inst.validTargets.clear();
             inst.targetFlags = 0;
-            sender.sendMessage( String.join( "", S.Col.GREEN, npcName, ": ALL Targets cleared" ) );
+            inst.clearTarget();
+            sender.sendMessage( String.join( "", Col.GREEN, npcName, ": ALL Targets cleared" ) );
             return true;
         }
         if ( args.length > 2 + nextArg ) {
@@ -52,7 +62,7 @@ public class TargetComand implements SentriesComplexCommand {
 
             joiner.add( String.join( "", Col.GOLD, "do '/sentry target <option>' where <option> is:-", Col.RESET ) );
             joiner.add( String.join( " ", Col.GOLD, "", S.LIST, Col.RESET, S.HELP_LIST, S.TARGETS ) );
-            joiner.add( String.join( " ", Col.GOLD, "", S.CLEAR, Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
+            joiner.add( String.join( " ", Col.GOLD, "", S.CLEARALL, Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
             joiner.add( String.join( " ", Col.GOLD, S.HELP_ADD_TYPE, Col.RESET, S.HELP_ADD ) );
             joiner.add( String.join( " ", Col.GOLD, S.HELP_REMOVE_TYPE, Col.RESET, S.HELP_REMOVE ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );

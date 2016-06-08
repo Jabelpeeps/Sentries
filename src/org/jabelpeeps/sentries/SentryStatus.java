@@ -130,7 +130,7 @@ public enum SentryStatus {
             if ( inst.respawnDelay == -1 ) {
 
                 if ( inst.hasMount() )
-                    Util.removeMount( inst.mountID );
+                    inst.dismount();
 
                 inst.cancelRunnable();
                 inst.getNPC().destroy();

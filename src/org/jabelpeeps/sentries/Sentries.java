@@ -136,13 +136,10 @@ public class Sentries extends JavaPlugin {
 
                 bridge = constructor.newInstance( targetBitFlag );
                 
-            } catch ( ClassNotFoundException e ) { helpfulReflectionError( each ); e.printStackTrace();
-            } catch ( InstantiationException e ) { helpfulReflectionError( each ); e.printStackTrace();
-            } catch ( IllegalAccessException e ) { helpfulReflectionError( each ); e.printStackTrace();
-            } catch ( IllegalArgumentException e ) { helpfulReflectionError( each ); e.printStackTrace();
-            } catch ( InvocationTargetException e ) { helpfulReflectionError( each ); e.printStackTrace();
-            } catch ( NoSuchMethodException e ) { helpfulReflectionError( each ); e.printStackTrace();
-            } catch ( SecurityException e ) { helpfulReflectionError( each ); e.printStackTrace();
+            } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException |
+                    IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e ) {
+                logger.log( Level.WARNING, "Error loading PluginBridge for the plugin: '" + each + "' from config.yml. " );
+                e.printStackTrace();
             }
 
             if ( bridge == null ) continue;
@@ -156,9 +153,7 @@ public class Sentries extends JavaPlugin {
                 debugLog( each + " activated with bitFlag value of " + bridge.getBitFlag() );
             
             logger.log( Level.INFO, bridge.getActivationMessage() );
-
             targetBitFlag *= 2;
-
             activePlugins.put( each, bridge );
         }
         CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
@@ -178,11 +173,7 @@ public class Sentries extends JavaPlugin {
             }
         }
     };
-    
-    private void helpfulReflectionError( String name ) {
-        logger.log( Level.WARNING, "Error loading PluginBridge for the plugin: '" + name + "' from config.yml. " );
-    }
-
+ 
     void reloadMyConfig() {
 
         saveDefaultConfig();

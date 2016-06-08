@@ -17,14 +17,15 @@ public class MountCommand implements SentriesToggleCommand {
 
         if ( set ) {
             inst.mount();
-            sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now Mounted" ) );
+            sender.sendMessage( String.join( "", Col.GREEN, npcName, " is now mounted" ) );
         }
         else {
-            if ( inst.hasMount() )
+            if ( inst.hasMount() ) {
                 Util.removeMount( inst.mountID );
-
-            inst.mountID = -1;
-            sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is no longer Mounted" ) );
+                inst.mountID = -1;
+                sender.sendMessage( String.join( "", Col.GREEN, npcName, " is no longer mounted" ) );
+            }
+            else sender.sendMessage( String.join( "", Col.YELLOW, npcName, " is not mounted" ) );
         }
         return true;
     }
@@ -38,8 +39,8 @@ public class MountCommand implements SentriesToggleCommand {
     public String getLongHelp() {
         
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.MOUNT, " (on|off| ) ", Col.RESET,
-                    "to control whether the Sentry rides a mount (currently only horses)",
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.MOUNT, " (on|off)", Col.RESET,
+                    ", to control whether the Sentry rides a mount (currently only horses).",
                     " (Specify 'on' or 'off', or leave blank to toggle state.)" );
         }      
         return helpTxt;

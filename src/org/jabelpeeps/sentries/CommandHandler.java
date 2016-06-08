@@ -185,7 +185,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage( String.join( "", Col.GOLD, "/sentry ", each.getKey(), " ... ", Col.RESET, command.getShortHelp() ) );
                 }
             }
-
             // two special commands to add to the list...
             if ( checkCommandPerm( S.PERM_RELOAD, sender ) )
                 sender.sendMessage( String.join( "", Col.GOLD, "/sentry reload", Col.RESET, " - Reloads the config file" ) );
@@ -193,7 +192,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if ( sender instanceof ConsoleCommandSender )
                 sender.sendMessage( String.join( "", Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!", System.lineSeparator(),
                                             Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console" ) );
-
             // lazy initialiser
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
@@ -206,8 +204,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
         
                 mainHelpOutro = joiner.toString();
-            }
-            
+            }           
             sender.sendMessage( mainHelpOutro );
             return true;
         }
@@ -229,8 +226,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
             return true;
         }
-
-        // the remaining commands all deal with npc's
         // -------------------------------------------------------------------------------------
         
         // did player specify an integer as the first argument?
@@ -242,7 +237,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( !enoughArgs( 1 + nextArg, inargs, sender ) ) return true;
 
         NPC thisNPC;
-        // check to see whether the value saved is an npc ID, and save a reference if so.
+
         if ( npcid == -1 ) {
 
             thisNPC = CitizensAPI.getDefaultNPCSelector().getSelected( sender );
@@ -266,33 +261,23 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage( S.ERROR.concat( S.ERROR_NOT_SENTRY ) );
             return true;
         }
-        // OK, we have a sentry to modify.
-
-        // We need to check that the player sending the command has the authority to use it.
+        
         if (    sender instanceof Player
                 && !sender.isOp()
                 && !((Entity) sender).hasMetadata( "NPC" ) ) {
-
             // TODO consider changing this section to allow admins to modify other players' npcs.
 
             if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( sender.getName() ) ) {
-                // player is not owner of the npc
-
                 if ( !((Player) sender).hasPermission( S.PERM_CITS_ADMIN ) ) {
-                    // player is not an admin either.
-
                     sender.sendMessage( Col.RED.concat( "You must be the owner of the sentry to use commands on it." ) );
                     return true;
                 }
                 if ( !thisNPC.getTrait( Owner.class ).getOwner().equalsIgnoreCase( "server" ) ) {
-                    // not server-owned NPC
-
                     sender.sendMessage( Col.RED.concat( "You, or the server, must be the owner of the sentry to use commands on it." ) );
                     return true;
                 }
             }
         }
-
         // We now know that player is either the owner, op'ed, or an admin with a server-owned npc. 
         SentryTrait inst = thisNPC.getTrait( SentryTrait.class );
         String npcName = thisNPC.getName();
@@ -312,7 +297,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     Boolean set = null;
                     
                     if ( inargs.length > nextArg + 2 ) {
-                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, "This command accepts 1 argument (at most)." ) );
+                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, " This command accepts 1 argument (at most)." ) );
                         return true;
                     }
                     else if ( inargs.length == 2 + nextArg ) {
@@ -330,7 +315,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 else if ( command instanceof SentriesNumberCommand ) {
                     
                     if ( inargs.length > nextArg + 2 )
-                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, "Only one number value can be processesd." ) );
+                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, " Only one number value can be processesd." ) );
                     else {
                         String number = null;
                         if ( inargs.length == nextArg + 2 ) number = inargs[nextArg + 1];
@@ -378,8 +363,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if ( !messageSent ) {
                         if ( opSucceeded )
                             joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target added. Now targeting:-"
-                                                                                           : "Ignore added. Now ignoring:-",
-                                                                                           setOfTargets.toString() ) );
+                                                                                         : "Ignore added. Now ignoring:-",
+                                                                              setOfTargets.toString() ) );
                         else
                             joiner.add( String.join( " ", Col.GREEN, arg, S.ALLREADY_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
                     }
@@ -409,8 +394,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if ( !messageSent ) {
                         if ( opSucceeded )
                             joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target removed. Now targeting:-"
-                                                                                           : "Ignore removed. Now ignoring:-",
-                                                                                setOfTargets.toString() ) );
+                                                                                         : "Ignore removed. Now ignoring:-",
+                                                                              setOfTargets.toString() ) );
                         else
                             joiner.add( String.join( " ", Col.GREEN, arg, S.NOT_FOUND_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
                     }
