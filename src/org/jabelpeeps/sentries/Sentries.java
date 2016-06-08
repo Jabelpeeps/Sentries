@@ -26,6 +26,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import net.aufdemrand.denizen.Denizen;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.api.trait.TraitInfo;
 
 public class Sentries extends JavaPlugin {
@@ -82,6 +83,7 @@ public class Sentries extends JavaPlugin {
     static Logger logger;
     static Plugin plugin;
     static DenizenHook denizenHook;
+    public static NPCRegistry registry;
 
     @Override
     public void onEnable() {
@@ -101,7 +103,8 @@ public class Sentries extends JavaPlugin {
             pluginManager.disablePlugin( this );
             return;
         }
-
+        registry = CitizensAPI.getNPCRegistry();
+        
         if ( checkPlugin( S.DENIZEN ) ) {
 
             String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription().getVersion();

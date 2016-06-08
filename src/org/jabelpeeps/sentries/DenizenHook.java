@@ -111,15 +111,15 @@ public class DenizenHook {
         @Override
         public void execute( ScriptEntry theEntry ) throws CommandExecutionException {
 
-            dNPC npc = ((BukkitScriptEntryData) theEntry.entryData).getNPC();
+            dNPC dnpc = ((BukkitScriptEntryData) theEntry.entryData).getNPC();
 
-            LivingEntity ent = (LivingEntity) npc.getEntity();
+            LivingEntity ent = (LivingEntity) dnpc.getEntity();
 
             if ( ent != null ) {
 
-                if ( npc.getCitizen().hasTrait( SentryTrait.class ) ) {
+                if ( dnpc.getCitizen().hasTrait( SentryTrait.class ) ) {
 
-                    SentryTrait inst = npc.getCitizen() .getTrait( SentryTrait.class );
+                    SentryTrait inst = dnpc.getCitizen().getTrait( SentryTrait.class );
 
                     boolean deaggro = false;
 
@@ -127,7 +127,7 @@ public class DenizenHook {
                         if ( arg.equalsIgnoreCase( "peace" ) )
                             deaggro = true;
                     }
-                    String db = "RISE! " + npc.getName() + "!";
+                    String db = "RISE! " + dnpc.getName() + "!";
 
                     if ( deaggro )
                         db += " ..And fight no more!";
@@ -158,11 +158,11 @@ public class DenizenHook {
         @Override
         public void execute( ScriptEntry theEntry ) throws CommandExecutionException {
 
-            dNPC npc = ((BukkitScriptEntryData) theEntry.entryData).getNPC();
+            dNPC dnpc = ((BukkitScriptEntryData) theEntry.entryData).getNPC();
 
-            LivingEntity ent = (LivingEntity) npc.getEntity();
+            LivingEntity ent = (LivingEntity) dnpc.getEntity();
 
-            SentryTrait inst = npc.getCitizen().getTrait( SentryTrait.class );
+            SentryTrait inst = dnpc.getCitizen().getTrait( SentryTrait.class );
 
             if ( inst != null ) {
                 dB.log( "Goodbye, cruel world... " );

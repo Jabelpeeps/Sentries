@@ -29,8 +29,8 @@ public class DropsCommand implements SentriesToggleCommand {
     public String getLongHelp() {
         
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.DROPS, " (on|off| )", Col.RESET,
-                            " to set whether the Sentry should drop their equiped items when they die.",
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.DROPS, " (on|off)", Col.RESET,
+                            ", to set whether a sentry should drop equiped items when they die.",
                             " (Specify 'on' or 'off', or leave blank to toggle state.)" );
         }      
         return helpTxt;

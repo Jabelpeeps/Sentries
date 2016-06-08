@@ -131,6 +131,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
             // TODO implement parsing of arguments to identify the intention of the sender.
             // TODO implement calling of methods in parent class to achieve target adding.
             // TODO don't forget to add TEAM:<TeamName> style tags to inst.validtargets or inst.ignoretargets
+            // TODO remove "Non-Functional" message from getLongHelp()
             return false;
         }
         

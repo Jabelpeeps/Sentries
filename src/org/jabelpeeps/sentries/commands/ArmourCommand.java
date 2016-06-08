@@ -40,10 +40,10 @@ public class ArmourCommand implements SentriesNumberCommand {
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARMOUR, " (#)", Col.RESET, System.lineSeparator(),
-            "  where # is the number (0-2000000) of armour points you want the sentry to have. ", System.lineSeparator(),
-            Col.RED, "NOTE: ", Col.RESET, "Attacks dealing an ammount of damage less than the armour value will be cancelled. ",
-            System.lineSeparator(), "If no number is given the current value is shown. (Default = 0)");
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARMOUR, " (#)", Col.RESET, 
+            ", where # is the number (0-2000000) of armour points you want the sentry to have. ", System.lineSeparator(),
+            Col.RED, Col.BOLD, "  NOTE: ", Col.RESET, "Attacks dealing an ammount of damage less than the armour value will be cancelled. ",
+            System.lineSeparator(), "  If no number is given the current value is shown. (Default = 0)");
         }
         S.Col.GOLD.concat( "Usage: /sentry armour [#] " );
         return helpTxt;

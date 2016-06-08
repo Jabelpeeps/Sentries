@@ -19,7 +19,8 @@ import net.citizensnpcs.api.trait.trait.Equipment;
 
 public class EquipCommand implements SentriesComplexCommand {
 
-    private String equipCommandHelp;  
+    private String equipCommandHelp; 
+    private String materialList;
     
     @Override
     public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -38,35 +39,54 @@ public class EquipCommand implements SentriesComplexCommand {
             if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] ) ) {
 
                 inst.equip( null );
-                sender.sendMessage( String.join( "", S.Col.YELLOW, npcName, "'s equipment cleared" ) );
+                sender.sendMessage( String.join( "", Col.YELLOW, npcName, "'s equipment cleared" ) );
             }
             else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
 
-                for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() )
+                for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() ) {
 
-                    if ( each.getKey().equalsIgnoreCase( args[nextArg + 2] ) ) {
+                    String slotName = args[nextArg + 2];
+                
+                    if ( each.getKey().equalsIgnoreCase( slotName ) ) {
                         
-                        npc.getTrait( Equipment.class ).set( each.getValue(), null );                                
-                        sender.sendMessage( String.join( "", S.Col.GREEN, "removed ", npcName, "'s ", args[nextArg +2] ) );
+                        npc.getTrait( Equipment.class ).set( each.getValue(), null ); 
+                        
+                        if ( "hand".equalsIgnoreCase( slotName ) ) slotName = "held item";
+                        
+                        sender.sendMessage( String.join( "", Col.GREEN, "removed ", npcName, "'s ", slotName ) );
                     }
+                    else sender.sendMessage( String.join( "", Col.RED, slotName, " was not recognised." ) );
+                }
+            }
+            else if ( S.LIST.equalsIgnoreCase( args[nextArg + 1] ) ) {
+                
+                if ( materialList == null ) {
+                    StringJoiner joiner = new StringJoiner( ", " );
+                    
+                    for ( Material each : Material.values() ) 
+                        joiner.add( each.name() );
+                   
+                    materialList = String.join( "", Col.GOLD, "Valid Item Names:- ", Col.RESET, joiner.toString() );
+                }
+                sender.sendMessage( materialList );
             }
             else {
                 Material mat = Material.matchMaterial( Util.joinArgs( nextArg + 1, args ) );
 
                 if ( mat == null ) {
-                    sender.sendMessage( S.Col.RED.concat( "Could not equip: item name not recognised" ) );
+                    sender.sendMessage( Col.RED.concat( "Could not equip: item name not recognised" ) );
                     return true;
                 }
 
                 ItemStack item = new ItemStack( mat );
 
                 if ( inst.equip( item ) )
-                    sender.sendMessage( String.join( " ", S.Col.GREEN, "equipped", mat.toString(), "on", npcName ) );
+                    sender.sendMessage( String.join( " ", Col.GREEN, "equipped", mat.toString(), "on", npcName ) );
                 else
-                    sender.sendMessage( S.Col.RED.concat( "Could not equip: invalid mob type?" ) );
+                    sender.sendMessage( Col.RED.concat( "Could not equip: invalid mob type?" ) );
             }
         }
-        else sender.sendMessage( S.Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
+        else sender.sendMessage( Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
         return false;
     }
 
@@ -82,14 +102,15 @@ public class EquipCommand implements SentriesComplexCommand {
 
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry equip <ItemName>'", Col.RESET ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip <ItemName>", Col.RESET ) );
             joiner.add( "  to give the named item to the sentry" );
             joiner.add( "  item names are the offical MC item names" );
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry equip clearall'", Col.RESET ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clearall", Col.RESET ) );
             joiner.add( "  to clear all equipment slots." );
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry equip clear <slot>'", Col.RESET ) );
-            joiner.add( "  to clear the specified slot, where slot can be one of: hand, helmet, chestplate, leggings or boots." );
-            joiner.add( "NOTE: equiped armour is currently only cosmetic. Use '/sentry armour' to add protection from attacks." );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clear <slot>", Col.RESET ) );
+            joiner.add( "  to clear the specified slot, where <slot> can be one of: hand, helmet, chestplate, leggings or boots." );
+            joiner.add( String.join( "", Col.RED, Col.BOLD, "NOTE: ", Col.RESET, "equiped armour is currently only cosmetic. Use ",
+                                                Col.GOLD, "/sentry armour ", Col.RESET, "to add protection from attacks." ) );
 
             equipCommandHelp = joiner.toString();
         }

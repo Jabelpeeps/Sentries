@@ -398,11 +398,11 @@ public class SentryTrait extends Trait {
         if ( ignoreFlags == none ) return false;
         if ( hasIgnoreType( all ) ) return true;
 
-        if ( CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
+        if ( aTarget.hasMetadata("NPC") ) {
 
             if ( hasIgnoreType( allnpcs ) ) return true;
 
-            NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
+            NPC targetNpc = Sentries.registry.getNPC( aTarget );
 
             if ( targetNpc != null ) {
 
@@ -455,11 +455,11 @@ public class SentryTrait extends Trait {
 
         if ( hasTargetType( all ) ) return true;
 
-        if ( CitizensAPI.getNPCRegistry().isNPC( aTarget ) ) {
+        if ( aTarget.hasMetadata("NPC") ) {
 
             if ( hasTargetType( allnpcs ) ) return true;
 
-            NPC targetNpc = CitizensAPI.getNPCRegistry().getNPC( aTarget );
+            NPC targetNpc = Sentries.registry.getNPC( aTarget );
             String targetName = targetNpc.getName();
 
             if (    hasTargetType( namednpcs )
@@ -618,6 +618,7 @@ public class SentryTrait extends Trait {
     }
 
     public void draw( boolean on ) {
+        if ( Sentries.debug ) Sentries.debugLog( "draw() call on " + getMyEntity().getName() + " with value [" + on + "]"  );
         
         NMS.getHandle( getMyEntity() ).b( on );
         // TODO: - IS THIS CORRECT?  What does it do?
@@ -1285,7 +1286,7 @@ public class SentryTrait extends Trait {
     // TODO convert to use uuid's
     NPC getMountNPC() {
         if ( hasMount() ) {
-            return CitizensAPI.getNPCRegistry().getById( mountID );
+            return Sentries.registry.getById( mountID );
         }
         return null;
     }
@@ -1350,7 +1351,7 @@ public class SentryTrait extends Trait {
             NPC mount = null;
 
             if ( hasMount() ) {
-                mount = CitizensAPI.getNPCRegistry().getById( mountID );
+                mount = Sentries.registry.getById( mountID );
 
                 if ( mount != null )
                     mount.despawn();
@@ -1358,7 +1359,7 @@ public class SentryTrait extends Trait {
                     Sentries.logger.info( "Cannot find mount NPC " + mountID );
             }
             else {
-                mount = CitizensAPI.getNPCRegistry().createNPC( EntityType.HORSE, npc.getName() + "_Mount" );
+                mount = Sentries.registry.createNPC( EntityType.HORSE, npc.getName() + "_Mount" );
                 mount.getTrait( MobType.class ).setType( EntityType.HORSE );
             }
 

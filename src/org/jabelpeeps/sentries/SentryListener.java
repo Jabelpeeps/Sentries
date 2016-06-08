@@ -26,7 +26,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 
-import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEvent;
@@ -261,7 +260,7 @@ public class SentryListener implements Listener {
             // cancel if invulnerable, non-sentry npc
             if ( instVictim == null ) {
 
-                NPC npc = CitizensAPI.getNPCRegistry().getNPC( victim );
+                NPC npc = Sentries.registry.getNPC( victim );
 
                 if ( npc != null ) {
                     event.setCancelled( npc.isProtected() );
@@ -373,7 +372,7 @@ public class SentryListener implements Listener {
             }
 
             if (    damager instanceof Player
-                    && !CitizensAPI.getNPCRegistry().isNPC( damager ) ) {
+                    && !damager.hasMetadata("NPC") ) {
 
                 Player player = (Player) damager;
                 instVictim._myDamamgers.add( player );
@@ -422,7 +421,7 @@ public class SentryListener implements Listener {
         if (    damager != victim
                 && event.getDamage() > 0 ) {
 
-            for ( NPC npc : CitizensAPI.getNPCRegistry() ) {
+            for ( NPC npc : Sentries.registry ) {
 
                 SentryTrait inst = Util.getSentryTrait( npc );
 
@@ -451,7 +450,7 @@ public class SentryListener implements Listener {
                 if (    inst.hasTargetType( SentryTrait.events )
                         && inst.myStatus == SentryStatus.LOOKING
                         && damager instanceof Player
-                        && !CitizensAPI.getNPCRegistry().isNPC( damager )
+                        && !damager.hasMetadata( "NPC" )
                         && !inst.isIgnoring( damager ) ) {
 
                     Location npcLoc = npc.getEntity().getLocation();
@@ -472,10 +471,10 @@ public class SentryListener implements Listener {
     
                             || (    inst.targetsContain( "event:pvp" )
                                     && victim instanceof Player
-                                    && !CitizensAPI.getNPCRegistry().isNPC( victim ) )
+                                    && !victim.hasMetadata("NPC") )
     
                             || (    inst.targetsContain( "event:pvnpc" )
-                                    && CitizensAPI.getNPCRegistry().isNPC( victim ) )
+                                    && victim.hasMetadata("NPC") )
     
                             || (    inst.targetsContain( "event:pvsentry" ) 
                                     && Util.getSentryTrait( victim ) != null ) ) 
@@ -499,7 +498,7 @@ public class SentryListener implements Listener {
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + mount.getFullName() );
 
         // if the mount dies carry aggression over.
-        for ( NPC each : CitizensAPI.getNPCRegistry() ) {
+        for ( NPC each : Sentries.registry ) {
 
             final SentryTrait inst = Util.getSentryTrait( each );
             if ( inst == null || !each.isSpawned() || !inst.hasMount() )

@@ -13,7 +13,6 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
-import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
 /**
@@ -60,7 +59,7 @@ public abstract class Util {
 
     public static void removeMount( int npcid ) {
 
-        NPC npc = CitizensAPI.getNPCRegistry().getById( npcid );
+        NPC npc = Sentries.registry.getById( npcid );
 
         if ( npc != null ) {
             if ( npc.getEntity() != null ) {
@@ -254,7 +253,7 @@ public abstract class Util {
     static SentryTrait getSentryTrait( Entity ent ) {
     
         if ( ent != null && ent instanceof LivingEntity ) {
-            return Util.getSentryTrait( CitizensAPI.getNPCRegistry().getNPC( ent ) );
+            return Util.getSentryTrait( Sentries.registry.getNPC( ent ) );
         }
         return null;
     }

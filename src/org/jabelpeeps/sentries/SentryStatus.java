@@ -201,7 +201,6 @@ public enum SentryStatus {
             if (    inst.guardeeEntity instanceof Player
                     && !((Player) inst.guardeeEntity).isOnline() ) {
                 inst.guardeeEntity = null;
-                // TODO With no-one to guard, what should the Sentry do now?
             }
             else if ( inst.guardeeName != null 
                     && inst.guardeeEntity == null

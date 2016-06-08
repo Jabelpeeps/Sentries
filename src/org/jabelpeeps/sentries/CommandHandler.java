@@ -191,8 +191,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage( String.join( "", Col.GOLD, "/sentry reload", Col.RESET, " - Reloads the config file" ) );
             
             if ( sender instanceof ConsoleCommandSender )
-                sender.sendMessage( String.join( "", Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console",
-                        System.lineSeparator(), Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!" ) );
+                sender.sendMessage( String.join( "", Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!", System.lineSeparator(),
+                                            Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console" ) );
 
             // lazy initialiser
             if ( mainHelpOutro == null ) {
@@ -254,7 +254,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             npcid = thisNPC.getId();
         }
         else {
-            thisNPC = CitizensAPI.getNPCRegistry().getById( npcid );
+            thisNPC = Sentries.registry.getById( npcid );
 
             if ( thisNPC == null ) {
                 sender.sendMessage( String.join( "", S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) ) );
@@ -271,7 +271,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         // We need to check that the player sending the command has the authority to use it.
         if (    sender instanceof Player
                 && !sender.isOp()
-                && !CitizensAPI.getNPCRegistry().isNPC( (Entity) sender ) ) {
+                && !((Entity) sender).hasMetadata( "NPC" ) ) {
 
             // TODO consider changing this section to allow admins to modify other players' npcs.
 

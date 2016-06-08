@@ -28,8 +28,8 @@ public class CriticalsCommand implements SentriesToggleCommand {
     public String getLongHelp() {
         
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.CRITICALS, " (on|off| )", Col.RESET,
-                    " to set whether damamge to this Sentry is managed by the plugin's own Critical Hit system, ",
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.CRITICALS, " (on|off)", Col.RESET,
+                    ", to set whether damamge to a sentry is managed by the plugin's own Critical Hit system.",
                     " (Specify 'on' or 'off', or leave blank to toggle state.)" );
         }      
         return helpTxt;

@@ -2,8 +2,8 @@ package org.jabelpeeps.sentries.attackstrategies;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.jabelpeeps.sentries.Sentries;
 
-import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.AttackStrategy;
 
 public class MountAttackStrategy implements AttackStrategy {
@@ -18,12 +18,11 @@ public class MountAttackStrategy implements AttackStrategy {
         Entity passenger = attacker.getPassenger();
 
         if ( passenger != null ) {
-            return CitizensAPI.getNPCRegistry()
-                              .getNPC( passenger )
-                              .getNavigator()
-                              .getLocalParameters()
-                              .attackStrategy()
-                              .handle( (LivingEntity) passenger, bukkitTarget );
+            return Sentries.registry.getNPC( passenger )
+                                    .getNavigator()
+                                    .getLocalParameters()
+                                    .attackStrategy()
+                                    .handle( (LivingEntity) passenger, bukkitTarget );
         }
         // I think this does the default attack.
         return false;

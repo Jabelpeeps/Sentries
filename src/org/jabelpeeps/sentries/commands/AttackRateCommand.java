@@ -40,8 +40,8 @@ public class AttackRateCommand implements SentriesNumberCommand {
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARROW_RATE, " #", Col.RESET, System.lineSeparator(),
-            "  where # is the number of seconds (0-30) to wait between ranged (all projectiles) attacks.",
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARROW_RATE, " (#)", Col.RESET,
+            ", where # is the number of seconds (0-30) to wait between ranged (all projectile) attacks.",
             System.lineSeparator(), "  If no number is given the current value is shown.");
         }
         return helpTxt;
