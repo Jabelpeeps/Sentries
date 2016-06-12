@@ -30,7 +30,50 @@ public class EquipCommand implements SentriesComplexCommand {
             sender.sendMessage( getLongHelp());
             return true;
         }
+        
+        if ( S.LIST.equalsIgnoreCase( args[nextArg + 1] ) ) {
+            
+            if ( materialList == null ) {
+                StringJoiner joiner = new StringJoiner( ", " );
+                
+                for ( Material each : Material.values() ) {
+                    
+                    if ( each.isEdible() || each.isRecord() ) continue;
+                    
+                    switch ( each ) {
+                        case AIR:
+                        case LONG_GRASS:
+                        case REDSTONE_WIRE:
+                        case CROPS:
+                        case SNOW:
+                        case PORTAL:
+                        case PUMPKIN_STEM:
+                        case MELON_STEM:
+                        case ENDER_PORTAL:
+                        case DOUBLE_PLANT:
+                        case END_GATEWAY:
+                        case BARRIER:
+                        case STRUCTURE_BLOCK:
+                        case COMMAND_REPEATING:
+                        case COMMAND_CHAIN:
+                            continue;
+                        default:                   
+                    }                    
+                    joiner.add( each.name() );
+                }
+                materialList = String.join( "", Col.GOLD, "Valid Item Names:- ", Col.RESET, joiner.toString() );
+            }            
+            sender.sendMessage( materialList );
+            return true;
+        }
+        
         NPC npc = inst.getNPC();
+        
+        if ( !npc.isSpawned() ) {
+            sender.sendMessage( String.join( "", Col.RED, "You can only modify equipment when a sentry is spawned." ) );
+            return true;
+        }
+        
         EntityType type = npc.getEntity().getType();
         
         // TODO figure out why zombies and skele's are not included here.
@@ -58,42 +101,6 @@ public class EquipCommand implements SentriesComplexCommand {
                     else sender.sendMessage( String.join( "", Col.RED, slotName, " was not recognised." ) );
                 }
             }
-            else if ( S.LIST.equalsIgnoreCase( args[nextArg + 1] ) ) {
-                
-                if ( materialList == null ) {
-                    StringJoiner joiner = new StringJoiner( ", " );
-                    
-                    for ( Material each : Material.values() ) {
-                        
-                        if ( each.isEdible() || each.isRecord() ) continue;
-                        
-                        switch ( each ) {
-                            case AIR:
-                            case LONG_GRASS:
-                            case REDSTONE_WIRE:
-                            case CROPS:
-                            case SNOW:
-                            case PORTAL:
-                            case PUMPKIN_STEM:
-                            case MELON_STEM:
-                            case ENDER_PORTAL:
-                            case DOUBLE_PLANT:
-                            case END_GATEWAY:
-                            case BARRIER:
-                            case STRUCTURE_BLOCK:
-                            case COMMAND_REPEATING:
-                            case COMMAND_CHAIN:
-                                continue;
-                            default:                   
-                        }
-                        
-                        joiner.add( each.name() );
-                    }
-                    materialList = String.join( "", Col.GOLD, "Valid Item Names:- ", Col.RESET, joiner.toString() );
-                }
-                
-                sender.sendMessage( materialList );
-            }
             else {
                 Material mat = Material.matchMaterial( Util.joinArgs( nextArg + 1, args ) );
 
@@ -111,13 +118,10 @@ public class EquipCommand implements SentriesComplexCommand {
             }
         }
         else sender.sendMessage( Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
-        return false;
+        return true;
     }
-
     @Override
-    public String getShortHelp() {
-        return "adjust the equipment a sentry is using";
-    }
+    public String getShortHelp() { return "adjust the equipment a sentry is using"; }
 
     @Override
     public String getLongHelp() {
@@ -140,10 +144,6 @@ public class EquipCommand implements SentriesComplexCommand {
         }
         return equipCommandHelp;
     }
-
     @Override
-    public String getPerm() {
-        return S.PERM_EQUIP;
-    }
-
+    public String getPerm() { return S.PERM_EQUIP; }
 }
