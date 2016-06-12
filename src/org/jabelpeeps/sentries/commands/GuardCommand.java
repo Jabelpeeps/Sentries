@@ -43,18 +43,18 @@ public class GuardCommand implements SentriesComplexCommand {
                 if ( !localonly ) ok = inst.findGuardEntity( arg, true );
 
                 if ( ok )
-                    sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is now guarding", arg ) );
+                    sender.sendMessage( String.join( " ", Col.GREEN, npcName, "is now guarding", arg ) );
                 else
-                    sender.sendMessage( String.join( " ", S.Col.RED, npcName, "could not find", arg ) );
+                    sender.sendMessage( String.join( " ", Col.RED, npcName, "could not find", arg ) );
                 return true;
             }
         }
         if ( inst.guardeeName == null )
-            sender.sendMessage( S.Col.GREEN.concat( "Guarding: My Surroundings" ) );
+            sender.sendMessage( Col.GREEN.concat( "Guarding: My Surroundings" ) );
         else if ( inst.guardeeEntity == null )
-            sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, "is configured to guard", inst.guardeeName, "but cannot find them at the moment" ) );
+            sender.sendMessage( String.join( " ", Col.GREEN, npcName, "is configured to guard", inst.guardeeName, "but cannot find them at the moment" ) );
         else
-            sender.sendMessage( String.join( " ", S.Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
+            sender.sendMessage( String.join( " ", Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
         return true;
     }
 
@@ -70,15 +70,15 @@ public class GuardCommand implements SentriesComplexCommand {
 
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry guard'", Col.RESET ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry guard", Col.RESET ) );
             joiner.add( "  to discover what a sentry is guarding" );
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry guard clear'", Col.RESET ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry guard clear", Col.RESET ) );
             joiner.add( "  to clear the player/npc being guarded" );
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry guard (-p/l) <EntityName>'", Col.RESET ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry guard (-p/l) <EntityName>", Col.RESET ) );
             joiner.add( "  to have a sentry guard a player, or another NPC" );
             joiner.add( String.join( "", Col.GOLD, "    -p ", Col.RESET, "-> only search player names" ) );
             joiner.add( String.join( "", Col.GOLD, "    -l ", Col.RESET, "-> only search local entities" ) );
-            joiner.add( "       -> only use one of -p or -l (or omit)" );
+            joiner.add( "    -> only use one of -p or -l (or omit)" );
 
             guardCommandHelp = joiner.toString();
         }

@@ -152,4 +152,10 @@ public class VaultBridge extends PluginBridge {
         }
         return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
     }
+
+    @Override
+    public void add( SentryTrait inst, String args ) {
+        // TODO Auto-generated method stub
+        
+    }
 }

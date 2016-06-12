@@ -15,6 +15,7 @@ import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.TargetType;
 import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 
@@ -23,7 +24,8 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     Map<SentryTrait, Set<Team>> friends = new HashMap<>();
     Map<SentryTrait, Set<Team>> enemies = new HashMap<>();
     Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-    SentriesCommand command = new ScoreboardTeamsCommand( this );
+    SentriesCommand command = new ScoreboardTeamsCommand();
+    private String commandHelp;
 
     public ScoreboardTeamsBridge( int flag ) { super( flag ); }
 
@@ -40,7 +42,15 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
 
     @Override
-    public String getCommandHelp() { return "Team:<TeamName> for a Minecraft Scoreboard Team."; }
+    public String getCommandHelp() { 
+        
+        if ( commandHelp == null ) {
+            commandHelp = String.join( "", Col.GOLD, "  Team:<TeamName> ", Col.RESET, "for a Minecraft Scoreboard Team.", 
+                    System.lineSeparator(), "  (or use the ", Col.GOLD, "/sentry scoreboard ... ", Col.RESET, "command structure." ) ; 
+        }
+        
+        return commandHelp;
+    }
 
     @Override
     public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
@@ -59,37 +69,35 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     }
 
     @Override
+    public void add( SentryTrait inst, String args ) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
     public String add( String target, SentryTrait inst, boolean asTarget ) {
 
-        String targetTeam = CommandHandler.colon.split( target, 2 )[1];
-        Set<Team> teams = scoreboard.getTeams();
-
-        for ( Team team : teams ) {
-
-            if ( team.getName().equalsIgnoreCase( targetTeam ) )
-                return target.concat( addToList( inst, team, asTarget ) );
-        }
-        return "There is currently no Team matching ".concat( target );
-    }
-
-    private String addToList( SentryTrait inst, Team team, boolean asTarget ) {
+        Team team = scoreboard.getTeam( CommandHandler.colon.split( target, 2 )[1] );
+        
+        if ( team == null ) 
+            return "There is currently no Team matching ".concat( target );
+        
         Map<SentryTrait, Set<Team>> map = asTarget ? enemies : friends;
 
         if ( !map.containsKey( inst ) )
             map.put( inst, new HashSet<Team>() );
 
         if ( map.get( inst ).add( team ) )
-            return String.join( " ", S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
+            return String.join( " ", target, S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
 
-        return String.join( " ", S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );
+        return String.join( " ", target, S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );           
     }
 
     @Override
     public String remove( String entity, SentryTrait inst, boolean fromTargets ) {
 
         if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY, "Teams added as ", 
-                    fromTargets ? S.TARGETS : S.IGNORES, S.YET );
+            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY, "Teams added as ", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
         }
         String targetTeam = CommandHandler.colon.split( entity, 2 )[1];
 
@@ -119,43 +127,138 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     
     public class ScoreboardTeamsCommand implements SentriesComplexCommand {
         
-        private PluginBridge bridge;
         private String helpTxt;
-        
-        ScoreboardTeamsCommand( PluginBridge pb ) {
-            bridge = pb;
-        }
         
         @Override
         public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
-            // TODO implement parsing of arguments to identify the intention of the sender.
-            // TODO implement calling of methods in parent class to achieve target adding.
-            // TODO don't forget to add TEAM:<TeamName> style tags to inst.validtargets or inst.ignoretargets
-            // TODO remove "Non-Functional" message from getLongHelp()
-            return false;
+  
+            if ( args.length <= nextArg + 2 ) { 
+                sender.sendMessage( String.join( "", S.ERROR, " Not enough arguments. ", Col.RESET, "Try /sentry help scoreboard" ) );
+                return true;
+            }
+            
+            if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] )  ) {               
+                inst.targets.clear();
+                inst.ignores.clear();  
+                checkIfEmpty( sender, inst, npcName );
+                return true;
+            }
+            
+            Team team = scoreboard.getTeam( args[nextArg + 2] );
+            
+            if ( team == null ) {
+                sender.sendMessage( String.join( "", S.ERROR, " No Team was found matching:- ", args[nextArg + 2] ) );
+                return true;
+            } 
+            
+            ScoreboardTeamsTarget target = new ScoreboardTeamsTarget( team );
+            
+            if ( S.REMOVE.equalsIgnoreCase( args[nextArg + 1] ) ) {
+                
+                if ( inst.targets.remove( target ) ) 
+                    sender.sendMessage( String.join( "", Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of targets." ) );
+                else if ( inst.ignores.remove( target ) ) 
+                    sender.sendMessage( String.join( "", Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of ignores." ) );
+                else {
+                    sender.sendMessage( String.join( "", Col.RED, npcName, " was neither targeting nor ignoring ", team.getName() ) );
+                    return true;
+                }
+                checkIfEmpty( sender, inst, npcName );
+                return true;
+            }
+            
+            target.setTargetString( String.join( ":", getPrefix(), args[nextArg + 1], args[nextArg + 2] ) );
+            
+            if (    S.TARGET.equalsIgnoreCase( args[nextArg + 1] ) ) {
+                
+                if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
+                    sender.sendMessage( String.join( "", Col.GREEN, "Scoreboard Team: ", team.getName(), " will be targeted by ", npcName ) );
+                else 
+                    sender.sendMessage( String.join( "", Col.RED, team.getName(), " is already listed as either a target or ignore for ", npcName ) );
+                
+                return true;
+            }
+            
+            if (    S.IGNORE.equalsIgnoreCase( args[nextArg + 1] ) 
+                    || S.JOIN.equalsIgnoreCase( args[nextArg + 1] ) ) {
+                
+                if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
+                    sender.sendMessage( String.join( "", Col.GREEN, "Scoreboard Team: ", team.getName(), " will be ignored by ", npcName ) );
+                else 
+                    sender.sendMessage( String.join( "", Col.RED, team.getName(), " is already listed as either a target or ignore for ", npcName ) );
+                
+                return true;            
+            }
+           
+            // TODO don't forget to add TEAM:<TeamName> style tags to inst.validtargets or inst.ignoretargets <- or find a better way to persist targets.
+            // TODO remove "Non-Functional" message from getLongHelp()  <- getting closer now.
+            
+            sender.sendMessage( String.join( "", S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+                                                Col.GOLD, "/sentry help scoreboard", Col.RESET, " and try again." ) );            
+            return true;
+        }
+        
+        private void checkIfEmpty ( CommandSender sender, SentryTrait inst, String npcName ) {
+            if ( inst.targets.isEmpty() && inst.ignores.isEmpty() )
+                sender.sendMessage( String.join( "", Col.GREEN, npcName, " will no longer use scoreboard teams in its target selection." ) );
         }
         
         @Override
-        public String getShortHelp() {
-            return "manage scoreboard-defined targets";
-        }
+        public String getShortHelp() { return "manage scoreboard-defined targets"; }
 
         @Override
         public String getLongHelp() {
 
             if ( helpTxt == null ) {
                 helpTxt = String.join( "", Col.RED, "Non-functional, for testing only!", Col.RESET,
-                        System.lineSeparator(), "do ", Col.GOLD, "/sentry scoreboard <add|remove> <target|ignore> <TeamName> ",
-                        Col.RESET, "to have a sentry consider MC scoreboard membership when selecting targets.",
-                        System.lineSeparator(), 
+                        System.lineSeparator(), "do ", Col.GOLD, "/sentry scoreboard <target|ignore|remove|clearall> <TeamName> ",
+                        Col.RESET, "to have a sentry consider MC scoreboard membership when selecting targets.", System.lineSeparator(),
+                        "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <TeamName>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <TeamName>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
+                        "  use ", Col.GOLD, "clearall", Col.RESET, "to remove all scoreboard targets and ignores", System.lineSeparator(), 
                         Col.GOLD, "  <TeamName> ", Col.RESET, "must be a currently existing scoreboard team." );
             }
             return helpTxt;
         }
 
         @Override
-        public String getPerm() {
-            return "sentry.scoreboardteams";
+        public String getPerm() { return "sentry.scoreboardteams"; }
+    }
+    
+    public class ScoreboardTeamsTarget implements TargetType {
+
+        private Team team;
+        private String tag;
+        
+        ScoreboardTeamsTarget( Team target ) { team = target; }
+        
+        @Override
+        public boolean includes( LivingEntity entity ) {
+            if ( !scoreboard.getTeams().contains( team ) ) return false;
+            
+            return team.hasEntry( entity.getName() );
         }
+
+        @Override
+        public boolean setTargetString( String type ) {
+            tag = type;
+            return true;
+        }
+
+        @Override
+        public String getTargetString() { return tag; } 
+        
+        @Override
+        public boolean equals( Object o ) {
+            if (    o != null 
+                    && o instanceof ScoreboardTeamsTarget 
+                    && ((ScoreboardTeamsTarget) o).team.equals( team ) ) 
+                return true;
+            
+            return false;            
+        }
+        @Override
+        public int hashCode() { return team.hashCode(); }
     }
 }

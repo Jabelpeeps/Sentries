@@ -63,11 +63,35 @@ public class EquipCommand implements SentriesComplexCommand {
                 if ( materialList == null ) {
                     StringJoiner joiner = new StringJoiner( ", " );
                     
-                    for ( Material each : Material.values() ) 
+                    for ( Material each : Material.values() ) {
+                        
+                        if ( each.isEdible() || each.isRecord() ) continue;
+                        
+                        switch ( each ) {
+                            case AIR:
+                            case LONG_GRASS:
+                            case REDSTONE_WIRE:
+                            case CROPS:
+                            case SNOW:
+                            case PORTAL:
+                            case PUMPKIN_STEM:
+                            case MELON_STEM:
+                            case ENDER_PORTAL:
+                            case DOUBLE_PLANT:
+                            case END_GATEWAY:
+                            case BARRIER:
+                            case STRUCTURE_BLOCK:
+                            case COMMAND_REPEATING:
+                            case COMMAND_CHAIN:
+                                continue;
+                            default:                   
+                        }
+                        
                         joiner.add( each.name() );
-                   
+                    }
                     materialList = String.join( "", Col.GOLD, "Valid Item Names:- ", Col.RESET, joiner.toString() );
                 }
+                
                 sender.sendMessage( materialList );
             }
             else {

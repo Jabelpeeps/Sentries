@@ -277,9 +277,30 @@ public abstract class Util {
         }      
         return damager;   
     }
-
+    
     /**
      * Concatenates the supplied String[] starting at the position indicated.
+     * 
+     * @param startFrom
+     *            - the starting position (zero-based)
+     * @param args
+     *            - the String[] to be joined
+     * @param delimiter
+     *            - a string to be inserted between the joined array's values.
+     * @return - the resulting String.
+     */
+    public static String joinArgs( int startFrom, String[] args, String delimiter ) {
+
+        StringJoiner joiner = new StringJoiner( delimiter );
+    
+        for ( int i = startFrom; i < args.length; i++ ) {
+            joiner.add( args[i] );
+        }
+        return joiner.toString();
+    }
+    /**
+     * Concatenates the supplied String[] starting at the position indicated. 
+     * Inserts a space between the values of the array.
      * 
      * @param startFrom
      *            - the starting position (zero-based)
@@ -288,12 +309,6 @@ public abstract class Util {
      * @return - the resulting String.
      */
     public static String joinArgs( int startFrom, String[] args ) {
-    
-        StringJoiner joiner = new StringJoiner( " " );
-    
-        for ( int i = startFrom; i < args.length; i++ ) {
-            joiner.add( args[i] );
-        }
-        return joiner.toString();
+        return joinArgs( startFrom, args, " " );
     }
 }

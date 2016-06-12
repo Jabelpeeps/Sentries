@@ -64,6 +64,7 @@ public abstract class PluginBridge {
      *            - the SentryTrait that is asking.
      * @return true - if the player is a valid target.
      */
+    @Deprecated
     public abstract boolean isTarget( LivingEntity entity, SentryTrait inst );
 
     /**
@@ -79,8 +80,15 @@ public abstract class PluginBridge {
      *            - the SentryTrait that is asking.
      * @return true - if the player should be ignored.
      */
+    @Deprecated
     public abstract boolean isIgnoring( LivingEntity entity, SentryTrait inst );
 
+    /** 
+     * Method for use when a sentry is reloaded. The String 'args' is the 'TargetString' 
+     * retrieved from the TargetType instances when the sentry was saved, and should contain 
+     * the information needed to recreate the TargetType instance. */
+    public abstract void add( SentryTrait inst, String args );
+    
     /**
      * Adds an entity - identified by the supplied string - as either a target
      * or ignore for the supplied for the supplied SentryTrait.
@@ -103,6 +111,7 @@ public abstract class PluginBridge {
      * @return a string that will be displayed to the player (either for success
      *         or failure)
      */
+    @Deprecated
     public abstract String add( String target, SentryTrait inst, boolean asTarget );
 
     /**
@@ -127,6 +136,7 @@ public abstract class PluginBridge {
      * @return a string that will be displayed to the player (either for success
      *         or failure)
      */
+    @Deprecated
     public abstract String remove( String entity, SentryTrait inst, boolean fromTargets );
 
     /**
@@ -153,6 +163,7 @@ public abstract class PluginBridge {
      *            ignores.
      * @return true - if the SentryTrait is listed.
      */
+    @Deprecated
     public abstract boolean isListed( SentryTrait inst, boolean asTarget );
 
     /**

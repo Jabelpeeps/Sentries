@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
@@ -146,12 +145,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         
         List<String> tabs = new ArrayList<>( commandMap.keySet() );
         
-        tabs.removeIf( new Predicate<String>() {
-            @Override
-            public boolean test( String t ) {
-                return !t.startsWith( args[args.length - 1] );
-            }            
-        });   
+        tabs.removeIf( t -> !t.startsWith( args[args.length - 1] ) );
+                
+//                new Predicate<String>() {
+//            @Override
+//            public boolean test( String t ) {
+//                return !t.startsWith( args[args.length - 1] );
+//            }            
+//        });   
         return tabs;       
     }
     

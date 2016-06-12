@@ -106,4 +106,10 @@ public class TownyBridge extends PluginBridge {
     public boolean isListed( SentryTrait inst, boolean asTarget ) {
         return myTown.containsKey( inst );
     }
+
+    @Override
+    public void add( SentryTrait inst, String args ) {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -109,4 +109,10 @@ public class SimpleClansBridge extends PluginBridge {
         return (asTarget ? rivals.containsKey( inst )
                          : allies.containsKey( inst ));
     }
+
+    @Override
+    public void add( SentryTrait inst, String args ) {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -116,4 +116,10 @@ public class WarBridge extends PluginBridge {
         return (asTarget ? enemies.containsKey( inst )
                          : friends.containsKey( inst ));
     }
+
+    @Override
+    public void add( SentryTrait inst, String args ) {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -24,9 +24,7 @@ public class FactionsBridge extends PluginBridge {
     Map<SentryTrait, Faction> myFaction = new HashMap<>();
     String commandHelp;
 
-    public FactionsBridge( int flag ) {
-        super( flag );
-    }
+    public FactionsBridge( int flag ) { super( flag ); }
 
     @Override
     public boolean activate() {
@@ -34,14 +32,10 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
-    public String getPrefix() {
-        return "FACTION";
-    }
+    public String getPrefix() { return "FACTION"; }
 
     @Override
-    public String getActivationMessage() {
-        return "Factions is active, the FACTION: target will function";
-    }
+    public String getActivationMessage() { return "Factions is active, the FACTION: target will function"; }
 
     @Override
     public String getCommandHelp() {
@@ -176,5 +170,11 @@ public class FactionsBridge extends PluginBridge {
             }
         }
         return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
+    }
+
+    @Override
+    public void add( SentryTrait inst, String args ) {
+        // TODO Auto-generated method stub
+        
     }
 }
