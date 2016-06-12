@@ -52,6 +52,13 @@ public class SimpleClansBridge extends PluginBridge {
     }
 
     @Override
+    public boolean add( SentryTrait inst, String args ) {
+        return false;
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public String add( String target, SentryTrait inst, boolean asTarget ) {
 
         String targetClan = CommandHandler.colon.split( target, 2 )[1];
@@ -108,11 +115,5 @@ public class SimpleClansBridge extends PluginBridge {
 
         return (asTarget ? rivals.containsKey( inst )
                          : allies.containsKey( inst ));
-    }
-
-    @Override
-    public void add( SentryTrait inst, String args ) {
-        // TODO Auto-generated method stub
-        
     }
 }

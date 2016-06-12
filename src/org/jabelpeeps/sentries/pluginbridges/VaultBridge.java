@@ -103,6 +103,13 @@ public class VaultBridge extends PluginBridge {
     }
 
     @Override
+    public boolean add( SentryTrait inst, String args ) {
+        return false;
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public String add( String target, SentryTrait inst, boolean asTarget ) {
 
         String targetGroup = CommandHandler.colon.split( target, 2 )[1];
@@ -151,11 +158,5 @@ public class VaultBridge extends PluginBridge {
             }
         }
         return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
-    }
-
-    @Override
-    public void add( SentryTrait inst, String args ) {
-        // TODO Auto-generated method stub
-        
     }
 }

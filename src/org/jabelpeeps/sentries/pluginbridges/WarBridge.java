@@ -54,6 +54,13 @@ public class WarBridge extends PluginBridge {
     }
 
     @Override
+    public boolean add( SentryTrait inst, String args ) {
+        return false;
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public String add( String target, SentryTrait inst, boolean asTarget ) {
 
         String targetTeam = CommandHandler.colon.split( target, 2 )[1];
@@ -115,11 +122,5 @@ public class WarBridge extends PluginBridge {
 
         return (asTarget ? enemies.containsKey( inst )
                          : friends.containsKey( inst ));
-    }
-
-    @Override
-    public void add( SentryTrait inst, String args ) {
-        // TODO Auto-generated method stub
-        
     }
 }

@@ -16,15 +16,14 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.TargetType;
-import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 
 public class ScoreboardTeamsBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<Team>> friends = new HashMap<>();
-    Map<SentryTrait, Set<Team>> enemies = new HashMap<>();
+    private Map<SentryTrait, Set<Team>> friends = new HashMap<>();
+    private Map<SentryTrait, Set<Team>> enemies = new HashMap<>();
     Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-    SentriesCommand command = new ScoreboardTeamsCommand();
+    private SentriesComplexCommand command = new ScoreboardTeamsCommand();
     private String commandHelp;
 
     public ScoreboardTeamsBridge( int flag ) { super( flag ); }
@@ -34,7 +33,6 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         CommandHandler.addCommand( "scoreboard", command );
         return true; 
     }
-
     @Override
     public String getPrefix() { return "TEAM"; }
 
@@ -42,13 +40,11 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
 
     @Override
-    public String getCommandHelp() { 
-        
+    public String getCommandHelp() {         
         if ( commandHelp == null ) {
             commandHelp = String.join( "", Col.GOLD, "  Team:<TeamName> ", Col.RESET, "for a Minecraft Scoreboard Team.", 
-                    System.lineSeparator(), "  (or use the ", Col.GOLD, "/sentry scoreboard ... ", Col.RESET, "command structure." ) ; 
-        }
-        
+                    System.lineSeparator(), "  (or use the ", Col.GOLD, "/sentry scoreboard ... ", Col.RESET, "commands." ) ; 
+        }       
         return commandHelp;
     }
 
@@ -69,9 +65,10 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     }
 
     @Override
-    public void add( SentryTrait inst, String args ) {
-        // TODO Auto-generated method stub
+    public boolean add( SentryTrait inst, String args ) {
         
+        command.call( null, null, inst, 0, args);
+        return true;
     }
     
     @Override
@@ -171,9 +168,9 @@ public class ScoreboardTeamsBridge extends PluginBridge {
             
             if (    S.TARGET.equalsIgnoreCase( args[nextArg + 1] ) ) {
                 
-                if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
+                if ( !inst.ignores.contains( target ) && inst.targets.add( target ) && sender != null ) 
                     sender.sendMessage( String.join( "", Col.GREEN, "Scoreboard Team: ", team.getName(), " will be targeted by ", npcName ) );
-                else 
+                else if ( sender != null )
                     sender.sendMessage( String.join( "", Col.RED, team.getName(), " is already listed as either a target or ignore for ", npcName ) );
                 
                 return true;
@@ -182,25 +179,22 @@ public class ScoreboardTeamsBridge extends PluginBridge {
             if (    S.IGNORE.equalsIgnoreCase( args[nextArg + 1] ) 
                     || S.JOIN.equalsIgnoreCase( args[nextArg + 1] ) ) {
                 
-                if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
+                if ( !inst.targets.contains( target ) && inst.ignores.add( target ) && sender != null ) 
                     sender.sendMessage( String.join( "", Col.GREEN, "Scoreboard Team: ", team.getName(), " will be ignored by ", npcName ) );
-                else 
+                else if ( sender != null )
                     sender.sendMessage( String.join( "", Col.RED, team.getName(), " is already listed as either a target or ignore for ", npcName ) );
                 
                 return true;            
-            }
-           
-            // TODO don't forget to add TEAM:<TeamName> style tags to inst.validtargets or inst.ignoretargets <- or find a better way to persist targets.
-            // TODO remove "Non-Functional" message from getLongHelp()  <- getting closer now.
-            
-            sender.sendMessage( String.join( "", S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
-                                                Col.GOLD, "/sentry help scoreboard", Col.RESET, " and try again." ) );            
+            } 
+            if ( sender != null )
+                sender.sendMessage( String.join( "", S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+                                                    Col.GOLD, "/sentry help scoreboard", Col.RESET, " and try again." ) );            
             return true;
         }
         
         private void checkIfEmpty ( CommandSender sender, SentryTrait inst, String npcName ) {
             if ( inst.targets.isEmpty() && inst.ignores.isEmpty() )
-                sender.sendMessage( String.join( "", Col.GREEN, npcName, " will no longer use scoreboard teams in its target selection." ) );
+                sender.sendMessage( String.join( "", Col.YELLOW, npcName, " has no defined targets now." ) );
         }
         
         @Override
@@ -210,18 +204,16 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         public String getLongHelp() {
 
             if ( helpTxt == null ) {
-                helpTxt = String.join( "", Col.RED, "Non-functional, for testing only!", Col.RESET,
-                        System.lineSeparator(), "do ", Col.GOLD, "/sentry scoreboard <target|ignore|remove|clearall> <TeamName> ",
+                helpTxt = String.join( "", "do ", Col.GOLD, "/sentry scoreboard <target|ignore|remove|clearall> <TeamName> ",
                         Col.RESET, "to have a sentry consider MC scoreboard membership when selecting targets.", System.lineSeparator(),
                         "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <TeamName>", System.lineSeparator(),
                         "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <TeamName>", System.lineSeparator(),
                         "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
-                        "  use ", Col.GOLD, "clearall", Col.RESET, "to remove all scoreboard targets and ignores", System.lineSeparator(), 
-                        Col.GOLD, "  <TeamName> ", Col.RESET, "must be a currently existing scoreboard team." );
+                        "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all scoreboard targets and ignores from the selected sentry.", 
+                        System.lineSeparator(), "  (", Col.GOLD, "<TeamName> ", Col.RESET, "must be a currently existing scoreboard team.)" );
             }
             return helpTxt;
         }
-
         @Override
         public String getPerm() { return "sentry.scoreboardteams"; }
     }
@@ -229,7 +221,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public class ScoreboardTeamsTarget implements TargetType {
 
         private Team team;
-        private String tag;
+        private String targetString;
         
         ScoreboardTeamsTarget( Team target ) { team = target; }
         
@@ -241,13 +233,10 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         }
 
         @Override
-        public boolean setTargetString( String type ) {
-            tag = type;
-            return true;
-        }
+        public void setTargetString( String type ) { targetString = type; }
 
         @Override
-        public String getTargetString() { return tag; } 
+        public String getTargetString() { return targetString; } 
         
         @Override
         public boolean equals( Object o ) {

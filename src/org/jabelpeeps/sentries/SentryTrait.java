@@ -127,9 +127,7 @@ public class SentryTrait extends Trait {
     public final int myID;
     private static int nextID;
 
-    static {
-        nextID = 0;
-    }
+    static { nextID = 0; }
     
     public SentryTrait() {
         super( "sentry" );
@@ -140,9 +138,7 @@ public class SentryTrait extends Trait {
     @SuppressWarnings( "unchecked" )
     @Override
     public void load( DataKey key ) throws NPCLoadException {
-
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() start" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() start" );
   
         if ( key.keyExists( "traits" ) ) 
             key = key.getRelative( "traits" );
@@ -206,14 +202,12 @@ public class SentryTrait extends Trait {
         loaded = true;
         processTargetStrings( true );
 
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
     }
 
     @Override
     public void onSpawn() {
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
 
         if ( !loaded ) {
             try {
@@ -234,10 +228,9 @@ public class SentryTrait extends Trait {
         if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
 
         // Allow Denizen to handle the sentry's health if it is active.
-        if ( DenizenHook.sentryHealthByDenizen ) {
-            if ( npc.hasTrait( HealthTrait.class ) )
-                npc.removeTrait( HealthTrait.class );
-        }
+        if (    DenizenHook.sentryHealthByDenizen 
+                && npc.hasTrait( HealthTrait.class ) )
+            npc.removeTrait( HealthTrait.class );
 
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
@@ -287,11 +280,9 @@ public class SentryTrait extends Trait {
 
     @Override
     public void onRemove() {        
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
 
-        if ( hasMount() )
-            Util.removeMount( mountID );
+        if ( hasMount() ) Util.removeMount( mountID );
         
         cancelRunnable();
     }
@@ -314,8 +305,7 @@ public class SentryTrait extends Trait {
 
     @Override
     public void onDespawn() {
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
 
         dismount();
         myStatus = SentryStatus.NOT_SPAWNED;
@@ -323,8 +313,7 @@ public class SentryTrait extends Trait {
     
     @Override
     public void save( DataKey key ) {
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
         
         key.setBoolean( S.CON_RETALIATION, iRetaliate );
         key.setBoolean( S.CON_INVINCIBLE, invincible );
@@ -334,6 +323,10 @@ public class SentryTrait extends Trait {
         key.setInt( S.PERSIST_MOUNT, mountID );
         key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
         key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
+        
+        targets.forEach( s -> validTargets.add( s.getTargetString() ) );
+        ignores.forEach( s -> ignoreTargets.add( s.getTargetString() ) );
+        
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
 
@@ -371,8 +364,7 @@ public class SentryTrait extends Trait {
     @Override
     public void onCopy() {
 
-        if ( Sentries.debug )
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
+        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
  
         // the new npc is not in the new location immediately.
         // TODO is this really needed?
@@ -802,7 +794,7 @@ public class SentryTrait extends Trait {
         if ( effect != null )
             myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
 
-        faceEntity( getMyEntity(), theTarget );
+        faceEntity( myEntity, theTarget );
 
         if ( projectileClazz == Arrow.class )
             draw( false );
@@ -823,9 +815,10 @@ public class SentryTrait extends Trait {
             return armour;
 
         double mod = 0;
-
-        if ( getMyEntity() instanceof Player ) {
-            for ( ItemStack is : ((Player) getMyEntity()).getInventory().getArmorContents() ) {
+        LivingEntity myEntity = getMyEntity();
+        
+        if ( myEntity instanceof Player ) {
+            for ( ItemStack is : ((Player) myEntity).getInventory().getArmorContents() ) {
                 Material item = is.getType();
 
                 if ( sentry.armorBuffs.containsKey( item ) )
@@ -1000,16 +993,15 @@ public class SentryTrait extends Trait {
                 else if ( ignore.contains( "ENTITY:" ) ) ignoreFlags |= namedentities;
              }
         }
-        if ( Sentries.debug )
-            Sentries.debugLog( "Target flags: " + targetFlags + "  Ignore flags: " + ignoreFlags );
     }
 
+    @SuppressWarnings( "deprecation" )
     private boolean checkBridges( String target, boolean onReload, boolean asTarget ) {
 
         for ( PluginBridge each : Sentries.activePlugins.values() ) {
             if ( target.contains( each.getPrefix().concat( ":" ) ) ) {
                 
-                if ( onReload )
+                if ( onReload && !each.add( this, target ) )
                     each.add( target, this, asTarget );
 
                 if ( each.isListed( this, asTarget ) ) {
@@ -1025,6 +1017,10 @@ public class SentryTrait extends Trait {
         return false;
     }
 
+    /** 
+     * Checks whether sufficient time has passed since the last healing, and if so restores
+     * health according to the configured healrate.
+     */
     void tryToHeal() {
         
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
@@ -1040,14 +1036,10 @@ public class SentryTrait extends Trait {
                 LivingEntity myEntity = getMyEntity();
                 
                 // idk what this effect looks like, so lets see if it looks ok in-game.
-                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.VILLAGER_PLANT_GROW, 100 );
-
-//                if ( healAnimation != null )
-//                    NMS.sendPacketNearby( null, getMyEntity().getLocation(), healAnimation );
+                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.HEART, 0 );
 
                 if ( getHealth() >= maxHealth )
                     _myDamamgers.clear();
-
             }
             oktoheal = (long) (System.currentTimeMillis() + healRate * 1000);
         }
@@ -1092,12 +1084,12 @@ public class SentryTrait extends Trait {
                     guardeeEntity = player;
                     guardeeName = name;
 
-                    clearTarget();
+//                    clearTarget();
                     return true;
                 }
             }
         }
-        else {
+        else if ( !onlyCheckAllPlayers ) {
             for ( Entity each : getMyEntity().getNearbyEntities( range, range, range ) ) {
 
                 String ename = null;
@@ -1119,7 +1111,7 @@ public class SentryTrait extends Trait {
                     guardeeEntity = (LivingEntity) each;
                     guardeeName = name;
 
-                    clearTarget();
+//                    clearTarget();
                     return true;
                 }
             }
@@ -1185,8 +1177,7 @@ public class SentryTrait extends Trait {
             myAttack = AttackType.find( weapon );
 
             if ( myAttack != AttackType.witchdoctor )
-                item.setDurability( (short) 0 );
-            
+                item.setDurability( (short) 0 );           
         }
         else if ( myEntity instanceof Skeleton ) myAttack = AttackType.archer;
         else if ( myEntity instanceof Ghast ) myAttack = AttackType.pyro3;
@@ -1216,45 +1207,11 @@ public class SentryTrait extends Trait {
      * 
      */
     public void clearTarget() {
-        
-        myStatus = SentryStatus.is_A_Guard( this );
+
         attackTarget = null;
         _projTargetLostLoc = null;
         
         draw( false );
-        
-//        GoalController goalController = getGoalController();
-//        Navigator navigator = getNavigator();
-//        
-//        if ( guardeeEntity == null ) {
-//            // not a guard or entity to be guarded is not spawned.
-//            navigator.cancelNavigation();
-//
-//            faceForward();
-//
-//            // allow new goals to be added.
-//            if ( goalController.isPaused() )
-//                goalController.setPaused( false );
-//        }
-//        else {
-//            goalController.setPaused( true );
-//
-//            if (    navigator.getEntityTarget() == null 
-//                    || navigator.getEntityTarget().getTarget() != guardeeEntity ) {
-//                
-//                LivingEntity myEntity = getMyEntity();
-//
-//                if (    myEntity != null 
-//                        && guardeeEntity.getLocation().getWorld() != myEntity.getLocation().getWorld() ) {
-//                    npc.despawn();
-//                    npc.spawn( guardeeEntity.getLocation().add( 1, 0, 1 ) );
-//                    return;
-//                }
-//                navigator.setTarget( guardeeEntity, false );
-//                navigator.getLocalParameters().stationaryTicks( 3 * 20 );
-//            }
-//        }
-        return;
     }
 
     void setAttackTarget( LivingEntity theEntity ) {
@@ -1465,7 +1422,9 @@ public class SentryTrait extends Trait {
                     && present.distanceSquared( target ) <= 4 ) {
                 return true;
             }
-            Util.getSentryTrait( npc ).clearTarget();
+            SentryTrait inst = Util.getSentryTrait( npc );
+            inst.clearTarget();
+            inst.myStatus = SentryStatus.is_A_Guard( inst );
             return false;
         }
     }

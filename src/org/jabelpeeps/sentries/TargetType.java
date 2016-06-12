@@ -25,7 +25,8 @@ public interface TargetType {
     public boolean includes( LivingEntity entity );
 
     /** 
-     * Method to define the targets that a TargetType will encompass.
+     * Method to supply a string to be used when saving the sentry; it should define the targets that 
+     * a TargetType will encompass, and be parse-able to enable the TargetType to be re-created.
      * <p>
      * The String may be parsed to define targets, or a constructor used to pass typed objects directly.
      * <p>
@@ -33,10 +34,8 @@ public interface TargetType {
      * by {@link #getTargetString()}
      * 
      * @param type - a string that can be parsed to provide a definition of the desired targets.
-     * @return true - if <b>type</b> was successfully parsed.<br>
-     *         false - if parsing failed, most probably leaving the instance in an invalid state.
      */
-    public boolean setTargetString( String type );
+    public void setTargetString( String type );
     
     /**
      *  Method to get a representation of the parameters of this TargetType.

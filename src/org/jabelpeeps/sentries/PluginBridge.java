@@ -65,7 +65,7 @@ public abstract class PluginBridge {
      * @return true - if the player is a valid target.
      */
     @Deprecated
-    public abstract boolean isTarget( LivingEntity entity, SentryTrait inst );
+    public boolean isTarget( LivingEntity entity, SentryTrait inst ) { return false; }
 
     /**
      * Determines whether the supplied Player should be ignored as a possible
@@ -81,13 +81,17 @@ public abstract class PluginBridge {
      * @return true - if the player should be ignored.
      */
     @Deprecated
-    public abstract boolean isIgnoring( LivingEntity entity, SentryTrait inst );
+    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) { return false; }
 
     /** 
      * Method for use when a sentry is reloaded. The String 'args' is the 'TargetString' 
      * retrieved from the TargetType instances when the sentry was saved, and should contain 
-     * the information needed to recreate the TargetType instance. */
-    public abstract void add( SentryTrait inst, String args );
+     * the information needed to recreate the TargetType instance. 
+     * 
+     * @return true if the method is implemented
+     * @return false if not (yet) implemented - and one of the legacy method should be tried.
+     */
+    public abstract boolean add( SentryTrait inst, String args );
     
     /**
      * Adds an entity - identified by the supplied string - as either a target
@@ -112,7 +116,7 @@ public abstract class PluginBridge {
      *         or failure)
      */
     @Deprecated
-    public abstract String add( String target, SentryTrait inst, boolean asTarget );
+    public String add( String target, SentryTrait inst, boolean asTarget ) { return ""; }
 
     /**
      * Removes the entity - identified by the supplied string - as either a
@@ -137,7 +141,7 @@ public abstract class PluginBridge {
      *         or failure)
      */
     @Deprecated
-    public abstract String remove( String entity, SentryTrait inst, boolean fromTargets );
+    public String remove( String entity, SentryTrait inst, boolean fromTargets ) { return ""; }
 
     /**
      * @return a string to be used as the first part of the command argument to
@@ -164,7 +168,7 @@ public abstract class PluginBridge {
      * @return true - if the SentryTrait is listed.
      */
     @Deprecated
-    public abstract boolean isListed( SentryTrait inst, boolean asTarget );
+    public boolean isListed( SentryTrait inst, boolean asTarget ) { return false; }
 
     /**
      * Static method to iterate over the activated PluginBridges, polling each one for command
@@ -178,7 +182,7 @@ public abstract class PluginBridge {
         if ( !Sentries.activePlugins.isEmpty() ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
     
-            joiner.add( "You may also use these additional types:- " );
+            joiner.add( "Further options available:- " );
     
             for ( PluginBridge each : Sentries.activePlugins.values() ) {
                 joiner.add( each.getCommandHelp() );

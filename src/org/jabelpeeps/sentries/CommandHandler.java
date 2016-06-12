@@ -96,7 +96,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * level sub-command (i.e. an option immediately following '/sentry')
      * 
      * @param name - the name of the sub-command that will need to be used by users to access it.
-     * @param command - either a {@link#SentriesComplexCommand} or a {@link#SentriesToggleCommand} object.
+     * @param command - either a {@link#SentriesComplexCommand}, a {@link#SentriesToggleCommand} 
+     * or a {@link#SentriesNumberCommand} object.
      */
     public static void addCommand( String name, SentriesCommand command ) {
         commandMap.put( name, command );

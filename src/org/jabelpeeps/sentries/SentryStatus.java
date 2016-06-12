@@ -231,6 +231,7 @@ public enum SentryStatus {
                     }
                     return this;
                 }
+                inst.getGoalController().setPaused( true );
                 Navigator navigator = inst.getNavigator();
                 boolean isNavigating = navigator.isNavigating();
                 double dist = npcLoc.distanceSquared( guardEntLoc );
@@ -264,6 +265,11 @@ public enum SentryStatus {
             
             inst.tryToHeal();
             
+            GoalController goalController = inst.getGoalController();
+            
+            if ( goalController.isPaused() )
+                goalController.setPaused( false );
+            
             LivingEntity target = null;
 
             // find and set a target to attack (if no current target)
@@ -272,9 +278,9 @@ public enum SentryStatus {
                     && System.currentTimeMillis() > inst.reassesTime ) {
 
                 target = inst.findTarget();
+                inst.reassesTime = System.currentTimeMillis() + 3000;
                 
                 if ( target != null ) {
-                    inst.reassesTime = System.currentTimeMillis() + 3000;
                     inst.setAttackTarget( target );
                     return SentryStatus.ATTACKING;
                 }

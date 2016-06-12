@@ -26,8 +26,8 @@ public abstract class S {
     public final static String ERROR_WRONG_DENIZEN = "This version of Sentries is only compatable with Denizen 0.9 versions";
     public final static String ERROR_PLUGIN_NOT_FOUND = "Could not find the plugin called ";
 
-    public final static String ERROR = Col.RED.concat( "Error: '" );
-    public final static String ERROR_NOT_NUMBER = "' was not recognised as a valid number";
+    public final static String ERROR = Col.RED.concat( "Error: " );
+    public final static String ERROR_NOT_NUMBER = " was not recognised as a valid number";
 
     public final static String ERROR_NOT_SENTRY = "That command can only be used on a Sentry";
     public final static String ERROR_NO_NPC = "You must have an NPC selected or provide an NPC #id";
@@ -88,6 +88,7 @@ public abstract class S {
     public final static String CLEAR = "clear";
     public final static String CLEARALL = "clearall";
     public final static String JOIN = "join";
+    public final static String LEAVE = "leave";
     public final static String HELP = "help";
     
     // a random selection of single words.

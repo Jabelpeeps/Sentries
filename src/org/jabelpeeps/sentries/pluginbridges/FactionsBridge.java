@@ -92,6 +92,13 @@ public class FactionsBridge extends PluginBridge {
     }
 
     @Override
+    public boolean add( SentryTrait inst, String args ) {
+        return false;
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public String add( String target, SentryTrait inst, boolean asTarget ) {
 
         String[] input = CommandHandler.colon.split( target, 3 );
@@ -170,11 +177,5 @@ public class FactionsBridge extends PluginBridge {
             }
         }
         return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
-    }
-
-    @Override
-    public void add( SentryTrait inst, String args ) {
-        // TODO Auto-generated method stub
-        
     }
 }
