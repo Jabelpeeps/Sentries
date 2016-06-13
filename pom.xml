@@ -21,6 +21,11 @@
 	<!-- Repositories -->
 	<repositories>
 		<repository>
+			<id>project.local</id>
+			<url>file:${project.basedir}/repo</url>
+		</repository>
+		
+		<repository>
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
@@ -71,7 +76,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.sacredlabyrinth.phaed.simpleclans</groupId>
+			<groupId>net.sacredlabyrinth</groupId>
 			<artifactId>SimpleClans</artifactId>
 			<version>2.6.1</version>
 			<type>jar</type>
@@ -79,39 +84,39 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.tommytony.war</groupId>
+			<groupId>com.tommytony</groupId>
 			<artifactId>war</artifactId>
-			<version>LATEST</version>
+			<version>1.9</version>
 			<type>jar</type>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/War.jar</systemPath>
+			<scope>provided</scope>
+			<!-- <systemPath>${project.basedir}/lib/War.jar</systemPath> -->
 		</dependency>
 
 		<dependency>
-			<groupId>com.palmergames.bukkit</groupId>
-			<artifactId>towny</artifactId>
-			<version>LATEST</version>
+			<groupId>com.palmergames</groupId>
+			<artifactId>Towny</artifactId>
+			<version>0.91.1.0</version>
 			<type>jar</type>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/Towny.0.91.1.jar</systemPath>
-		</dependency>
-
-		<dependency>
-			<groupId>com.massivecraft</groupId>
-			<artifactId>factions</artifactId>
-			<version>LATEST</version>
-			<type>jar</type>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/Factions.jar</systemPath>
+			<scope>provided</scope>
+	<!-- 		<systemPath>${project.basedir}/lib/Towny.0.91.1.jar</systemPath> -->
 		</dependency>
 
 		<dependency>
 			<groupId>com.massivecraft</groupId>
-			<artifactId>mcore</artifactId>
-			<version>LATEST</version>
+			<artifactId>Factions</artifactId>
+			<version>2.8.17</version>
 			<type>jar</type>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/mcore.jar</systemPath>
+			<scope>provided</scope>
+			<!-- <systemPath>${project.basedir}/lib/Factions.jar</systemPath> -->
+		</dependency>
+
+		<dependency>
+			<groupId>com.massivecraft</groupId>
+			<artifactId>MassiveCore</artifactId>
+			<version>2.8.17</version>
+			<type>jar</type>
+			<scope>provided</scope>
+		<!-- 	<systemPath>${project.basedir}/lib/mcore.jar</systemPath> -->
 		</dependency>
 
 		<dependency>
