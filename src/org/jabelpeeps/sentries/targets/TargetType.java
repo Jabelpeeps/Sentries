@@ -1,4 +1,4 @@
-package org.jabelpeeps.sentries;
+package org.jabelpeeps.sentries.targets;
 
 import org.bukkit.entity.LivingEntity;
 
@@ -13,7 +13,7 @@ import org.bukkit.entity.LivingEntity;
  * fewer of these objects that define multiple targets each (rather than having many
  * instances, each defining a single target entity. 
  */
-public interface TargetType {
+public interface TargetType extends Comparable<TargetType> {
     
     /** 
      * Method to quickly determine whether the supplied <b>entity</b> is a member
@@ -43,4 +43,10 @@ public interface TargetType {
      *  @return the String supplied to {@link #setTargetString(String)}
      */
     public String getTargetString();
+    
+    @Override
+    public boolean equals( Object o );
+    
+    @Override
+    public int hashCode();
 }

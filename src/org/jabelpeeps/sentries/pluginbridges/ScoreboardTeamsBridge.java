@@ -15,8 +15,8 @@ import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.TargetType;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
+import org.jabelpeeps.sentries.targets.AbstractTargetType;
 
 public class ScoreboardTeamsBridge extends PluginBridge {
 
@@ -218,12 +218,14 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         public String getPerm() { return "sentry.scoreboardteams"; }
     }
     
-    public class ScoreboardTeamsTarget implements TargetType {
+    public class ScoreboardTeamsTarget extends AbstractTargetType {
 
         private Team team;
-        private String targetString;
         
-        ScoreboardTeamsTarget( Team target ) { team = target; }
+        ScoreboardTeamsTarget( Team target ) { 
+            super( 40 );
+            team = target; 
+        }
         
         @Override
         public boolean includes( LivingEntity entity ) {
@@ -231,12 +233,6 @@ public class ScoreboardTeamsBridge extends PluginBridge {
             
             return team.hasEntry( entity.getName() );
         }
-
-        @Override
-        public void setTargetString( String type ) { targetString = type; }
-
-        @Override
-        public String getTargetString() { return targetString; } 
         
         @Override
         public boolean equals( Object o ) {

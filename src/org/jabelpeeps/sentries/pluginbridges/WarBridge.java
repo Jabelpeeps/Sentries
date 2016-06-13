@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
+import org.jabelpeeps.sentries.targets.AbstractTargetType;
 
 import com.tommytony.war.Team;
 import com.tommytony.war.War;
@@ -122,5 +125,59 @@ public class WarBridge extends PluginBridge {
 
         return (asTarget ? enemies.containsKey( inst )
                          : friends.containsKey( inst ));
+    }
+
+    public class WarTeamCommand implements SentriesComplexCommand {
+
+        private String helpTxt;
+        
+        @Override
+        public String getShortHelp() { return ""; }
+
+        @Override
+        public String getLongHelp() {
+
+            if ( helpTxt == null )
+                helpTxt = "";
+            
+            return helpTxt;
+        }
+
+        @Override
+        public String getPerm() { return "sentry.warteam"; }
+
+        @Override
+        public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+            // TODO Auto-generated method stub
+            return false;
+        }       
+    }
+    
+    public class WarTeamTarget extends AbstractTargetType {
+        
+        private Team team;
+
+        WarTeamTarget( Team t ) { 
+            super( 80 );
+            team = t; 
+        }
+        
+        @Override
+        public boolean includes( LivingEntity entity ) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+        
+        @Override
+        public boolean equals( Object o ) {
+            if (    o != null 
+                    && o instanceof WarTeamTarget 
+                    && ((WarTeamTarget) o).team.equals( team ) )
+                return true;
+            
+            return false;           
+        }       
+        @Override
+        public int hashCode() { return team.hashCode(); }
     }
 }

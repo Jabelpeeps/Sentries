@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -13,6 +14,8 @@ import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
+import org.jabelpeeps.sentries.targets.AbstractTargetType;
 
 import net.milkbowl.vault.permission.Permission;
 
@@ -158,5 +161,60 @@ public class VaultBridge extends PluginBridge {
             }
         }
         return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
+    }
+    
+    public class GroupCommand implements SentriesComplexCommand {
+
+        private String helpTxt;
+        
+        @Override
+        public String getShortHelp() { return ""; }
+
+        @Override
+        public String getLongHelp() {
+
+            if ( helpTxt == null )
+                helpTxt = "";
+            
+            return helpTxt;
+        }
+
+        @Override
+        public String getPerm() { return "sentry.groups"; }
+
+        @Override
+        public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+            // TODO Auto-generated method stub
+            return false;
+        }       
+    }
+    
+    public class GroupTarget extends AbstractTargetType {
+        
+        private String group;
+        
+        GroupTarget( String grp ) { 
+            super( 50 );
+            group = grp;
+        }
+
+        @Override
+        public boolean includes( LivingEntity entity ) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+        
+        @Override
+        public boolean equals( Object o ) {
+            if ( o   != null 
+                    && o instanceof GroupTarget 
+                    && ((GroupTarget) o).group.equals( group ) )
+                return true;
+            
+            return false;           
+        } 
+        
+        @Override
+        public int hashCode() { return group.hashCode(); }
     }
 }

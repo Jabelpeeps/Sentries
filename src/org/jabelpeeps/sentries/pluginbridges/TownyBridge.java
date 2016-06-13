@@ -8,8 +8,8 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.TargetType;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
+import org.jabelpeeps.sentries.targets.AbstractTargetType;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
@@ -80,6 +80,7 @@ public class TownyBridge extends PluginBridge {
                 sender.sendMessage( String.join( "", S.ERROR, " No Town was found matching:- ", args[nextArg + 2] ) );
                 return true;
             } 
+            
             TownyTarget target = new TownyTarget( town, true ); 
             TownyTarget ignore = new TownyTarget( town, false ); 
             
@@ -123,13 +124,13 @@ public class TownyBridge extends PluginBridge {
         public String getPerm() { return "sentry.towny"; }      
     }
     
-    public class TownyTarget implements TargetType {
+    public class TownyTarget extends AbstractTargetType {
 
         private Town town;
         private boolean forEnemies;
-        private String targetString = "";
         
         TownyTarget( Town target, boolean toAttack ) { 
+            super( 55 );
             town = target; 
             forEnemies = toAttack; 
         }
@@ -149,12 +150,6 @@ public class TownyBridge extends PluginBridge {
                 return false;
             }      
         }
-
-        @Override
-        public void setTargetString( String type ) { targetString = type; }
-
-        @Override
-        public String getTargetString() { return targetString; } 
         
         @Override
         public boolean equals( Object o ) {

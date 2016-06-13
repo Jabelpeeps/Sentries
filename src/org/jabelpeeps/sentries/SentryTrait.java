@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -48,6 +49,7 @@ import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.attackstrategies.CreeperAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.SpiderAttackStrategy;
+import org.jabelpeeps.sentries.targets.TargetType;
 
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
 import net.citizensnpcs.api.ai.GoalController;
@@ -99,8 +101,8 @@ public class SentryTrait extends Trait {
     public String guardeeName;
     DamageCause causeOfDeath;
 
-    public Set<TargetType> targets = new HashSet<>();
-    public Set<TargetType> ignores = new HashSet<>();
+    public Set<TargetType> targets = new TreeSet<>();
+    public Set<TargetType> ignores = new TreeSet<>();
     
     public Set<String> ignoreTargets = new HashSet<>();
     public Set<String> validTargets = new HashSet<>();
@@ -387,11 +389,13 @@ public class SentryTrait extends Trait {
 
     public boolean isIgnoring( LivingEntity aTarget ) {
 
-        // block for new Target handling
-        for ( TargetType each : ignores ) {
-            if ( each.includes( aTarget ) )
-                return true;
-        }
+        // block for new Target handling (now reduced to one line!)
+        if ( ignores.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
+        
+//        for ( TargetType each : ignores ) {
+//            if ( each.includes( aTarget ) )
+//                return true;
+//        }
         
         // old method follows
         if ( aTarget == guardeeEntity ) return true;
@@ -451,11 +455,13 @@ public class SentryTrait extends Trait {
 
     public boolean isTarget( LivingEntity aTarget ) {
 
-        // block for new target handling
-        for ( TargetType each : targets ) {
-            if ( each.includes( aTarget ) )
-                return true;
-        }
+        // block for new target handling (now on one line!)
+        if ( targets.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
+        
+//        for ( TargetType each : targets ) {
+//            if ( each.includes( aTarget ) )
+//                return true;
+//        }
         
         // old method follows
         if ( targetFlags == none || targetFlags == events ) return false;

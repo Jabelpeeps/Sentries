@@ -7,8 +7,8 @@ import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.targets.TargetType;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.TargetType;
 
 
 public class TargetComand implements SentriesComplexCommand {
