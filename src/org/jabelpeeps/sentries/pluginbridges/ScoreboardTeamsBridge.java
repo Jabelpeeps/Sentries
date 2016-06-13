@@ -43,7 +43,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     public String getCommandHelp() {         
         if ( commandHelp == null ) {
             commandHelp = String.join( "", Col.GOLD, "  Team:<TeamName> ", Col.RESET, "for a Minecraft Scoreboard Team.", 
-                    System.lineSeparator(), "  (or use the ", Col.GOLD, "/sentry scoreboard ... ", Col.RESET, "commands." ) ; 
+                    System.lineSeparator(), "    (or use the ", Col.GOLD, "/sentry scoreboard ... ", Col.RESET, "commands.)" ) ; 
         }       
         return commandHelp;
     }
@@ -210,7 +210,7 @@ public class ScoreboardTeamsBridge extends PluginBridge {
                         "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <TeamName>", System.lineSeparator(),
                         "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
                         "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all scoreboard targets and ignores from the selected sentry.", 
-                        System.lineSeparator(), "  (", Col.GOLD, "<TeamName> ", Col.RESET, "must be a currently existing scoreboard team.)" );
+                        System.lineSeparator(), Col.GOLD, "    <TeamName> ", Col.RESET, "must be a currently existing scoreboard team." );
             }
             return helpTxt;
         }

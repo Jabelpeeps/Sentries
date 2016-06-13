@@ -60,11 +60,11 @@ public class TargetComand implements SentriesComplexCommand {
 
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", Col.GOLD, "do '/sentry target <option>' where <option> is:-", Col.RESET ) );
-            joiner.add( String.join( " ", Col.GOLD, "", S.LIST, Col.RESET, S.HELP_LIST, S.TARGETS ) );
-            joiner.add( String.join( " ", Col.GOLD, "", S.CLEARALL, Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
-            joiner.add( String.join( " ", Col.GOLD, S.HELP_ADD_TYPE, Col.RESET, S.HELP_ADD ) );
-            joiner.add( String.join( " ", Col.GOLD, S.HELP_REMOVE_TYPE, Col.RESET, S.HELP_REMOVE ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry target <option> ", Col.RESET, "where <option> is:-", Col.RESET ) );
+            joiner.add( String.join( "", Col.GOLD, "  ", S.LIST, Col.RESET, S.HELP_LIST, S.TARGETS ) );
+            joiner.add( String.join( "", Col.GOLD, "  ", S.CLEARALL, Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
+            joiner.add( String.join( "", Col.GOLD, S.HELP_ADD_TYPE, Col.RESET, S.HELP_ADD ) );
+            joiner.add( String.join( "", Col.GOLD, S.HELP_REMOVE_TYPE, Col.RESET, S.HELP_REMOVE ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );
             joiner.add( PluginBridge.getAdditionalTargets() );
 

@@ -147,13 +147,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         List<String> tabs = new ArrayList<>( commandMap.keySet() );
         
         tabs.removeIf( t -> !t.startsWith( args[args.length - 1] ) );
-                
-//                new Predicate<String>() {
-//            @Override
-//            public boolean test( String t ) {
-//                return !t.startsWith( args[args.length - 1] );
-//            }            
-//        });   
+                  
         return tabs;       
     }
     

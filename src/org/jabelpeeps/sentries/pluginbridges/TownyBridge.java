@@ -6,14 +6,15 @@ import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.TargetType;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
-import com.palmergames.bukkit.towny.utils.CombatUtil;
 
 public class TownyBridge extends PluginBridge {
     
@@ -79,8 +80,8 @@ public class TownyBridge extends PluginBridge {
                 sender.sendMessage( String.join( "", S.ERROR, " No Town was found matching:- ", args[nextArg + 2] ) );
                 return true;
             } 
-            TownyTarget target = new TownyTarget( town, inst, true ); 
-            TownyTarget ignore = new TownyTarget( town, inst, false ); 
+            TownyTarget target = new TownyTarget( town, true ); 
+            TownyTarget ignore = new TownyTarget( town, false ); 
             
             if ( S.LEAVE.equalsIgnoreCase( args[nextArg + 1] ) ) {
                 
@@ -126,21 +127,27 @@ public class TownyBridge extends PluginBridge {
 
         private Town town;
         private boolean forEnemies;
-        private SentryTrait inst;
         private String targetString = "";
         
-        TownyTarget( Town target, SentryTrait trait, boolean toAttack ) { 
+        TownyTarget( Town target, boolean toAttack ) { 
             town = target; 
             forEnemies = toAttack; 
-            inst = trait;
         }
         
         @Override
         public boolean includes( LivingEntity entity ) {
-            if ( forEnemies )
-                return !CombatUtil.preventDamageCall( inst.getMyEntity(), entity );
-            // else
-            return CombatUtil.preventDamageCall( inst.getMyEntity(), entity );
+            try {
+                Resident theStranger = TownyUniverse.getDataSource().getResident( entity.getName() );
+                
+                if ( forEnemies ) {               
+                    return town.getNation().hasEnemy( theStranger.getTown().getNation() );
+                }            
+                return town.hasResident( theStranger );
+                
+            } catch ( NotRegisteredException e ) {
+                if ( Sentries.debug ) Sentries.debugLog( "TownyTarget has thrown NotRegisteredException" );
+                return false;
+            }      
         }
 
         @Override

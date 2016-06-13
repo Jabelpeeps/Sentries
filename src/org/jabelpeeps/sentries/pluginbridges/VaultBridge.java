@@ -30,7 +30,7 @@ public class VaultBridge extends PluginBridge {
     public String getPrefix() { return "GROUP"; }
 
     @Override
-    public String getCommandHelp() { return "Group:<GroupName> for a permission group."; }
+    public String getCommandHelp() { return "  Group:<GroupName> for a permission group."; }
 
     @Override
     public boolean activate() {
