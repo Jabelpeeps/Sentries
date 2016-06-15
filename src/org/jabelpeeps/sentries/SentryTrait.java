@@ -173,7 +173,7 @@ public class SentryTrait extends Trait {
         warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
         if ( key.keyExists( S.PERSIST_SPAWN ) ) {
-            try {
+//            try {
                 spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
                                              key.getDouble( "Spawn.x" ), 
                                              key.getDouble( "Spawn.y" ),
@@ -183,10 +183,10 @@ public class SentryTrait extends Trait {
 
                 if ( spawnLocation.getWorld() == null )
                     spawnLocation = null;
-            } catch ( Exception e ) {
-                e.printStackTrace();
-                spawnLocation = null;
-            }
+//            } catch ( Exception e ) {
+//                e.printStackTrace();
+//                spawnLocation = null;
+//            }
         }
         if ( guardeeName != null && guardeeName.isEmpty() )
             guardeeName = null;
@@ -206,7 +206,8 @@ public class SentryTrait extends Trait {
 
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
     }
-
+    
+    @SuppressWarnings( "synthetic-access" )
     @Override
     public void onSpawn() {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
@@ -266,8 +267,7 @@ public class SentryTrait extends Trait {
         updateAttackType();
 
         if ( tickMe == null ) {
-            tickMe = new BukkitRunnable() {                
-                    @SuppressWarnings( "synthetic-access" )
+            tickMe = new BukkitRunnable() {
                     @Override
                     public void run() {                      
                         if ( Sentries.debug && oldStatus != myStatus ) {
@@ -362,7 +362,8 @@ public class SentryTrait extends Trait {
         key.setString( S.CON_WARNING, warningMsg );
         key.setString( S.CON_GREETING, greetingMsg );
     }
-    
+
+    @SuppressWarnings( "synthetic-access" )
     @Override
     public void onCopy() {
 
@@ -370,12 +371,10 @@ public class SentryTrait extends Trait {
  
         // the new npc is not in the new location immediately.
         // TODO is this really needed?
-        new BukkitRunnable() {
-            @SuppressWarnings( "synthetic-access" )
-            @Override
-            public void run() {
-                spawnLocation = npc.getEntity().getLocation();
-            }
+        new BukkitRunnable() {  @Override
+                                public void run() {
+                                    spawnLocation = npc.getEntity().getLocation();
+                                }
         }.runTaskLater( sentry, 10 );
     }
 

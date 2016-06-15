@@ -41,45 +41,15 @@ public class EquipCommand implements SentriesComplexCommand {
                     if ( each.isEdible() || each.isRecord() ) continue;
                     
                     switch ( each ) {
-                        case AIR:
-                        case LONG_GRASS:
-                        case REDSTONE_WIRE:
-                        case CROPS:
-                        case SNOW:
-                        case PORTAL:
-                        case PUMPKIN_STEM:
-                        case MELON_STEM:
-                        case ENDER_PORTAL:
-                        case DOUBLE_PLANT:
-                        case END_GATEWAY:
-                        case BARRIER:
-                        case STRUCTURE_BLOCK:
-                        case COMMAND_REPEATING:
-                        case COMMAND_CHAIN:
-                        case COMMAND:
-                        case WATER:
-                        case LAVA:
-                        case STATIONARY_WATER:
-                        case STATIONARY_LAVA:
-                        case BEDROCK:
-                        case BED_BLOCK:
-                        case DROPPER:
-                        case DISPENSER:
-                        case PISTON_STICKY_BASE:
-                        case PISTON_BASE:
-                        case PISTON_EXTENSION:
-                        case PISTON_MOVING_PIECE:
-                        case MOB_SPAWNER:
-                        case WOODEN_DOOR:
-                        case IRON_DOOR:
-                        case DIODE_BLOCK_OFF:
-                        case DIODE_BLOCK_ON:
-                        case DOUBLE_STEP:
-                        case WOOD_DOUBLE_STEP:
-                        case DOUBLE_STONE_SLAB2:
-                        case PURPUR_DOUBLE_SLAB:
-                        case REDSTONE_COMPARATOR_OFF:
-                        case REDSTONE_COMPARATOR_ON:
+                        case AIR: case LONG_GRASS: case REDSTONE_WIRE: case CROPS: case SNOW: case PORTAL: case PUMPKIN_STEM: case MELON_STEM:
+                        case ENDER_PORTAL: case DOUBLE_PLANT: case BARRIER: case END_GATEWAY: case STRUCTURE_BLOCK: case COMMAND_REPEATING:
+                        case COMMAND_CHAIN: case COMMAND: case WATER: case LAVA: case STATIONARY_WATER: case STATIONARY_LAVA: case BEDROCK:
+                        case BED_BLOCK: case DROPPER: case DISPENSER: case PISTON_STICKY_BASE: case PISTON_BASE: case PISTON_EXTENSION:
+                        case PISTON_MOVING_PIECE: case MOB_SPAWNER: case WOODEN_DOOR: case IRON_DOOR: case IRON_DOOR_BLOCK: case DIODE:
+                        case DIODE_BLOCK_OFF: case DIODE_BLOCK_ON: case DOUBLE_STEP: case WOOD_DOUBLE_STEP: case DOUBLE_STONE_SLAB2:
+                        case PURPUR_DOUBLE_SLAB: case REDSTONE_COMPARATOR: case REDSTONE_COMPARATOR_OFF: case REDSTONE_COMPARATOR_ON:
+                        case COMMAND_MINECART: case EMPTY_MAP: case ARMOR_STAND: case IRON_BARDING: case GOLD_BARDING: case DIAMOND_BARDING:
+                        case STANDING_BANNER: case WALL_BANNER: case POWERED_RAIL: case DETECTOR_RAIL: case TRAPPED_CHEST: 
                             continue;
                         default:                   
                     }                    

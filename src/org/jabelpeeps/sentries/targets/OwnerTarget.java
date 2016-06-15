@@ -21,7 +21,12 @@ public class OwnerTarget extends AbstractTargetType {
         
         return false;
     }
-
+    
+    @Override
+    public String getTargetString() { 
+        return "OWNER:" + owner.toString(); 
+    }
+    
     @Override
     public boolean equals( Object o ) {
         if (    o != null 

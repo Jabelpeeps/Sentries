@@ -7,7 +7,6 @@ import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.targets.TargetType;
 import org.jabelpeeps.sentries.SentryTrait;
 
 
@@ -25,9 +24,8 @@ public class TargetComand implements SentriesComplexCommand {
         if ( S.LIST.equals( args[nextArg + 1] ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
             
-            for ( TargetType each : inst.targets ) {
-                joiner.add( each.getTargetString() );
-            }
+            inst.targets.forEach( t -> joiner.add( t.getTargetString() ) );
+
             joiner.add( inst.validTargets.toString() );
             
             sender.sendMessage( String.join( "", Col.GREEN, "Targets: ", joiner.toString() ) );

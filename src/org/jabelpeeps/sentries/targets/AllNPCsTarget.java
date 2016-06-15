@@ -13,6 +13,12 @@ public class AllNPCsTarget extends AbstractTargetType {
 
         return false;
     }
+    
+    @Override
+    public String getTargetString() { 
+        return "NPC:ALL"; 
+    }
+    
     @Override
     public boolean equals( Object o ) {
         if ( o != null && o instanceof AllNPCsTarget ) return true;

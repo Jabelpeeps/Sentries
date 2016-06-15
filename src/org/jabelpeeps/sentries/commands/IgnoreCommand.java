@@ -7,7 +7,6 @@ import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.targets.TargetType;
 import org.jabelpeeps.sentries.SentryTrait;
 
 
@@ -25,9 +24,8 @@ public class IgnoreCommand implements SentriesComplexCommand {
         if ( S.LIST.equals( args[nextArg + 1] ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
             
-            for ( TargetType each : inst.ignores ) {
-                joiner.add( each.getTargetString() );
-            }
+            inst.ignores.forEach( t -> joiner.add( t.getTargetString() ) );
+
             joiner.add( inst.ignoreTargets.toString() );
             
             sender.sendMessage( String.join( " ", Col.GREEN, npcName, "Current Ignores:", joiner.toString() ) );

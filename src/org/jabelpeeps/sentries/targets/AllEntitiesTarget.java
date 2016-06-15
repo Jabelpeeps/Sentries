@@ -15,8 +15,12 @@ public class AllEntitiesTarget extends AbstractTargetType {
         return true;
     }
     @Override
-    public boolean equals( Object o ) { 
-        
+    public String getTargetString() { 
+        return "ENTITY:ALL"; 
+    }
+    
+    @Override
+    public boolean equals( Object o ) {         
         if ( o != null && o instanceof AllEntitiesTarget ) return true;
         
         return false;

@@ -16,6 +16,12 @@ public class AllPlayersTarget extends AbstractTargetType {
 
         return false;
     }
+    
+    @Override
+    public String getTargetString() { 
+        return "PLAYER:ALL"; 
+    }
+    
     @Override
     public boolean equals( Object o ) {
         if ( o != null && o instanceof AllPlayersTarget ) return true;

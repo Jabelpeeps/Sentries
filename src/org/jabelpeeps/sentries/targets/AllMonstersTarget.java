@@ -4,9 +4,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 
 
-public class AllHostileMobsTarget extends AbstractTargetType {
+public class AllMonstersTarget extends AbstractTargetType {
 
-    AllHostileMobsTarget() { super( 3 ); }
+    AllMonstersTarget() { super( 3 ); }
 
     @Override
     public boolean includes( LivingEntity entity ) {
@@ -15,8 +15,13 @@ public class AllHostileMobsTarget extends AbstractTargetType {
         return false;
     }
     @Override
+    public String getTargetString() { 
+        return "MONSTER:ALL"; 
+    }
+    
+    @Override
     public boolean equals( Object o ) {
-        if ( o != null && o instanceof AllHostileMobsTarget ) return true;
+        if ( o != null && o instanceof AllMonstersTarget ) return true;
 
         return false;
     }
