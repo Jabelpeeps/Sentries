@@ -12,30 +12,26 @@ public class RangeCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            sender.sendMessage( 
-                String.join( "", Col.GOLD, npcName, "'s attack range is:- ", String.valueOf( inst.range ) ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s attack range is:- ", String.valueOf( inst.range ) );
         }
         else {
             int range = Util.string2Int( number );
             if ( range < 1 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( range > 100 ) range = 100;
             
             inst.range = range;
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s attack range set to:- ", String.valueOf( range ) ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s attack range set to:- ", String.valueOf( range ) );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set the range a sentry's target detection";
-    }
+    public String getShortHelp() { return "set the range a sentry's target detection"; }
 
     @Override
     public String getLongHelp() {
@@ -48,7 +44,5 @@ public class RangeCommand implements SentriesNumberCommand {
         return helpTxt;
     }
     @Override
-    public String getPerm() {
-        return S.PERM_RANGE;
-    }
+    public String getPerm() { return S.PERM_RANGE; }
 }

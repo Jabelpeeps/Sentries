@@ -5,6 +5,7 @@ import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Util;
 
 
 public class SetSpawnCommand implements SentriesComplexCommand {
@@ -12,7 +13,7 @@ public class SetSpawnCommand implements SentriesComplexCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         LivingEntity entity = inst.getMyEntity();
         
@@ -20,15 +21,12 @@ public class SetSpawnCommand implements SentriesComplexCommand {
             sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is dead" ) );
         else {
             inst.spawnLocation = entity.getLocation();
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, " will respawn at its present location" ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, " will respawn at its present location" );
         }
-        return true;
     }
     
     @Override
-    public String getShortHelp() {
-        return "set the sentry's spawn point";
-    }
+    public String getShortHelp() { return "set the sentry's spawn point"; }
     
     @Override
     public String getLongHelp() {
@@ -40,7 +38,5 @@ public class SetSpawnCommand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_SET_SPAWN;
-    }
+    public String getPerm() { return S.PERM_SET_SPAWN; }
 }

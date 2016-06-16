@@ -12,7 +12,7 @@ public class ArmourCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
             sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s armour value is:- ", String.valueOf( inst.armour ) ) );
@@ -21,14 +21,13 @@ public class ArmourCommand implements SentriesNumberCommand {
             int armour = Util.string2Int( number );
             if ( armour < 0 ) {
                 sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                return;
             }
             if ( armour > 2000000 ) armour = 2000000;
             
             inst.armour = armour;
             sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s armour set to:- ", String.valueOf( armour ) ) );
         }
-        return true;
     }
 
     @Override
@@ -45,7 +44,6 @@ public class ArmourCommand implements SentriesNumberCommand {
             Col.RED, Col.BOLD, "  NOTE: ", Col.RESET, "Attacks dealing an ammount of damage less than the armour value will be cancelled. ",
             System.lineSeparator(), "  If no number is given the current value is shown. (Default = 0)");
         }
-        S.Col.GOLD.concat( "Usage: /sentry armour [#] " );
         return helpTxt;
     }
 

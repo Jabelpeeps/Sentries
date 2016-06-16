@@ -12,23 +12,22 @@ public class AttackRateCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
-            sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s ranged attack rate is:- ", 
+            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s ranged attack rate is:- ", 
                                 String.valueOf( inst.arrowRate), " seconds between shots." ) );
         }
         else {
             double attackrate = Util.string2Double( number );
             if ( attackrate < 0.0 ) {
                 sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                return;
             }
             if ( attackrate > 30.0 ) attackrate = 30.0;
             
             inst.arrowRate = attackrate;
-            sender.sendMessage( String.join( "", S.Col.GREEN, npcName, "'s ranged attack rate set to:- ", String.valueOf( attackrate ) ) );
+            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s ranged attack rate set to:- ", String.valueOf( attackrate ) ) );
         }
-        return true;
     }
 
     @Override

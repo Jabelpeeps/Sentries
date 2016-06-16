@@ -171,6 +171,9 @@ public class VaultBridge extends PluginBridge {
         public String getShortHelp() { return ""; }
 
         @Override
+        public String getPerm() { return "sentry.groups"; }
+
+        @Override
         public String getLongHelp() {
 
             if ( helpTxt == null )
@@ -178,14 +181,10 @@ public class VaultBridge extends PluginBridge {
             
             return helpTxt;
         }
-
+        
         @Override
-        public String getPerm() { return "sentry.groups"; }
-
-        @Override
-        public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+        public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
             // TODO Auto-generated method stub
-            return false;
         }       
     }
     
@@ -206,7 +205,7 @@ public class VaultBridge extends PluginBridge {
         
         @Override
         public boolean equals( Object o ) {
-            if ( o   != null 
+            if (    o != null 
                     && o instanceof GroupTarget 
                     && ((GroupTarget) o).group.equals( group ) )
                 return true;

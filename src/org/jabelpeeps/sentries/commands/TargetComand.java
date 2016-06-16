@@ -8,6 +8,7 @@ import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Util;
 
 
 public class TargetComand implements SentriesComplexCommand {
@@ -15,41 +16,36 @@ public class TargetComand implements SentriesComplexCommand {
     private String targetCommandHelp;
 
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
                 
         if ( args.length <= nextArg + 1 ) {
             sender.sendMessage( getLongHelp() );
-            return true;
+            return;
         }
         if ( S.LIST.equals( args[nextArg + 1] ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
-            
-            inst.targets.forEach( t -> joiner.add( t.getTargetString() ) );
 
             joiner.add( inst.validTargets.toString() );
-            
-            sender.sendMessage( String.join( "", Col.GREEN, "Targets: ", joiner.toString() ) );
-            return true;
+            inst.targets.forEach( t -> joiner.add( t.getTargetString() ) );
+
+            Util.sendMessage( sender, Col.GREEN, "Targets: ", joiner.toString() );
+            return;
         }
         if ( S.CLEARALL.equals( args[nextArg + 1] ) ) {
             inst.targets.clear();
             inst.validTargets.clear();
             inst.targetFlags = 0;
             inst.clearTarget();
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, ": ALL Targets cleared" ) );
-            return true;
+            Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Targets cleared" );
+            return;
         }
         if ( args.length > 2 + nextArg ) {
             sender.sendMessage( CommandHandler.parseTargetOrIgnore( args, nextArg, npcName, inst, true ) );
-            return true;
         }                
-        return false;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set targets to attack.";
-    }
+    public String getShortHelp() { return "set targets to attack."; }
 
     @Override
     public String getLongHelp() {
@@ -72,7 +68,5 @@ public class TargetComand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_TARGET;
-    }
+    public String getPerm() { return S.PERM_TARGET; }
 }

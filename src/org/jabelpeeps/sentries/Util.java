@@ -311,4 +311,13 @@ public abstract class Util {
     public static String joinArgs( int startFrom, String[] args ) {
         return joinArgs( startFrom, args, " " );
     }
+    
+    /**
+     * Convenience method to send messages. Before sending it performs a null-check
+     * on sender, and then calls String.join() on the String args, with a delimiter of ""
+     */
+    public static void sendMessage( CommandSender sender, String...strings ) {
+        if ( sender != null ) 
+            sender.sendMessage( String.join( "", strings ) );
+    }
 }

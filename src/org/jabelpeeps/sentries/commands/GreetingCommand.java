@@ -12,7 +12,7 @@ public class GreetingCommand implements SentriesComplexCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... inargs ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... inargs ) {
         
         if ( inargs.length >= 2 + nextArg ) {
 
@@ -20,18 +20,15 @@ public class GreetingCommand implements SentriesComplexCommand {
             str = ChatColor.translateAlternateColorCodes( '&', str );
             inst.greetingMsg = str;
             
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, ": Greeting message set to:- ", S.Col.RESET, str ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, ": Greeting message set to:- ", S.Col.RESET, str );
         }
         else {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s Greeting Message is:- ", S.Col.RESET, inst.greetingMsg ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s Greeting Message is:- ", S.Col.RESET, inst.greetingMsg );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set how the sentry greets friends";
-    }
+    public String getShortHelp() { return "set how the sentry greets friends"; }
 
     @Override
     public String getLongHelp() {
@@ -44,7 +41,5 @@ public class GreetingCommand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_GREETING;
-    }
+    public String getPerm() { return S.PERM_GREETING; }
 }

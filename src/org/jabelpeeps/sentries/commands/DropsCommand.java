@@ -10,20 +10,17 @@ public class DropsCommand implements SentriesToggleCommand {
 
     private String helpTxt;
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
         
         inst.dropInventory = (set == null) ? !inst.dropInventory : set;
 
         sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, 
                             inst.dropInventory ? "will drop items"
                                                : "will not drop items" ) );
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "control drops when the sentry is killed";
-    }
+    public String getShortHelp() { return "control drops when the sentry is killed"; }
 
     @Override
     public String getLongHelp() {
@@ -37,7 +34,5 @@ public class DropsCommand implements SentriesToggleCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_DROPS;
-    }
+    public String getPerm() { return S.PERM_DROPS; }
 }

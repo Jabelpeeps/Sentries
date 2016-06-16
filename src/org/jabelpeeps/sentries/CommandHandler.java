@@ -170,7 +170,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
             }
             
-            sender.sendMessage( String.join( "", Col.GOLD, "---------- Sentries Commands ----------", Col.RESET  ) );
+            Util.sendMessage( sender, Col.GOLD, "---------- Sentries Commands ----------", Col.RESET );
 
             for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {                
                 if ( S.ARMOR.equals( each.getKey() ) ) continue;
@@ -178,16 +178,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 SentriesCommand command = each.getValue();
                 
                 if ( sender.hasPermission( command.getPerm() ) ) {
-                    sender.sendMessage( String.join( "", Col.GOLD, "/sentry ", each.getKey(), " ... ", Col.RESET, command.getShortHelp() ) );
+                    Util.sendMessage( sender, Col.GOLD, "/sentry ", each.getKey(), " ... ", Col.RESET, command.getShortHelp() );
                 }
             }
             // two special commands to add to the list...
             if ( checkCommandPerm( S.PERM_RELOAD, sender ) )
-                sender.sendMessage( String.join( "", Col.GOLD, "/sentry reload", Col.RESET, " - Reloads the config file" ) );
+                Util.sendMessage( sender, Col.GOLD, "/sentry reload", Col.RESET, " - Reloads the config file" );
             
             if ( sender instanceof ConsoleCommandSender )
-                sender.sendMessage( String.join( "", Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!", System.lineSeparator(),
-                                            Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console" ) );
+                Util.sendMessage( sender, Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!", System.lineSeparator(),
+                                            Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console" );
             // lazy initialiser
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
@@ -248,7 +248,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             thisNPC = Sentries.registry.getById( npcid );
 
             if ( thisNPC == null ) {
-                sender.sendMessage( String.join( "", S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) ) );
+                Util.sendMessage( sender, S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) );
                 return true;
             }
         }
@@ -293,7 +293,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     Boolean set = null;
                     
                     if ( inargs.length > nextArg + 2 ) {
-                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, " This command accepts 1 argument (at most)." ) );
+                        Util.sendMessage( sender, S.ERROR, "Too many arguments given.", Col.RESET, " This command accepts 1 argument (at most)." );
                         return true;
                     }
                     else if ( inargs.length == 2 + nextArg ) {
@@ -311,7 +311,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 else if ( command instanceof SentriesNumberCommand ) {
                     
                     if ( inargs.length > nextArg + 2 )
-                        sender.sendMessage( String.join( "", S.ERROR, "Too many arguments given.", Col.RESET, " Only one number value can be processesd." ) );
+                        Util.sendMessage( sender, S.ERROR, "Too many arguments given.", Col.RESET, " Only one number value can be processesd." );
                     else {
                         String number = null;
                         if ( inargs.length == nextArg + 2 ) number = inargs[nextArg + 1];

@@ -5,7 +5,7 @@ import org.jabelpeeps.sentries.SentryTrait;
 
 public interface SentriesToggleCommand extends SentriesCommand {
     
-    boolean call( CommandSender sender, 
+    void call( CommandSender sender, 
                   String npcName, 
                   SentryTrait inst, 
                   Boolean set );

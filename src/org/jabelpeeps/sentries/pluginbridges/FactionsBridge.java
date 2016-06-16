@@ -188,6 +188,9 @@ public class FactionsBridge extends PluginBridge {
         public String getShortHelp() { return ""; }
 
         @Override
+        public String getPerm() { return "sentry.factions"; }
+        
+        @Override
         public String getLongHelp() {
 
             if ( helpTxt == null )
@@ -196,13 +199,10 @@ public class FactionsBridge extends PluginBridge {
             return helpTxt;
         }
 
-        @Override
-        public String getPerm() { return "sentry.factions"; }
 
         @Override
-        public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+        public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
             // TODO Auto-generated method stub
-            return false;
         }       
     }
     

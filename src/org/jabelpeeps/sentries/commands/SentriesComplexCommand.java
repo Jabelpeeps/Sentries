@@ -5,7 +5,7 @@ import org.jabelpeeps.sentries.SentryTrait;
 
 public interface SentriesComplexCommand extends SentriesCommand {
     
-    boolean call( CommandSender sender, // the sender of the command
+    void call( CommandSender sender, // the sender of the command
                   String npcName,       // the NPC's name
                   SentryTrait inst,     // the NPC's SentryTrait
                   int nextArg,          // the next argument to be parsed

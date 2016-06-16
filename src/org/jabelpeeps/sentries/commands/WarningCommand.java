@@ -13,7 +13,7 @@ public class WarningCommand implements SentriesComplexCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... inargs ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... inargs ) {
         
         if ( inargs.length >= 2 + nextArg ) {
 
@@ -21,18 +21,15 @@ public class WarningCommand implements SentriesComplexCommand {
             str = ChatColor.translateAlternateColorCodes( '&', str );
             inst.warningMsg = str;
             
-            sender.sendMessage( String.join( "", S.Col.GREEN, npcName, ": Warning message set to:- ", S.Col.RESET, str ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, ": Warning message set to:- ", Col.RESET, str );
         }
         else {
-            sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s Warning message is:- ", S.Col.RESET, inst.warningMsg ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s Warning message is:- ", Col.RESET, inst.warningMsg );
         }
-        return false;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set how the sentry warns enemies";
-    }
+    public String getShortHelp() { return "set how the sentry warns enemies"; }
 
     @Override
     public String getLongHelp() {
@@ -46,7 +43,5 @@ public class WarningCommand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_WARNING;
-    }
+    public String getPerm() { return S.PERM_WARNING; }
 }

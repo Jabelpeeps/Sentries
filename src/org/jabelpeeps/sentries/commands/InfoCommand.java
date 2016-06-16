@@ -14,7 +14,7 @@ public class InfoCommand implements SentriesComplexCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
@@ -52,14 +52,10 @@ public class InfoCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() ) );
 
         sender.sendMessage( joiner.toString() );
-    
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "view the attributes of a sentry";
-    }
+    public String getShortHelp() { return "view the attributes of a sentry"; }
 
     @Override
     public String getLongHelp() {
@@ -71,7 +67,5 @@ public class InfoCommand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_INFO;
-    }
+    public String getPerm() { return S.PERM_INFO; }
 }

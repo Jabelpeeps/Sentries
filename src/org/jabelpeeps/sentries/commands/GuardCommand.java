@@ -14,7 +14,7 @@ public class GuardCommand implements SentriesComplexCommand {
     private String guardCommandHelp;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length > nextArg + 1 ) {
             
@@ -43,25 +43,22 @@ public class GuardCommand implements SentriesComplexCommand {
                 if ( !localonly ) ok = inst.findGuardEntity( arg, true );
 
                 if ( ok )
-                    sender.sendMessage( String.join( " ", Col.GREEN, npcName, "is now guarding", arg ) );
+                    Util.sendMessage( sender, Col.GREEN, npcName, " is now guarding ", arg );
                 else
-                    sender.sendMessage( String.join( " ", Col.RED, npcName, "could not find", arg ) );
-                return true;
+                    Util.sendMessage( sender, Col.RED, npcName, " could not find ", arg );
+                return;
             }
         }
         if ( inst.guardeeName == null )
             sender.sendMessage( Col.GREEN.concat( "Guarding: My Surroundings" ) );
         else if ( inst.guardeeEntity == null )
-            sender.sendMessage( String.join( " ", Col.GREEN, npcName, "is configured to guard", inst.guardeeName, "but cannot find them at the moment" ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, " is configured to guard ", inst.guardeeName, " but cannot find them at the moment." );
         else
-            sender.sendMessage( String.join( " ", Col.BLUE, "Guarding:", inst.guardeeEntity.getName() ) );
-        return true;
+            Util.sendMessage( sender, Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() );
     }
 
     @Override
-    public String getShortHelp() {
-        return "tell the sentry what to guard" ;
-    }
+    public String getShortHelp() { return "tell the sentry what to guard" ; }
 
     @Override
     public String getLongHelp() {
@@ -86,8 +83,5 @@ public class GuardCommand implements SentriesComplexCommand {
     }
     
     @Override
-    public String getPerm() {
-        return S.PERM_GUARD;
-    }
-
+    public String getPerm() { return S.PERM_GUARD; }
 }

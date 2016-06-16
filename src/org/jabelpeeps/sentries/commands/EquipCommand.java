@@ -23,12 +23,12 @@ public class EquipCommand implements SentriesComplexCommand {
     private String materialList;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= 1 + nextArg ) {
             sender.sendMessage( String.join( "", S.ERROR, "More arguments needed.") );
             sender.sendMessage( getLongHelp());
-            return true;
+            return;
         }
         
         if ( S.LIST.equalsIgnoreCase( args[nextArg + 1] ) ) {
@@ -58,14 +58,14 @@ public class EquipCommand implements SentriesComplexCommand {
                 materialList = String.join( "", Col.GOLD, "Valid Item Names:- ", Col.RESET, joiner.toString() );
             }            
             sender.sendMessage( materialList );
-            return true;
+            return;
         }
         
         NPC npc = inst.getNPC();
         
         if ( !npc.isSpawned() ) {
-            sender.sendMessage( String.join( "", Col.RED, "You can only modify equipment when a sentry is spawned." ) );
-            return true;
+            Util.sendMessage( sender, Col.RED, "You can only modify equipment when a sentry is spawned." );
+            return;
         }
         
         EntityType type = npc.getEntity().getType();
@@ -76,7 +76,7 @@ public class EquipCommand implements SentriesComplexCommand {
             if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] ) ) {
 
                 inst.equip( null );
-                sender.sendMessage( String.join( "", Col.YELLOW, npcName, "'s equipment cleared" ) );
+                Util.sendMessage( sender, Col.YELLOW, npcName, "'s equipment cleared" );
             }
             else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
 
@@ -90,9 +90,9 @@ public class EquipCommand implements SentriesComplexCommand {
                         
                         if ( "hand".equalsIgnoreCase( slotName ) ) slotName = "held item";
                         
-                        sender.sendMessage( String.join( "", Col.GREEN, "removed ", npcName, "'s ", slotName ) );
+                        Util.sendMessage( sender, Col.GREEN, "removed ", npcName, "'s ", slotName );
                     }
-                    else sender.sendMessage( String.join( "", Col.RED, slotName, " was not recognised." ) );
+                    else Util.sendMessage( sender, Col.RED, slotName, " was not recognised." );
                 }
             }
             else {
@@ -100,7 +100,7 @@ public class EquipCommand implements SentriesComplexCommand {
 
                 if ( mat == null ) {
                     sender.sendMessage( Col.RED.concat( "Could not equip: item name not recognised" ) );
-                    return true;
+                    return;
                 }
 
                 ItemStack item = new ItemStack( mat );
@@ -112,7 +112,6 @@ public class EquipCommand implements SentriesComplexCommand {
             }
         }
         else sender.sendMessage( Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
-        return true;
     }
     @Override
     public String getShortHelp() { return "adjust the equipment a sentry is using"; }

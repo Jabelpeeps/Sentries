@@ -12,30 +12,27 @@ public class HealthCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s Health is:- ", String.valueOf( inst.maxHealth ) ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s Health is:- ", String.valueOf( inst.maxHealth ) );
         }
         else {
             int HPs = Util.string2Int( number );
             if ( HPs < 1 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( HPs > 2000000 ) HPs = 2000000;
             
             inst.maxHealth = HPs;
             inst.setHealth( HPs );
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "directly adjust a sentry's health";
-    }
+    public String getShortHelp() { return "directly adjust a sentry's health"; }
 
     @Override
     public String getLongHelp() {
@@ -49,7 +46,5 @@ public class HealthCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_HEALTH;
-    }
+    public String getPerm() { return S.PERM_HEALTH; }
 }

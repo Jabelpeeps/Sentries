@@ -12,31 +12,26 @@ public class HealRateCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            sender.sendMessage( 
-                String.join( "", Col.GOLD, npcName," will heal every ", String.valueOf( inst.healRate ), " seconds" ) );
+            Util.sendMessage( sender, Col.GOLD, npcName," will heal every ", String.valueOf( inst.healRate ), " seconds" );
         }
         else {
             double healrate = Util.string2Double( number );
             if ( healrate < 0.0 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( healrate > 300.0 ) healrate = 300.0;
             
             inst.healRate = healrate;
-            sender.sendMessage( 
-                String.join( " ", Col.GREEN, npcName, " will now heal every ", String.valueOf( healrate ), " seconds" ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, " will now heal every ", String.valueOf( healrate ), " seconds" );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set how fast a sentry will heal";
-    }
+    public String getShortHelp() { return "set how fast a sentry will heal"; }
 
     @Override
     public String getLongHelp() {
@@ -51,7 +46,5 @@ public class HealRateCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_HEAL_RATE;
-    }
+    public String getPerm() { return S.PERM_HEAL_RATE; }
 }

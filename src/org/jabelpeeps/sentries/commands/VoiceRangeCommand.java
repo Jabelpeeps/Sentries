@@ -12,29 +12,26 @@ public class VoiceRangeCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s voice range is:- " + inst.voiceRange ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s voice range is:- " + inst.voiceRange );
         }
         else {
             int range = Util.string2Int( number );
             if ( range < 0 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( range > 50 ) range = 50;
             
             inst.voiceRange = range;
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s voice range set to:- ", String.valueOf( range ) ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s voice range set to:- ", String.valueOf( range ) );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set the range of warnings and greetings";
-    }
+    public String getShortHelp() { return "set the range of warnings and greetings"; }
 
     @Override
     public String getLongHelp() {
@@ -48,7 +45,5 @@ public class VoiceRangeCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_WARNING_RANGE;
-    }
+    public String getPerm() { return S.PERM_WARNING_RANGE; }
 }

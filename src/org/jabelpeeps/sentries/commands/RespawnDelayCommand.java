@@ -12,7 +12,7 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
             respawnCommandMessage( inst.respawnDelay, npcName, sender );
@@ -20,15 +20,14 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
         else {
             int respawn = Util.string2Int( number );
             if ( respawn < -1 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( respawn > 2000000 ) respawn = 2000000;
             
             inst.respawnDelay = respawn;
             respawnCommandMessage( inst.respawnDelay, npcName, sender );
         }
-        return true;
     }
     /**
      * Convenience method to send a formatted message to the player regarding
@@ -52,9 +51,7 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
     }
     
     @Override
-    public String getShortHelp() {
-        return "set the delay before a sentry respawns";
-    }
+    public String getShortHelp() { return "set the delay before a sentry respawns"; }
 
     @Override
     public String getLongHelp() {
@@ -70,7 +67,5 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_RESPAWN_DELAY;
-    }
+    public String getPerm() { return S.PERM_RESPAWN_DELAY; }
 }

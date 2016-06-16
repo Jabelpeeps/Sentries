@@ -8,6 +8,7 @@ import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Util;
 
 
 public class IgnoreCommand implements SentriesComplexCommand {
@@ -15,40 +16,35 @@ public class IgnoreCommand implements SentriesComplexCommand {
     String ignoreCommandHelp;
 
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= nextArg + 1 ) {
             sender.sendMessage( getLongHelp() );
-            return true;
+            return;
         }                    
         if ( S.LIST.equals( args[nextArg + 1] ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
-            
-            inst.ignores.forEach( t -> joiner.add( t.getTargetString() ) );
 
-            joiner.add( inst.ignoreTargets.toString() );
+            joiner.add( inst.ignoreTargets.toString() );            
+            inst.ignores.forEach( t -> joiner.add( t.getTargetString() ) );
             
-            sender.sendMessage( String.join( " ", Col.GREEN, npcName, "Current Ignores:", joiner.toString() ) );
-            return true;
+            Util.sendMessage( sender, Col.GREEN, npcName, " Current Ignores: ", joiner.toString() );
+            return;
         }
         if ( S.CLEARALL.equals( args[nextArg + 1] ) ) {
             inst.ignores.clear();
             inst.ignoreTargets.clear();
             inst.ignoreFlags = 0;
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, ": ALL Ignores cleared" ) );
-            return true;
+            Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Ignores cleared" );
+            return;
         }
         if ( args.length > 2 + nextArg ) {
             sender.sendMessage( CommandHandler.parseTargetOrIgnore( args, nextArg, npcName, inst, false ) );
-            return true;
         }
-        return false;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set entities to ignore";
-    }
+    public String getShortHelp() { return "set entities to ignore"; }
 
     @Override
     public String getLongHelp() {
@@ -71,8 +67,5 @@ public class IgnoreCommand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_IGNORE;
-    }
-
+    public String getPerm() { return S.PERM_IGNORE; }
 }

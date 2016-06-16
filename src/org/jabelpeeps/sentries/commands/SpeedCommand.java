@@ -12,30 +12,27 @@ public class SpeedCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s Speed is:- " + inst.speed ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s Speed is:- " + inst.speed );
         }
         else {
             float speed = Util.string2Float( number );
             if ( speed < 0.0 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
 
             if ( speed > 2.0 ) speed = 2.0f;
             
             inst.speed = speed;
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s speed set to:- ", String.valueOf( speed ) ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s speed set to:- ", String.valueOf( speed ) );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "adjust a sentry's speed";
-    }
+    public String getShortHelp() { return "adjust a sentry's speed"; }
 
     @Override
     public String getLongHelp() {
@@ -49,8 +46,6 @@ public class SpeedCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_SPEED;
-    }
+    public String getPerm() { return S.PERM_SPEED; }
 }
 

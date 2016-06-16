@@ -14,6 +14,7 @@ import org.bukkit.Effect;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Creeper;
@@ -46,6 +47,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.attackstrategies.CreeperAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.SpiderAttackStrategy;
@@ -1219,6 +1221,11 @@ public class SentryTrait extends Trait {
         draw( false );
     }
 
+    public void checkIfEmpty ( CommandSender sender ) {
+        if ( targets.isEmpty() && ignores.isEmpty() )
+            sender.sendMessage( String.join( "", Col.YELLOW, npc.getName(), " now has no defined targets." ) );
+    }
+    
     void setAttackTarget( LivingEntity theEntity ) {
 
         LivingEntity myEntity = getMyEntity();

@@ -12,28 +12,25 @@ public class NightVisionCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s night-vision is:- ", String.valueOf( inst.nightVision ) ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s night-vision is:- ", String.valueOf( inst.nightVision ) );
         }
         else {
             int vision = Util.string2Int( number );
             if ( vision < 0 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( vision > 16 ) vision = 16;
             
             inst.nightVision = vision;
-            sender.sendMessage( String.join( "", S.Col.GREEN, npcName, "'s night_vision set to:- ", String.valueOf( vision ) ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s night_vision set to:- ", String.valueOf( vision ) );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "allow sentry to see in darkness";
-    }
+    public String getShortHelp() { return "allow sentry to see in darkness"; }
 
     @Override
     public String getLongHelp() {
@@ -48,7 +45,5 @@ public class NightVisionCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_NIGHTVISION;
-    }
+    public String getPerm() { return S.PERM_NIGHTVISION; }
 }

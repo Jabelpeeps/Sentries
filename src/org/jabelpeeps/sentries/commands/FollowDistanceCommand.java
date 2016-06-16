@@ -12,7 +12,7 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
     private String helpTxt;
     
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
             sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s follow distance is ", String.valueOf( inst.followDistance ) ) );
@@ -20,21 +20,18 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
         else {
             int dist = Util.string2Int( number );
             if ( dist < 0 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
-                return true;
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                return;
             }
             if ( dist > 32 ) dist = 32;
             
             inst.followDistance = dist * dist;
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s follow distance set to ", String.valueOf( dist ) ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s follow distance set to ", String.valueOf( dist ) );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set how close the sentry follows when guarding";
-    }
+    public String getShortHelp() { return "set how close the sentry follows when guarding"; }
 
     @Override
     public String getLongHelp() {
@@ -48,7 +45,5 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_FOLLOW_DIST;
-    }
+    public String getPerm() { return S.PERM_FOLLOW_DIST; }
 }

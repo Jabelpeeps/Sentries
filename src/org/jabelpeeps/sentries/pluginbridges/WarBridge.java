@@ -147,9 +147,8 @@ public class WarBridge extends PluginBridge {
         public String getPerm() { return "sentry.warteam"; }
 
         @Override
-        public boolean call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+        public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
             // TODO Auto-generated method stub
-            return false;
         }       
     }
     

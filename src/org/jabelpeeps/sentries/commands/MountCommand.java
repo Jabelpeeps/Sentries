@@ -11,29 +11,26 @@ public class MountCommand implements SentriesToggleCommand {
 
     private String helpTxt;
     @Override
-    public boolean call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
 
         set = (set == null) ? !inst.hasMount() : set;
 
         if ( set ) {
             inst.mount();
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, " is now mounted" ) );
+            Util.sendMessage( sender, Col.GREEN, npcName, " is now mounted" );
         }
         else {
             if ( inst.hasMount() ) {
                 Util.removeMount( inst.mountID );
                 inst.mountID = -1;
-                sender.sendMessage( String.join( "", Col.GREEN, npcName, " is no longer mounted" ) );
+                Util.sendMessage( sender, Col.GREEN, npcName, " is no longer mounted" );
             }
-            else sender.sendMessage( String.join( "", Col.YELLOW, npcName, " is not mounted" ) );
+            else Util.sendMessage( sender, Col.YELLOW, npcName, " is not mounted" );
         }
-        return true;
     }
 
     @Override
-    public String getShortHelp() {
-        return "set whether the sentry is mounted";
-    }
+    public String getShortHelp() { return "set whether the sentry is mounted"; }
 
     @Override
     public String getLongHelp() {
@@ -47,7 +44,5 @@ public class MountCommand implements SentriesToggleCommand {
     }
 
     @Override
-    public String getPerm() {
-        return S.PERM_MOUNT;
-    }
+    public String getPerm() { return S.PERM_MOUNT; }
 }
