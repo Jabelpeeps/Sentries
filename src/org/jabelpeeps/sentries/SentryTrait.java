@@ -76,7 +76,7 @@ public class SentryTrait extends Trait {
 
     Sentries sentry;
 
-    Location _projTargetLostLoc;
+//    Location _projTargetLostLoc;
     public Location spawnLocation;
 
     public int strength, armour, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
@@ -388,16 +388,12 @@ public class SentryTrait extends Trait {
         return (ignoreFlags & type) == type;
     }
 
+    @SuppressWarnings( "deprecation" )
     public boolean isIgnoring( LivingEntity aTarget ) {
 
         // block for new Target handling (now reduced to one line!)
         if ( ignores.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
-        
-//        for ( TargetType each : ignores ) {
-//            if ( each.includes( aTarget ) )
-//                return true;
-//        }
-        
+ 
         // old method follows
         if ( aTarget == guardeeEntity ) return true;
         if ( ignoreFlags == none ) return false;
@@ -454,16 +450,12 @@ public class SentryTrait extends Trait {
         return false;
     }
 
+    @SuppressWarnings( "deprecation" )
     public boolean isTarget( LivingEntity aTarget ) {
 
         // block for new target handling (now on one line!)
         if ( targets.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
-        
-//        for ( TargetType each : targets ) {
-//            if ( each.includes( aTarget ) )
-//                return true;
-//        }
-        
+               
         // old method follows
         if ( targetFlags == none || targetFlags == events ) return false;
         if ( hasTargetType( all ) ) return true;
@@ -683,11 +675,11 @@ public class SentryTrait extends Trait {
         }
 
         double hangtime = Util.hangtime( testAngle, v, elev, g );
-        Vector targetVelocity = theTarget.getLocation().subtract( _projTargetLostLoc ).toVector();
+        Vector targetVelocity = theTarget.getLocation().subtract( attackTarget.getLocation() ).toVector();
 
         targetVelocity.multiply( 20 / Sentries.logicTicks );
 
-        Location to = Util.leadLocation( targetsHeart, targetVelocity, hangtime );
+        Location to = targetsHeart.clone().add( targetVelocity.clone().multiply( hangtime ) );
         Vector victor = to.clone().subtract( myLocation ).toVector();
 
         double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
@@ -1216,7 +1208,7 @@ public class SentryTrait extends Trait {
     public void clearTarget() {
 
         attackTarget = null;
-        _projTargetLostLoc = null;
+//        _projTargetLostLoc = null;
         
         draw( false );
     }

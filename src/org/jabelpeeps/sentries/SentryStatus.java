@@ -83,7 +83,7 @@ public enum SentryStatus {
                         .spawn( myEntity.getLocation(), ExperienceOrb.class )
                         .setExperience( Sentries.sentryEXP );
             }
-            List<ItemStack> items = new LinkedList<ItemStack>();
+            List<ItemStack> items = new LinkedList<>();
 
             if ( myEntity instanceof HumanEntity ) {
 
@@ -97,18 +97,16 @@ public enum SentryStatus {
 
                 ItemStack is = inventory.getItemInMainHand();
 
-                if ( is.getType() != null )
-                    items.add( is );
+                if ( is.getType() != null ) items.add( is );
 
                 is = inventory.getItemInOffHand();
 
-                if ( is.getType() != null )
-                    items.add( is );
+                if ( is.getType() != null ) items.add( is );
 
                 inventory.clear();
-                inventory.setArmorContents( null );
-                inventory.setItemInMainHand( null );
-                inventory.setItemInOffHand( null );
+//                inventory.setArmorContents( null );
+//                inventory.setItemInMainHand( null );
+//                inventory.setItemInOffHand( null );
             }
 
             if ( items.isEmpty() )
@@ -116,11 +114,12 @@ public enum SentryStatus {
             else
                 myEntity.playEffect( EntityEffect.HURT );
 
-            if ( !inst.dropInventory )
-                items.clear();
+            if ( !inst.dropInventory ) items.clear();
 
-            for ( ItemStack is : items )
-                myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), is );
+            items.parallelStream().forEach( i -> myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), i ) );
+            
+//            for ( ItemStack is : items )
+//                myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), is );
 
             if ( Sentries.dieLikePlayers )
                 myEntity.setHealth( 0 );
@@ -129,8 +128,7 @@ public enum SentryStatus {
 
             if ( inst.respawnDelay == -1 ) {
 
-                if ( inst.hasMount() )
-                    inst.dismount();
+                if ( inst.hasMount() ) inst.dismount();
 
                 inst.cancelRunnable();
                 inst.getNPC().destroy();
@@ -190,8 +188,7 @@ public enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
-            LivingEntity myEntity = inst.getMyEntity();
-            
+            LivingEntity myEntity = inst.getMyEntity();            
             NPC npc = inst.getNPC();
 
             if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
@@ -255,7 +252,39 @@ public enum SentryStatus {
             return this;
         }
     },
-    
+    /** 
+     *  Sentries with this status will navigate back to their spawn points, using a teleport
+     *  if it is too far, or they are in a different world.
+     *  <p>
+     *  Once they have complete the navigation, {@link SentryListener#onFinishedNavigating()}
+     *  will update their status to {@link#LOOKING}
+     */
+    RETURNING_TO_SPAWNPOINT {
+
+        @Override
+        SentryStatus update( SentryTrait inst ) {
+            
+            Navigator navigator = inst.getNavigator();
+            if ( navigator.isNavigating() ) return this;
+            
+            LivingEntity myEntity = inst.getMyEntity(); 
+
+            if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
+
+            if ( myEntity.isInsideVehicle() ) inst.faceAlignWithVehicle();
+            
+            if (    myEntity.getWorld() != inst.spawnLocation.getWorld() 
+                    || myEntity.getLocation().distanceSquared( inst.spawnLocation ) > 1024 ) {
+                
+                inst.ifMountedGetMount().teleport( inst.spawnLocation, TeleportCause.PLUGIN );
+                return SentryStatus.LOOKING;
+            }
+            navigator.setTarget( inst.spawnLocation );
+            
+            return this;
+        }
+        
+    },
     /** Sentries with this status will search for possible targets, and be receptive to events 
      *  within their detection range. <p>  They will also heal whilst in this state. */
     LOOKING {
@@ -314,8 +343,8 @@ public enum SentryStatus {
                 
                 if ( inst.myAttack != AttackType.brawler ) {
 
-                    if ( inst._projTargetLostLoc == null )
-                        inst._projTargetLostLoc = inst.attackTarget.getLocation();
+//                    if ( inst._projTargetLostLoc == null )
+//                        inst._projTargetLostLoc = inst.attackTarget.getLocation();
 
                     if ( !navigator.isPaused() ) {
                         navigator.setPaused( true );
@@ -331,26 +360,22 @@ public enum SentryStatus {
                         inst.fire( inst.attackTarget );
                     }
 
-                    if ( inst.attackTarget != null )
-                        inst._projTargetLostLoc = inst.attackTarget.getLocation();
+//                    if ( inst.attackTarget != null )
+//                        inst._projTargetLostLoc = inst.attackTarget.getLocation();
                 }
-                else {
-                    // check if the desired target is already the current destination.
-                    if (    navigator.getEntityTarget() == null
+                else if (    navigator.getEntityTarget() == null
                             || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
                         
-                        GoalController goalController = inst.getGoalController();
-                        // pause goalcontroller to keep sentry focused on this attack
-                        if ( !goalController.isPaused() )
-                            goalController.setPaused( true );
-    
-                        navigator.setTarget( inst.attackTarget, true );
-                        navigator.getLocalParameters().speedModifier( inst.getSpeed() );
-                        navigator.getLocalParameters().stuckAction( SentryTrait.giveup );
-                        navigator.getLocalParameters().stationaryTicks( 5 * 20 );
-                    }
+                    GoalController goalController = inst.getGoalController();
+                    // pause goalcontroller to keep sentry focused on this attack
+                    if ( !goalController.isPaused() )
+                        goalController.setPaused( true );
+
+                    navigator.setTarget( inst.attackTarget, true );
+                    navigator.getLocalParameters().speedModifier( inst.getSpeed() );
+                    navigator.getLocalParameters().stuckAction( SentryTrait.giveup );
+                    navigator.getLocalParameters().stationaryTicks( 5 * 20 );                 
                 }
-                inst.faceEntity( myEntity, inst.attackTarget );
 
                 double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
                 // block if in range
@@ -372,14 +397,15 @@ public enum SentryStatus {
     abstract SentryStatus update( SentryTrait inst );
     
     /** Convenience method that returns {@link SentryStatus#FOLLOWING} for guards, 
-     *  and {@link SentryStatus#LOOKING} for non-guards. */
+     *  and {@link SentryStatus#RETURNING_TO_SPAWNPOINT} for non-guards. */
     static SentryStatus is_A_Guard( SentryTrait inst ) {
         
         if ( inst.guardeeName == null )
-            return SentryStatus.LOOKING;
-        
+            return SentryStatus.RETURNING_TO_SPAWNPOINT;
+        // else...
         return SentryStatus.FOLLOWING;
     }
+    
     boolean isDeadOrDieing() {
         return this == DEAD || this == DIEING;
     }

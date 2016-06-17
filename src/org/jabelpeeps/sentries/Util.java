@@ -52,11 +52,6 @@ public abstract class Util {
         return victor.multiply( 0 );
     }
 
-    public static Location leadLocation( Location loc, Vector victor, double t ) {
-
-        return loc.clone().add( victor.clone().multiply( t ) );
-    }
-
     public static void removeMount( int npcid ) {
 
         NPC npc = Sentries.registry.getById( npcid );
@@ -253,7 +248,7 @@ public abstract class Util {
     static SentryTrait getSentryTrait( Entity ent ) {
     
         if ( ent != null && ent instanceof LivingEntity ) {
-            return Util.getSentryTrait( Sentries.registry.getNPC( ent ) );
+            return getSentryTrait( Sentries.registry.getNPC( ent ) );
         }
         return null;
     }
@@ -298,6 +293,7 @@ public abstract class Util {
         }
         return joiner.toString();
     }
+    
     /**
      * Concatenates the supplied String[] starting at the position indicated. 
      * Inserts a space between the values of the array.

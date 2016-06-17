@@ -26,6 +26,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 
+import net.citizensnpcs.api.ai.event.NavigationCompleteEvent;
 import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEvent;
@@ -544,5 +545,16 @@ public class SentryListener implements Listener {
 
             event.setCancelled( true );
         }
+    }
+    
+    @EventHandler
+    public void onFinishedNavigating( NavigationCompleteEvent event ) {
+        
+        SentryTrait inst = Util.getSentryTrait( event.getNPC() );
+        
+        if ( inst == null ) return;
+        
+        if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
+            inst.myStatus = SentryStatus.LOOKING;
     }
 }
