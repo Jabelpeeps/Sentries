@@ -1,6 +1,5 @@
 package org.jabelpeeps.sentries;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -119,8 +118,6 @@ public class Sentries extends JavaPlugin {
             }
         }
 
-        int targetBitFlag = SentryTrait.bridges;
-
         for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
 
             if ( !checkPlugin( each ) ) continue;
@@ -131,10 +128,8 @@ public class Sentries extends JavaPlugin {
                 @SuppressWarnings( "unchecked" )
                 Class<? extends PluginBridge> clazz = 
                     (Class<? extends PluginBridge>) Class.forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
-                
-                Constructor<? extends PluginBridge> constructor =  clazz.getDeclaredConstructor( int.class );
 
-                bridge = constructor.newInstance( targetBitFlag );
+                bridge = clazz.getDeclaredConstructor().newInstance();
                 
             } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException |
                     IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e ) {
@@ -142,18 +137,11 @@ public class Sentries extends JavaPlugin {
                 e.printStackTrace();
             }
 
-            if ( bridge == null ) continue;
-            
-            if ( !bridge.activate() ) {
-                logger.log( Level.INFO, bridge.getActivationMessage() );
-                continue;
-            }
+            if ( bridge == null || !bridge.activate() ) continue;           
 
-            if ( debug )
-                debugLog( each + " activated with bitFlag value of " + bridge.getBitFlag() );
+            if ( debug ) debugLog( each + " activated" ); 
             
             logger.log( Level.INFO, bridge.getActivationMessage() );
-            targetBitFlag *= 2;
             activePlugins.put( each, bridge );
         }
         CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
@@ -248,7 +236,9 @@ public class Sentries extends JavaPlugin {
             double val = Util.string2Double( args[1] );
             Material item = Material.getMaterial( args[0] );
 
-            if ( item != null && val > 0 && !map.containsKey( item ) ) {
+            if (    item != null 
+                    && val > 0 
+                    && !map.containsKey( item ) ) {
 
                 map.put( item, val );
             }
@@ -303,7 +293,6 @@ public class Sentries extends JavaPlugin {
 
             if ( dur < 0 ) dur = 10;
         }
-
         if ( args.length > 2 ) {
             amp = Util.string2Int( args[2] );
 

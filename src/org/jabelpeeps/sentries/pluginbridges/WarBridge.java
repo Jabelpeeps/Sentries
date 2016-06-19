@@ -24,8 +24,6 @@ public class WarBridge extends PluginBridge {
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
     private SentriesComplexCommand command = new WarTeamCommand();
 
-    public WarBridge( int flag ) { super( flag ); }
-
     @Override
     public boolean activate() { 
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );

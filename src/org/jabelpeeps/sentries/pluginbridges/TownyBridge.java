@@ -37,8 +37,6 @@ public class TownyBridge extends PluginBridge {
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry towny ... ", Col.RESET, "commands." );
     final static String PREFIX = "TOWNY";
     
-    public TownyBridge( int flag ) { super( flag ); }
-
     @Override
     public boolean activate() {
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );

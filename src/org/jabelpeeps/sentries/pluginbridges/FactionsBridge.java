@@ -26,8 +26,6 @@ public class FactionsBridge extends PluginBridge {
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new FactionsCommand();
 
-    public FactionsBridge( int flag ) { super( flag ); }
-
     @Override
     public boolean activate() { 
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );

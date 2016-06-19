@@ -24,8 +24,6 @@ public class ScoreboardTeamsBridge extends PluginBridge {
     private SentriesComplexCommand command = new ScoreboardTeamsCommand();
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
 
-    public ScoreboardTeamsBridge( int flag ) { super( flag ); }
-    
     @Override
     public boolean activate() {
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );
@@ -159,15 +157,13 @@ public class ScoreboardTeamsBridge extends PluginBridge {
         ScoreboardTeamsTarget( Team target ) { 
             super( 40 );
             team = target; 
-        }
-        
+        }    
         @Override
         public boolean includes( LivingEntity entity ) {
             if ( !scoreboard.getTeams().contains( team ) ) return false;
             
             return team.hasEntry( entity.getName() );
-        }
-        
+        }       
         @Override
         public boolean equals( Object o ) {       
             return  o != null 

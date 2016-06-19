@@ -2,8 +2,6 @@ package org.jabelpeeps.sentries;
 
 import java.util.StringJoiner;
 
-import org.bukkit.entity.LivingEntity;
-
 /**
  * An abstract class to act as a bridge between Sentries and other Server plugins.
  * <p>
@@ -19,16 +17,6 @@ import org.bukkit.entity.LivingEntity;
  * possible for others to be added by third parties.
  */
 public abstract class PluginBridge {
-
-    private final int bitFlag;
-
-    public int getBitFlag() {
-        return bitFlag;
-    }
-
-    public PluginBridge( int flag ) {
-        bitFlag = flag;
-    }
 
     /**
      * Carries out any initialisation that the implementation requires.
@@ -51,38 +39,6 @@ public abstract class PluginBridge {
      */
     public abstract String getActivationMessage();
 
-    /**
-     * Determines whether the supplied Player is a valid target of the supplied
-     * SentryTrait.
-     * <p>
-     * This method should return a result as quickly as possible, so that server
-     * performance is not affected if it is called often.
-     * 
-     * @param entity
-     *            - the possible target player
-     * @param inst
-     *            - the SentryTrait that is asking.
-     * @return true - if the player is a valid target.
-     */
-    @Deprecated
-    public boolean isTarget( LivingEntity entity, SentryTrait inst ) { return false; }
-
-    /**
-     * Determines whether the supplied Player should be ignored as a possible
-     * target of the supplied SentryTrait.
-     * <p>
-     * This method should return a result as quickly as possible, so that server
-     * performance is not affected if it is called often.
-     * 
-     * @param entity
-     *            - the player that should possibly be ignored.
-     * @param inst
-     *            - the SentryTrait that is asking.
-     * @return true - if the player should be ignored.
-     */
-    @Deprecated
-    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) { return false; }
-
     /** 
      * Method for use when a sentry is reloaded. The String 'args' is the 'TargetString' 
      * retrieved from the TargetType instances when the sentry was saved, and should contain 
@@ -92,56 +48,6 @@ public abstract class PluginBridge {
      * @return false if not (yet) implemented - and one of the legacy method should be tried.
      */
     public abstract boolean add( SentryTrait inst, String args );
-    
-    /**
-     * Adds an entity - identified by the supplied string - as either a target
-     * or ignore for the supplied for the supplied SentryTrait.
-     * <p>
-     * The PluginBridge should achieve this task without modifying the
-     * SentryTrait (which knows nothing about the third party plugin) but
-     * should store relevant references in preparation for a call to
-     * 'isTarget()' or 'isIgnoring()'
-     * 
-     * @param target
-     *            - a String identifying the entity to reference (the exact
-     *            contents can vary, as long as the pluginBridge knows how to
-     *            parse the String).
-     * @param inst
-     *            - the SentryTrait instance that will have the target
-     *            recorded against it.
-     * @param asTarget
-     *            - send true to add to the targets list, false to add to
-     *            ignores.
-     * @return a string that will be displayed to the player (either for success
-     *         or failure)
-     */
-    @Deprecated
-    public String add( String target, SentryTrait inst, boolean asTarget ) { return ""; }
-
-    /**
-     * Removes the entity - identified by the supplied string - as either a
-     * target or ignore for the supplied for the supplied SentryTrait.
-     * <p>
-     * The PluginBridge should achieve this task without modifying the
-     * SentryTrait (which knows nothing about the third party plugin) but
-     * should store relevant references in preparation for a call to
-     * 'isTarget()' or 'isIgnoring()'
-     * 
-     * @param target
-     *            - a String identifying the entity to reference (the exact
-     *            contents can vary, as long as the pluginBridge knows how to
-     *            parse the String).
-     * @param inst
-     *            - the SentryTrait instance that will have the target
-     *            recorded against it.
-     * @param fromTargets
-     *            - send true to remove from the targets list, false to remove
-     *            from ignores.
-     * @return a string that will be displayed to the player (either for success
-     *         or failure)
-     */
-    @Deprecated
-    public String remove( String entity, SentryTrait inst, boolean fromTargets ) { return ""; }
 
     /**
      * @return a string to be used as the first part of the command argument to
@@ -155,20 +61,6 @@ public abstract class PluginBridge {
      *         by 'addTarget()' and 'addIgnore()'
      */
     public abstract String getCommandHelp();
-
-    /**
-     * A method to check whether the supplied SentryTrait has any targets or
-     * ignores tracked by this bridge.
-     * 
-     * @param inst
-     *            - the SentryTrait instance to check
-     * @param asTarget
-     *            - supply true to check target list(s), and false to check
-     *            ignores.
-     * @return true - if the SentryTrait is listed.
-     */
-    @Deprecated
-    public boolean isListed( SentryTrait inst, boolean asTarget ) { return false; }
 
     /**
      * Static method to iterate over the activated PluginBridges, polling each one for command

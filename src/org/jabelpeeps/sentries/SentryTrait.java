@@ -175,20 +175,15 @@ public class SentryTrait extends Trait {
         warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
         if ( key.keyExists( S.PERSIST_SPAWN ) ) {
-//            try {
-                spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
-                                             key.getDouble( "Spawn.x" ), 
-                                             key.getDouble( "Spawn.y" ),
-                                             key.getDouble( "Spawn.z" ),
-                                            (float) key.getDouble( "Spawn.yaw" ),
-                                            (float) key.getDouble( "Spawn.pitch" ) );
+            spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
+                                         key.getDouble( "Spawn.x" ), 
+                                         key.getDouble( "Spawn.y" ),
+                                         key.getDouble( "Spawn.z" ),
+                                        (float) key.getDouble( "Spawn.yaw" ),
+                                        (float) key.getDouble( "Spawn.pitch" ) );
 
-                if ( spawnLocation.getWorld() == null )
-                    spawnLocation = null;
-//            } catch ( Exception e ) {
-//                e.printStackTrace();
-//                spawnLocation = null;
-//            }
+            if ( spawnLocation.getWorld() == null )
+                spawnLocation = null;
         }
         if ( guardeeName != null && guardeeName.isEmpty() )
             guardeeName = null;
@@ -388,7 +383,6 @@ public class SentryTrait extends Trait {
         return (ignoreFlags & type) == type;
     }
 
-    @SuppressWarnings( "deprecation" )
     public boolean isIgnoring( LivingEntity aTarget ) {
 
         // block for new Target handling (now reduced to one line!)
@@ -431,14 +425,6 @@ public class SentryTrait extends Trait {
             if (    hasIgnoreType( owner ) 
                     && name.equalsIgnoreCase( npc.getTrait( Owner.class ).getOwner() ) )
                 return true;
-
-            for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                
-                if (    hasIgnoreType( each.getBitFlag() )
-                        && each.isIgnoring( player, this ) ) {
-                    return true;
-                }
-            }
         }
         else if ( aTarget instanceof Monster && hasIgnoreType( allmonsters ) )
             return true;
@@ -450,7 +436,6 @@ public class SentryTrait extends Trait {
         return false;
     }
 
-    @SuppressWarnings( "deprecation" )
     public boolean isTarget( LivingEntity aTarget ) {
 
         // block for new target handling (now on one line!)
@@ -490,14 +475,6 @@ public class SentryTrait extends Trait {
             if (    targetsContain( "ENTITY:OWNER" ) 
                     && name.equalsIgnoreCase( npc.getTrait( Owner.class ).getOwner() ) )
                 return true;
-
-            for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                
-                if (    hasTargetType( each.getBitFlag() )
-                        && each.isTarget( player, this ) ) {
-                    return true;
-                }
-            }
         }
         else if ( aTarget instanceof Monster && hasTargetType( allmonsters ) )
             return true;
@@ -695,7 +672,7 @@ public class SentryTrait extends Trait {
             ballistics = false;
             effect = null;
         }
-
+        
         if ( dist > range ) {
             clearTarget();
             return;
@@ -931,7 +908,7 @@ public class SentryTrait extends Trait {
     static final int namednpcs = 128;
     static final int owner = 256;
 
-    static final int bridges = 512;
+//    static final int bridges = 512;
 
     public int targetFlags = none;
     public int ignoreFlags = none;
@@ -994,23 +971,15 @@ public class SentryTrait extends Trait {
         }
     }
 
-    @SuppressWarnings( "deprecation" )
     private boolean checkBridges( String target, boolean onReload, boolean asTarget ) {
 
         for ( PluginBridge each : Sentries.activePlugins.values() ) {
             if ( target.contains( each.getPrefix().concat( ":" ) ) ) {
                 
-                if ( onReload && !each.add( this, target ) )
-                    each.add( target, this, asTarget );
-
-                if ( each.isListed( this, asTarget ) ) {
-
-                    if ( asTarget )
-                        targetFlags |= each.getBitFlag();
-                    else
-                        ignoreFlags |= each.getBitFlag();
+                if ( onReload ) {
+                    each.add( this, target );
+                    return true;
                 }
-                return true;
             }
         }
         return false;

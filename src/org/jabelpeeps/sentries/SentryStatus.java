@@ -77,7 +77,6 @@ public enum SentryStatus {
                     }
                 }
             }
-
             if ( inst.dropInventory ) {
                 myEntity.getWorld()
                         .spawn( myEntity.getLocation(), ExperienceOrb.class )
@@ -94,7 +93,6 @@ public enum SentryStatus {
                     if ( is != null && is.getType() != null )
                         items.add( is );
                 }
-
                 ItemStack is = inventory.getItemInMainHand();
 
                 if ( is.getType() != null ) items.add( is );
@@ -104,9 +102,6 @@ public enum SentryStatus {
                 if ( is.getType() != null ) items.add( is );
 
                 inventory.clear();
-//                inventory.setArmorContents( null );
-//                inventory.setItemInMainHand( null );
-//                inventory.setItemInOffHand( null );
             }
 
             if ( items.isEmpty() )
@@ -117,9 +112,6 @@ public enum SentryStatus {
             if ( !inst.dropInventory ) items.clear();
 
             items.parallelStream().forEach( i -> myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), i ) );
-            
-//            for ( ItemStack is : items )
-//                myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), is );
 
             if ( Sentries.dieLikePlayers )
                 myEntity.setHealth( 0 );
@@ -138,8 +130,7 @@ public enum SentryStatus {
 
             return SentryStatus.DEAD;
         }
-    },
-    
+    },    
     /** Sentries with this status will be re-spawned after the configured time. */
     DEAD {
 
@@ -162,8 +153,7 @@ public enum SentryStatus {
             }
             return this;
         }
-    },
-    
+    },    
     NOT_SPAWNED {
 
         @Override
@@ -178,8 +168,7 @@ public enum SentryStatus {
             }
             return this;
         }
-    },
-    
+    },    
     /** Sentries with this status will look for and navigate to the entities they are guarding (if set). 
      *  Once reunited with the guardee (or none it set), the status will be changed to 
      *  {@link SentryStatus#LOOKING} */
@@ -316,8 +305,7 @@ public enum SentryStatus {
             }
             return this;
         }
-    },
-    
+    },   
     /** The status for Sentries who are attacking! */
     ATTACKING {
 
@@ -343,9 +331,6 @@ public enum SentryStatus {
                 
                 if ( inst.myAttack != AttackType.brawler ) {
 
-//                    if ( inst._projTargetLostLoc == null )
-//                        inst._projTargetLostLoc = inst.attackTarget.getLocation();
-
                     if ( !navigator.isPaused() ) {
                         navigator.setPaused( true );
                         navigator.cancelNavigation();
@@ -359,9 +344,6 @@ public enum SentryStatus {
                         inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
                         inst.fire( inst.attackTarget );
                     }
-
-//                    if ( inst.attackTarget != null )
-//                        inst._projTargetLostLoc = inst.attackTarget.getLocation();
                 }
                 else if (    navigator.getEntityTarget() == null
                             || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
@@ -383,8 +365,7 @@ public enum SentryStatus {
                 // is it still in range? then keep attacking...
                 if ( dist <= inst.range * inst.range )
                     return this;
-            }
-            
+            }            
             // somehow we failed to attack the chosen target, so lets clear it, and look for another.
             inst.clearTarget();
             return SentryStatus.is_A_Guard( inst );

@@ -25,9 +25,6 @@ public class SimpleClansBridge extends PluginBridge {
     protected ClanManager clanManager = SimpleClans.getInstance().getClanManager();
     private SentriesComplexCommand command = new ClansCommand();
 
-    public SimpleClansBridge( int flag ) { 
-        super( flag ); 
-    }
     @Override
     public boolean activate() { 
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );

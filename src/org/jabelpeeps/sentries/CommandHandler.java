@@ -343,28 +343,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 if ( args.length > 1 ) {
 
-                    boolean messageSent = false, opSucceeded = false;
-
-                    plugins: 
-                    for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                        if ( each.getPrefix().equalsIgnoreCase( args[0] ) ) {
-
-                            joiner.add( each.add( arg, inst, forTargets ) );
-                            messageSent = true;
-                            break plugins;
-                        }
-                    }
                     if ( setOfTargets.add( arg.toUpperCase() ) )
-                        opSucceeded = true;
-
-                    if ( !messageSent ) {
-                        if ( opSucceeded )
-                            joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target added. Now targeting:-"
-                                                                                         : "Ignore added. Now ignoring:-",
-                                                                              setOfTargets.toString() ) );
-                        else
-                            joiner.add( String.join( " ", Col.GREEN, arg, S.ALLREADY_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
-                    }
+                        joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target added. Now targeting:-"
+                                                                                     : "Ignore added. Now ignoring:-",
+                                                                          setOfTargets.toString() ) );
+                    else
+                        joiner.add( String.join( " ", Col.GREEN, arg, S.ALLREADY_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
                 }
             }
         }
@@ -374,28 +358,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 String[] args = colon.split( arg, 2 );
                 if ( args.length > 1 ) {
 
-                    boolean messageSent = false, opSucceeded = false;
-
-                    plugins: 
-                    for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                        if ( each.getPrefix().equalsIgnoreCase( args[0] ) ) {
-
-                            joiner.add( each.remove( arg, inst, forTargets ) );
-                            messageSent = true;
-                            break plugins;
-                        }
-                    }
                     if ( setOfTargets.remove( arg.toUpperCase() ) )
-                        opSucceeded = true;
-
-                    if ( !messageSent ) {
-                        if ( opSucceeded )
-                            joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target removed. Now targeting:-"
-                                                                                         : "Ignore removed. Now ignoring:-",
-                                                                              setOfTargets.toString() ) );
-                        else
-                            joiner.add( String.join( " ", Col.GREEN, arg, S.NOT_FOUND_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
-                    }
+                        joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target removed. Now targeting:-"
+                                                                                     : "Ignore removed. Now ignoring:-",
+                                                                          setOfTargets.toString() ) );
+                    else
+                        joiner.add( String.join( " ", Col.GREEN, arg, S.NOT_FOUND_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
                 }
             }
         }

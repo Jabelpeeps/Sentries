@@ -28,8 +28,6 @@ public class VaultBridge extends PluginBridge {
     private String activationMsg;
     protected Permission perms;
 
-    public VaultBridge( int flag ) { super( flag ); }
-
     @Override
     public String getPrefix() { return PREFIX; }
 
