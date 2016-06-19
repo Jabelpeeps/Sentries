@@ -20,7 +20,7 @@ import org.jabelpeeps.sentries.targets.TargetType;
 
 import net.milkbowl.vault.permission.Permission;
 
-public class VaultBridge extends PluginBridge {
+public class VaultBridge implements PluginBridge {
 
     protected final static String PREFIX = "GROUP";
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
@@ -69,9 +69,8 @@ public class VaultBridge extends PluginBridge {
     public String getActivationMessage() { return activationMsg; }
 
     @Override
-    public boolean add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
-        return true;
+    public void add( SentryTrait inst, String args ) {       
+        command.call( null, null, inst, 0, Util.colon.split( args ) );
     }
    
     public class GroupCommand implements SentriesComplexCommand {
@@ -103,12 +102,10 @@ public class VaultBridge extends PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof GroupTarget )
-                                     .forEach( t -> joiner.add( Col.RED.concat( "Target: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof GroupTarget )
-                                     .forEach( t -> joiner.add( Col.GREEN.concat( "Ignore: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no group targets or ignores" );
@@ -190,14 +187,12 @@ public class VaultBridge extends PluginBridge {
             super( 50 );
             group = grp;
         }
-
         @Override
         public boolean includes( LivingEntity entity ) {            
             if ( !(entity instanceof Player) ) return false;
            
             return perms.playerInGroup( (Player) entity, group );
-        }
-        
+        }        
         @Override
         public boolean equals( Object o ) {
             if (    o != null 
@@ -206,8 +201,7 @@ public class VaultBridge extends PluginBridge {
                 return true;
             
             return false;           
-        } 
-        
+        }         
         @Override
         public int hashCode() { return group.hashCode(); }
     }

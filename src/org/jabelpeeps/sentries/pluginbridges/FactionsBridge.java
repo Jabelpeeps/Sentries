@@ -20,7 +20,7 @@ import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.FactionColl;
 import com.massivecraft.factions.entity.MPlayer;
 
-public class FactionsBridge extends PluginBridge {
+public class FactionsBridge implements PluginBridge {
 
     private final static String PREFIX = "FACTIONS";
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
@@ -42,9 +42,8 @@ public class FactionsBridge extends PluginBridge {
     public String getCommandHelp() { return commandHelp; }
 
     @Override
-    public boolean add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
-        return true;
+    public void add( SentryTrait inst, String args ) {       
+        command.call( null, null, inst, 0, Util.colon.split( args ) );
     }
 
     public class FactionsCommand implements SentriesComplexCommand {
@@ -87,12 +86,10 @@ public class FactionsBridge extends PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof AbstractFactionTarget )
-                                     .forEach( t -> joiner.add( Col.RED.concat( "Target: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof AbstractFactionTarget )
-                                     .forEach( t -> joiner.add( Col.GREEN.concat( "Ignore: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no Factions targets or ignores" );

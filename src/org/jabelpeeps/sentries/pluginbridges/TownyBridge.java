@@ -21,7 +21,7 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
-public class TownyBridge extends PluginBridge {
+public class TownyBridge implements PluginBridge {
     
     /*
      * Notes for self:
@@ -52,9 +52,8 @@ public class TownyBridge extends PluginBridge {
     public String getCommandHelp() { return commandHelp; }
 
     @Override
-    public boolean add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
-        return true;
+    public void add( SentryTrait inst, String args ) {       
+        command.call( null, null, inst, 0, Util.colon.split( args ) );
     }
     
     public class TownyCommand implements SentriesComplexCommand {

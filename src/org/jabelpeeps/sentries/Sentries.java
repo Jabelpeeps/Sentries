@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class Sentries extends JavaPlugin {
     static boolean ignoreListIsInvincible = true;
 
     static boolean denizenActive = false;
-    static Map<String, PluginBridge> activePlugins = new HashMap<>();
+    static Set<PluginBridge> activePlugins = new HashSet<>();
 
     // Lists of various armour items that will be accepted, by default.
     static Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, 
@@ -59,6 +60,7 @@ public class Sentries extends JavaPlugin {
         equipmentSlots.put( "chestplate", 2 );
         equipmentSlots.put( "leggings", 3 );
         equipmentSlots.put( "boots", 4 );
+        equipmentSlots.put( "offhand", 5 );
     }
     
     Map<Material, Double> armorBuffs = new EnumMap<>( Material.class );
@@ -104,6 +106,8 @@ public class Sentries extends JavaPlugin {
         }
         registry = CitizensAPI.getNPCRegistry();
         
+        reloadMyConfig();
+        
         if ( checkPlugin( S.DENIZEN ) ) {
 
             String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription().getVersion();
@@ -117,39 +121,11 @@ public class Sentries extends JavaPlugin {
                 logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
             }
         }
-
-        for ( String each : getConfig().getStringList( "OtherPlugins" ) ) {
-
-            if ( !checkPlugin( each ) ) continue;
-
-            PluginBridge bridge = null;
-
-            try {
-                @SuppressWarnings( "unchecked" )
-                Class<? extends PluginBridge> clazz = 
-                    (Class<? extends PluginBridge>) Class.forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
-
-                bridge = clazz.getDeclaredConstructor().newInstance();
-                
-            } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException |
-                    IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e ) {
-                logger.log( Level.WARNING, "Error loading PluginBridge for the plugin: '" + each + "' from config.yml. " );
-                e.printStackTrace();
-            }
-
-            if ( bridge == null || !bridge.activate() ) continue;           
-
-            if ( debug ) debugLog( each + " activated" ); 
-            
-            logger.log( Level.INFO, bridge.getActivationMessage() );
-            activePlugins.put( each, bridge );
-        }
         CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
 
         pluginManager.registerEvents( new SentryListener(), this );
         
         Bukkit.getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
-        reloadMyConfig();
     }
     
     final Runnable removeArrows = new Runnable() {
@@ -197,6 +173,30 @@ public class Sentries extends JavaPlugin {
         defaultIgnores = config.getStringList( S.DEFAULT_IGNORES );
         defaultWarning = config.getString( "DefaultTexts.Warning" );
         defaultGreeting = config.getString( "DefaultTexts.Greeting" );
+        
+        for ( String each : config.getStringList( "OtherPlugins" ) ) {
+            if ( !checkPlugin( each ) ) continue;
+
+            PluginBridge bridge = null;
+
+            try {
+                Class<?> clazz = Class.forName( S.PACKAGE + "pluginbridges." + each + "Bridge" );
+
+                bridge = clazz.asSubclass( PluginBridge.class ).getDeclaredConstructor().newInstance();
+                
+            } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException |
+                      ClassCastException | InvocationTargetException | NoSuchMethodException | SecurityException e ) {
+                logger.log( Level.WARNING, "Error loading PluginBridge for the plugin: '" + each + "' from config.yml. " );
+                e.printStackTrace();
+            }
+
+            if ( bridge == null || !bridge.activate() ) continue;           
+
+            if ( debug ) debugLog( each + " activated" ); 
+            
+            logger.log( Level.INFO, bridge.getActivationMessage() );
+            activePlugins.add( bridge );
+        }
     }
 
     @Override

@@ -18,7 +18,7 @@ import org.jabelpeeps.sentries.targets.TargetType;
 import com.tommytony.war.Team;
 import com.tommytony.war.War;
 
-public class WarBridge extends PluginBridge {
+public class WarBridge implements PluginBridge {
 
     final static String PREFIX = "WAR";
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
@@ -40,9 +40,8 @@ public class WarBridge extends PluginBridge {
 
     
     @Override
-    public boolean add( SentryTrait inst, String args ) {     
-        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
-        return true;
+    public void add( SentryTrait inst, String args ) {     
+        command.call( null, null, inst, 0, Util.colon.split( args ) );
     }
 
     public class WarTeamCommand implements SentriesComplexCommand {
@@ -74,12 +73,10 @@ public class WarBridge extends PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof WarTeamTarget )
-                                     .forEach( t -> joiner.add( Col.RED.concat( "Target: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof WarTeamTarget )
-                                     .forEach( t -> joiner.add( Col.GREEN.concat( "Ignore: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );

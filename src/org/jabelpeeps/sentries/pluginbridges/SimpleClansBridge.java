@@ -18,7 +18,7 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 
-public class SimpleClansBridge extends PluginBridge {
+public class SimpleClansBridge implements PluginBridge {
 
     final static String PREFIX = "CLAN";
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
@@ -41,9 +41,8 @@ public class SimpleClansBridge extends PluginBridge {
     public String getPrefix() { return PREFIX; }
 
     @Override
-    public boolean add( SentryTrait inst, String args ) {
-        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
-        return true;  
+    public void add( SentryTrait inst, String args ) {
+        command.call( null, null, inst, 0, Util.colon.split( args ) );
     }
 
     public class ClansCommand implements SentriesComplexCommand {
@@ -86,12 +85,10 @@ public class SimpleClansBridge extends PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof ClanTarget )
-                                     .forEach( t -> joiner.add( Col.RED.concat( "Target: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof ClanTarget )
-                                     .forEach( t -> joiner.add( Col.GREEN.concat( "Ignore: " ) )
-                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no Clan targets or ignores" );

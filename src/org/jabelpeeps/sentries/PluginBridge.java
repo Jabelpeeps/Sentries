@@ -16,7 +16,7 @@ import java.util.StringJoiner;
  * Some such bridges are provided with Sentries, but in future it should be
  * possible for others to be added by third parties.
  */
-public abstract class PluginBridge {
+public interface PluginBridge {
 
     /**
      * Carries out any initialisation that the implementation requires.
@@ -28,7 +28,7 @@ public abstract class PluginBridge {
      * @return true - if the activation was successful.
      * @return false - if not.
      */
-    public abstract boolean activate();
+    public boolean activate();
 
     /**
      * Implementations may specify a string to be used for logging once a call
@@ -37,30 +37,26 @@ public abstract class PluginBridge {
      * 
      * @return the string.
      */
-    public abstract String getActivationMessage();
+    public String getActivationMessage();
 
     /** 
      * Method for use when a sentry is reloaded. The String 'args' is the 'TargetString' 
      * retrieved from the TargetType instances when the sentry was saved, and should contain 
-     * the information needed to recreate the TargetType instance. 
-     * 
-     * @return true if the method is implemented
-     * @return false if not (yet) implemented - and one of the legacy method should be tried.
+     * the information needed to recreate the TargetType instance.
      */
-    public abstract boolean add( SentryTrait inst, String args );
+    public void add( SentryTrait inst, String args );
 
     /**
      * @return a string to be used as the first part of the command argument to
-     *         refer to this PluginBridge.
+     *         refer to this PluginBridge.  The lowercase version of the same string 
+     *         is often used as the subCommand (one level below '/sentry').
      */
-    public abstract String getPrefix();
+    public String getPrefix();
 
     /**
-     * @return the help text describing how to identify targets and ignores for
-     *         this PluginBridge - so that they will be recognised when parsed
-     *         by 'addTarget()' and 'addIgnore()'
+     * @return a short String giving info on how to access the commands added by this PluginBridge.
      */
-    public abstract String getCommandHelp();
+    public String getCommandHelp();
 
     /**
      * Static method to iterate over the activated PluginBridges, polling each one for command
@@ -74,11 +70,9 @@ public abstract class PluginBridge {
         if ( !Sentries.activePlugins.isEmpty() ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
     
-            joiner.add( "Further options available:- " );
-    
-            for ( PluginBridge each : Sentries.activePlugins.values() ) {
-                joiner.add( each.getCommandHelp() );
-            }
+            joiner.add( "Further options available:- " );    
+            Sentries.activePlugins.parallelStream().forEach( p -> joiner.add( p.getCommandHelp() ) );
+            
             outString = joiner.toString();
         }
         return outString;

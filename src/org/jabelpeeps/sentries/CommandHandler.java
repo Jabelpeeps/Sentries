@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -55,7 +54,6 @@ import net.citizensnpcs.api.trait.trait.Owner;
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
     
-    public static Pattern colon = Pattern.compile( ":" );
     private static Map<String, SentriesCommand> commandMap = new TreeMap<>();
     private static String mainHelpOutro;
 
@@ -339,7 +337,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( S.ADD.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
 
             for ( String arg : typeArgs ) {
-                String[] args = colon.split( arg, 2 );
+                String[] args = Util.colon.split( arg, 2 );
 
                 if ( args.length > 1 ) {
 
@@ -355,7 +353,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         else if ( S.REMOVE.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
 
             for ( String arg : typeArgs ) {
-                String[] args = colon.split( arg, 2 );
+                String[] args = Util.colon.split( arg, 2 );
                 if ( args.length > 1 ) {
 
                     if ( setOfTargets.remove( arg.toUpperCase() ) )

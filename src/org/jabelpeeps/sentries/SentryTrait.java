@@ -75,8 +75,6 @@ import net.citizensnpcs.util.PlayerAnimation;
 public class SentryTrait extends Trait {
 
     Sentries sentry;
-
-//    Location _projTargetLostLoc;
     public Location spawnLocation;
 
     public int strength, armour, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
@@ -88,7 +86,6 @@ public class SentryTrait extends Trait {
     public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
     
     boolean loaded;
-
     boolean ignoreLOS;
 
     static GiveUpStuckAction giveup = new GiveUpStuckAction();
@@ -908,8 +905,6 @@ public class SentryTrait extends Trait {
     static final int namednpcs = 128;
     static final int owner = 256;
 
-//    static final int bridges = 512;
-
     public int targetFlags = none;
     public int ignoreFlags = none;
 
@@ -973,10 +968,10 @@ public class SentryTrait extends Trait {
 
     private boolean checkBridges( String target, boolean onReload, boolean asTarget ) {
 
-        for ( PluginBridge each : Sentries.activePlugins.values() ) {
-            if ( target.contains( each.getPrefix().concat( ":" ) ) ) {
+        if ( onReload ) {
+            for ( PluginBridge each : Sentries.activePlugins ) {
+                if ( target.contains( each.getPrefix().concat( ":" ) ) ) {
                 
-                if ( onReload ) {
                     each.add( this, target );
                     return true;
                 }
@@ -1194,17 +1189,8 @@ public class SentryTrait extends Trait {
         if ( myEntity == null || theEntity == myEntity || theEntity == guardeeEntity ) return;
 
         // don't attack when bodyguard target isn't around.
-        if ( guardeeName != null && guardeeEntity == null )
-//            theEntity = null; 
-//
-//        if ( theEntity == null ) {
-//            // no target to be attacked
-//            if ( Sentries.debug )
-//                Sentries.debugLog( npc.getName() + " - Set Target Null? " );
-//
-//            clearTarget();
-            return;
-//        }
+        if ( guardeeName != null && guardeeEntity == null ) return;
+
         attackTarget = theEntity;
         myStatus = SentryStatus.ATTACKING;
     }

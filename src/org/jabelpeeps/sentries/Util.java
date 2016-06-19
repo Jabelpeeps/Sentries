@@ -316,4 +316,6 @@ public abstract class Util {
         if ( sender != null ) 
             sender.sendMessage( String.join( "", strings ) );
     }
+
+    public static Pattern colon = Pattern.compile( ":" );
 }
