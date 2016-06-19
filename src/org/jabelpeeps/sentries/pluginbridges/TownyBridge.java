@@ -68,6 +68,11 @@ public class TownyBridge implements PluginBridge {
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
+            if ( args.length <= nextArg + 1 ) {
+                Util.sendMessage( sender, getLongHelp() );
+                return;
+            }
+            
             String subCommand = args[nextArg + 1].toLowerCase();
             
             if ( S.INFO.equals( subCommand ) ) {
