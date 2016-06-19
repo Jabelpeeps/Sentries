@@ -83,9 +83,9 @@ public class TownyBridge implements PluginBridge {
                                              .forEach( t -> joiner.add( t.getTargetString().split( ":" )[2] ) );
                 
                 if ( joiner.length() < 3 )
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " is a member of ", joiner.toString() );
-                else
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has not settled in a town yet." );
+                else
+                    Util.sendMessage( sender, Col.YELLOW, npcName, " is a member of these Towns:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;    
             }
             

@@ -75,14 +75,14 @@ public class VaultBridge implements PluginBridge {
    
     public class GroupCommand implements SentriesComplexCommand {
 
-        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry group <target|ignore|remove|list|clearall> <GroupsName> ",
+        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry group <target|ignore|remove|list|clearall> <GroupName> ",
                 Col.RESET, "to have a sentry consider permission group membership when selecting targets.", System.lineSeparator(),
-                "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <GroupsName>", System.lineSeparator(),
-                "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <GroupsName>", System.lineSeparator(),
-                "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <GroupsName> as either a target or ignore", System.lineSeparator(),
+                "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <GroupName>", System.lineSeparator(),
+                "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <GroupName>", System.lineSeparator(),
+                "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <GroupName> as either a target or ignore", System.lineSeparator(),
                 "  use ", Col.GOLD, "list ", Col.RESET, "to list current group targets and ignores", System.lineSeparator(),
-                "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all scoreboard targets and ignores from the selected sentry.", 
-                System.lineSeparator(), Col.GOLD, "    <GroupsName> ", Col.RESET, "must be a currently existing permission group." );
+                "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all perm group targets and ignores from a sentry.", 
+                System.lineSeparator(), Col.GOLD, "    <GroupName> ", Col.RESET, "must be a currently existing permission group." );
         
         @Override
         public String getShortHelp() { return "define targets by permission groups"; }
@@ -115,7 +115,7 @@ public class VaultBridge implements PluginBridge {
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no group targets or ignores" );
                 else
-                    sender.sendMessage( joiner.toString() );
+                    Util.sendMessage( sender, Col.YELLOW, "Current Group targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             

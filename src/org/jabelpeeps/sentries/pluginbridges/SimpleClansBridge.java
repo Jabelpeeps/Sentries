@@ -95,10 +95,13 @@ public class SimpleClansBridge implements PluginBridge {
                 inst.ignores.stream().filter( t -> t instanceof ClanTarget )
                                      .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
                 
+                inst.targets.stream().filter( t -> t instanceof ClanRivalsTarget )
+                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", t.getTargetString().split( ":" )[2] ) ) );
+                
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no Clan targets or ignores" );
                 else
-                    sender.sendMessage( joiner.toString() );
+                    Util.sendMessage( sender, Col.YELLOW, "Current Clan targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             

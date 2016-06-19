@@ -90,16 +90,19 @@ public class FactionsBridge implements PluginBridge {
             if ( S.LIST.equals( subCommand ) ) {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
-                inst.targets.stream().filter( t -> t instanceof AbstractFactionTarget )
+                inst.targets.stream().filter( t -> t instanceof FactionTarget )
                                      .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
                 
-                inst.ignores.stream().filter( t -> t instanceof AbstractFactionTarget )
+                inst.ignores.stream().filter( t -> t instanceof FactionTarget )
                                      .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
-                
+ 
+                inst.targets.stream().filter( t -> t instanceof FactionRivalsTarget )
+                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", t.getTargetString().split( ":" )[2] ) ) );
+
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no Factions targets or ignores" );
                 else
-                    sender.sendMessage( joiner.toString() );
+                    Util.sendMessage( sender, Col.YELLOW, "Current Factions targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             

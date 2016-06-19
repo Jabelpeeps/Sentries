@@ -76,7 +76,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );
                 else
-                    sender.sendMessage( joiner.toString() );
+                    Util.sendMessage( sender, Col.YELLOW, "Current Scoreboard Team targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             
