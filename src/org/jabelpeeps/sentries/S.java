@@ -42,6 +42,7 @@ public abstract class S {
     public final static String REMOVED_FROM_LIST = "was removed from this sentry's list of";
     public final static String NOT_FOUND_ON_LIST = "was not found on this sentry's list of";
     public final static String NOT_ANY = "does not have any";
+    public final static String ALREADY_LISTED = " is already listed as either a target or ignore for ";
 
     public final static String HELP_LIST = "- to display current list of";
     public final static String HELP_CLEAR = "- to clear the ALL the current";

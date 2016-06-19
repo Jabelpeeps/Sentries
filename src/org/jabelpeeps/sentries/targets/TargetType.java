@@ -17,7 +17,7 @@ public interface TargetType extends Comparable<TargetType> {
     
     /** 
      * Method to quickly determine whether the supplied <b>entity</b> is a member
-     * of the set defined an instance of TargetType. 
+     * of the set defined by instance of TargetType. 
      * 
      * @param entity - the LivingEntity to be checked.
      * @return true - if the set includes <b>entity</b> 

@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries.pluginbridges;
 
+import java.util.StringJoiner;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
@@ -13,6 +15,7 @@ import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
 
+import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
@@ -32,16 +35,17 @@ public class TownyBridge extends PluginBridge {
 
     private SentriesComplexCommand command = new TownyCommand();
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry towny ... ", Col.RESET, "commands." );
-
+    final static String PREFIX = "TOWNY";
+    
     public TownyBridge( int flag ) { super( flag ); }
 
     @Override
     public boolean activate() {
-        CommandHandler.addCommand( "towny", command );
+        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
         return true; 
     }
     @Override
-    public String getPrefix() { return "TOWNY"; }
+    public String getPrefix() { return PREFIX; }
 
     @Override
     public String getActivationMessage() { return "Detected Towny, the TOWNY: target will function"; }
@@ -50,55 +54,83 @@ public class TownyBridge extends PluginBridge {
     public String getCommandHelp() { return commandHelp; }
 
     @Override
-    public boolean add( SentryTrait inst, String args ) {
-        command.call( null, null, inst, 0, args );
+    public boolean add( SentryTrait inst, String args ) {       
+        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
         return true;
     }
     
     public class TownyCommand implements SentriesComplexCommand {
         
-        private String helpTxt;
+        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry towny <join|leave|info> <TownName> ", Col.RESET, 
+                "to have a player-type sentry behave as though it were a town resident.  It will attack the members of enemy nations, and ignore allies.", 
+                System.lineSeparator(), "  use ", Col.GOLD, "join ", Col.RESET, "to join <TownName>", 
+                System.lineSeparator(), "  use ", Col.GOLD, "leave ", Col.RESET, "to leave <TownName>",
+                System.lineSeparator(), "  (", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name.",
+                System.lineSeparator(), "  use ", Col.GOLD, "info ", Col.RESET, "to see which (if any) Town is currently configured.");
         
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+
+            String subCommand = args[nextArg + 1].toLowerCase();
+            
+            if ( S.INFO.equals( subCommand ) ) {
+                
+                StringJoiner joiner = new StringJoiner( ", " );
+                
+                inst.targets.parallelStream().filter( t -> t instanceof TownyEnemyTarget )
+                                             .forEach( t -> joiner.add( t.getTargetString().split( ":" )[2] ) );
+                
+                if ( joiner.length() < 3 )
+                    Util.sendMessage( sender, Col.YELLOW, npcName, " is a member of ", joiner.toString() );
+                else
+                    Util.sendMessage( sender, Col.YELLOW, npcName, " has not settled in a town yet." );
+                return;    
+            }
             
             if ( args.length <= nextArg + 2 ) { 
                 Util.sendMessage( sender,  S.ERROR, " Not enough arguments. ", Col.RESET, "Try /sentry help towny" );
                 return;
             }
-            
+            String townName = args[nextArg + 2];
             Town town = null;
             try {
-                town = TownyUniverse.getDataSource().getTown( args[nextArg + 2] );
+                town = TownyUniverse.getDataSource().getTown( townName );
                 
             } catch ( NotRegisteredException e ) {}
             
             if ( town == null ) {
-                Util.sendMessage( sender, S.ERROR, " No Town was found matching:- ", args[nextArg + 2] );
+                Util.sendMessage( sender, S.ERROR, " No Town was found matching:- ", townName );
                 return;
             } 
             
-            TargetType target = new TownyTarget( town, true ); 
-            TargetType ignore = new TownyTarget( town, false ); 
-            
-            if ( S.LEAVE.equalsIgnoreCase( args[nextArg + 1] ) ) {
+            if ( (S.LEAVE + S.JOIN).contains( subCommand ) ) {
                 
-                if ( inst.targets.remove( target ) && inst.ignores.remove( ignore ) )
-                    Util.sendMessage( sender, Col.GREEN, npcName, " is no-longer a resident of ", town.getName() );
-                else 
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " is unknown in ", town.getName() );
+                TargetType enemies = new TownyEnemyTarget( town ); 
+                TargetType friends = new TownyFriendTarget( town ); 
                 
-                return;
-            }
-            // we only need to set the targetString on one TownyTarget instance, as each command creates and removes two instances.
-            target.setTargetString( String.join( ":", getPrefix(), S.JOIN, args[nextArg + 2] ) );
-            
-            if ( S.JOIN.equalsIgnoreCase( args[nextArg + 1] ) ) {
+                if ( S.LEAVE.equals( subCommand ) ) {
+                    
+                    if ( inst.targets.remove( enemies ) && inst.ignores.remove( friends ) )
+                        Util.sendMessage( sender, Col.GREEN, npcName, " is no-longer a resident of ", town.getName() );
+                    else 
+                        Util.sendMessage( sender, Col.YELLOW, npcName, " is unknown in ", town.getName() );
+                    
+                    return;
+                }
+                // we only need to set the targetString on one TargetType instance, as they are created and removed in pairs.
+                enemies.setTargetString( String.join( ":", PREFIX, S.JOIN, townName ) );
                 
-                if ( inst.targets.add( target ) && inst.ignores.add( ignore ) )
-                    Util.sendMessage( sender, Col.GREEN, npcName, " has settled in ", town.getName() );              
-            }
+                if ( S.JOIN.equals( subCommand ) 
+                        && inst.targets.add( enemies ) 
+                        && inst.ignores.add( friends ) ) {
+                    Util.sendMessage( sender, Col.GREEN, npcName, " has settled in ", town.getName() ); 
+                    return;
+                }
+            }         
+            Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+                                            Col.GOLD, "/sentry help towny", Col.RESET, " and try again." ); 
         } 
+        
         @Override
         public String getShortHelp() { return "have a sentry join a town"; }
         
@@ -106,58 +138,73 @@ public class TownyBridge extends PluginBridge {
         public String getPerm() { return "sentry.towny"; }  
 
         @Override
-        public String getLongHelp() {
-            if ( helpTxt == null ) {
-                helpTxt = String.join( "", "do ", Col.GOLD, "/sentry towny <join|leave> <TownName> ", Col.RESET, 
-                        "to have a player-type sentry behave as though it were a town resident.  It will attack the members of enemy nations, and ignore allies.", 
-                        System.lineSeparator(), "  use ", Col.GOLD, "join ", Col.RESET, "to join <TownName>", 
-                        System.lineSeparator(), "  use ", Col.GOLD, "leave ", Col.RESET, "to leave <TownName>",
-                        System.lineSeparator(), "  (", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name." );
-            }
-            return helpTxt;
-        }    
+        public String getLongHelp() { return helpTxt; }    
     }
     
-    public class TownyTarget extends AbstractTargetType {
+    protected abstract class AbstractTownyTarget extends AbstractTargetType {
 
-        private Town town;
-        private boolean forEnemies;
+        protected Town town;
+        protected TownyDataSource townyData = TownyUniverse.getDataSource();
         
-        TownyTarget( Town target, boolean toAttack ) { 
+        protected AbstractTownyTarget( int i ) { super( i ); }
+        @Override
+        public int hashCode() { return town.hashCode(); }
+    }
+    
+    public class TownyEnemyTarget extends AbstractTownyTarget {
+        
+        TownyEnemyTarget( Town target ) { 
             super( 55 );
             town = target; 
-            forEnemies = toAttack; 
-        }
-        
+        }     
         @Override
         public boolean includes( LivingEntity entity ) {
             try {
-                Resident theStranger = TownyUniverse.getDataSource().getResident( entity.getName() );
-                
-                if ( forEnemies ) {               
-                    return town.getNation().hasEnemy( theStranger.getTown().getNation() );
-                }            
-                return town.hasResident( theStranger );
-                
+                return townyData.getResident( entity.getName() ).getTown().getNation().hasEnemy( town.getNation() );
+             
             } catch ( NotRegisteredException e ) {
                 if ( Sentries.debug ) {
-                    Sentries.debugLog( "TownyTarget has thrown NotRegisteredException" );
+                    Sentries.debugLog( "TownyEnemyTarget has thrown NotRegisteredException" );
                     e.printStackTrace();
                 }
                 return false;
             }      
+        }      
+        @Override
+        public boolean equals( Object o ) {           
+            return  o != null 
+                    && o instanceof TownyEnemyTarget
+                    && ((TownyEnemyTarget)o).town.equals( town );            
         }
+    }
+    
+    public class TownyFriendTarget extends AbstractTownyTarget {
         
+        TownyFriendTarget( Town target ) { 
+            super( 56 );
+            town = target; 
+        }        
+        @Override
+        public boolean includes( LivingEntity entity ) {
+            try {
+                Resident resident = townyData.getResident( entity.getName() );
+                
+                return  town.hasResident( resident )
+                        || resident.getTown().getNation().hasAlly( town.getNation() );
+                
+            } catch ( NotRegisteredException e ) {
+                if ( Sentries.debug ) {
+                    Sentries.debugLog( "TownyEnemyTarget has thrown NotRegisteredException" );
+                    e.printStackTrace();
+                }
+                return false;
+            }      
+        }      
         @Override
         public boolean equals( Object o ) {
-            if (    o != null 
-                    && o instanceof TownyTarget
-                    && ((TownyTarget)o).town.equals( town )) 
-                return true;
-            
-            return false;            
+            return  o != null 
+                    && o instanceof TownyFriendTarget
+                    && ((TownyFriendTarget) o).town.equals( town );            
         }
-        @Override
-        public int hashCode() { return town.hashCode(); }
     }
 }

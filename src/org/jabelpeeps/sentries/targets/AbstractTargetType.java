@@ -1,8 +1,5 @@
 package org.jabelpeeps.sentries.targets;
 
-import org.bukkit.entity.LivingEntity;
-
-
 public abstract class AbstractTargetType implements TargetType {
 
     protected int order;
@@ -11,15 +8,6 @@ public abstract class AbstractTargetType implements TargetType {
     protected AbstractTargetType( int i ) {
         order = i;
     }
-    
-    @Override
-    public abstract boolean includes( LivingEntity entity );
-    
-    @Override
-    public abstract boolean equals( Object o );
-    
-    @Override
-    public abstract int hashCode();
 
     @Override
     public final int compareTo( TargetType o ) {

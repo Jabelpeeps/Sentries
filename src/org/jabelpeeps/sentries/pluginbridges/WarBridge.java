@@ -1,154 +1,169 @@
 package org.jabelpeeps.sentries.pluginbridges;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.StringJoiner;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
+import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Util;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
+import org.jabelpeeps.sentries.targets.TargetType;
 
 import com.tommytony.war.Team;
 import com.tommytony.war.War;
-import com.tommytony.war.Warzone;
 
 public class WarBridge extends PluginBridge {
 
-    Map<SentryTrait, Set<Team>> friends = new HashMap<>();
-    Map<SentryTrait, Set<Team>> enemies = new HashMap<>();
+    final static String PREFIX = "WAR";
+    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
+    private SentriesComplexCommand command = new WarTeamCommand();
 
     public WarBridge( int flag ) { super( flag ); }
 
     @Override
-    public boolean activate() { return true; }
-
+    public boolean activate() { 
+        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        return true; 
+    }
     @Override
-    public String getPrefix() { return "WAR"; }
+    public String getPrefix() { return PREFIX; }
 
     @Override
     public String getActivationMessage() { return "War is active, The WAR: target will function"; }
 
     @Override
-    public String getCommandHelp() { return "War:<TeamName> for a War Team."; }
+    public String getCommandHelp() { return commandHelp; }
 
+    
     @Override
-    public boolean isTarget( LivingEntity entity, SentryTrait inst ) {
-
-        if ( !enemies.containsKey( inst ) )
-            return false;
-
-        return enemies.get( inst ).contains( Team.getTeamByPlayerName( entity.getName() ) );
-    }
-
-    @Override
-    public boolean isIgnoring( LivingEntity entity, SentryTrait inst ) {
-
-        if ( !friends.containsKey( inst ) )
-            return false;
-
-        return friends.get( inst ).contains( Team.getTeamByPlayerName( entity.getName() ) );
-    }
-
-    @Override
-    public boolean add( SentryTrait inst, String args ) {
-        return false;
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public String add( String target, SentryTrait inst, boolean asTarget ) {
-
-        String targetTeam = CommandHandler.colon.split( target, 2 )[1];
-        List<Warzone> zones = War.war.getWarzones();
-        Set<Team> teams = new HashSet<Team>();
-
-        for ( Warzone zone : zones ) {
-            teams.addAll( zone.getTeams() );
-        }
-
-        for ( Team team : teams ) {
-
-            if ( team.getName().equalsIgnoreCase( targetTeam ) )
-                return target.concat( addToList( inst, team, asTarget ) );
-        }
-        return "There is currently no Team matching ".concat( target );
-    }
-
-    private String addToList( SentryTrait inst, Team team, boolean asTarget ) {
-        
-        Map<SentryTrait, Set<Team>> map = asTarget ? enemies : friends;
-
-        if ( !map.containsKey( inst ) )
-            map.put( inst, new HashSet<Team>() );
-
-        if ( map.get( inst ).add( team ) )
-            return String.join( " ", S.ADDED_TO_LIST, asTarget ? S.TARGETS : S.IGNORES );
-
-        return String.join( " ", S.ALLREADY_ON_LIST, asTarget ? S.TARGETS : S.IGNORES );
-    }
-
-    @Override
-    public String remove( String entity, SentryTrait inst, boolean fromTargets ) {
-
-        if ( !isListed( inst, fromTargets ) ) {
-            return String.join( " ", inst.getNPC().getName(), S.NOT_ANY,
-                    "Teams added as", fromTargets ? S.TARGETS : S.IGNORES, S.YET );
-        }
-        String targetTeam = CommandHandler.colon.split( entity, 2 )[1];
-
-        Map<SentryTrait, Set<Team>> map = fromTargets ? enemies : friends;
-        Set<Team> teams = map.get( inst );
-
-        for ( Team team : teams ) {
-            if (    team.getName().equalsIgnoreCase( targetTeam )
-                    && teams.remove( team ) ) {
-
-                if ( teams.isEmpty() )
-                    map.remove( inst );
-
-                return String.join( " ", entity, S.REMOVED_FROM_LIST, fromTargets ? S.TARGETS : S.IGNORES );
-            }
-        }
-        return String.join( " ", entity, S.NOT_FOUND_ON_LIST, fromTargets ? S.TARGETS : S.IGNORES );
-    }
-
-    @Override
-    public boolean isListed( SentryTrait inst, boolean asTarget ) {
-
-        return (asTarget ? enemies.containsKey( inst )
-                         : friends.containsKey( inst ));
+    public boolean add( SentryTrait inst, String args ) {     
+        command.call( null, null, inst, 0, CommandHandler.colon.split( args ) );
+        return true;
     }
 
     public class WarTeamCommand implements SentriesComplexCommand {
 
-        private String helpTxt;
+        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", PREFIX.toLowerCase(), " <target|ignore|remove|list|clearall> <WarTeam> ",
+                Col.RESET, "to have a sentry consider War Team membership when selecting targets.", System.lineSeparator(),
+                "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <WarTeam>", System.lineSeparator(),
+                "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <WarTeam>", System.lineSeparator(),
+                "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
+                "  use ", Col.GOLD, "list", Col.RESET, "to list the current targets and ignores", System.lineSeparator(),
+                "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all War team targets and ignores from the selected sentry.", 
+                System.lineSeparator(), Col.GOLD, "    <WarTeam> ", Col.RESET, "must be a currently existing War Team." );
         
         @Override
-        public String getShortHelp() { return ""; }
+        public String getShortHelp() { return "define targets according to War Team"; }
 
         @Override
-        public String getLongHelp() {
-
-            if ( helpTxt == null )
-                helpTxt = "";
-            
-            return helpTxt;
-        }
+        public String getLongHelp() { return helpTxt; }
 
         @Override
         public String getPerm() { return "sentry.warteam"; }
 
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
-            // TODO Auto-generated method stub
+
+            String subCommand = args[nextArg + 1].toLowerCase();
+
+            if ( S.LIST.equals( subCommand ) ) {
+                StringJoiner joiner = new StringJoiner( ", " );
+                
+                inst.targets.stream().filter( t -> t instanceof WarTeamTarget )
+                                     .forEach( t -> joiner.add( Col.RED.concat( "Target: " ) )
+                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                
+                inst.ignores.stream().filter( t -> t instanceof WarTeamTarget )
+                                     .forEach( t -> joiner.add( Col.GREEN.concat( "Ignore: " ) )
+                                                          .add( t.getTargetString().split( ":" )[2] ) );
+                
+                if ( joiner.length() < 1 ) 
+                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );
+                else
+                    sender.sendMessage( joiner.toString() );
+                return;
+            }
+            
+            if ( S.CLEARALL.equals( subCommand )  ) {                
+                inst.targets.removeIf( t -> t instanceof WarTeamTarget );
+                inst.ignores.removeIf( t -> t instanceof WarTeamTarget );
+                
+                Util.sendMessage( sender, Col.GREEN, "All War Team Targets cleared from ", npcName );
+                inst.checkIfEmpty( sender );
+                return;
+            }
+            
+            if ( args.length <= nextArg + 2 ) { 
+                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", PREFIX.toLowerCase() );
+                return;
+            }
+            String teamName = args[nextArg + 2];
+            
+            Team team = War.war.getEnabledWarzones()
+                               .parallelStream()
+                               .filter( z -> z.getTeams()
+                                              .parallelStream()
+                                              .anyMatch( t -> t.getName()
+                                                               .equalsIgnoreCase( teamName ) ) )
+                               .findAny()
+                               .get()
+                               .getTeams()
+                               .parallelStream()
+                               .filter( t -> t.getName()
+                                              .equalsIgnoreCase( teamName ) )
+                               .findAny()
+                               .get();
+            
+            if ( team == null ) {
+                Util.sendMessage( sender, S.ERROR, "No Team was found matching:- ", teamName );
+                return;
+            } 
+            
+            TargetType target = new WarTeamTarget( team );
+            
+            if ( S.REMOVE.equals( subCommand ) ) {
+                
+                if ( inst.targets.remove( target ) ) 
+                    Util.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of targets." );
+                else if ( inst.ignores.remove( target ) ) 
+                    Util.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of ignores." );
+                else {
+                    Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", team.getName() );
+                    return;
+                }
+                inst.checkIfEmpty( sender );
+                return;
+            }
+            
+            target.setTargetString( String.join( ":", PREFIX, subCommand, teamName ) );
+            
+            if ( S.TARGET.equals( subCommand ) ) {
+                
+                if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
+                    Util.sendMessage( sender, Col.GREEN, "War Team: ", team.getName(), " will be targeted by ", npcName );
+                else 
+                    Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
+                
+                return;
+            }
+            
+            if ( S.IGNORE.equals( subCommand ) ) {
+                
+                if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
+                    Util.sendMessage( sender, Col.GREEN, "War Team: ", team.getName(), " will be ignored by ", npcName );
+                else 
+                    Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
+                
+                return;            
+            } 
+            Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+                                      Col.GOLD, "/sentry help ", PREFIX.toLowerCase(), Col.RESET, " and try again." );   
         }       
     }
     
@@ -160,21 +175,20 @@ public class WarBridge extends PluginBridge {
             super( 80 );
             team = t; 
         }
-        
+       
         @Override
         public boolean includes( LivingEntity entity ) {
-            // TODO Auto-generated method stub
-            return false;
+            
+            if ( !(entity instanceof Player) ) return false;
+           
+            return team.getPlayers().contains( entity );
         }
         
         @Override
-        public boolean equals( Object o ) {
-            if (    o != null 
+        public boolean equals( Object o ) {       
+            return  o != null 
                     && o instanceof WarTeamTarget 
-                    && ((WarTeamTarget) o).team.equals( team ) )
-                return true;
-            
-            return false;           
+                    && ((WarTeamTarget) o).team.equals( team );           
         }       
         @Override
         public int hashCode() { return team.hashCode(); }

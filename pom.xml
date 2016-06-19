@@ -39,7 +39,11 @@
 			<id>everything</id>
 			<url>http://repo.citizensnpcs.co/</url>
 		</repository>
-
+        
+        <repository>
+            <id>dre2n-repo</id>
+            <url>http://feuerstern.bplaced.net/repo/</url>
+        </repository>
 	</repositories>
 
 	<!-- Dependencies -->
@@ -89,7 +93,6 @@
 			<version>1.9</version>
 			<type>jar</type>
 			<scope>provided</scope>
-			<!-- <systemPath>${project.basedir}/lib/War.jar</systemPath> -->
 		</dependency>
 
 		<dependency>
@@ -98,7 +101,6 @@
 			<version>0.91.1.0</version>
 			<type>jar</type>
 			<scope>provided</scope>
-	<!-- 		<systemPath>${project.basedir}/lib/Towny.0.91.1.jar</systemPath> -->
 		</dependency>
 
 		<dependency>
@@ -107,7 +109,6 @@
 			<version>2.8.17</version>
 			<type>jar</type>
 			<scope>provided</scope>
-			<!-- <systemPath>${project.basedir}/lib/Factions.jar</systemPath> -->
 		</dependency>
 
 		<dependency>
@@ -116,8 +117,14 @@
 			<version>2.8.17</version>
 			<type>jar</type>
 			<scope>provided</scope>
-		<!-- 	<systemPath>${project.basedir}/lib/mcore.jar</systemPath> -->
 		</dependency>
+		
+        <dependency>
+            <groupId>io.github.dre2n</groupId>
+            <artifactId>factionsone</artifactId>
+            <version>1.3-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>

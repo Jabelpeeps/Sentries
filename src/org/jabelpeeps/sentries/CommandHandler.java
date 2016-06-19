@@ -322,7 +322,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
             return true;
         }
-        return false;
+        Util.sendMessage( sender, S.ERROR, "Command not recognised, try '/sentry help'" );
+        return true;
     }
 
     public static String parseTargetOrIgnore( String[] inargs, int nextArg,  String npcName, SentryTrait inst, boolean forTargets ) {
