@@ -44,20 +44,13 @@ public abstract class S {
     public final static String NOT_ANY = "does not have any";
     public final static String ALREADY_LISTED = " is already listed as either a target or ignore for ";
 
-    public final static String HELP_LIST = "- to display current list of";
-    public final static String HELP_CLEAR = "- to clear the ALL the current";
-    public final static String HELP_REMOVE_TYPE = " remove <type:name>";
-    public final static String HELP_REMOVE = "- to remove <type:name> from the list";
-    public final static String HELP_ADD_TYPE = " add <type:name>";
-    public final static String HELP_ADD = "- to add <type:name> to the list";
-
-    public final static String HELP_ADD_REMOVE_TYPES = "  <type:name> can be any of the following: entity:<MobName>, "
-                                                        + "entity:monster, entity:player, entity:all, player:<PlayerName>";  
+    public final static String HELP_ADD_REMOVE_TYPES = "<TargetType> can be any of the following: ";  
 
     // words used as command options, keep all lower case.
     public final static String SET_SPAWN = "setspawn";
     public final static String TARGET = "target";
     public final static String IGNORE = "ignore";
+    public final static String EVENT = "event";
     public final static String EQUIP = "equip";
     public final static String GUARD = "guard";
     public final static String RETALIATE = "retaliate";
@@ -130,6 +123,7 @@ public abstract class S {
     public final static String PERSIST_SPAWN = "Spawn";
     public final static String TARGETS = "Targets";
     public final static String IGNORES = "Ignores";
+    public final static String EVENTS = "Events";
 
     // Some strings to hold the names of external plugins in one location (in case of future changes to the names.)
     public final static String CITIZENS = "Citizens";
@@ -140,6 +134,7 @@ public abstract class S {
     // Strings used for permission strings - these *must* be the same as those in plugin.yml
     public final static String PERM_TARGET = "sentry.target";
     public final static String PERM_IGNORE = "sentry.ignore";
+    public final static String PERM_EVENT = "sentry.event";
     public final static String PERM_INFO = "sentry.info";
     public final static String PERM_EQUIP = "sentry.equip";
     public final static String PERM_RELOAD = "sentry.reload";

@@ -6,9 +6,9 @@ import org.bukkit.entity.LivingEntity;
  *  A TargetType that will always return true to {@link#includes()} to 
  *  include all LivingEntities within its definition.
  */
-public class AllEntitiesTarget extends AbstractTargetType {
+public class AllEntitiesTarget extends AbstractTargetType implements TargetType.Internal {
 
-    AllEntitiesTarget() { super( 1 ); }
+    public AllEntitiesTarget() { super( 1 ); }
     
     @Override
     public boolean includes( LivingEntity entity ) {
@@ -16,14 +16,12 @@ public class AllEntitiesTarget extends AbstractTargetType {
     }
     @Override
     public String getTargetString() { 
-        return "ENTITY:ALL"; 
+        return "All:Entities"; 
     }
     
     @Override
     public boolean equals( Object o ) {         
-        if ( o != null && o instanceof AllEntitiesTarget ) return true;
-        
-        return false;
+        return o != null && o instanceof AllEntitiesTarget;
     }
     @Override
     public int hashCode() {

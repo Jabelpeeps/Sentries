@@ -214,7 +214,6 @@ public class FactionsBridge implements PluginBridge {
             super( 57 );
             faction = f;
         }
-
         @Override
         public boolean includes( LivingEntity entity ) {            
             if ( !(entity instanceof Player) ) return false;
@@ -223,7 +222,6 @@ public class FactionsBridge implements PluginBridge {
             
             return player != null && faction.equals( player.getFaction() );
         }
-
         @Override
         public boolean equals( Object o ) {
             return  o != null

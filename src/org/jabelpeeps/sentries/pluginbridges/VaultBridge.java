@@ -193,19 +193,15 @@ public class VaultBridge implements PluginBridge {
             group = grp;
         }
         @Override
-        public boolean includes( LivingEntity entity ) {            
-            if ( !(entity instanceof Player) ) return false;
-           
-            return perms.playerInGroup( (Player) entity, group );
+        public boolean includes( LivingEntity entity ) { 
+            return  entity instanceof Player 
+                    && perms.playerInGroup( (Player) entity, group );
         }        
         @Override
         public boolean equals( Object o ) {
-            if (    o != null 
+            return  o != null 
                     && o instanceof GroupTarget 
-                    && ((GroupTarget) o).group.equals( group ) )
-                return true;
-            
-            return false;           
+                    && ((GroupTarget) o).group.equals( group );           
         }         
         @Override
         public int hashCode() { return group.hashCode(); }

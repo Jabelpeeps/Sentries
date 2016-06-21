@@ -27,7 +27,6 @@ import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
@@ -102,12 +101,7 @@ public class SentryTrait extends Trait {
 
     public Set<TargetType> targets = new TreeSet<>();
     public Set<TargetType> ignores = new TreeSet<>();
-    
-    public Set<String> ignoreTargets = new HashSet<>();
-    public Set<String> validTargets = new HashSet<>();
-
-    Set<String> _ignoreTargets = new HashSet<>();
-    Set<String> _validTargets = new HashSet<>();
+    public Set<TargetType> events = new TreeSet<>();
 
     long respawnTime = System.currentTimeMillis();
     long oktoFire = System.currentTimeMillis();
@@ -184,21 +178,50 @@ public class SentryTrait extends Trait {
         }
         if ( guardeeName != null && guardeeName.isEmpty() )
             guardeeName = null;
-
+        
+        Set<String> validTargets = new HashSet<>();
+        
         if ( key.getRaw( S.TARGETS ) != null )
             validTargets.addAll( (Set<String>) key.getRaw( S.TARGETS ) );
         else
             validTargets.addAll( sentry.defaultTargets );
-
+        
+        validTargets.parallelStream().forEach( t -> CommandHandler.getCommand( S.TARGET ).call( null, null, this, 0, "", "add", t ) );
+        
+        validTargets.parallelStream()
+                    .filter( v -> targets.parallelStream()
+                                         .noneMatch( t -> t.getTargetString().equalsIgnoreCase( v ) ) )
+                    .forEach( e -> checkBridges( e ) );
+        
+        Set<String> ignoreTargets = new HashSet<>();
+        
         if ( key.getRaw( S.IGNORES ) != null )
             ignoreTargets.addAll( (Set<String>) key.getRaw( S.IGNORES ) );
         else
             ignoreTargets.addAll( sentry.defaultIgnores );
+        
+        ignoreTargets.parallelStream().forEach( i -> CommandHandler.getCommand( S.IGNORE ).call( null, null, this, 0, "", "add", i ) ); 
+        
+        ignoreTargets.parallelStream()
+                     .filter( v -> ignores.parallelStream()
+                                          .noneMatch( i -> i.getTargetString().equalsIgnoreCase( v ) ) )
+                     .forEach( e -> checkBridges( e ) );
 
-        loaded = true;
-        processTargetStrings( true );
-
+        Set<String> eventTargets = new HashSet<>();
+        
+        if ( key.getRaw( S.EVENTS ) != null )
+            eventTargets.addAll( (Set<String>) key.getRaw( S.EVENTS ) );
+        
+        eventTargets.parallelStream().forEach( e -> CommandHandler.getCommand( S.EVENT ).call( null, null, this, 0, "", "add", e ) );
+        
+        loaded = true;      
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
+    }
+    
+    private void checkBridges( String target ) {
+        Sentries.activePlugins.parallelStream()
+                              .filter( p -> target.contains( p.getPrefix() ) )
+                              .forEach( b -> b.add( this, target ) );
     }
     
     @SuppressWarnings( "synthetic-access" )
@@ -319,12 +342,18 @@ public class SentryTrait extends Trait {
         key.setInt( S.PERSIST_MOUNT, mountID );
         key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
         key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
+
+        Set<String> ignoreTargets = new HashSet<>();
+        Set<String> validTargets = new HashSet<>();
+        Set<String> eventTargets = new HashSet<>();
         
         targets.forEach( s -> validTargets.add( s.getTargetString() ) );
-        ignores.forEach( s -> ignoreTargets.add( s.getTargetString() ) );
+        ignores.forEach( s -> ignoreTargets.add( s.getTargetString() ) ); 
+        events.forEach( e -> eventTargets.add( e.getTargetString() ) );
         
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
+        key.setRaw( S.EVENTS, eventTargets );
 
         if ( spawnLocation != null ) {
             key.setDouble( "Spawn.x", spawnLocation.getX() );
@@ -372,137 +401,33 @@ public class SentryTrait extends Trait {
         }.runTaskLater( sentry, 10 );
     }
 
-    public boolean hasTargetType( int type ) { 
-        return (targetFlags & type) == type;
-    }
-
-    public boolean hasIgnoreType( int type ) {
-        return (ignoreFlags & type) == type;
-    }
-
     public boolean isIgnoring( LivingEntity aTarget ) {
 
-        // block for new Target handling (now reduced to one line!)
-        if ( ignores.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
- 
-        // old method follows
         if ( aTarget == guardeeEntity ) return true;
-        if ( ignoreFlags == none ) return false;
-        if ( hasIgnoreType( all ) ) return true;
-
+        
+        if ( ignores.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
+        
         if ( aTarget.hasMetadata("NPC") ) {
 
-            if ( hasIgnoreType( allnpcs ) ) return true;
-
-            NPC targetNpc = Sentries.registry.getNPC( aTarget );
-
-            if ( targetNpc != null ) {
-
-                if (    hasIgnoreType( namednpcs )
-                        && ignoresContain( "NPC:" + targetNpc.getName() ) )
-                    return true;
-
-                // As this is an NPC and we haven't decided whether to ignore it yet, let check the ignores of the owner.
-                LivingEntity player = Bukkit.getPlayer( targetNpc.getTrait( Owner.class ).getOwnerId() );
-                
-                if ( player != null ) return isIgnoring( player );
-            }
+            LivingEntity player = Bukkit.getPlayer( Sentries.registry.getNPC( aTarget ).getTrait( Owner.class ).getOwnerId() );
+            
+            if ( player != null ) return isIgnoring( player );           
         }
-        else if ( aTarget instanceof Player ) {
-
-            if ( hasIgnoreType( allplayers ) ) return true;
-
-            Player player = (Player) aTarget;
-            String name = player.getName();
-
-            if (    hasIgnoreType( namedplayers )
-                    && ignoresContain( "PLAYER:" + name ) )
-                return true;
-
-            if (    hasIgnoreType( owner ) 
-                    && name.equalsIgnoreCase( npc.getTrait( Owner.class ).getOwner() ) )
-                return true;
-        }
-        else if ( aTarget instanceof Monster && hasIgnoreType( allmonsters ) )
-            return true;
-
-        else if ( hasIgnoreType( namedentities )
-                && ignoresContain( "ENTITY:" + aTarget.getType() ) )
-            return true;
-
         return false;
     }
 
     public boolean isTarget( LivingEntity aTarget ) {
 
-        // block for new target handling (now on one line!)
         if ( targets.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
                
-        // old method follows
-        if ( targetFlags == none || targetFlags == events ) return false;
-        if ( hasTargetType( all ) ) return true;
-
         if ( aTarget.hasMetadata("NPC") ) {
 
-            if ( hasTargetType( allnpcs ) ) return true;
-
-            NPC targetNpc = Sentries.registry.getNPC( aTarget );
-            String targetName = targetNpc.getName();
-
-            if (    hasTargetType( namednpcs )
-                    && targetsContain( "NPC:" + targetName ) )
-                return true;
-
             // As we are checking an NPC and haven't decided whether to attack it yet, lets check the owner.
-            LivingEntity player = Bukkit.getPlayer( targetNpc.getTrait( Owner.class ).getOwnerId() );
+            LivingEntity player = Bukkit.getPlayer( Sentries.registry.getNPC( aTarget ).getTrait( Owner.class ).getOwnerId() );
             
             if ( player != null ) return isTarget( player );            
         }
-        else if ( aTarget instanceof Player ) {
-
-            if ( hasTargetType( allplayers ) ) return true;
-
-            Player player = (Player) aTarget;
-            String name = player.getName();
-
-            if (    hasTargetType( namedplayers )
-                    && targetsContain( "PLAYER:" + name ) )
-                return true;
-
-            if (    targetsContain( "ENTITY:OWNER" ) 
-                    && name.equalsIgnoreCase( npc.getTrait( Owner.class ).getOwner() ) )
-                return true;
-        }
-        else if ( aTarget instanceof Monster && hasTargetType( allmonsters ) )
-            return true;
-
-        else if ( hasTargetType( namedentities )
-                && targetsContain( "ENTITY:" + aTarget.getType() ) )
-            return true;
-
         return false;
-    }
-
-    /**
-     * Checks whether the Set '_ignoreTargets' contains the supplied String.
-     * 
-     * @param theTarget
-     *            - the string to check for.
-     * @return true - if the string is found.
-     */
-    public boolean ignoresContain( String theTarget ) {
-        return _ignoreTargets.contains( theTarget.toUpperCase().intern() );
-    }
-
-    /**
-     * Checks whether the Set '_validTargets' contains the supplied String.
-     * 
-     * @param theTarget
-     *            - the string to check for.
-     * @return true - if the string is found.
-     */
-    public boolean targetsContain( String theTarget ) {
-        return _validTargets.contains( theTarget.toUpperCase().intern() );
     }
 
     void faceEntity( Entity from, Entity at ) {        
@@ -894,92 +819,6 @@ public class SentryTrait extends Trait {
         }
     }
 
-    static final int none = 0;
-    static final int all = 1;
-    static final int allplayers = 2;
-    static final int allnpcs = 4;
-    static final int allmonsters = 8;
-    static final int events = 16;
-    static final int namedentities = 32;
-    static final int namedplayers = 64;
-    static final int namednpcs = 128;
-    static final int owner = 256;
-
-    public int targetFlags = none;
-    public int ignoreFlags = none;
-
-
-    /**
-     * Scans the strings lists "validTargets" & "ignoreTargets", and sets the
-     * "targets" and "ignores" bit-filter int's accordingly.
-     * <p>
-     * Also adds the strings relating to any named entities to the corresponding
-     * list that is prefixed with a "_" character.
-     * 
-     * @param onReload - send true if the trait is being reloaded. false if the method is 
-     *                      being called after adding a target.
-     */
-    void processTargetStrings( boolean onReload ) {
-
-        if ( Sentries.debug )
-            Sentries.debugLog( "processing targets for npc: " + npc.getName() );
-
-        targetFlags = none;
-        ignoreFlags = none;
-        _ignoreTargets.clear();
-        _validTargets.clear();
-
-        for ( String target : validTargets ) {
-
-            if (      target.contains( "ENTITY:ALL" ) ) targetFlags |= all;
-            else if ( target.contains( "ENTITY:MONSTER" ) ) targetFlags |= allmonsters;
-            else if ( target.contains( "ENTITY:PLAYER" ) ) targetFlags |= allplayers;
-            else if ( target.contains( "ENTITY:NPC" ) ) targetFlags |= allnpcs;
-
-            else if ( !checkBridges( target, onReload, true ) ) {
-
-                _validTargets.add( target );
-
-                if (      target.contains( "NPC:" ) ) targetFlags |= namednpcs;
-                else if ( target.contains( "EVENT:" ) ) targetFlags |= events;
-                else if ( target.contains( "PLAYER:" ) ) targetFlags |= namedplayers;
-                else if ( target.contains( "ENTITY:" ) ) targetFlags |= namedentities;
-             }
-        }
-        // end of 1st for loop
-        
-        for ( String ignore : ignoreTargets ) {
-            if (      ignore.contains( "ENTITY:ALL" ) ) ignoreFlags |= all;
-            else if ( ignore.contains( "ENTITY:MONSTER" ) ) ignoreFlags |= allmonsters;
-            else if ( ignore.contains( "ENTITY:PLAYER" ) ) ignoreFlags |= allplayers;
-            else if ( ignore.contains( "ENTITY:NPC" ) ) ignoreFlags |= allnpcs;
-            else if ( ignore.contains( "ENTITY:OWNER" ) ) ignoreFlags |= owner;
-
-            else if ( !checkBridges( ignore, onReload, false ) ) {
-
-                _ignoreTargets.add( ignore );
-
-                if (      ignore.contains( "NPC:" ) ) ignoreFlags |= namednpcs;
-                else if ( ignore.contains( "PLAYER:" ) ) ignoreFlags |= namedplayers;
-                else if ( ignore.contains( "ENTITY:" ) ) ignoreFlags |= namedentities;
-             }
-        }
-    }
-
-    private boolean checkBridges( String target, boolean onReload, boolean asTarget ) {
-
-        if ( onReload ) {
-            for ( PluginBridge each : Sentries.activePlugins ) {
-                if ( target.contains( each.getPrefix().concat( ":" ) ) ) {
-                
-                    each.add( this, target );
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     /** 
      * Checks whether sufficient time has passed since the last healing, and if so restores
      * health according to the configured healrate.
@@ -1171,9 +1010,8 @@ public class SentryTrait extends Trait {
      */
     public void clearTarget() {
 
-        attackTarget = null;
-//        _projTargetLostLoc = null;
-        
+        getNavigator().cancelNavigation();
+        attackTarget = null;       
         draw( false );
     }
 
@@ -1359,9 +1197,9 @@ public class SentryTrait extends Trait {
 
     @Override
     public boolean equals( Object obj ) {
-        if ( obj == null || !(obj instanceof SentryTrait) ) return false;
-        if ( ((SentryTrait) obj).myID == myID ) return true;
-        return false;
+        return  obj != null
+                && obj instanceof SentryTrait
+                && ((SentryTrait) obj).myID == myID;
     }
 
     @Override

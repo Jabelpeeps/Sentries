@@ -162,9 +162,8 @@ public class ScoreboardTeamsBridge implements PluginBridge {
         }    
         @Override
         public boolean includes( LivingEntity entity ) {
-            if ( !scoreboard.getTeams().contains( team ) ) return false;
-            
-            return team.hasEntry( entity.getName() );
+            return  scoreboard.getTeams().contains( team ) 
+                    && team.hasEntry( entity.getName() );
         }       
         @Override
         public boolean equals( Object o ) {       

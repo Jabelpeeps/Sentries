@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
@@ -22,6 +21,7 @@ import org.jabelpeeps.sentries.commands.AttackRateCommand;
 import org.jabelpeeps.sentries.commands.CriticalsCommand;
 import org.jabelpeeps.sentries.commands.DropsCommand;
 import org.jabelpeeps.sentries.commands.EquipCommand;
+import org.jabelpeeps.sentries.commands.EventCommand;
 import org.jabelpeeps.sentries.commands.FollowDistanceCommand;
 import org.jabelpeeps.sentries.commands.GreetingCommand;
 import org.jabelpeeps.sentries.commands.GuardCommand;
@@ -60,6 +60,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     static {
         commandMap.put( S.TARGET,       new TargetComand() );
         commandMap.put( S.IGNORE,       new IgnoreCommand() );
+        commandMap.put( S.EVENT,        new EventCommand() );
         commandMap.put( S.EQUIP,        new EquipCommand() );
         commandMap.put( S.GUARD,        new GuardCommand() );
         commandMap.put( S.SET_SPAWN,    new SetSpawnCommand() );
@@ -100,6 +101,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     public static void addCommand( String name, SentriesCommand command ) {
         commandMap.put( name, command );
     }
+    
+    static SentriesComplexCommand getCommand ( String name ) {
+        return (SentriesComplexCommand) commandMap.get( name );
+    }
 
     /**
      * Convenience method to check perms on Command usage. The method includes
@@ -111,7 +116,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *            - The sender of the command.
      * @return true - if the player has the required permission.
      */
-    public static boolean checkCommandPerm( String command, CommandSender player ) {
+    static boolean checkCommandPerm( String command, CommandSender player ) {
 
         if ( player.hasPermission( command ) ) return true;
 
@@ -324,55 +329,55 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    public static String parseTargetOrIgnore( String[] inargs, int nextArg,  String npcName, SentryTrait inst, boolean forTargets ) {
-
-        String[] typeArgs = new String[inargs.length - (2 + nextArg)];
-        System.arraycopy( inargs, 2 + nextArg, typeArgs, 0, inargs.length - (2 + nextArg) );
-
-        if ( Sentries.debug ) Sentries.debugLog( "Target types list is:- " + Util.joinArgs( 0, typeArgs ) );
-
-        StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-        Set<String> setOfTargets = forTargets ? inst.validTargets : inst.ignoreTargets;
-
-        if ( S.ADD.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-
-            for ( String arg : typeArgs ) {
-                String[] args = Util.colon.split( arg, 2 );
-
-                if ( args.length > 1 ) {
-
-                    if ( setOfTargets.add( arg.toUpperCase() ) )
-                        joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target added. Now targeting:-"
-                                                                                     : "Ignore added. Now ignoring:-",
-                                                                          setOfTargets.toString() ) );
-                    else
-                        joiner.add( String.join( " ", Col.GREEN, arg, S.ALLREADY_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
-                }
-            }
-        }
-        else if ( S.REMOVE.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
-
-            for ( String arg : typeArgs ) {
-                String[] args = Util.colon.split( arg, 2 );
-                if ( args.length > 1 ) {
-
-                    if ( setOfTargets.remove( arg.toUpperCase() ) )
-                        joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target removed. Now targeting:-"
-                                                                                     : "Ignore removed. Now ignoring:-",
-                                                                          setOfTargets.toString() ) );
-                    else
-                        joiner.add( String.join( " ", Col.GREEN, arg, S.NOT_FOUND_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
-                }
-            }
-        }
-
-        if ( joiner.toString() == "" ) {
-            joiner.add( "Arguments not recognised. Try '/sentry help'" );
-        }
-        else {
-            inst.processTargetStrings( false );
-            inst.clearTarget();
-        }
-        return joiner.toString();
-    }
+//    public static String parseTargetOrIgnore( String[] inargs, int nextArg,  String npcName, SentryTrait inst, boolean forTargets ) {
+//
+//        String[] typeArgs = new String[inargs.length - (2 + nextArg)];
+//        System.arraycopy( inargs, 2 + nextArg, typeArgs, 0, inargs.length - (2 + nextArg) );
+//
+//        if ( Sentries.debug ) Sentries.debugLog( "Target types list is:- " + Util.joinArgs( 0, typeArgs ) );
+//
+//        StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+//        Set<String> setOfTargets = forTargets ? inst.validTargets : inst.ignoreTargets;
+//
+//        if ( S.ADD.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
+//
+//            for ( String arg : typeArgs ) {
+//                String[] args = Util.colon.split( arg, 2 );
+//
+//                if ( args.length > 1 ) {
+//
+//                    if ( setOfTargets.add( arg.toUpperCase() ) )
+//                        joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target added. Now targeting:-"
+//                                                                                     : "Ignore added. Now ignoring:-",
+//                                                                          setOfTargets.toString() ) );
+//                    else
+//                        joiner.add( String.join( " ", Col.GREEN, arg, S.ALLREADY_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
+//                }
+//            }
+//        }
+//        else if ( S.REMOVE.equalsIgnoreCase( inargs[nextArg + 1] ) ) {
+//
+//            for ( String arg : typeArgs ) {
+//                String[] args = Util.colon.split( arg, 2 );
+//                if ( args.length > 1 ) {
+//
+//                    if ( setOfTargets.remove( arg.toUpperCase() ) )
+//                        joiner.add( String.join( " ", Col.GREEN, npcName, forTargets ? "Target removed. Now targeting:-"
+//                                                                                     : "Ignore removed. Now ignoring:-",
+//                                                                          setOfTargets.toString() ) );
+//                    else
+//                        joiner.add( String.join( " ", Col.GREEN, arg, S.NOT_FOUND_ON_LIST, forTargets ? S.TARGETS : S.IGNORES ) );
+//                }
+//            }
+//        }
+//
+//        if ( joiner.toString() == "" ) {
+//            joiner.add( "Arguments not recognised. Try '/sentry help'" );
+//        }
+//        else {
+//            inst.processTargetStrings( false );
+//            inst.clearTarget();
+//        }
+//        return joiner.toString();
+//    }
 }

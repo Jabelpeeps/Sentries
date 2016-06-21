@@ -3,27 +3,21 @@ package org.jabelpeeps.sentries.targets;
 import org.bukkit.entity.LivingEntity;
 
 
-public class AllNPCsTarget extends AbstractTargetType {
+public class AllNPCsTarget extends AbstractTargetType implements TargetType.Internal {
 
-    protected AllNPCsTarget() { super( 4 ); }
+    public AllNPCsTarget() { super( 4 ); }
 
     @Override
     public boolean includes( LivingEntity entity ) {
-        if ( entity.hasMetadata( "NPC" ) ) return true;
-
-        return false;
-    }
-    
+        return entity.hasMetadata( "NPC" );
+    }  
     @Override
     public String getTargetString() { 
-        return "NPC:ALL"; 
-    }
-    
+        return "All:NPCs"; 
+    } 
     @Override
-    public boolean equals( Object o ) {
-        if ( o != null && o instanceof AllNPCsTarget ) return true;
-        
-        return false;
+    public boolean equals( Object o ) { 
+        return o != null && o instanceof AllNPCsTarget;
     }
     @Override
     public int hashCode() {

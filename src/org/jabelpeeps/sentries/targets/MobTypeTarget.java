@@ -5,43 +5,29 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 
-public class MobTypeTarget extends AbstractTargetType {
+public class MobTypeTarget extends AbstractTargetType implements TargetType.Internal {
 
     EntityType type;
     
-    protected MobTypeTarget() { 
+    public MobTypeTarget( EntityType target ) { 
         super( 15 );
+        type = target;
     }
-
     @Override
     public boolean includes( LivingEntity entity ) {
-        if ( !(entity instanceof Creature ) ) return false;
-        
-        if ( entity.getType().equals( type ) ) return true;
-        
-        return false;
+        return  !(entity instanceof Creature ) 
+                && entity.getType().equals( type );
     }
-
-    @Override
-    public void setTargetString( String target ) {         
-        type = EntityType.valueOf( target );
-    }
-    
     @Override
     public String getTargetString() { 
         return String.join( ":", "MobType", type.toString() ); 
     }
-    
     @Override
     public boolean equals( Object o ) {
-        if (    o != null 
+        return  o != null 
                 && o instanceof MobTypeTarget 
-                && type.equals( ((MobTypeTarget) o).type ) )
-            return true;
-
-        return false;
+                && type.equals( ((MobTypeTarget) o).type );
     }
-
     @Override
     public int hashCode() {
         return type.hashCode();

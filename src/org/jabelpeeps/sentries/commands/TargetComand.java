@@ -1,14 +1,26 @@
 package org.jabelpeeps.sentries.commands;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringJoiner;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.bukkit.entity.EntityType;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.targets.AllEntitiesTarget;
+import org.jabelpeeps.sentries.targets.AllMonstersTarget;
+import org.jabelpeeps.sentries.targets.AllNPCsTarget;
+import org.jabelpeeps.sentries.targets.AllPlayersTarget;
+import org.jabelpeeps.sentries.targets.MobTypeTarget;
+import org.jabelpeeps.sentries.targets.NamedNPCTarget;
+import org.jabelpeeps.sentries.targets.NamedPlayerTarget;
+import org.jabelpeeps.sentries.targets.TargetType;
 
 
 public class TargetComand implements SentriesComplexCommand {
@@ -22,30 +34,91 @@ public class TargetComand implements SentriesComplexCommand {
             sender.sendMessage( getLongHelp() );
             return;
         }
-        if ( S.LIST.equals( args[nextArg + 1] ) ) {
+
+        String subCommand = args[nextArg + 1].toLowerCase();
+        
+        if ( S.LIST.equals( subCommand ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
 
-            joiner.add( inst.validTargets.toString() );
+//            joiner.add( inst.validTargets.toString() );
             inst.targets.forEach( t -> joiner.add( t.getTargetString() ) );
 
             Util.sendMessage( sender, Col.GREEN, "Targets: ", joiner.toString() );
             return;
         }
-        if ( S.CLEARALL.equals( args[nextArg + 1] ) ) {
-            inst.targets.clear();
-            inst.validTargets.clear();
-            inst.targetFlags = 0;
+        
+        if ( S.CLEARALL.equals( subCommand ) ) {
+            inst.targets.removeIf( i -> i instanceof TargetType.Internal );
             inst.clearTarget();
             Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Targets cleared" );
             return;
         }
-        if ( args.length > 2 + nextArg ) {
-            sender.sendMessage( CommandHandler.parseTargetOrIgnore( args, nextArg, npcName, inst, true ) );
+        
+        if ( (S.ADD + S.REMOVE).contains( subCommand ) ) {    
+            
+            if ( args.length <= nextArg + 2 ) {
+                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, "try '/sentry help target'" );
+                return;
+            }
+            TargetType target = null;
+            String[] targetArgs = Util.colon.split( args[nextArg + 2] );
+            
+            if ( targetArgs.length < 2 ) {
+                Util.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, "try '/sentry help target'" );
+                return;
+            }
+            String firstSubArg = targetArgs[0].toLowerCase();
+            String secondSubArg = targetArgs[1].toLowerCase();
+            
+            // TODO add user feedback for success or failure conditions
+            
+            if ( firstSubArg.equals( "all" ) ) {
+                if ( secondSubArg.equals( "entities" ) ) 
+                    target = new AllEntitiesTarget();
+                else if ( secondSubArg.equals( "monsters" ) ) 
+                    target = new AllMonstersTarget();
+                else if ( secondSubArg.equals( "npcs" ) ) 
+                    target = new AllNPCsTarget();
+                else if ( secondSubArg.equals( "players" ) ) 
+                    target = new AllPlayersTarget();
+            }
+            else if ( firstSubArg.equals( "mobtype" ) ) {
+                EntityType type = EntityType.valueOf( secondSubArg );
+                if ( type != null )
+                    target = new MobTypeTarget( type );
+            }
+            else if ( firstSubArg.equals( "named" ) ) {
+                if ( secondSubArg.equals( "player" ) ) {                   
+                    target = new NamedPlayerTarget( 
+                            Arrays.stream( Bukkit.getOfflinePlayers() )
+                                  .filter( p -> p.getName().equalsIgnoreCase( targetArgs[2] ) )
+                                  .findAny().get()
+                                  .getUniqueId() );
+                }
+                else if ( secondSubArg.equals( "npc" ) ) {
+
+                    // this is ugly, but I can't see a better way to search for an npc by name atm
+                    Set<TargetType> targetset = new HashSet<>();
+                    Sentries.registry.forEach( n -> { 
+                        if ( n.getName().equalsIgnoreCase( targetArgs[2] ) ) {
+                            targetset.add( new NamedNPCTarget( n.getUniqueId() ) );
+                        } 
+                    });
+                    target = (TargetType) targetset.toArray()[0];
+                }
+            }
+            
+            if ( target == null )
+                Util.sendMessage( sender, "The intended target was not recognised" );
+            else if ( S.ADD.equals( subCommand ) && inst.targets.add( target ) )
+                Util.sendMessage( sender, "Target Added" );
+            else if ( S.REMOVE.equals( subCommand ) && inst.targets.remove( target ) )
+                Util.sendMessage( sender, "Target Removed" );            
         }                
     }
 
     @Override
-    public String getShortHelp() { return "set targets to attack."; }
+    public String getShortHelp() { return "set targets to attack"; }
 
     @Override
     public String getLongHelp() {
@@ -54,13 +127,20 @@ public class TargetComand implements SentriesComplexCommand {
 
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry target <option> ", Col.RESET, "where <option> is:-", Col.RESET ) );
-            joiner.add( String.join( "", Col.GOLD, "  ", S.LIST, Col.RESET, S.HELP_LIST, S.TARGETS ) );
-            joiner.add( String.join( "", Col.GOLD, "  ", S.CLEARALL, Col.RESET, S.HELP_CLEAR, S.TARGETS ) );
-            joiner.add( String.join( "", Col.GOLD, S.HELP_ADD_TYPE, Col.RESET, S.HELP_ADD ) );
-            joiner.add( String.join( "", Col.GOLD, S.HELP_REMOVE_TYPE, Col.RESET, S.HELP_REMOVE ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.TARGET, " <add|remove|list|clearall> <TargetType>", 
+                                                Col.RESET, " to configure targets for a sentry to attack. " ) );
+            joiner.add( String.join( "", "  ", Col.BOLD, "Targets can be overridden by ignores.", Col.RESET ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add <TargetType> as a target" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove <TargetType> as a target" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of targets" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current targets" ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );
-            joiner.add( PluginBridge.getAdditionalTargets() );
+            joiner.add( String.join( "", Col.GOLD, "  All:Entities ", Col.RESET, "to target anything that moves.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to target all hostile mobs.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to target all Citizens NPC's.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to target all (human) Players.") );
+            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
+            joiner.add( Util.getAdditionalTargets() );
 
             targetCommandHelp = joiner.toString();
         }       

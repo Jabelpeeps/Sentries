@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -52,6 +53,8 @@ public class Sentries extends JavaPlugin {
 
     static Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
+    
+    public static Set<EntityType> mobs = EnumSet.range( EntityType.CREEPER, EntityType.VILLAGER );
 
     public static Map<String, Integer> equipmentSlots = new HashMap<>();
     static {

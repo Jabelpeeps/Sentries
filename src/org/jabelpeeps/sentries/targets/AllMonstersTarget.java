@@ -4,26 +4,21 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 
 
-public class AllMonstersTarget extends AbstractTargetType {
+public class AllMonstersTarget extends AbstractTargetType implements TargetType.Internal {
 
-    AllMonstersTarget() { super( 3 ); }
+    public AllMonstersTarget() { super( 3 ); }
 
     @Override
     public boolean includes( LivingEntity entity ) {
-        if ( entity instanceof Monster ) return true;
-
-        return false;
+        return entity instanceof Monster;
     }
     @Override
     public String getTargetString() { 
-        return "MONSTER:ALL"; 
+        return "All:Monsters"; 
     }
-    
     @Override
     public boolean equals( Object o ) {
-        if ( o != null && o instanceof AllMonstersTarget ) return true;
-
-        return false;
+        return o != null && o instanceof AllMonstersTarget;
     }
     @Override
     public int hashCode() {

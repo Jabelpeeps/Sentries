@@ -245,7 +245,7 @@ public abstract class Util {
         }
     }
 
-    static SentryTrait getSentryTrait( Entity ent ) {
+    public static SentryTrait getSentryTrait( Entity ent ) {
     
         if ( ent != null && ent instanceof LivingEntity ) {
             return getSentryTrait( Sentries.registry.getNPC( ent ) );
@@ -318,4 +318,24 @@ public abstract class Util {
     }
 
     public static Pattern colon = Pattern.compile( ":" );
+    
+    /**
+     * Static method to iterate over the activated PluginBridges, polling each one for command
+     * help text.
+     * 
+     * @return - the concatenated help Strings
+     */
+    public static String getAdditionalTargets() {
+        String outString = "";
+    
+        if ( !Sentries.activePlugins.isEmpty() ) {
+            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+    
+            joiner.add( "These additional options are available:- " );    
+            Sentries.activePlugins.parallelStream().forEach( p -> joiner.add( p.getCommandHelp() ) );
+            
+            outString = joiner.toString();
+        }
+        return outString;
+    }
 }

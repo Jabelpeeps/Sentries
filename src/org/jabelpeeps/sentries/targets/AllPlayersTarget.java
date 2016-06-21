@@ -6,27 +6,21 @@ import org.bukkit.entity.Player;
 /**
  *  A TargetType to encompass all true players, but not Player-type NPC's.
  */
-public class AllPlayersTarget extends AbstractTargetType {
+public class AllPlayersTarget extends AbstractTargetType implements TargetType.Internal {
 
-    AllPlayersTarget() { super( 2 ); }
+    public AllPlayersTarget() { super( 2 ); }
     
     @Override
     public boolean includes( LivingEntity entity ) {
-        if ( entity instanceof Player && !entity.hasMetadata( "NPC" ) ) return true;
-
-        return false;
-    }
-    
+        return entity instanceof Player && !entity.hasMetadata( "NPC" );
+    }   
     @Override
     public String getTargetString() { 
-        return "PLAYER:ALL"; 
+        return "All:Players"; 
     }
-    
     @Override
     public boolean equals( Object o ) {
-        if ( o != null && o instanceof AllPlayersTarget ) return true;
-
-        return false;
+        return o != null && o instanceof AllPlayersTarget;
     }
     @Override
     public int hashCode() {

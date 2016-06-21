@@ -410,7 +410,7 @@ public class SentryListener implements Listener {
     
     @EventHandler( priority = EventPriority.MONITOR )
     public void processEventForTargets( EntityDamageByEntityEvent event ) {
-        // event to check each sentry for events that need a response.
+        // event to check each sentry for _events that need a response.
         
         Entity victim = event.getEntity();        
         if ( !(victim instanceof LivingEntity) ) return;
@@ -448,12 +448,13 @@ public class SentryListener implements Listener {
                     continue;
                 }
 
-                if (    inst.hasTargetType( SentryTrait.events )
+                if (    inst.events.parallelStream().anyMatch( e -> e.includes( (LivingEntity) victim ) )
+//                        inst.hasTargetType( SentryTrait._events )
                         && inst.myStatus == SentryStatus.LOOKING
                         && damager instanceof Player
                         && !damager.hasMetadata( "NPC" )
                         && !inst.isIgnoring( damager ) ) {
-
+                    
                     Location npcLoc = npc.getEntity().getLocation();
                     // is the event within range of the sentry?
                     if (    (   npcLoc.distance( victim.getLocation() ) <= inst.range
@@ -464,26 +465,11 @@ public class SentryListener implements Listener {
                             ||  inst.nightVision >= victim.getLocation().getBlock().getLightLevel())
     
                         // does the sentry have line-of-sight?
-                        &&  (   inst.hasLOS( damager ) || inst.hasLOS( victim ) )
-    
-                        // does the event correspond to configured event triggers?
-                        &&  (  (    inst.targetsContain( "event:pve" )
-                                    && !(victim instanceof Player) )
-    
-                            || (    inst.targetsContain( "event:pvp" )
-                                    && victim instanceof Player
-                                    && !victim.hasMetadata("NPC") )
-    
-                            || (    inst.targetsContain( "event:pvnpc" )
-                                    && victim.hasMetadata("NPC") )
-    
-                            || (    inst.targetsContain( "event:pvsentry" ) 
-                                    && Util.getSentryTrait( victim ) != null ) ) 
-                        ) {
+                        &&  (   inst.hasLOS( damager ) || inst.hasLOS( victim ) ) ) {
                         
                     // phew! we made it! the event is a valid trigger. Attack the aggressor!
                     inst.setAttackTarget( damager );
-                    }
+                    }                  
                 }
             }
         }

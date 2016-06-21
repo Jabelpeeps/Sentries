@@ -49,4 +49,6 @@ public interface TargetType extends Comparable<TargetType> {
     
     @Override
     public int hashCode();
+    
+    public interface Internal {}
 }

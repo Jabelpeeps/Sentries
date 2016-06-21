@@ -174,16 +174,12 @@ public class WarBridge implements PluginBridge {
         WarTeamTarget( Team t ) { 
             super( 80 );
             team = t; 
-        }
-       
+        }      
         @Override
         public boolean includes( LivingEntity entity ) {
-            
-            if ( !(entity instanceof Player) ) return false;
-           
-            return team.getPlayers().contains( entity );
-        }
-        
+            return  entity instanceof Player 
+                    && team.getPlayers().contains( entity );
+        }        
         @Override
         public boolean equals( Object o ) {       
             return  o != null 

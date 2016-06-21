@@ -1,7 +1,5 @@
 package org.jabelpeeps.sentries;
 
-import java.util.StringJoiner;
-
 /**
  * An abstract class to act as a bridge between Sentries and other Server plugins.
  * <p>
@@ -57,24 +55,5 @@ public interface PluginBridge {
      * @return a short String giving info on how to access the commands added by this PluginBridge.
      */
     public String getCommandHelp();
-
-    /**
-     * Static method to iterate over the activated PluginBridges, polling each one for command
-     * help text.
-     * 
-     * @return - the concatenated help Strings
-     */
-    public static String getAdditionalTargets() {
-        String outString = "";
     
-        if ( !Sentries.activePlugins.isEmpty() ) {
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-    
-            joiner.add( "Further options available:- " );    
-            Sentries.activePlugins.parallelStream().forEach( p -> joiner.add( p.getCommandHelp() ) );
-            
-            outString = joiner.toString();
-        }
-        return outString;
-    }
 }

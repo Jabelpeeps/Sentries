@@ -6,45 +6,32 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 
-public class NamedPlayerTarget extends AbstractTargetType {
+public class NamedPlayerTarget extends AbstractTargetType implements TargetType.Internal {
 
     private UUID uuid;
     
-    protected NamedPlayerTarget() { 
+    public NamedPlayerTarget( UUID player ) { 
         super( 10 ); 
+        uuid = player;
     }
-
     @Override
     public boolean includes( LivingEntity entity ) {
-        if (  !(entity instanceof Player) || entity.hasMetadata( "NPC" ) ) return false;
-        
-        if ( uuid.equals( entity.getUniqueId() ) ) return true;
-               
-        return false;
-    }
-
-    @Override
-    public void setTargetString( String target ) { 
-        uuid = UUID.fromString( target );
-    }
-    
+        return  entity instanceof Player
+                && !entity.hasMetadata( "NPC" )
+                && uuid.equals( entity.getUniqueId() );
+    }  
     @Override
     public String getTargetString() { 
-        return String.join( ":", "Player", uuid.toString() ); 
+        return String.join( ":", "Named", "Player", uuid.toString() ); 
     }
     @Override
     public boolean equals( Object o ) {
-        if (    o != null 
+        return  o != null 
                 && o instanceof NamedPlayerTarget 
-                && uuid.equals( ((NamedPlayerTarget) o).uuid ) )
-            return true;
-
-        return false;
+                && uuid.equals( ((NamedPlayerTarget) o).uuid );
     }
-
     @Override
     public int hashCode() {
         return uuid.hashCode();
     }
-
 }

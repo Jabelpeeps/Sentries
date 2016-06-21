@@ -274,7 +274,7 @@ public enum SentryStatus {
         }
         
     },
-    /** Sentries with this status will search for possible targets, and be receptive to events 
+    /** Sentries with this status will search for possible targets, and be receptive to _events 
      *  within their detection range. <p>  They will also heal whilst in this state. */
     LOOKING {
 
@@ -291,7 +291,7 @@ public enum SentryStatus {
             LivingEntity target = null;
 
             // find and set a target to attack (if no current target)
-            if (    inst.targetFlags > 0 
+            if (    !inst.targets.isEmpty() 
                     && inst.attackTarget == null
                     && System.currentTimeMillis() > inst.reassesTime ) {
 

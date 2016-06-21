@@ -5,40 +5,29 @@ import java.util.UUID;
 import org.bukkit.entity.LivingEntity;
 
 
-public class NamedNPCTarget extends AbstractTargetType {
+public class NamedNPCTarget extends AbstractTargetType implements TargetType.Internal {
 
     private UUID uuid;
     
-    protected NamedNPCTarget() { super( 20 ); }
-
+    public NamedNPCTarget( UUID NPCuuid ) { 
+        super( 20 ); 
+        uuid = NPCuuid;
+    }
     @Override
     public boolean includes( LivingEntity entity ) {
-        if ( !entity.hasMetadata( "NPC" ) ) return false;
-        
-        if ( uuid.equals( entity.getUniqueId() ) ) return true;
-        
-        return false;
+        return  entity.hasMetadata( "NPC" ) 
+                && uuid.equals( entity.getUniqueId() );
     }
-
-    @Override
-    public void setTargetString( String NPCuuid ) { 
-        uuid = UUID.fromString( NPCuuid );
-    }
-    
     @Override
     public String getTargetString() { 
-        return String.join( ":", "NPC", uuid.toString() ); 
-    }
-    
+        return String.join( ":", "Named", "NPC", uuid.toString() ); 
+    }   
     @Override
     public boolean equals( Object o ) {
-        if (    o != null 
+        return  o != null 
                 && o instanceof NamedNPCTarget 
-                && uuid.equals( ((NamedNPCTarget) o).uuid ) ) return true;
-
-        return false;
+                && uuid.equals( ((NamedNPCTarget) o).uuid );
     }
-
     @Override
     public int hashCode() {
         return uuid.hashCode();
