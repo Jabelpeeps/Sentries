@@ -118,16 +118,10 @@ public class SentryTrait extends Trait {
     AttackType myAttack;
 
     private BukkitTask tickMe;
-
-    public final int myID;
-    private static int nextID;
-
-    static { nextID = 0; }
     
     public SentryTrait() {
         super( "sentry" );
         sentry = (Sentries) Bukkit.getPluginManager().getPlugin( "Sentries" );
-        myID = ++nextID;
     }
     
     @SuppressWarnings( "unchecked" )
@@ -215,7 +209,13 @@ public class SentryTrait extends Trait {
         eventTargets.parallelStream().forEach( e -> CommandHandler.getCommand( S.EVENT ).call( null, null, this, 0, "", "add", e ) );
         
         loaded = true;      
-        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );
+        if ( Sentries.debug ) {
+            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );        
+            Sentries.debugLog( "validTargets: " + validTargets.toString() );
+            Sentries.debugLog( "ignoreTargets: " + ignoreTargets.toString() );
+            Sentries.debugLog( "eventTargets: " + eventTargets.toString() );
+        }
+        
     }
     
     private void checkBridges( String target ) {
@@ -293,7 +293,7 @@ public class SentryTrait extends Trait {
                         }
                         myStatus = myStatus.update( SentryTrait.this );                    
                     }
-            }.runTaskTimer( sentry, 40 + myID, Sentries.logicTicks );
+            }.runTaskTimer( sentry, 40, Sentries.logicTicks );
         }
     }
 
@@ -350,6 +350,12 @@ public class SentryTrait extends Trait {
         targets.forEach( s -> validTargets.add( s.getTargetString() ) );
         ignores.forEach( s -> ignoreTargets.add( s.getTargetString() ) ); 
         events.forEach( e -> eventTargets.add( e.getTargetString() ) );
+        
+        if ( Sentries.debug ) {
+            Sentries.debugLog( "validTargets: " + validTargets.toString() + System.lineSeparator() +
+                                "ignoreTargets: " + ignoreTargets.toString() + System.lineSeparator() +
+                                "eventTargets: " + eventTargets.toString() );
+        }
         
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
@@ -1193,18 +1199,7 @@ public class SentryTrait extends Trait {
     @EventHandler
     public void onCitReload( CitizensReloadEvent event ) {
         cancelRunnable();
-    }
-
-    @Override
-    public boolean equals( Object obj ) {
-        return  obj != null
-                && obj instanceof SentryTrait
-                && ((SentryTrait) obj).myID == myID;
-    }
-
-    @Override
-    public int hashCode() { return myID; }
-    
+    }    
     
     static class GiveUpStuckAction implements StuckAction {
         @Override

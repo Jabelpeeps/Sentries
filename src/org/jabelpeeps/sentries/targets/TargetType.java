@@ -35,7 +35,7 @@ public interface TargetType extends Comparable<TargetType> {
      * 
      * @param type - a string that can be parsed to provide a definition of the desired targets.
      */
-    public void setTargetString( String type );
+    public TargetType setTargetString( String type );
     
     /**
      *  Method to get a representation of the parameters of this TargetType.

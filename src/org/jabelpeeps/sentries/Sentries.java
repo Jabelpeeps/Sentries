@@ -32,7 +32,7 @@ import net.citizensnpcs.api.trait.TraitInfo;
 
 public class Sentries extends JavaPlugin {
 
-    public static boolean debug = false;
+    public static boolean debug = true;
 
     static boolean dieLikePlayers = false;
     static boolean bodyguardsObeyProtection = true;

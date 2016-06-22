@@ -2,6 +2,7 @@ package org.jabelpeeps.sentries.commands;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -39,11 +40,9 @@ public class TargetComand implements SentriesComplexCommand {
         
         if ( S.LIST.equals( subCommand ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
-
-//            joiner.add( inst.validTargets.toString() );
             inst.targets.forEach( t -> joiner.add( t.getTargetString() ) );
 
-            Util.sendMessage( sender, Col.GREEN, "Targets: ", joiner.toString() );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s Targets: ", joiner.toString() );
             return;
         }
         
@@ -57,14 +56,14 @@ public class TargetComand implements SentriesComplexCommand {
         if ( (S.ADD + S.REMOVE).contains( subCommand ) ) {    
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, "try '/sentry help target'" );
+                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help target'" );
                 return;
             }
             TargetType target = null;
             String[] targetArgs = Util.colon.split( args[nextArg + 2] );
             
             if ( targetArgs.length < 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, "try '/sentry help target'" );
+                Util.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, " try '/sentry help target'" );
                 return;
             }
             String firstSubArg = targetArgs[0].toLowerCase();
@@ -88,12 +87,14 @@ public class TargetComand implements SentriesComplexCommand {
                     target = new MobTypeTarget( type );
             }
             else if ( firstSubArg.equals( "named" ) ) {
-                if ( secondSubArg.equals( "player" ) ) {                   
+                if ( secondSubArg.equals( "player" ) ) { 
+                    try {
                     target = new NamedPlayerTarget( 
                             Arrays.stream( Bukkit.getOfflinePlayers() )
                                   .filter( p -> p.getName().equalsIgnoreCase( targetArgs[2] ) )
                                   .findAny().get()
                                   .getUniqueId() );
+                    } catch (NoSuchElementException e) {}
                 }
                 else if ( secondSubArg.equals( "npc" ) ) {
 
@@ -104,7 +105,8 @@ public class TargetComand implements SentriesComplexCommand {
                             targetset.add( new NamedNPCTarget( n.getUniqueId() ) );
                         } 
                     });
-                    target = (TargetType) targetset.toArray()[0];
+                    if ( !targetset.isEmpty() )
+                        target = (TargetType) targetset.toArray()[0];
                 }
             }
             
@@ -129,7 +131,7 @@ public class TargetComand implements SentriesComplexCommand {
 
             joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.TARGET, " <add|remove|list|clearall> <TargetType>", 
                                                 Col.RESET, " to configure targets for a sentry to attack. " ) );
-            joiner.add( String.join( "", "  ", Col.BOLD, "Targets can be overridden by ignores.", Col.RESET ) );
+            joiner.add( String.join( "", Col.BOLD, "Targets can be overridden by ignores.", Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add <TargetType> as a target" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove <TargetType> as a target" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of targets" ) );

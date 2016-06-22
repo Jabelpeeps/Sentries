@@ -21,7 +21,7 @@ public class OwnerTarget extends AbstractTargetType implements TargetType.Intern
     } 
     @Override
     public String getTargetString() { 
-        return "Owner:" + owner.toString(); 
+        return "Owner"; 
     }   
     @Override
     public boolean equals( Object o ) {

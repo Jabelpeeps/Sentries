@@ -31,7 +31,7 @@ public class EventCommand implements SentriesComplexCommand {
             StringJoiner joiner = new StringJoiner( ", " );
             inst.events.forEach( t -> joiner.add( t.getTargetString() ) );
             
-            Util.sendMessage( sender, Col.GREEN, "Events: ", joiner.toString() );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s Events: ", joiner.toString() );
             return;
         }
         
@@ -45,7 +45,7 @@ public class EventCommand implements SentriesComplexCommand {
         if ( (S.ADD + S.REMOVE).contains( subCommand ) ) {
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Missing argument!", Col.RESET, "try '/sentry help event'" );
+                Util.sendMessage( sender, S.ERROR, "Missing argument!", Col.RESET, " try '/sentry help event'" );
                 return;
             }
             TargetType target = null;
@@ -80,17 +80,17 @@ public class EventCommand implements SentriesComplexCommand {
 
             joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.EVENT, " <add|remove|list|clearall> <EventType>", 
                                                 Col.RESET, " to configure events for a sentry to respond to."  ) );
-            joiner.add( String.join( "", "  ", Col.BOLD, "Ignores override events (if both are configured and apply).", Col.RESET ) );
+            joiner.add( String.join( "", Col.BOLD, "Events are overridden by ignores (if both are configured and apply).", Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to respond to <EventType>" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to stop responding to <EventType>" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of events" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current events" ) );
-            joiner.add( String.join( "", Col.GOLD, Col.BOLD, "  <Eventtype> ", Col.RESET, "can be any of the following:-") );
+            joiner.add( String.join( "", Col.GOLD, Col.BOLD, "<EventType> ", Col.RESET, "can be any of the following:-") );
             joiner.add( String.join( "", Col.GOLD, "  PvP ", Col.RESET, "- a Player-vs-Player Event") );
             joiner.add( String.join( "", Col.GOLD, "  PvE ", Col.RESET, "-  a Player-vs-Environment Event" ) );
             joiner.add( String.join( "", Col.GOLD, "  PvNPC ", Col.RESET, "- a Player-vs-NPC Event") );
             joiner.add( String.join( "", Col.GOLD, "  PvSentry", Col.RESET, "- a Player-vs-Sentry Event") );
-            joiner.add( String.join( "", "  In all cases the sentry will respond by attacking ", Col.BOLD, "the Aggressor!", Col.RESET ) );
+            joiner.add( String.join( "", "In all cases the sentry will respond by attacking ", Col.BOLD, "the Aggressor!", Col.RESET ) );
 
             commandHelp = joiner.toString();
         }

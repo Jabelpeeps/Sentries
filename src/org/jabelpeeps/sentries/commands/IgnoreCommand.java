@@ -13,7 +13,6 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
-import org.jabelpeeps.sentries.targets.AllEntitiesTarget;
 import org.jabelpeeps.sentries.targets.AllMonstersTarget;
 import org.jabelpeeps.sentries.targets.AllNPCsTarget;
 import org.jabelpeeps.sentries.targets.AllPlayersTarget;
@@ -41,12 +40,10 @@ public class IgnoreCommand implements SentriesComplexCommand {
         String subCommand = args[nextArg + 1].toLowerCase();
         
         if ( S.LIST.equals( subCommand ) ) {
-            StringJoiner joiner = new StringJoiner( ", " );
-
-//            joiner.add( inst.ignoreTargets.toString() );            
+            StringJoiner joiner = new StringJoiner( ", " );           
             inst.ignores.forEach( t -> joiner.add( t.getTargetString() ) );
             
-            Util.sendMessage( sender, Col.GREEN, npcName, " Current Ignores: ", joiner.toString() );
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s Ignores: ", joiner.toString() );
             return;
         }
         
@@ -61,7 +58,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
             // TODO add more user feedback for success or failure conditions
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, "try '/sentry help ignore'" );
+                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help ignore'" );
                 return;
             }
             TargetType target = null;
@@ -75,9 +72,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
                 String secondSubArg = targetArgs[1].toLowerCase();
                 
                 if ( firstSubArg.equals( "all" ) ) {
-                    if ( secondSubArg.equals( "entities" ) ) 
-                        target = new AllEntitiesTarget();
-                    else if ( secondSubArg.equals( "monsters" ) ) 
+                    if ( secondSubArg.equals( "monsters" ) ) 
                         target = new AllMonstersTarget();
                     else if ( secondSubArg.equals( "npcs" ) ) 
                         target = new AllNPCsTarget();
@@ -106,7 +101,8 @@ public class IgnoreCommand implements SentriesComplexCommand {
                                 targetset.add( new NamedNPCTarget( n.getUniqueId() ) );
                             } 
                         });
-                        target = (TargetType) targetset.toArray()[0];
+                        if ( !targetset.isEmpty() )
+                            target = (TargetType) targetset.toArray()[0];
                     }
                 }
             }
@@ -132,16 +128,16 @@ public class IgnoreCommand implements SentriesComplexCommand {
 
             joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.IGNORE, " <add|remove|list|clearall> <TargetType>", 
                                                 Col.RESET, " to add a target for a sentry to ignore."  ) );
-            joiner.add( String.join( "", "  ", Col.BOLD, "Ignores override targets (if both are configured).", Col.RESET ) );
+            joiner.add( String.join( "", Col.BOLD, "Ignores override targets (if both are configured).", Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add <TargetType> as an ignore" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove <TargetType> as an ignore" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of ignores" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current ignores" ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );
-            joiner.add( String.join( "", Col.GOLD, "  All:Entities ", Col.RESET, "to ignore everything that moves.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
+            joiner.add( String.join( "", Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
             joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Util.getAdditionalTargets() );
 

@@ -13,8 +13,9 @@ public abstract class AbstractTargetType implements TargetType {
         return order - ((AbstractTargetType) o).order;
     }   
     @Override
-    public void setTargetString( String type ) {
+    public TargetType setTargetString( String type ) {
         targetString = type;
+        return this;
     }
     @Override
     public String getTargetString() { 
