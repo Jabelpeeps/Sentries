@@ -209,8 +209,7 @@ public class SentryTrait extends Trait {
         eventTargets.parallelStream().forEach( e -> CommandHandler.getCommand( S.EVENT ).call( null, null, this, 0, "", "add", e ) );
         
         loaded = true;      
-        if ( Sentries.debug ) {
-            Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() end" );        
+        if ( Sentries.debug ) {      
             Sentries.debugLog( "validTargets: " + validTargets.toString() );
             Sentries.debugLog( "ignoreTargets: " + ignoreTargets.toString() );
             Sentries.debugLog( "eventTargets: " + eventTargets.toString() );
@@ -219,6 +218,7 @@ public class SentryTrait extends Trait {
     }
     
     private void checkBridges( String target ) {
+        if ( Sentries.debug ) Sentries.debugLog( "checkBridges() called with: " + target );
         Sentries.activePlugins.parallelStream()
                               .filter( p -> target.contains( p.getPrefix() ) )
                               .forEach( b -> b.add( this, target ) );

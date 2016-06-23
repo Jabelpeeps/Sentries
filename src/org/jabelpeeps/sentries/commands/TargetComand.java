@@ -1,10 +1,8 @@
 package org.jabelpeeps.sentries.commands;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -22,6 +20,8 @@ import org.jabelpeeps.sentries.targets.MobTypeTarget;
 import org.jabelpeeps.sentries.targets.NamedNPCTarget;
 import org.jabelpeeps.sentries.targets.NamedPlayerTarget;
 import org.jabelpeeps.sentries.targets.TargetType;
+
+import net.citizensnpcs.api.npc.NPC;
 
 
 public class TargetComand implements SentriesComplexCommand {
@@ -92,21 +92,24 @@ public class TargetComand implements SentriesComplexCommand {
                     target = new NamedPlayerTarget( 
                             Arrays.stream( Bukkit.getOfflinePlayers() )
                                   .filter( p -> p.getName().equalsIgnoreCase( targetArgs[2] ) )
-                                  .findAny().get()
+                                  .findAny().orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
                                   .getUniqueId() );
-                    } catch (NoSuchElementException e) {}
+                    } catch (IllegalArgumentException e) {
+                        Util.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
+                    }                  
                 }
                 else if ( secondSubArg.equals( "npc" ) ) {
 
-                    // this is ugly, but I can't see a better way to search for an npc by name atm
-                    Set<TargetType> targetset = new HashSet<>();
-                    Sentries.registry.forEach( n -> { 
-                        if ( n.getName().equalsIgnoreCase( targetArgs[2] ) ) {
-                            targetset.add( new NamedNPCTarget( n.getUniqueId() ) );
-                        } 
-                    });
-                    if ( !targetset.isEmpty() )
-                        target = (TargetType) targetset.toArray()[0];
+                    for ( NPC npc : Sentries.registry ) {
+                        if ( npc.getName().equalsIgnoreCase( targetArgs[2] ) ) {
+                            target = new NamedNPCTarget( npc.getUniqueId() );
+                            break;
+                        }
+                        else if ( npc.getUniqueId().toString().equals( targetArgs[2] ) ) {
+                            target = new NamedNPCTarget( UUID.fromString( targetArgs[2] ) );
+                            break;
+                        }
+                    }
                 }
             }
             
@@ -141,7 +144,7 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to target all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to target all Citizens NPC's.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to target all (human) Players.") );
-            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
+//            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Util.getAdditionalTargets() );
 
             targetCommandHelp = joiner.toString();
