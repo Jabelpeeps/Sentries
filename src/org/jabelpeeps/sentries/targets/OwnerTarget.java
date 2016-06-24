@@ -12,16 +12,13 @@ public class OwnerTarget extends AbstractTargetType implements TargetType.Intern
     public OwnerTarget( UUID uuid ) { 
         super( 10 ); 
         owner = uuid;
+        targetString = "Owner";
     }
     @Override
     public boolean includes( LivingEntity entity ) {
         UUID uuid = entity.getUniqueId();
         
         return uuid != null && uuid.equals( owner );
-    } 
-    @Override
-    public String getTargetString() { 
-        return "Owner"; 
     }   
     @Override
     public boolean equals( Object o ) {

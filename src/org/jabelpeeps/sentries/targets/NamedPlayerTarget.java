@@ -2,6 +2,7 @@ package org.jabelpeeps.sentries.targets;
 
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -23,6 +24,10 @@ public class NamedPlayerTarget extends AbstractTargetType implements TargetType.
     @Override
     public String getTargetString() { 
         return String.join( ":", "Named", "Player", uuid.toString() ); 
+    }
+    @Override
+    public String getPrettyString() {
+        return String.join( ":", "Named", "Player", Bukkit.getPlayer( uuid ).getName() );
     }
     @Override
     public boolean equals( Object o ) {

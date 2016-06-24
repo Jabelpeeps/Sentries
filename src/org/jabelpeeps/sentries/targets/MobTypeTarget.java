@@ -12,15 +12,12 @@ public class MobTypeTarget extends AbstractTargetType implements TargetType.Inte
     public MobTypeTarget( EntityType target ) { 
         super( 15 );
         type = target;
+        targetString = String.join( ":", "MobType", type.toString() ); 
     }
     @Override
     public boolean includes( LivingEntity entity ) {
         return  !(entity instanceof Creature ) 
                 && entity.getType().equals( type );
-    }
-    @Override
-    public String getTargetString() { 
-        return String.join( ":", "MobType", type.toString() ); 
     }
     @Override
     public boolean equals( Object o ) {

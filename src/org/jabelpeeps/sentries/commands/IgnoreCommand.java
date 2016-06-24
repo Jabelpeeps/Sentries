@@ -41,7 +41,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
         
         if ( S.LIST.equals( subCommand ) ) {
             StringJoiner joiner = new StringJoiner( ", " );           
-            inst.ignores.forEach( t -> joiner.add( t.getTargetString() ) );
+            inst.ignores.forEach( t -> joiner.add( t.getPrettyString() ) );
             
             Util.sendMessage( sender, Col.GREEN, npcName, "'s Ignores: ", joiner.toString() );
             return;

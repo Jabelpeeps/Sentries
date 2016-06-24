@@ -40,7 +40,8 @@ public class TargetComand implements SentriesComplexCommand {
         
         if ( S.LIST.equals( subCommand ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
-            inst.targets.forEach( t -> joiner.add( t.getTargetString() ) );
+            inst.targets.forEach( t -> joiner.add( t.getPrettyString() ) );
+            inst.events.forEach( e -> joiner.add( e.getPrettyString() ) );
 
             Util.sendMessage( sender, Col.GREEN, npcName, "'s Targets: ", joiner.toString() );
             return;
@@ -49,7 +50,7 @@ public class TargetComand implements SentriesComplexCommand {
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.targets.removeIf( i -> i instanceof TargetType.Internal );
             inst.clearTarget();
-            Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Targets cleared" );
+            Util.sendMessage( sender, Col.GREEN, npcName, ": Targets cleared" );
             return;
         }
         
@@ -82,8 +83,12 @@ public class TargetComand implements SentriesComplexCommand {
                     target = new AllPlayersTarget();
             }
             else if ( firstSubArg.equals( "mobtype" ) ) {
+                if ( S.LIST.equals( secondSubArg ) ) {
+                    Util.sendMessage( sender, String.join( ", ", (String[]) Sentries.mobs.stream().map( m -> m.toString() ).toArray() ) );
+                    return;
+                }
                 EntityType type = EntityType.valueOf( secondSubArg );
-                if ( type != null )
+                if ( type != null && Sentries.mobs.contains( type ))
                     target = new MobTypeTarget( type );
             }
             else if ( firstSubArg.equals( "named" ) ) {
@@ -95,7 +100,7 @@ public class TargetComand implements SentriesComplexCommand {
                                   .findAny().orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
                                   .getUniqueId() );
                     } catch (IllegalArgumentException e) {
-                        Util.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
+                        Util.sendMessage( sender, S.ERROR, "No player called:- ", targetArgs[2], " was found." );
                     }                  
                 }
                 else if ( secondSubArg.equals( "npc" ) ) {
@@ -138,7 +143,7 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add <TargetType> as a target" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove <TargetType> as a target" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of targets" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current targets" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear all targets added with this command" ) );
             joiner.add( S.HELP_ADD_REMOVE_TYPES );
             joiner.add( String.join( "", Col.GOLD, "  All:Entities ", Col.RESET, "to target anything that moves.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to target all hostile mobs.") );

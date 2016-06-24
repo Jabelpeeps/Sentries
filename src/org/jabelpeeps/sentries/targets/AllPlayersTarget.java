@@ -8,16 +8,14 @@ import org.bukkit.entity.Player;
  */
 public class AllPlayersTarget extends AbstractTargetType implements TargetType.Internal {
 
-    public AllPlayersTarget() { super( 2 ); }
-    
+    public AllPlayersTarget() { 
+        super( 2 ); 
+        targetString = "All:Players";
+    }
     @Override
     public boolean includes( LivingEntity entity ) {
         return entity instanceof Player && !entity.hasMetadata( "NPC" );
-    }   
-    @Override
-    public String getTargetString() { 
-        return "All:Players"; 
-    }
+    } 
     @Override
     public boolean equals( Object o ) {
         return o != null && o instanceof AllPlayersTarget;

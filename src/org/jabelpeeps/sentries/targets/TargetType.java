@@ -44,11 +44,20 @@ public interface TargetType extends Comparable<TargetType> {
      */
     public String getTargetString();
     
+    /**
+     * This method is called when a user lists a sentry's targets.
+     * @return a human-friendly string that describes the TargetType
+     */
+    public String getPrettyString();
+    
     @Override
     public boolean equals( Object o );
     
     @Override
     public int hashCode();
     
+    /**
+     * Interface to tag the TargetTypes that are added by the 'target' and 'ignore' Sub-commands.
+     */
     public interface Internal {}
 }

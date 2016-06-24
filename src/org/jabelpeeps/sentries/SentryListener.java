@@ -360,8 +360,7 @@ public class SentryListener implements Listener {
                 // do knockback
                 myEntity.setVelocity( damager.getLocation()
                                              .getDirection()
-                                             .multiply( 1.0 / ( instVictim.weight + (armour / 5) ) ) 
-                );
+                                             .multiply( 1.0 / ( instVictim.weight + (armour / 5) ) ) );
                 // Apply armour
                 damage -= armour;
 

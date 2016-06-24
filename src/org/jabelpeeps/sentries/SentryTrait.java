@@ -241,7 +241,7 @@ public class SentryTrait extends Trait {
         // check for illegal values
         if ( weight <= 0 ) weight = 1.0;
         if ( arrowRate > 30 ) arrowRate = 30.0;
-        if ( maxHealth < 0 ) maxHealth = 0;
+        if ( maxHealth < 1 ) maxHealth = 1;
         if ( range < 1 ) range = 1;
         if ( range > 200 ) range = 200;
         if ( respawnDelay < -1 ) respawnDelay = -1;
@@ -529,12 +529,12 @@ public class SentryTrait extends Trait {
         return theTarget;
     }
 
-    public void draw( boolean on ) {
-        if ( Sentries.debug ) Sentries.debugLog( "draw() call on " + getMyEntity().getName() + " with value [" + on + "]"  );
-        
-        NMS.getHandle( getMyEntity() ).b( on );
-        // TODO: - IS THIS CORRECT?  What does it do?
-    }
+//    public void draw( boolean on ) {
+//        if ( Sentries.debug ) Sentries.debugLog( "draw() call on " + getMyEntity().getName() + " with value [" + on + "]"  );
+//        
+//        NMS.getHandle( getMyEntity() ).b( on );
+//        // TODO: - IS THIS CORRECT?  What does it do?
+//    }
 
     public void fire( LivingEntity theTarget ) {
 
@@ -700,8 +700,8 @@ public class SentryTrait extends Trait {
 
         faceEntity( myEntity, theTarget );
 
-        if ( projectileClazz == Arrow.class )
-            draw( false );
+        if ( projectileClazz == Arrow.class ) {}
+//            draw( false );
         else if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );
     }
@@ -1018,7 +1018,7 @@ public class SentryTrait extends Trait {
 
         getNavigator().cancelNavigation();
         attackTarget = null;       
-        draw( false );
+//        draw( false );
     }
 
     public void checkIfEmpty ( CommandSender sender ) {

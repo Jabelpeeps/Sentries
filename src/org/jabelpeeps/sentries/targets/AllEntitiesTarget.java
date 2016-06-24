@@ -8,17 +8,14 @@ import org.bukkit.entity.LivingEntity;
  */
 public class AllEntitiesTarget extends AbstractTargetType implements TargetType.Internal {
 
-    public AllEntitiesTarget() { super( 1 ); }
-    
+    public AllEntitiesTarget() { 
+        super( 1 ); 
+        targetString = "All:Entities";
+    }    
     @Override
     public boolean includes( LivingEntity entity ) {
         return true;
     }
-    @Override
-    public String getTargetString() { 
-        return "All:Entities"; 
-    }
-    
     @Override
     public boolean equals( Object o ) {         
         return o != null && o instanceof AllEntitiesTarget;

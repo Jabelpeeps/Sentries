@@ -337,7 +337,7 @@ public enum SentryStatus {
                         navigator.setTarget( inst.attackTarget, true );
                     }
 
-                    inst.draw( true );
+//                    inst.draw( true );
 
                     if ( System.currentTimeMillis() > inst.oktoFire ) {
 
@@ -361,7 +361,7 @@ public enum SentryStatus {
 
                 double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
                 // block if in range
-                inst.draw( dist < 9 );
+//                inst.draw( dist < 9 );
                 // is it still in range? then keep attacking...
                 if ( dist <= inst.range * inst.range )
                     return this;

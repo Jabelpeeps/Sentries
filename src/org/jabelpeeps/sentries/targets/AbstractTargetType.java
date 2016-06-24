@@ -22,6 +22,10 @@ public abstract class AbstractTargetType implements TargetType {
         return targetString; 
     }
     @Override
+    public String getPrettyString() {
+        return targetString;
+    }
+    @Override
     public abstract boolean equals( Object o );
     
     @Override

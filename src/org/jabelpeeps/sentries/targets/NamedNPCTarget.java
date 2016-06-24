@@ -3,6 +3,7 @@ package org.jabelpeeps.sentries.targets;
 import java.util.UUID;
 
 import org.bukkit.entity.LivingEntity;
+import org.jabelpeeps.sentries.Sentries;
 
 
 public class NamedNPCTarget extends AbstractTargetType implements TargetType.Internal {
@@ -21,6 +22,10 @@ public class NamedNPCTarget extends AbstractTargetType implements TargetType.Int
     @Override
     public String getTargetString() { 
         return String.join( ":", "Named", "NPC", uuid.toString() ); 
+    } 
+    @Override
+    public String getPrettyString() { 
+        return String.join( ":", "Named", "NPC", Sentries.registry.getByUniqueIdGlobal( uuid ).getName() ); 
     }   
     @Override
     public boolean equals( Object o ) {

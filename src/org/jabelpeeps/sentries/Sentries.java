@@ -131,13 +131,11 @@ public class Sentries extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
     }
     
-    final Runnable removeArrows = new Runnable() {
-        @Override
-        public void run() {
-            while ( arrows.size() > 200 ) {
-                Projectile arrow = arrows.remove();
-                if ( arrow != null ) arrow.remove();
-            }
+    final Runnable removeArrows = () -> {
+
+        while ( arrows.size() > 200 ) {
+            Projectile arrow = arrows.remove();
+            if ( arrow != null ) arrow.remove();
         }
     };
  

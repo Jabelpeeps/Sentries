@@ -5,15 +5,13 @@ import org.bukkit.entity.LivingEntity;
 
 public class AllNPCsTarget extends AbstractTargetType implements TargetType.Internal {
 
-    public AllNPCsTarget() { super( 4 ); }
-
+    public AllNPCsTarget() { 
+        super( 4 );
+        targetString = "All:NPCs";
+    }
     @Override
     public boolean includes( LivingEntity entity ) {
         return entity.hasMetadata( "NPC" );
-    }  
-    @Override
-    public String getTargetString() { 
-        return "All:NPCs"; 
     } 
     @Override
     public boolean equals( Object o ) { 
