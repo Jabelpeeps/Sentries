@@ -1,6 +1,6 @@
 package org.jabelpeeps.sentries.attackstrategies;
 
-import org.bukkit.craftbukkit.v1_9_R2.entity.CraftCreeper;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftCreeper;
 import org.bukkit.entity.LivingEntity;
 
 import net.citizensnpcs.api.ai.AttackStrategy;
