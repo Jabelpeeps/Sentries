@@ -2,6 +2,7 @@ package org.jabelpeeps.sentries;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -33,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 
+import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.event.NavigationCompleteEvent;
 import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
@@ -43,6 +45,8 @@ import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
 public class SentryListener implements Listener {
+    
+    private Random random = new Random();
 
     SentryListener() {}
 
@@ -187,7 +191,21 @@ public class SentryListener implements Listener {
             event.setCancelled( true );
 
             switch ( event.getCause() ) {
-
+                
+                case FALL:
+                default:
+                    return;
+                    
+                case LIGHTNING:
+                    if ( inst.isStormcaller() ) return;
+                    break;
+                case FIRE:
+                case FIRE_TICK:
+                    if ( !inst.isFlammable() ) return;
+                    break;
+                case POISON:
+                    if ( inst.isWitchDoctor() ) return;
+                    
                 case CONTACT:
                 case DROWNING:
                 case LAVA:
@@ -197,27 +215,44 @@ public class SentryListener implements Listener {
                 case BLOCK_EXPLOSION:
                 case SUFFOCATION:
                 case MAGIC:
-                    inst.onEnvironmentDamage( event );
-                    break;
+            }
+            
+            if ( inst.myStatus.isDeadOrDieing() ) return;
 
-                case LIGHTNING:
-                    if ( !inst.isStormcaller() )
-                        inst.onEnvironmentDamage( event );
-                    break;
+            NPC npc = inst.getNPC();
+            
+            if ( npc == null || !npc.isSpawned() || inst.invincible ) return;
 
-                case FIRE:
-                case FIRE_TICK:
-                    if ( inst.isFlammable() )
-                        inst.onEnvironmentDamage( event );
-                    break;
+            if ( inst.guardeeName != null && inst.guardeeEntity == null ) return; 
 
-                case POISON:
-                    if ( !inst.isWitchDoctor() )
-                        inst.onEnvironmentDamage( event );
-                    break;
+            if ( System.currentTimeMillis() < inst.okToTakedamage ) return;
 
-                case FALL:
-                default:
+            inst.okToTakedamage = System.currentTimeMillis() + 500;
+
+            LivingEntity myEntity = inst.getMyEntity();
+            double finaldamage = event.getDamage();
+            DamageCause cause = event.getCause();
+
+            if (    cause == DamageCause.CONTACT
+                    || cause == DamageCause.BLOCK_EXPLOSION ) {
+                finaldamage -= inst.getArmor();
+            }
+
+            if ( finaldamage > 0 ) {
+                myEntity.playEffect( EntityEffect.HURT );
+
+                if ( cause == DamageCause.FIRE ) {
+
+                    Navigator navigator = inst.getNavigator();
+
+                    if ( !navigator.isNavigating() )
+                        navigator.setTarget( myEntity.getLocation().add( 
+                                random.nextInt( 2 ) - 1, 0, random.nextInt( 2 ) - 1 ) );
+                }
+                if ( inst.getHealth() - finaldamage <= 0 )
+                    inst.die( true, event );
+                else
+                    myEntity.damage( finaldamage );
             }
         }
     }

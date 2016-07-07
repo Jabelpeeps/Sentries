@@ -11,7 +11,6 @@ import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
-import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -109,7 +108,7 @@ public class SentryTrait extends Trait {
 
     List<PotionEffect> weaponSpecialEffects;
     ItemStack potionItem;
-    Random random = new Random();
+    private Random random = new Random();
 
     public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
@@ -253,6 +252,7 @@ public class SentryTrait extends Trait {
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
 
+        myEntity.setMaxHealth( maxHealth );
         setHealth( maxHealth );
         _myDamamgers.clear();
         faceForward();
@@ -530,13 +530,6 @@ public class SentryTrait extends Trait {
         return theTarget;
     }
 
-//    public void draw( boolean on ) {
-//        if ( Sentries.debug ) Sentries.debugLog( "draw() call on " + getMyEntity().getName() + " with value [" + on + "]"  );
-//        
-//        NMS.getHandle( getMyEntity() ).b( on );
-//        // TODO: - IS THIS CORRECT?  What does it do?
-//    }
-
     public void fire( LivingEntity theTarget ) {
 
         LivingEntity myEntity = getMyEntity();
@@ -701,9 +694,7 @@ public class SentryTrait extends Trait {
 
         faceEntity( myEntity, theTarget );
 
-        if ( projectileClazz == Arrow.class ) {}
-//            draw( false );
-        else if ( myEntity instanceof Player ) 
+        if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );
     }
 
@@ -783,48 +774,6 @@ public class SentryTrait extends Trait {
     public boolean isWitchDoctor() { return myAttack == AttackType.witchdoctor; }
     public boolean isFlammable() { return !notFlammable.contains( myAttack ); }
 
-   public void onEnvironmentDamage( NPCDamageEvent event ) {
-        // not called for fall damage, or for lightning on stormcallers,
-        // or for fire on pyromancers & stormcallers, or for poison on witchdoctors.
-        
-        if ( myStatus.isDeadOrDieing() ) return;
-
-        if ( npc == null || !npc.isSpawned() || invincible ) return;
-
-        if ( guardeeName != null && guardeeEntity == null ) return; 
-
-        if ( System.currentTimeMillis() < okToTakedamage + 500 ) return;
-
-        okToTakedamage = System.currentTimeMillis();
-
-        LivingEntity myEntity = getMyEntity();
-        double finaldamage = event.getDamage();
-        DamageCause cause = event.getCause();
-
- //       myEntity.setLastDamageCause( event );
-
-        if (    cause == DamageCause.CONTACT
-                || cause == DamageCause.BLOCK_EXPLOSION ) {
-            finaldamage -= getArmor();
-        }
-
-        if ( finaldamage > 0 ) {
-            myEntity.playEffect( EntityEffect.HURT );
-
-            if ( cause == DamageCause.FIRE ) {
-
-                Navigator navigator = getNavigator();
-
-                if ( !navigator.isNavigating() )
-                    navigator.setTarget( myEntity.getLocation().add( 
-                            random.nextInt( 2 ) - 1, 0, random.nextInt( 2 ) - 1 ) );
-            }
-            if ( getHealth() - finaldamage <= 0 )
-                die( true, event );
-            else
-                myEntity.damage( finaldamage );
-        }
-    }
 
     /** 
      * Checks whether sufficient time has passed since the last healing, and if so restores
@@ -893,7 +842,6 @@ public class SentryTrait extends Trait {
                     guardeeEntity = player;
                     guardeeName = name;
 
-//                    clearTarget();
                     return true;
                 }
             }
@@ -920,7 +868,6 @@ public class SentryTrait extends Trait {
                     guardeeEntity = (LivingEntity) each;
                     guardeeName = name;
 
-//                    clearTarget();
                     return true;
                 }
             }
@@ -934,11 +881,8 @@ public class SentryTrait extends Trait {
 
         if ( myEntity == null ) return;
 
-        myEntity.setMaxHealth( maxHealth );
-
-        if ( health > maxHealth ) health = maxHealth;
-
-        myEntity.setHealth( health );
+        myEntity.setHealth( health > maxHealth ? maxHealth 
+                                               : health );
     }
     
     public boolean equip( ItemStack newEquipment ) {
@@ -1112,7 +1056,7 @@ public class SentryTrait extends Trait {
 
     /** 
      * Spawns and returns a mountNPC, creating a new NPC of type horse if the sentry does not already have a mount.
-     * The method will do nothing and return null if the Sentries is not spawned.  */
+     * The method will do nothing and return null if the Sentry is not spawned.  */
     NPC spawnMount() {
         if ( Sentries.debug ) Sentries.debugLog( "Creating mount for " + npc.getName() );
 
