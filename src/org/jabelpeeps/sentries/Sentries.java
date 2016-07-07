@@ -334,14 +334,13 @@ public class Sentries extends JavaPlugin {
      * the config.yml (or the default config).  If the supplied material does not match any of
      * the configured armour types, then this method will return 0 (the slot number for the main hand). */
     static int getSlot( Material equipment ) {
-        int slot = 0;
         
-        if ( helmets.contains( equipment ) ) slot = 1;
-        else if ( chestplates.contains( equipment ) ) slot = 2;
-        else if ( leggings.contains( equipment ) ) slot = 3;
-        else if ( boots.contains( equipment ) ) slot = 4;
+        if ( helmets.contains( equipment ) ) return 1;
+        else if ( chestplates.contains( equipment ) ) return 2;
+        else if ( leggings.contains( equipment ) ) return 3;
+        else if ( boots.contains( equipment ) ) return 4;
         
-        return slot;
+        return 0;
     }
     
     /**

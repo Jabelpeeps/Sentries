@@ -32,13 +32,11 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowman;
-import org.bukkit.entity.Spider;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
@@ -47,9 +45,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.attackstrategies.CreeperAttackStrategy;
 import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
-import org.jabelpeeps.sentries.attackstrategies.SpiderAttackStrategy;
 import org.jabelpeeps.sentries.targets.TargetType;
 
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
@@ -59,6 +55,7 @@ import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.event.CitizensReloadEvent;
 import net.citizensnpcs.api.event.DespawnReason;
+import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
@@ -98,6 +95,7 @@ public class SentryTrait extends Trait {
     public LivingEntity attackTarget;
     public String guardeeName;
     DamageCause causeOfDeath;
+    Entity killer;
 
     public Set<TargetType> targets = new TreeSet<>();
     public Set<TargetType> ignores = new TreeSet<>();
@@ -276,10 +274,10 @@ public class SentryTrait extends Trait {
         navigatorParams.stationaryTicks( 5 * 20 );
         navigatorParams.useNewPathfinder( false );
 
-        if ( myEntity instanceof Creeper )
-            navigatorParams.attackStrategy( new CreeperAttackStrategy() );
-        else if ( myEntity instanceof Spider )
-            navigatorParams.attackStrategy( new SpiderAttackStrategy() );
+//        if ( myEntity instanceof Creeper )
+//            navigatorParams.attackStrategy( new CreeperAttackStrategy() );
+//        else if ( myEntity instanceof Spider )
+//            navigatorParams.attackStrategy( new SpiderAttackStrategy() );
 
         updateAttackType();
 
@@ -310,14 +308,17 @@ public class SentryTrait extends Trait {
         if ( tickMe != null ) tickMe.cancel();;
     }
     
-    public void die( boolean runscripts, EntityDamageEvent.DamageCause cause ) {
+    public void die( boolean runscripts, NPCDamageEvent event ) {
 
         if ( myStatus.isDeadOrDieing() ) return;
         
+        myStatus = SentryStatus.DIEING;       
         respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
-        causeOfDeath = cause;
-        myStatus = SentryStatus.DIEING;
-
+        causeOfDeath = event.getCause();
+        
+        if ( event instanceof NPCDamageByEntityEvent )
+            killer = ((NPCDamageByEntityEvent) event).getDamager();
+        
         if ( runscripts && Sentries.denizenActive )
             DenizenHook.sentryDeath( _myDamamgers, npc );
     }
@@ -819,7 +820,7 @@ public class SentryTrait extends Trait {
                             random.nextInt( 2 ) - 1, 0, random.nextInt( 2 ) - 1 ) );
             }
             if ( getHealth() - finaldamage <= 0 )
-                die( true, cause );
+                die( true, event );
             else
                 myEntity.damage( finaldamage );
         }

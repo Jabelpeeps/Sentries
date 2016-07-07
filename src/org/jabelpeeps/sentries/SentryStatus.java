@@ -1,24 +1,11 @@
 package org.jabelpeeps.sentries;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
@@ -31,15 +18,14 @@ import net.citizensnpcs.api.npc.NPC;
  * actions, returning an updated state (if needed). */
 public enum SentryStatus {
 
-    /** Sentries with this status will have their death's handled, along with any drops, and then 
+    /** Sentries with this status will have their death's handled, and then 
      * various items tidied up before having their status set to {@link SentryStatus#DEAD} */
     DIEING {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+            // item drop handling moved to SentryListener.
             
-            LivingEntity myEntity = inst.getMyEntity();
-
             inst.clearTarget();
 
             if ( Sentries.denizenActive ) {
@@ -47,23 +33,9 @@ public enum SentryStatus {
                 DenizenHook.denizenAction( inst.getNPC(), "death", null );
                 DenizenHook.denizenAction( inst.getNPC(), "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
 
-                Entity killer = myEntity.getKiller();
-
-                if ( killer == null ) {
-                    // might have been a projectile.
-                    EntityDamageEvent ev = myEntity.getLastDamageCause();
-                    if (    ev != null
-                            && ev instanceof EntityDamageByEntityEvent ) {
-                        killer = ((EntityDamageByEntityEvent) ev).getDamager();
-                    }
-                }
-
-                if ( killer != null ) {
-
-                    if (    killer instanceof Projectile
-                            && ((Projectile) killer).getShooter() != null
-                            && ((Projectile) killer).getShooter() instanceof Entity )
-                        killer = (Entity) ((Projectile) killer).getShooter();
+                if ( inst.killer != null ) {
+                    
+                    Entity killer = Util.getArcher( inst.killer );
 
                     if ( Sentries.debug )
                         Sentries.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
@@ -77,46 +49,6 @@ public enum SentryStatus {
                     }
                 }
             }
-            if ( inst.dropInventory ) {
-                myEntity.getWorld()
-                        .spawn( myEntity.getLocation(), ExperienceOrb.class )
-                        .setExperience( Sentries.sentryEXP );
-            }
-            List<ItemStack> items = new LinkedList<>();
-
-            if ( myEntity instanceof HumanEntity ) {
-
-                PlayerInventory inventory = ((HumanEntity) myEntity).getInventory();
-
-                for ( ItemStack is : inventory.getArmorContents() ) {
-
-                    if ( is != null && is.getType() != null )
-                        items.add( is );
-                }
-                ItemStack is = inventory.getItemInMainHand();
-
-                if ( is.getType() != null ) items.add( is );
-
-                is = inventory.getItemInOffHand();
-
-                if ( is.getType() != null ) items.add( is );
-
-                inventory.clear();
-            }
-
-            if ( items.isEmpty() )
-                myEntity.playEffect( EntityEffect.DEATH );
-            else
-                myEntity.playEffect( EntityEffect.HURT );
-
-            if ( !inst.dropInventory ) items.clear();
-
-            items.parallelStream().forEach( i -> myEntity.getWorld().dropItemNaturally( myEntity.getLocation(), i ) );
-
-            if ( Sentries.dieLikePlayers )
-                myEntity.setHealth( 0 );
-            else
-                Bukkit.getPluginManager().callEvent( new EntityDeathEvent( myEntity, items ) );
 
             if ( inst.respawnDelay == -1 ) {
 

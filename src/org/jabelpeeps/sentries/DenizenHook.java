@@ -8,7 +8,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
 
 import net.aufdemrand.denizen.BukkitScriptEntryData;
 import net.aufdemrand.denizen.Denizen;
@@ -166,7 +165,7 @@ public class DenizenHook {
 
             if ( inst != null ) {
                 dB.log( "Goodbye, cruel world... " );
-                inst.die( false, EntityDamageEvent.DamageCause.CUSTOM );
+                inst.die( false, null );
             }
             else if ( ent != null ) {
                 ent.remove();

@@ -261,6 +261,11 @@ public abstract class Util {
         return null;
     }
     
+    /**
+     * Returns the shooter of a projectile, if possible.
+     * @param damager - the entity that did some damage.
+     * @return The shooter, if damager is a projectile, or damager if not.
+     */
     static Entity getArcher( Entity damager ) {
         
         if ( damager instanceof Projectile ) {
