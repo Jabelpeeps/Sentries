@@ -261,7 +261,7 @@ public enum SentryStatus {
                 if ( !navigator.isNavigating() )
                     inst.faceEntity( myEntity, inst.attackTarget );
                 
-                if ( inst.myAttack != AttackType.brawler ) {
+                if ( inst.myAttack.getProjectile() != null ) {
 
                     if ( !navigator.isPaused() ) {
                         navigator.setPaused( true );
