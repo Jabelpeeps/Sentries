@@ -55,6 +55,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class CommandHandler implements CommandExecutor, TabCompleter {
     
     private static Map<String, SentriesCommand> commandMap = new TreeMap<>();
+    private static String mainHelpIntro;
     private static String mainHelpOutro;
 
     static {
@@ -149,7 +150,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         
         List<String> tabs = new ArrayList<>( commandMap.keySet() );
         
-        tabs.removeIf( t -> !t.startsWith( args[args.length - 1] ) );
+        tabs.removeIf( t -> !t.startsWith( args[args.length - 1] ) 
+                         || !sender.hasPermission( commandMap.get( t ).getPerm() ) );
                   
         return tabs;       
     }
@@ -172,8 +174,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
                 return true;
             }
-            
-            Util.sendMessage( sender, Col.GOLD, "---------- Sentries Commands ----------", Col.RESET );
+            if ( mainHelpIntro == null ) {
+                StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+                
+                joiner.add( String.join( "", Col.GOLD, "---------- Sentries Commands ----------", Col.RESET ) );
+                joiner.add( String.join( "", "Select NPC's with ", Col.GOLD, "'/npc sel'", Col.RESET, " before running commands, or" ) );
+                joiner.add( String.join( "", " use ", Col.GOLD, "/sentry #npcid <command> ", Col.RESET, "to run a command on the sentry with the given npcid." ) );
+                joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
+                
+                mainHelpIntro = joiner.toString();
+            }
+            sender.sendMessage( mainHelpIntro );
 
             for ( Entry<String, SentriesCommand> each : commandMap.entrySet() ) {                
                 if ( S.ARMOR.equals( each.getKey() ) ) continue;
@@ -186,20 +197,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
             // two special commands to add to the list...
             if ( checkCommandPerm( S.PERM_RELOAD, sender ) )
-                Util.sendMessage( sender, Col.GOLD, "/sentry reload", Col.RESET, " - Reloads the config file" );
+                Util.sendMessage( sender, Col.GOLD, "/sentry reload", Col.RESET, " - reloads the config file" );
             
             if ( sender instanceof ConsoleCommandSender )
-                Util.sendMessage( sender, Col.RED, "Debug Reduces Performance! DO NOT enable unless you need it!", System.lineSeparator(),
-                                            Col.GOLD, "/sentry debug", Col.RESET, " - toggles the debug display on the console" );
+                Util.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, " - toggles display of debug info on the console", Col.RED, "NOTE: Debug Reduces Performance!" );
             // lazy initialiser
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         
                 joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
-                joiner.add( String.join( "", "If '...' is shown do ", Col.GOLD, "/sentry help <command>", Col.RESET, " for further help" ) );
-                joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
-                joiner.add( String.join( "", "Select NPC's with ", Col.GOLD, "'/npc sel'", Col.RESET, " before running commands, or use ",
-                        Col.GOLD, "/sentry #npcid <command> [args]", Col.RESET, " to run command on the sentry with the given npcid number." ) );
+                joiner.add( String.join( "", "do ", Col.GOLD, "/sentry help <command>", Col.RESET, " for further help on each command" ) );
                 joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
         
                 mainHelpOutro = joiner.toString();

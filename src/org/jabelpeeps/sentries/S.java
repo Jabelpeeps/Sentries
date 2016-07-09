@@ -29,7 +29,7 @@ public abstract class S {
     public final static String ERROR = Col.RED.concat( "Error: " );
     public final static String ERROR_NOT_NUMBER = " was not recognised as a valid number";
 
-    public final static String ERROR_NOT_SENTRY = "That command can only be used on a Sentry";
+    public final static String ERROR_NOT_SENTRY = "That command can only be used on a sentry";
     public final static String ERROR_NO_NPC = "You must have an NPC selected or provide an NPC #id";
     public final static String ERROR_ID_INVALID = "Could not find an NPC with #id of ";
     public final static String ERROR_NO_COMMAND_PERM = "You do not have permission for that command";
@@ -44,7 +44,7 @@ public abstract class S {
     public final static String NOT_ANY = "does not have any";
     public final static String ALREADY_LISTED = " is already listed as either a target or ignore for ";
 
-    public final static String HELP_ADD_REMOVE_TYPES = "<TargetType> can be any of the following: ";  
+    public final static String HELP_ADD_REMOVE_TYPES = " can be any of the following: ";  
 
     // words used as command options, keep all lower case.
     public final static String SET_SPAWN = "setspawn";
@@ -79,6 +79,7 @@ public abstract class S {
     public final static String REMOVE = "remove";
     public final static String INFO = "info";
     public final static String LIST = "list";
+    public final static String LIST_MOBS = "listmobs";
     public final static String CLEAR = "clear";
     public final static String CLEARALL = "clearall";
     public final static String JOIN = "join";

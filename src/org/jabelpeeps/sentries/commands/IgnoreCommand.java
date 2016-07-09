@@ -46,6 +46,13 @@ public class IgnoreCommand implements SentriesComplexCommand {
             Util.sendMessage( sender, Col.GREEN, npcName, "'s Ignores: ", joiner.toString() );
             return;
         }
+
+        if ( S.LIST_MOBS.equals( subCommand ) ) {
+            Util.sendMessage( sender, String.join( ", ", Sentries.mobs.stream()
+                                                                 .map( m -> m.toString() )
+                                                                 .toArray( String[]::new ) ) );
+            return;
+        }
         
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.ignores.removeIf( i -> i instanceof TargetType.Internal );
@@ -80,8 +87,8 @@ public class IgnoreCommand implements SentriesComplexCommand {
                         target = new AllPlayersTarget();
                 }
                 else if ( firstSubArg.equals( "mobtype" ) ) {
-                    EntityType type = EntityType.valueOf( secondSubArg );
-                    if ( type != null )
+                    EntityType type = EntityType.valueOf( secondSubArg.toUpperCase() );
+                    if ( type != null && Sentries.mobs.contains( type ) )
                         target = new MobTypeTarget( type );
                 }
                 else if ( targetArgs.length > 2 && firstSubArg.equals( "named" ) ) {
@@ -90,7 +97,8 @@ public class IgnoreCommand implements SentriesComplexCommand {
                         target = new NamedPlayerTarget( 
                                 Arrays.stream( Bukkit.getOfflinePlayers() )
                                       .filter( p -> p.getName().equalsIgnoreCase( targetArgs[2] ) )
-                                      .findAny().orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
+                                      .findAny()
+                                      .orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
                                       .getUniqueId() );
                         } catch (IllegalArgumentException e) {
                             Util.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
@@ -133,16 +141,18 @@ public class IgnoreCommand implements SentriesComplexCommand {
 
             joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.IGNORE, " <add|remove|list|clearall> <TargetType>", 
                                                 Col.RESET, " to add a target for a sentry to ignore."  ) );
-            joiner.add( String.join( "", Col.BOLD, "Ignores override targets (if both are configured).", Col.RESET ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add <TargetType> as an ignore" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove <TargetType> as an ignore" ) );
+            joiner.add( String.join( "", Col.BOLD, "Ignores override targets and/or events (if both apply to an entity).", Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of ignores" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current ignores" ) );
-            joiner.add( S.HELP_ADD_REMOVE_TYPES );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
+            joiner.add( String.join( "", Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );
+            joiner.add( String.join( "", Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
-            joiner.add( String.join( "", Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
+            joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Util.getAdditionalTargets() );
 

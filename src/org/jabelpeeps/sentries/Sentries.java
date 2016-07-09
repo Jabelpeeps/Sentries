@@ -124,7 +124,7 @@ public class Sentries extends JavaPlugin {
                 logger.log( Level.WARNING, S.ERROR_WRONG_DENIZEN );
             }
         }
-        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentry" ) );
+        CitizensAPI.getTraitFactory().registerTrait( TraitInfo.create( SentryTrait.class ).withName( "sentries" ) );
 
         pluginManager.registerEvents( new SentryListener(), this );
         
@@ -333,7 +333,7 @@ public class Sentries extends JavaPlugin {
     /** Returns the slot number appropriate to hold the supplied material, as defined in 
      * the config.yml (or the default config).  If the supplied material does not match any of
      * the configured armour types, then this method will return 0 (the slot number for the main hand). */
-    static int getSlot( Material equipment ) {
+    public static int getSlot( Material equipment ) {
         
         if ( helmets.contains( equipment ) ) return 1;
         else if ( chestplates.contains( equipment ) ) return 2;

@@ -59,7 +59,6 @@ import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
-import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
@@ -117,7 +116,7 @@ public class SentryTrait extends Trait {
     private BukkitTask tickMe;
     
     public SentryTrait() {
-        super( "sentry" );
+        super( "sentries" );
         sentry = (Sentries) Bukkit.getPluginManager().getPlugin( "Sentries" );
     }
     
@@ -884,32 +883,6 @@ public class SentryTrait extends Trait {
         myEntity.setHealth( health > maxHealth ? maxHealth 
                                                : health );
     }
-    
-    public boolean equip( ItemStack newEquipment ) {
-
-        Equipment equipment = npc.getTrait( Equipment.class );
-        if ( equipment == null ) return false;
-        // the npc's entity type does not support equipment.
-
-        if ( newEquipment == null ) {
-
-            for ( int i = 0; i < 5; i++ ) {
-
-                if (    equipment.get( i ) != null
-                        && equipment.get( i ).getType() != Material.AIR ) {
-                    equipment.set( i, null );
-                }
-            }
-            return true;
-        }
-        int slot = Sentries.getSlot( newEquipment.getType() );
-
-        equipment.set( slot, newEquipment );
-
-        if ( slot == 0 ) updateAttackType();
-
-        return true;
-    }
 
     /**
      * Updates the Attacktype reference in myAttack field, according to the
@@ -917,7 +890,7 @@ public class SentryTrait extends Trait {
      * <p>
      * Also sets potion effects, and potion types if appropriate.
      */
-    void updateAttackType() {
+    public void updateAttackType() {
 
         Material weapon = Material.AIR;
         ItemStack item = null;
@@ -956,8 +929,8 @@ public class SentryTrait extends Trait {
     }
 
     /**
-     * Clears the target of the Sentry's attack, and returns it to following/looking status.
-     * 
+     *  Cancels the current navigation (including targetted attacks) and 
+     *  clears the held reference for the target. 
      */
     public void clearTarget() {
 

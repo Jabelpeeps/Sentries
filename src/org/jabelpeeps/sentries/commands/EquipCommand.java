@@ -15,6 +15,7 @@ import org.jabelpeeps.sentries.Util;
 
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
 
 
 public class EquipCommand implements SentriesComplexCommand {
@@ -26,8 +27,8 @@ public class EquipCommand implements SentriesComplexCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= 1 + nextArg ) {
-            sender.sendMessage( String.join( "", S.ERROR, "More arguments needed.") );
-            sender.sendMessage( getLongHelp());
+            Util.sendMessage( sender, "", S.ERROR, "More arguments needed.");
+            sender.sendMessage( getLongHelp() );
             return;
         }
         
@@ -49,7 +50,14 @@ public class EquipCommand implements SentriesComplexCommand {
                         case DIODE_BLOCK_OFF: case DIODE_BLOCK_ON: case DOUBLE_STEP: case WOOD_DOUBLE_STEP: case DOUBLE_STONE_SLAB2:
                         case PURPUR_DOUBLE_SLAB: case REDSTONE_COMPARATOR: case REDSTONE_COMPARATOR_OFF: case REDSTONE_COMPARATOR_ON:
                         case COMMAND_MINECART: case EMPTY_MAP: case ARMOR_STAND: case IRON_BARDING: case GOLD_BARDING: case DIAMOND_BARDING:
-                        case STANDING_BANNER: case WALL_BANNER: case POWERED_RAIL: case DETECTOR_RAIL: case TRAPPED_CHEST: 
+                        case STANDING_BANNER: case WALL_BANNER: case POWERED_RAIL: case DETECTOR_RAIL: case TRAPPED_CHEST: case STONE_BUTTON:
+                        case THIN_GLASS: case STAINED_GLASS: case WOOD_BUTTON: case STAINED_CLAY: case STAINED_GLASS_PANE: case CARPET:
+                        case STRUCTURE_VOID: case REDSTONE: case EXPLOSIVE_MINECART: case HOPPER_MINECART: case SPRUCE_DOOR_ITEM: 
+                        case BIRCH_DOOR_ITEM: case JUNGLE_DOOR_ITEM: case ACACIA_DOOR_ITEM: case DARK_OAK_DOOR_ITEM: case SPRUCE_DOOR: 
+                        case BIRCH_DOOR: case JUNGLE_DOOR: case ACACIA_DOOR: case DARK_OAK_DOOR: case SPRUCE_FENCE_GATE: case BIRCH_FENCE_GATE: 
+                        case JUNGLE_FENCE_GATE: case DARK_OAK_FENCE_GATE: case ACACIA_FENCE_GATE: case SPRUCE_FENCE: case BIRCH_FENCE: 
+                        case JUNGLE_FENCE: case DARK_OAK_FENCE: case ACACIA_FENCE: case FENCE:case FENCE_GATE: case STORAGE_MINECART: 
+                        case POWERED_MINECART: case IRON_FENCE: case ACTIVATOR_RAIL:
                             continue;
                         default:                   
                     }                    
@@ -64,55 +72,69 @@ public class EquipCommand implements SentriesComplexCommand {
         NPC npc = inst.getNPC();
         
         if ( !npc.isSpawned() ) {
-            Util.sendMessage( sender, Col.RED, "You can only modify equipment when a sentry is spawned." );
+            Util.sendMessage( sender, S.ERROR, "You can only modify equipment when a sentry is spawned." );
             return;
         }
-        
-        EntityType type = npc.getEntity().getType();
-        
-        // TODO figure out why zombies and skele's are not included here.
-        if ( type == EntityType.ENDERMAN || type == EntityType.PLAYER ) {
 
-            if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] ) ) {
-
-                inst.equip( null );
-                Util.sendMessage( sender, Col.YELLOW, npcName, "'s equipment cleared" );
+        Equipment equip = npc.getTrait( Equipment.class );
+        
+        if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] ) ) {
+           
+            for ( EquipmentSlot each : EquipmentSlot.values() ) {
+                equip.set( each, null );
             }
-            else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
+            Util.sendMessage( sender, Col.YELLOW, npcName, "'s equipment cleared" );
+        }
+        
+        else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
 
-                for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() ) {
+            for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() ) {
 
-                    String slotName = args[nextArg + 2];
-                
-                    if ( each.getKey().equalsIgnoreCase( slotName ) ) {
-                        
-                        npc.getTrait( Equipment.class ).set( each.getValue(), null ); 
+                String slotName = args[nextArg + 2];
+            
+                if ( each.getKey().equalsIgnoreCase( slotName ) ) {
+                    
+                    if ( checkSlot( npc.getEntity().getType(), each.getValue() ) ) {
+                        equip.set( each.getValue(), null ); 
                         
                         if ( "hand".equalsIgnoreCase( slotName ) ) slotName = "held item";
                         
                         Util.sendMessage( sender, Col.GREEN, "removed ", npcName, "'s ", slotName );
+                        break;
                     }
-                    else Util.sendMessage( sender, Col.RED, slotName, " was not recognised." );
+                    Util.sendMessage( sender, S.ERROR, "Unable to set equipment, does the sentry's type support the specified slot?" );
                 }
-            }
-            else {
-                Material mat = Material.matchMaterial( Util.joinArgs( nextArg + 1, args ) );
-
-                if ( mat == null ) {
-                    sender.sendMessage( Col.RED.concat( "Could not equip: item name not recognised" ) );
-                    return;
-                }
-
-                ItemStack item = new ItemStack( mat );
-
-                if ( inst.equip( item ) )
-                    sender.sendMessage( String.join( " ", Col.GREEN, "equipped", mat.toString(), "on", npcName ) );
-                else
-                    sender.sendMessage( Col.RED.concat( "Could not equip: invalid mob type?" ) );
+                Util.sendMessage( sender, S.ERROR, slotName, " was not recognised." );
             }
         }
-        else sender.sendMessage( Col.RED.concat( "Could not equip: must be Player or Enderman type" ) );
+        else {
+            Material mat = Material.matchMaterial( Util.joinArgs( nextArg + 1, args ) );
+
+            if ( mat == null ) {
+                Util.sendMessage( sender, S.ERROR, "Could not equip: item name not recognised" );
+                return;
+            }            
+            if ( equip != null ) {
+
+                ItemStack item = new ItemStack( mat );
+                int slot = Sentries.getSlot( item.getType() );
+                
+                if ( checkSlot( npc.getEntity().getType(), slot ) ) {
+                    equip.set( slot, item );
+    
+                    if ( slot == 0 ) inst.updateAttackType();
+                    
+                    Util.sendMessage( sender, " ", Col.GREEN, "equipped", mat.toString(), "on", npcName );
+                }
+            }
+            else Util.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
+        }
     }
+
+    private boolean checkSlot( EntityType ent, int slot ) {
+        return ( slot >= 1 && slot <= 5 ) || ( slot == 0 && ent != EntityType.ENDERMAN );
+    }
+    
     @Override
     public String getShortHelp() { return "adjust the equipment a sentry is using"; }
 

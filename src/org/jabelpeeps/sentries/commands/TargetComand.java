@@ -47,6 +47,13 @@ public class TargetComand implements SentriesComplexCommand {
             return;
         }
         
+        if ( S.LIST_MOBS.equals( subCommand ) ) {
+            Util.sendMessage( sender, String.join( ", ", Sentries.mobs.stream()
+                                                                 .map( m -> m.toString() )
+                                                                 .toArray( String[]::new ) ) );
+            return;
+        }
+        
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.targets.removeIf( i -> i instanceof TargetType.Internal );
             inst.clearTarget();
@@ -82,36 +89,43 @@ public class TargetComand implements SentriesComplexCommand {
                 else if ( secondSubArg.equals( "players" ) ) 
                     target = new AllPlayersTarget();
             }
+            
             else if ( firstSubArg.equals( "mobtype" ) ) {
-                if ( S.LIST.equals( secondSubArg ) ) {
-                    Util.sendMessage( sender, String.join( ", ", (String[]) Sentries.mobs.stream().map( m -> m.toString() ).toArray() ) );
-                    return;
-                }
-                EntityType type = EntityType.valueOf( secondSubArg );
-                if ( type != null && Sentries.mobs.contains( type ))
+                EntityType type = EntityType.valueOf( secondSubArg.toUpperCase() );
+                if ( type != null && Sentries.mobs.contains( type ) )
                     target = new MobTypeTarget( type );
             }
+            
             else if ( firstSubArg.equals( "named" ) ) {
+                
+                if ( targetArgs.length < 3 ) {
+                    Util.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, " try '/sentry help target'" );
+                    return;  
+                }
+                String thirdSubArg = targetArgs[2];
+                
                 if ( secondSubArg.equals( "player" ) ) { 
                     try {
                     target = new NamedPlayerTarget( 
                             Arrays.stream( Bukkit.getOfflinePlayers() )
-                                  .filter( p -> p.getName().equalsIgnoreCase( targetArgs[2] ) )
-                                  .findAny().orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
+                                  .filter( p -> p.getName().equalsIgnoreCase( thirdSubArg ) )
+                                  .findAny()
+                                  // the OrElse is used during target reloading, when the UUID is known but not the name
+                                  .orElse( Bukkit.getOfflinePlayer( UUID.fromString( thirdSubArg ) ) )
                                   .getUniqueId() );
                     } catch (IllegalArgumentException e) {
-                        Util.sendMessage( sender, S.ERROR, "No player called:- ", targetArgs[2], " was found." );
+                        Util.sendMessage( sender, S.ERROR, "No player called:- ", thirdSubArg, " was found." );
                     }                  
                 }
                 else if ( secondSubArg.equals( "npc" ) ) {
 
                     for ( NPC npc : Sentries.registry ) {
-                        if ( npc.getName().equalsIgnoreCase( targetArgs[2] ) ) {
+                        if ( npc.getName().equalsIgnoreCase( thirdSubArg ) ) {
                             target = new NamedNPCTarget( npc.getUniqueId() );
                             break;
                         }
-                        else if ( npc.getUniqueId().toString().equals( targetArgs[2] ) ) {
-                            target = new NamedNPCTarget( UUID.fromString( targetArgs[2] ) );
+                        else if ( npc.getUniqueId().toString().equals( thirdSubArg ) ) {
+                            target = new NamedNPCTarget( UUID.fromString( thirdSubArg ) );
                             break;
                         }
                     }
@@ -120,9 +134,11 @@ public class TargetComand implements SentriesComplexCommand {
             
             if ( target == null )
                 Util.sendMessage( sender, "The intended target was not recognised" );
-            else if ( S.ADD.equals( subCommand ) && inst.targets.add( target ) )
+            else if ( S.ADD.equals( subCommand ) 
+                    && inst.targets.add( target ) )
                 Util.sendMessage( sender, "Target Added" );
-            else if ( S.REMOVE.equals( subCommand ) && inst.targets.remove( target ) )
+            else if ( S.REMOVE.equals( subCommand ) 
+                    && inst.targets.remove( target ) )
                 Util.sendMessage( sender, "Target Removed" );            
         }                
     }
@@ -139,17 +155,19 @@ public class TargetComand implements SentriesComplexCommand {
 
             joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.TARGET, " <add|remove|list|clearall> <TargetType>", 
                                                 Col.RESET, " to configure targets for a sentry to attack. " ) );
-            joiner.add( String.join( "", Col.BOLD, "Targets can be overridden by ignores.", Col.RESET ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add <TargetType> as a target" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove <TargetType> as a target" ) );
+            joiner.add( String.join( "", Col.BOLD, "Targets can be overridden by ignores (see '/sentry ignore').", Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of targets" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear all targets added with this command" ) );
-            joiner.add( S.HELP_ADD_REMOVE_TYPES );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add ", Col.GOLD, "<TargetType> ", Col.RESET, "as a target" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove ", Col.GOLD, "<TargetType> ", Col.RESET, "as a target" ) );
+            joiner.add( String.join( "", Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );
             joiner.add( String.join( "", Col.GOLD, "  All:Entities ", Col.RESET, "to target anything that moves.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to target all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to target all Citizens NPC's.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to target all (human) Players.") );
-//            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
+            joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to target all mobs of <Type>.") );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
+//          joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Util.getAdditionalTargets() );
 
             targetCommandHelp = joiner.toString();

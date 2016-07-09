@@ -148,8 +148,6 @@ public abstract class Util {
         input = input.replace( "<ITEM>", (item == null) ? "" : Util.getLocalItemName( item ) );
         input = input.replace( "<AMOUNT>", (amount == null) ? "" : amount );
 
-//        input = ChatColor.translateAlternateColorCodes( '&', input );
-
         return input;
     }
     
@@ -188,10 +186,7 @@ public abstract class Util {
         if ( mat == null || mat == Material.AIR )
             return "Hand";
 
-//        if ( mat.isBlock() )
         return mat.name();
-
-//        return LocaleI18n.get( mat.name() + ".name" );
     }
 
     /**
@@ -333,16 +328,15 @@ public abstract class Util {
      * @return - the concatenated help Strings
      */
     public static String getAdditionalTargets() {
-        String outString = "";
-    
+        
         if ( !Sentries.activePlugins.isEmpty() ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
     
             joiner.add( "These additional options are available:- " );    
             Sentries.activePlugins.parallelStream().forEach( p -> joiner.add( p.getCommandHelp() ) );
             
-            outString = joiner.toString();
+            return joiner.toString();
         }
-        return outString;
+        return "";
     }
 }
