@@ -128,16 +128,14 @@ public class Sentries extends JavaPlugin {
 
         pluginManager.registerEvents( new SentryListener(), this );
         
-        Bukkit.getScheduler().scheduleSyncRepeatingTask( this, removeArrows, 40, 20 * 120 );
+        Bukkit.getScheduler().scheduleSyncRepeatingTask( this, () -> { 
+            
+                                                            while ( arrows.size() > 200 ) {
+                                                                Projectile arrow = arrows.remove();
+                                                                if ( arrow != null ) arrow.remove();
+                                                            }
+                                                        }, 40, 20 * 120 );
     }
-    
-    final Runnable removeArrows = () -> {
-
-        while ( arrows.size() > 200 ) {
-            Projectile arrow = arrows.remove();
-            if ( arrow != null ) arrow.remove();
-        }
-    };
  
     void reloadMyConfig() {
 

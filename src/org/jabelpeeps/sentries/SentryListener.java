@@ -57,7 +57,6 @@ public class SentryListener implements Listener {
 
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + deceased.toString() );
         
-        // don't mess with player death.
         if ( deceased instanceof Player && !deceased.hasMetadata( "NPC" ) ) return;
 
         Entity killer = deceased.getKiller();
@@ -77,8 +76,7 @@ public class SentryListener implements Listener {
                 killer = Util.getArcher( killer );
 
                 // TODO consider what to do if killer is not a living entity.
-                // (e.g. it is possible killer references a projectile shot by a
-                // dispenser.)
+                // (e.g. it is possible killer references a projectile shot by a dispenser.)
             }
         }
         SentryTrait inst = Util.getSentryTrait( killer );
@@ -161,19 +159,15 @@ public class SentryListener implements Listener {
 
             final Block block = projectile.getLocation().getBlock();
 
-            final Runnable blockDamage = new Runnable() {
-                @Override
-                public void run() {
-
-                    for ( BlockFace face : BlockFace.values() ) {
-                        if ( block.getRelative( face ).getType() == Material.FIRE )
-                            block.getRelative( face ).setType( Material.AIR );
-                    }
-                    if ( block.getType() == Material.FIRE )
-                        block.setType( Material.AIR );
+            Bukkit.getScheduler().scheduleSyncDelayedTask( Sentries.plugin, () -> {
+                
+                for ( BlockFace face : BlockFace.values() ) {
+                    if ( block.getRelative( face ).getType() == Material.FIRE )
+                        block.getRelative( face ).setType( Material.AIR );
                 }
-            };
-            Bukkit.getScheduler().scheduleSyncDelayedTask( Sentries.plugin, blockDamage );
+                if ( block.getType() == Material.FIRE )
+                    block.setType( Material.AIR );
+            });
         }
     }
 
@@ -199,22 +193,14 @@ public class SentryListener implements Listener {
                 case LIGHTNING:
                     if ( inst.isStormcaller() ) return;
                     break;
-                case FIRE:
-                case FIRE_TICK:
+                case FIRE: case FIRE_TICK:
                     if ( !inst.isFlammable() ) return;
                     break;
                 case POISON:
                     if ( inst.isWitchDoctor() ) return;
                     
-                case CONTACT:
-                case DROWNING:
-                case LAVA:
-                case VOID:
-                case SUICIDE:
-                case CUSTOM:
-                case BLOCK_EXPLOSION:
-                case SUFFOCATION:
-                case MAGIC:
+                case CONTACT: case DROWNING: case LAVA: case VOID: case SUICIDE:
+                case CUSTOM: case BLOCK_EXPLOSION: case SUFFOCATION: case MAGIC:
             }
             
             if ( inst.myStatus.isDeadOrDieing() ) return;

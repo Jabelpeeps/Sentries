@@ -41,6 +41,7 @@
 		</repository>
         
         <repository>
+        <!-- FactionsOne Repo -->
             <id>dre2n-repo</id>
             <url>http://feuerstern.bplaced.net/repo/</url>
         </repository>

@@ -215,6 +215,7 @@ public class SentryTrait extends Trait {
     
     private void checkBridges( String target ) {
         if ( Sentries.debug ) Sentries.debugLog( "checkBridges() called with: " + target );
+        
         Sentries.activePlugins.parallelStream()
                               .filter( p -> target.contains( p.getPrefix() ) )
                               .forEach( b -> b.add( this, target ) );
@@ -279,7 +280,7 @@ public class SentryTrait extends Trait {
 //            navigatorParams.attackStrategy( new SpiderAttackStrategy() );
 
         updateAttackType();
-
+       
         if ( tickMe == null ) {
             tickMe = new BukkitRunnable() {
                     @Override
@@ -392,19 +393,13 @@ public class SentryTrait extends Trait {
         key.setString( S.CON_GREETING, greetingMsg );
     }
 
-    @SuppressWarnings( "synthetic-access" )
     @Override
     public void onCopy() {
 
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
- 
-        // the new npc is not in the new location immediately.
-        // TODO is this really needed?
-        new BukkitRunnable() {  @Override
-                                public void run() {
-                                    spawnLocation = npc.getEntity().getLocation();
-                                }
-        }.runTaskLater( sentry, 10 );
+
+        Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getEntity().getLocation(), 10 );
+
     }
 
     public boolean isIgnoring( LivingEntity aTarget ) {
@@ -585,7 +580,7 @@ public class SentryTrait extends Trait {
 
         if ( dist == 0 ) return;
 
-        if ( !hasLOS( theTarget ) ) {
+        if ( !hasLOS( theTarget ) || dist > range ) {
             clearTarget();
             return;
         }
@@ -594,11 +589,6 @@ public class SentryTrait extends Trait {
             effect = null;
         }
         
-        if ( dist > range ) {
-            clearTarget();
-            return;
-        }
-
         if ( ballistics ) {
 
             Double launchAngle = Util.launchAngle( myLocation, to, v, elev, g );
@@ -645,9 +635,9 @@ public class SentryTrait extends Trait {
                 break;
             default:
                 // not lightning
-                Projectile projectile = myEntity.launchProjectile( projectileClazz );
-                //myEntity.getWorld().spawn( myLocation, projectileClazz );
-
+                Projectile projectile =  myEntity.getWorld().spawn( myLocation, projectileClazz );
+//                myEntity.launchProjectile( projectileClazz );
+                
                 if (    projectileClazz == ThrownPotion.class 
                         && potionItem != null ) {
                     
@@ -687,14 +677,14 @@ public class SentryTrait extends Trait {
                 else
                     projectile.setVelocity( victor ); 
         }
-
+        faceEntity( myEntity, theTarget );
+        
         if ( effect != null )
             myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
 
-        faceEntity( myEntity, theTarget );
-
+        
         if ( myEntity instanceof Player ) 
-            PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );
+            PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        
     }
 
     public double getHealth() {
