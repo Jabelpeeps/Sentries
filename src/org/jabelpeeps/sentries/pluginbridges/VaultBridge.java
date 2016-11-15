@@ -186,7 +186,7 @@ public class VaultBridge implements PluginBridge {
     
     public class GroupTarget extends AbstractTargetType {
         
-        private String group;
+        private final String group;
         
         GroupTarget( String grp ) { 
             super( 50 );

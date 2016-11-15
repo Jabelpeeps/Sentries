@@ -145,10 +145,10 @@ public class TownyBridge implements PluginBridge {
     
     protected abstract class AbstractTownyTarget extends AbstractTargetType {
 
-        protected Town town;
+        protected final Town town;
         protected TownyDataSource townyData = TownyUniverse.getDataSource();
         
-        protected AbstractTownyTarget( int i ) { super( i ); }
+        protected AbstractTownyTarget( int i, Town t ) { super( i ); town = t; }
         @Override
         public int hashCode() { return town.hashCode(); }
     }
@@ -156,18 +156,19 @@ public class TownyBridge implements PluginBridge {
     public class TownyEnemyTarget extends AbstractTownyTarget {
         
         TownyEnemyTarget( Town target ) { 
-            super( 55 );
-            town = target; 
+            super( 55, target );
         }     
         @Override
         public boolean includes( LivingEntity entity ) {
             try {
-                return townyData.getResident( entity.getName() ).getTown().getNation().hasEnemy( town.getNation() );
+                Resident resident = townyData.getResident( entity.getName() );
+                
+                return  !town.hasResident( resident )
+                        && resident.getTown().getNation().hasEnemy( town.getNation() );
              
             } catch ( NotRegisteredException e ) {
                 if ( Sentries.debug ) {
                     Sentries.debugLog( "TownyEnemyTarget has thrown NotRegisteredException" );
-                    e.printStackTrace();
                 }
                 return false;
             }      
@@ -183,8 +184,7 @@ public class TownyBridge implements PluginBridge {
     public class TownyFriendTarget extends AbstractTownyTarget {
         
         TownyFriendTarget( Town target ) { 
-            super( 56 );
-            town = target; 
+            super( 56, target );
         }        
         @Override
         public boolean includes( LivingEntity entity ) {
@@ -197,7 +197,6 @@ public class TownyBridge implements PluginBridge {
             } catch ( NotRegisteredException e ) {
                 if ( Sentries.debug ) {
                     Sentries.debugLog( "TownyEnemyTarget has thrown NotRegisteredException" );
-                    e.printStackTrace();
                 }
                 return false;
             }      

@@ -29,7 +29,7 @@ public class SimpleClansBridge implements PluginBridge {
     public boolean activate() { 
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );
         return true; 
-        }
+    }
 
     @Override
     public String getActivationMessage() { return "SimpleClans is active, The CLAN: target will function"; }
@@ -197,10 +197,11 @@ public class SimpleClansBridge implements PluginBridge {
     
     protected abstract class AbstractClanTarget extends AbstractTargetType {
 
-        protected Clan clan;
+        protected final Clan clan;
         
-        protected AbstractClanTarget( int i ) {
+        protected AbstractClanTarget( int i, Clan c ) {
             super( i );
+            clan = c;
         }       
         @Override
         public int hashCode() { return clan.hashCode(); }       
@@ -209,8 +210,7 @@ public class SimpleClansBridge implements PluginBridge {
     public class ClanTarget extends AbstractClanTarget {
 
         ClanTarget( Clan myClan ) {
-            super( 60 );
-            clan = myClan; 
+            super( 60, myClan );
         }  
 
         @Override
@@ -231,8 +231,7 @@ public class SimpleClansBridge implements PluginBridge {
     public class ClanAlliesTarget extends AbstractClanTarget {
         
         ClanAlliesTarget( Clan myClan ) {
-            super( 61 );
-            clan = myClan; 
+            super( 61, myClan );
         } 
         
         @Override
@@ -253,8 +252,7 @@ public class SimpleClansBridge implements PluginBridge {
     public class ClanRivalsTarget extends AbstractClanTarget {
         
         ClanRivalsTarget( Clan myClan ) {
-            super( 62 );
-            clan = myClan; 
+            super( 62, myClan );
         } 
         
         @Override

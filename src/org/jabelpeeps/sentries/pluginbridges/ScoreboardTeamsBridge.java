@@ -154,7 +154,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
     
     public class ScoreboardTeamsTarget extends AbstractTargetType {
 
-        private Team team;
+        private final Team team;
         
         ScoreboardTeamsTarget( Team target ) { 
             super( 40 );

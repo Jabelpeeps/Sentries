@@ -200,7 +200,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 Util.sendMessage( sender, Col.GOLD, "/sentry reload", Col.RESET, " - reloads the config file" );
             
             if ( sender instanceof ConsoleCommandSender )
-                Util.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, " - toggles display of debug info on the console", Col.RED, "NOTE: Debug Reduces Performance!" );
+                Util.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, 
+                        " - toggles display of debug info on the console", Col.RED, "NOTE: Debug Reduces Performance!" );
             // lazy initialiser
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );

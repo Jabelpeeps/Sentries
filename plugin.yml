@@ -11,9 +11,7 @@ commands:
   sentries: 
     description: Lists Sentries commands.
     usage: /sentries help
-  sentry:
-    description: Lists Sentries commands.
-    usage: /sentry help
+    aliases: [sentry]
 
 permissions:
   sentry.*:

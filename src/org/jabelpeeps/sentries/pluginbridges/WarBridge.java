@@ -169,7 +169,7 @@ public class WarBridge implements PluginBridge {
     
     public class WarTeamTarget extends AbstractTargetType {
         
-        private Team team;
+        private final Team team;
 
         WarTeamTarget( Team t ) { 
             super( 80 );

@@ -199,10 +199,11 @@ public class FactionsBridge implements PluginBridge {
     
     protected abstract class AbstractFactionTarget extends AbstractTargetType {
         
-        protected Faction faction;
+        protected final Faction faction;
 
-        protected AbstractFactionTarget( int i ) { 
+        protected AbstractFactionTarget( int i, Faction f ) { 
             super( i );
+            faction = f;
         }
         @Override
         public int hashCode() { return faction.hashCode(); }
@@ -211,8 +212,7 @@ public class FactionsBridge implements PluginBridge {
     public class FactionTarget extends AbstractFactionTarget {
 
         FactionTarget( Faction f ) {
-            super( 57 );
-            faction = f;
+            super( 57, f );
         }
         @Override
         public boolean includes( LivingEntity entity ) {            
@@ -233,8 +233,7 @@ public class FactionsBridge implements PluginBridge {
     public class FactionRivalsTarget extends AbstractFactionTarget {
                
         FactionRivalsTarget(  Faction f ) {
-            super( 56 );
-            faction = f;
+            super( 56, f );
         }
         @Override
         public boolean includes( LivingEntity entity ) {          
@@ -257,8 +256,7 @@ public class FactionsBridge implements PluginBridge {
    public class FactionAlliesTarget extends AbstractFactionTarget {
         
         FactionAlliesTarget(  Faction f ) {
-            super( 55 );
-            faction = f;
+            super( 55, f );
         }
         @Override
         public boolean includes( LivingEntity entity ) {           
