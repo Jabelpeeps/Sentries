@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.util.NMS;
 
 /** 
  * An Enum of states that a Sentry can be in.
@@ -114,7 +115,8 @@ public enum SentryStatus {
 
             if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
 
-            if ( myEntity.isInsideVehicle() ) inst.faceAlignWithVehicle();
+            if ( myEntity.isInsideVehicle() ) 
+                NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
 
             if (    inst.guardeeEntity instanceof Player
                     && !((Player) inst.guardeeEntity).isOnline() ) {
@@ -192,7 +194,8 @@ public enum SentryStatus {
 
             if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
 
-            if ( myEntity.isInsideVehicle() ) inst.faceAlignWithVehicle();
+            if ( myEntity.isInsideVehicle() ) 
+                NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
             
             if (    myEntity.getWorld() != inst.spawnLocation.getWorld() 
                     || myEntity.getLocation().distanceSquared( inst.spawnLocation ) > 1024 ) {
@@ -259,7 +262,7 @@ public enum SentryStatus {
                 Navigator navigator = inst.getNavigator();
                 
                 if ( !navigator.isNavigating() )
-                    inst.faceEntity( myEntity, inst.attackTarget );
+                    NMS.look( myEntity, inst.attackTarget );
                 
                 if ( inst.myAttack.getProjectile() != null ) {
 

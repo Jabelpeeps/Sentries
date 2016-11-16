@@ -255,7 +255,7 @@ public class SentryTrait extends Trait {
         myEntity.setMaxHealth( maxHealth );
         setHealth( maxHealth );
         _myDamamgers.clear();
-        faceForward();
+        NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
 
         if ( guardeeName == null )
             npc.teleport( spawnLocation, TeleportCause.PLUGIN );
@@ -399,7 +399,6 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
 
         Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getEntity().getLocation(), 10 );
-
     }
 
     public boolean isIgnoring( LivingEntity aTarget ) {
@@ -431,19 +430,19 @@ public class SentryTrait extends Trait {
         return false;
     }
 
-    void faceEntity( Entity from, Entity at ) {        
-        NMS.look( NMS.getHandle( from ), NMS.getHandle( at ) );
-    }
+//    void faceEntity( Entity from, Entity at ) {        
+//        NMS.look(  from, at );
+//    }
 
-    private void faceForward() {
-        LivingEntity myEntity = getMyEntity();
-        NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
-    }
+//    private void faceForward() {
+//        LivingEntity myEntity = getMyEntity();
+//        NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
+//    }
 
-    void faceAlignWithVehicle() {
-        LivingEntity myEntity = getMyEntity();
-        NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
-    }
+//    void faceAlignWithVehicle() {
+//        LivingEntity myEntity = getMyEntity();
+//        NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
+//    }
 
     public LivingEntity findTarget() {
 
@@ -491,7 +490,7 @@ public class SentryTrait extends Trait {
                                 player.sendMessage( Util.format( warningMsg, npc, player, null, null ) );
 
                                 if ( !getNavigator().isNavigating() )
-                                    faceEntity( myEntity, aTarget );
+                                    NMS.look( myEntity, aTarget );
 
                                 warningsGiven.put( player, System.currentTimeMillis() );
                             }
@@ -515,7 +514,7 @@ public class SentryTrait extends Trait {
                     Player player = (Player) aTarget;
 
                     player.sendMessage( Util.format( greetingMsg, npc, player, null, null ) );
-                    faceEntity( myEntity, aTarget );
+                    NMS.look( myEntity, aTarget );
 
                     warningsGiven.put( player, System.currentTimeMillis() );
                 }
@@ -677,7 +676,7 @@ public class SentryTrait extends Trait {
                 else
                     projectile.setVelocity( victor ); 
         }
-        faceEntity( myEntity, theTarget );
+        NMS.look( myEntity, theTarget );
         
         if ( effect != null )
             myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );

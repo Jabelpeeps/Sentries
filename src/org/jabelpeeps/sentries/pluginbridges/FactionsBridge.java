@@ -30,7 +30,7 @@ public class FactionsBridge implements PluginBridge {
     public boolean activate() { 
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );
         return true; 
-        }
+    }
 
     @Override
     public String getPrefix() { return PREFIX; }

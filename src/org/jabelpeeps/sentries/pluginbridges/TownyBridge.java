@@ -196,7 +196,7 @@ public class TownyBridge implements PluginBridge {
                 
             } catch ( NotRegisteredException e ) {
                 if ( Sentries.debug ) {
-                    Sentries.debugLog( "TownyEnemyTarget has thrown NotRegisteredException" );
+                    Sentries.debugLog( "TownyFriendTarget has thrown NotRegisteredException" );
                 }
                 return false;
             }      

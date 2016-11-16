@@ -7,10 +7,6 @@ package org.jabelpeeps.sentries;
  * order to be able to find out how the plugin groups players, and then decide
  * whether they are friend or foe.
  * <p>
- * It is suggested the child classes implement some form of caching of target
- * and ignore information in order to avoid the potential for causing lag during
- * battles.
- * <p>
  * Some such bridges are provided with Sentries, but in future it should be
  * possible for others to be added by third parties.
  */
