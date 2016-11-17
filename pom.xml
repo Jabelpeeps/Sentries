@@ -36,21 +36,21 @@
         </repository>
 
 		<repository>
-			<id>everything</id>
+			<id>citizens-repo</id>
 			<url>http://repo.citizensnpcs.co/</url>
 		</repository>
         
-        <repository>
-        <!-- FactionsOne Repo -->
+ <!--        <repository>
+        FactionsOne Repo
             <id>dre2n-repo</id>
             <url>http://feuerstern.bplaced.net/repo/</url>
-        </repository>
+        </repository> -->
 	</repositories>
 
 	<!-- Dependencies -->
 	<dependencies>
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
 			<version>${craftbukkit.version}</version>
@@ -62,11 +62,11 @@
                     <artifactId>bungeecord-chat</artifactId>
                 </exclusion>
             </exclusions>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>craftbukkit</artifactId>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot</artifactId>
 			<version>${craftbukkit.version}</version>
 			<type>jar</type>
 			<scope>provided</scope>
