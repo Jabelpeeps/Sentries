@@ -47,13 +47,6 @@ public class IgnoreCommand implements SentriesComplexCommand {
             return;
         }
 
-        if ( S.LIST_MOBS.equals( subCommand ) ) {
-            Util.sendMessage( sender, String.join( ", ", Sentries.mobs.stream()
-                                                                 .map( m -> m.toString() )
-                                                                 .toArray( String[]::new ) ) );
-            return;
-        }
-        
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.ignores.removeIf( i -> i instanceof TargetType.Internal );
             Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Ignores cleared" );
@@ -152,7 +145,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Util.getAdditionalTargets() );
 

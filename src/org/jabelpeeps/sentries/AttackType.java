@@ -16,7 +16,11 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
 
-enum AttackType {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+public enum AttackType {
     // Columns:- "name"         weapon held                 projectile       incendiary? lightning level?
     bombardier( "Bombardier",   Material.EGG,               Egg.class ), 
     archer(     "Archer",       Material.BOW,               Arrow.class ), 
@@ -36,7 +40,7 @@ enum AttackType {
     brawler(     "Brawler",     Material.AIR,               null ) {
 
         @Override
-        Material getWeapon( SentryTrait sentry ) {
+        public Material getWeapon( SentryTrait sentry ) {
             return ((HumanEntity) sentry.getMyEntity())
                                         .getInventory()
                                         .getItemInMainHand().getType();
@@ -45,8 +49,8 @@ enum AttackType {
 
     // The strings used for the names must correspond exactly with the names used in the config file.
     String name;
-    private Material weapon;
-    private Class<? extends Projectile> projectile;
+    @Getter private Material weapon;
+    @Getter private Class<? extends Projectile> projectile;
 
     boolean incendiary;
     int lightningLevel;
@@ -55,24 +59,12 @@ enum AttackType {
         this( n, w, p, false, 0 );
     }
 
-    AttackType( String n, Material w, Class<? extends Projectile> p, boolean i, int ll ) {
-        name = n;
-        weapon = w;
-        projectile = p;
-        incendiary = i;
-        lightningLevel = ll;
-    }
-
     // the argument for this method is only used in the override for the  'brawler' instance.
-    Material getWeapon( SentryTrait sentry ) {
+    public Material getWeapon( SentryTrait sentry ) {
         return weapon;
     }
 
-    Class<? extends Projectile> getProjectile() {
-        return projectile;
-    }
-
-    static Map<Material, AttackType> reverseSearch = new EnumMap<Material, AttackType>( Material.class );
+    static Map<Material, AttackType> reverseSearch = new EnumMap<>( Material.class );
     static {
         updateMap();
     }
@@ -89,8 +81,8 @@ enum AttackType {
      * @return a reference to the appropriate AttackType instance.
      */
     static AttackType find( Material item ) {
-        return (reverseSearch.containsKey( item )) ? reverseSearch.get( item )
-                                                   : AttackType.brawler;
+        return reverseSearch.containsKey( item ) ? reverseSearch.get( item )
+                                                 : AttackType.brawler;
     }
 
     /**

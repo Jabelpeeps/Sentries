@@ -48,6 +48,6 @@ public class AttackRateCommand implements SentriesNumberCommand {
 
     @Override
     public String getPerm() {
-        return null;
+        return S.PERM_ATTACK_RATE;
     }
 }

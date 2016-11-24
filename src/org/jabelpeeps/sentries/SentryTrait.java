@@ -40,8 +40,6 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
@@ -72,10 +70,10 @@ public class SentryTrait extends Trait {
     public Location spawnLocation;
 
     public int strength, armour, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
-    int activeStrength, activeArmour;
+//    int activeStrength, activeArmour;
     public float speed;
 
-    float activeSpeed;
+//    float activeSpeed;
     public double arrowRate, healRate, weight, maxHealth;
     public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
     
@@ -113,7 +111,7 @@ public class SentryTrait extends Trait {
     SentryStatus oldStatus;
     AttackType myAttack;
 
-    private BukkitTask tickMe;
+    private Integer tickMe;
     
     public SentryTrait() {
         super( "sentries" );
@@ -221,7 +219,6 @@ public class SentryTrait extends Trait {
                               .forEach( b -> b.add( this, target ) );
     }
     
-    @SuppressWarnings( "synthetic-access" )
     @Override
     public void onSpawn() {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
@@ -282,16 +279,14 @@ public class SentryTrait extends Trait {
         updateAttackType();
        
         if ( tickMe == null ) {
-            tickMe = new BukkitRunnable() {
-                    @Override
-                    public void run() {                      
-                        if ( Sentries.debug && oldStatus != myStatus ) {
-                            Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
-                            oldStatus = myStatus;
-                        }
-                        myStatus = myStatus.update( SentryTrait.this );                    
-                    }
-            }.runTaskTimer( sentry, 40, Sentries.logicTicks );
+            tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
+                    () -> {                      
+                                if ( Sentries.debug && oldStatus != myStatus ) {
+                                    Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
+                                    oldStatus = myStatus;
+                                }
+                                myStatus = myStatus.update( SentryTrait.this );                    
+                            }, 40, Sentries.logicTicks );
         }
     }
 
@@ -305,7 +300,7 @@ public class SentryTrait extends Trait {
     }
     
     public void cancelRunnable() {
-        if ( tickMe != null ) tickMe.cancel();;
+        if ( tickMe != null ) Bukkit.getScheduler().cancelTask( tickMe );
     }
     
     public void die( boolean runscripts, NPCDamageEvent event ) {
@@ -395,16 +390,13 @@ public class SentryTrait extends Trait {
 
     @Override
     public void onCopy() {
-
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
 
         Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getEntity().getLocation(), 10 );
     }
 
     public boolean isIgnoring( LivingEntity aTarget ) {
-
-        if ( aTarget == guardeeEntity ) return true;
-        
+        if ( aTarget == guardeeEntity ) return true;      
         if ( ignores.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
         
         if ( aTarget.hasMetadata("NPC") ) {
@@ -417,7 +409,6 @@ public class SentryTrait extends Trait {
     }
 
     public boolean isTarget( LivingEntity aTarget ) {
-
         if ( targets.parallelStream().anyMatch( t -> t.includes( aTarget ) ) ) return true;
                
         if ( aTarget.hasMetadata("NPC") ) {
@@ -429,20 +420,6 @@ public class SentryTrait extends Trait {
         }
         return false;
     }
-
-//    void faceEntity( Entity from, Entity at ) {        
-//        NMS.look(  from, at );
-//    }
-
-//    private void faceForward() {
-//        LivingEntity myEntity = getMyEntity();
-//        NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
-//    }
-
-//    void faceAlignWithVehicle() {
-//        LivingEntity myEntity = getMyEntity();
-//        NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
-//    }
 
     public LivingEntity findTarget() {
 
@@ -470,7 +447,7 @@ public class SentryTrait extends Trait {
                     lightLevel /= 2;
 
                 // not too dark?
-                if ( lightLevel >= (16 - nightVision) ) {
+                if ( lightLevel >= ( 16 - nightVision ) ) {
 
                     double dist = aTarget.getLocation().distance( myEntity.getLocation() );
 
@@ -623,7 +600,7 @@ public class SentryTrait extends Trait {
 
             case 1:
                 to.getWorld().strikeLightningEffect( to );
-                theTarget.damage( getStrength(), myEntity );
+                theTarget.damage( strength, myEntity );
                 break;
             case 2:
                 to.getWorld().strikeLightning( to );
@@ -693,25 +670,28 @@ public class SentryTrait extends Trait {
         return myEntity.getHealth();
     }
     
-    public int getArmor() {
-
-        if ( sentry.armorBuffs.isEmpty() )
-            return armour;
-
+    // TODO call this method from the right place(s)
+    public void updateArmour() {
+        if ( sentry.armorBuffs.isEmpty() ) return;
+        
         double mod = 0;
         LivingEntity myEntity = getMyEntity();
         
-        if ( myEntity instanceof Player ) {
-            for ( ItemStack is : ((Player) myEntity).getInventory().getArmorContents() ) {
-                Material item = is.getType();
+        ItemStack[] myArmour;  
+        if ( myEntity instanceof Player )
+            myArmour = ((Player) myEntity).getInventory().getArmorContents();
+        else
+            myArmour = myEntity.getEquipment().getArmorContents();
+        
+        for ( ItemStack is : myArmour ) {
+            Material item = is.getType();
 
-                if ( sentry.armorBuffs.containsKey( item ) )
-                    mod += sentry.armorBuffs.get( item );
-            }
+            if ( sentry.armorBuffs.containsKey( item ) )
+                mod += sentry.armorBuffs.get( item );
         }
-        return (int) (armour + mod);
+        armour = (int) mod;
     }
-
+    
     public float getSpeed() {
 
         LivingEntity myEntity = getMyEntity();
@@ -733,23 +713,22 @@ public class SentryTrait extends Trait {
         return (float) ( speed + mod ) * ( myEntity.isInsideVehicle() ? 2 : 1 );
     }
 
-    public int getStrength() {
-        if ( sentry.strengthBuffs.isEmpty() )
-            return strength;
-
-        double mod = 0;
-        LivingEntity myEntity = getMyEntity();
-
-        if ( myEntity instanceof Player ) {
-
-            Material item = ((Player) myEntity).getInventory().getItemInMainHand().getType();
-
-            if ( sentry.strengthBuffs.containsKey( item ) ) {
-                mod += sentry.strengthBuffs.get( item );
-            }
-        }
-        return (int) (strength + mod);
-    }
+//    public int getStrength() {
+//        if ( sentry.strengthBuffs.isEmpty() ) return strength;
+//
+//        double mod = 0;
+//        LivingEntity myEntity = getMyEntity();
+//
+//        if ( myEntity instanceof Player ) {
+//
+//            Material item = ((Player) myEntity).getInventory().getItemInMainHand().getType();
+//
+//            if ( sentry.strengthBuffs.containsKey( item ) ) {
+//                mod += sentry.strengthBuffs.get( item );
+//            }
+//        }
+//        return (int) (strength + mod);
+//    }
 
     static Set<AttackType> pyros = EnumSet.range( AttackType.pyro1, AttackType.pyro3 );
     static Set<AttackType> stormCallers = EnumSet.range( AttackType.sc1, AttackType.sc3 );

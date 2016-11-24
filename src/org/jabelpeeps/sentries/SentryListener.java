@@ -159,15 +159,15 @@ public class SentryListener implements Listener {
 
             final Block block = projectile.getLocation().getBlock();
 
-            Bukkit.getScheduler().scheduleSyncDelayedTask( Sentries.plugin, () -> {
-                
-                for ( BlockFace face : BlockFace.values() ) {
-                    if ( block.getRelative( face ).getType() == Material.FIRE )
-                        block.getRelative( face ).setType( Material.AIR );
-                }
-                if ( block.getType() == Material.FIRE )
-                    block.setType( Material.AIR );
-            });
+            Bukkit.getScheduler().scheduleSyncDelayedTask( Sentries.plugin, 
+                    () -> {
+                            for ( BlockFace face : BlockFace.values() ) {
+                                if ( block.getRelative( face ).getType() == Material.FIRE )
+                                    block.getRelative( face ).setType( Material.AIR );
+                            }
+                            if ( block.getType() == Material.FIRE )
+                                block.setType( Material.AIR );
+                        });
         }
     }
 
@@ -186,8 +186,7 @@ public class SentryListener implements Listener {
 
             switch ( event.getCause() ) {
                 
-                case FALL:
-                default:
+                case FALL: default:
                     return;
                     
                 case LIGHTNING:
@@ -221,7 +220,7 @@ public class SentryListener implements Listener {
 
             if (    cause == DamageCause.CONTACT
                     || cause == DamageCause.BLOCK_EXPLOSION ) {
-                finaldamage -= inst.getArmor();
+                finaldamage -= inst.armour;
             }
 
             if ( finaldamage > 0 ) {
@@ -279,7 +278,7 @@ public class SentryListener implements Listener {
             }
 
             // set damage dealt by a sentry
-            event.setDamage( instDamager.getStrength() );
+            event.setDamage( instDamager.strength );
 
             // uncancel if not bodyguard.
             if (    instDamager.guardeeName == null
@@ -309,7 +308,7 @@ public class SentryListener implements Listener {
 
                 if ( instVictim == null ) event.setCancelled( true );
 
-                double h = instDamager.getStrength() + 3;
+                double h = instDamager.strength + 3;
                 double v = 7.7 * Math.sqrt( h ) + 0.2;
 
                 if ( h <= 3 ) v -= 2;
@@ -380,7 +379,7 @@ public class SentryListener implements Listener {
                 damage = Math.round( damage * hit.damageModifier );
             }
             
-            int armour = instVictim.getArmor();
+            int armour = instVictim.armour;
             Entity myEntity = npc.getEntity();
             
             if ( damager != null && damage > 0 ) {

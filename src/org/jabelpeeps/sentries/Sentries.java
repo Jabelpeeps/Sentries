@@ -42,16 +42,16 @@ public class Sentries extends JavaPlugin {
     static Set<PluginBridge> activePlugins = new HashSet<>();
 
     // Lists of various armour items that will be accepted, by default.
-    static Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, 
+    public static Set<Material> boots = EnumSet.of( Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, 
             Material.IRON_BOOTS, Material.DIAMOND_BOOTS, Material.GOLD_BOOTS );
 
-    static Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, Material.CHAINMAIL_CHESTPLATE, 
+    public static Set<Material> chestplates = EnumSet.of( Material.LEATHER_CHESTPLATE, Material.CHAINMAIL_CHESTPLATE, 
             Material.IRON_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.GOLD_CHESTPLATE );
 
-    static Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET, Material.CHAINMAIL_HELMET, Material.IRON_HELMET,
+    public static Set<Material> helmets = EnumSet.of( Material.LEATHER_HELMET, Material.CHAINMAIL_HELMET, Material.IRON_HELMET,
             Material.DIAMOND_HELMET, Material.GOLD_HELMET, Material.PUMPKIN, Material.JACK_O_LANTERN );
 
-    static Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
+    public static Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
     
     public static Set<EntityType> mobs = EnumSet.range( EntityType.CREEPER, EntityType.VILLAGER );
@@ -331,13 +331,12 @@ public class Sentries extends JavaPlugin {
     /** Returns the slot number appropriate to hold the supplied material, as defined in 
      * the config.yml (or the default config).  If the supplied material does not match any of
      * the configured armour types, then this method will return 0 (the slot number for the main hand). */
-    public static int getSlot( Material equipment ) {
-        
+    public static int getSlot( Material equipment ) {      
         if ( helmets.contains( equipment ) ) return 1;
-        else if ( chestplates.contains( equipment ) ) return 2;
-        else if ( leggings.contains( equipment ) ) return 3;
-        else if ( boots.contains( equipment ) ) return 4;
-        
+        if ( chestplates.contains( equipment ) ) return 2;
+        if ( leggings.contains( equipment ) ) return 3;
+        if ( boots.contains( equipment ) ) return 4;
+        if ( Material.SHIELD == equipment ) return 5;       
         return 0;
     }
     

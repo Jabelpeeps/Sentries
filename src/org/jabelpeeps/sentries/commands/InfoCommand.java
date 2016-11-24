@@ -23,8 +23,8 @@ public class InfoCommand implements SentriesComplexCommand {
         
         joiner.add( String.join( "", 
                 Col.RED, "[Health]:", Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.maxHealth ),
-                Col.RED, " [Armour]:", Col.WHITE, String.valueOf( inst.getArmor() ),
-                Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.getStrength() ),
+                Col.RED, " [Armour]:", Col.WHITE, String.valueOf( inst.armour ),
+                Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ),
                 Col.RED, " [Speed]:", Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
                 Col.RED, " [Range]:", Col.WHITE, String.valueOf( inst.range ),
                 Col.RED, " [ArrowRate]:", Col.WHITE, String.valueOf( inst.arrowRate ),

@@ -165,11 +165,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( S.HELP.equalsIgnoreCase( inargs[0] ) ) {
 
             if ( inargs.length > 1 ) {
+                String subcommand = inargs[1].toLowerCase();
                 
-                SentriesCommand command = commandMap.get( inargs[1].toLowerCase() );
+                SentriesCommand command = commandMap.get( subcommand );
                 
                 if ( command != null && sender.hasPermission( command.getPerm() ) )               
                     sender.sendMessage( command.getLongHelp() );
+                
+                else if ( S.LIST_MOBS.equals( subcommand ) ) 
+                    sender.sendMessage( String.join( ", ", Sentries.mobs.stream()
+                                                                         .map( m -> m.toString() )
+                                                                         .toArray( String[]::new ) ) );             
                 else 
                     sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
                 return true;
@@ -201,7 +207,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             
             if ( sender instanceof ConsoleCommandSender )
                 Util.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, 
-                        " - toggles display of debug info on the console", Col.RED, "NOTE: Debug Reduces Performance!" );
+                        " - toggles display of debug info on the console  ", Col.RED, "NOTE: Debug Reduces Performance!" );
             // lazy initialiser
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
