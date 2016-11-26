@@ -1,13 +1,16 @@
 package org.jabelpeeps.sentries;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -55,8 +58,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class CommandHandler implements CommandExecutor, TabCompleter {
     
     private static Map<String, SentriesCommand> commandMap = new TreeMap<>();
-    private static String mainHelpIntro;
-    private static String mainHelpOutro;
+    private static String mainHelpIntro, mainHelpOutro, shortEquipList;
 
     static {
         commandMap.put( S.TARGET,       new TargetComand() );
@@ -103,8 +105,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( name, command );
     }
     
+    static SentriesComplexCommand nullCommand = new SentriesComplexCommand() {
+        @Override public String getShortHelp() { return null; }
+        @Override public String getLongHelp() { return null; }
+        @Override public String getPerm() { return null; }
+        @Override public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+            Sentries.logger.info( "[Sentries] NPC:" + npcName + ". Target/Ignore could not be imported:- " + Util.joinArgs( 0, args ) );
+        }
+    };
+    
     static SentriesComplexCommand getCommand ( String name ) {
-        return (SentriesComplexCommand) commandMap.get( name );
+        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( name );
+        return command != null ? command : nullCommand;
     }
 
     /**
@@ -176,10 +188,31 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage( String.join( ", ", Sentries.mobs.stream()
                                                                          .map( m -> m.toString() )
                                                                          .toArray( String[]::new ) ) );             
+                else if ( "listequips".equalsIgnoreCase( subcommand ) ) {
+                    if ( shortEquipList == null ) {
+                        Set<Material> allowed = EnumSet.copyOf( Sentries.helmets );
+                        allowed.addAll( Sentries.chestplates );
+                        allowed.addAll( Sentries.leggings );
+                        allowed.addAll( Sentries.boots );
+                        
+                        for ( AttackType each : AttackType.values() ) {
+                            if ( each == AttackType.brawler ) continue;
+                            allowed.add( each.getWeapon() );
+                        }
+
+                        StringJoiner joiner = new StringJoiner( ", " );
+                        for ( Material each : allowed ) {
+                            joiner.add( each.toString() );
+                        }
+                        shortEquipList = "Allowed equipment includes:- " + joiner.toString();
+                    }
+                    sender.sendMessage( shortEquipList );
+                }                
                 else 
                     sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
                 return true;
             }
+            // if no arguments are added after '/sentry help'
             if ( mainHelpIntro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
                 
@@ -208,7 +241,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if ( sender instanceof ConsoleCommandSender )
                 Util.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, 
                         " - toggles display of debug info on the console  ", Col.RED, "NOTE: Debug Reduces Performance!" );
-            // lazy initialiser
+
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         

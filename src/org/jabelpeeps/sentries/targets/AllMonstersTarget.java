@@ -7,7 +7,7 @@ import org.bukkit.entity.Monster;
 public class AllMonstersTarget extends AbstractTargetType implements TargetType.Internal {
 
     public AllMonstersTarget() { 
-        super( 3 );
+        super( 4 );
         targetString = "All:Monsters";
     }
     @Override
@@ -17,9 +17,5 @@ public class AllMonstersTarget extends AbstractTargetType implements TargetType.
     @Override
     public boolean equals( Object o ) {
         return o != null && o instanceof AllMonstersTarget;
-    }
-    @Override
-    public int hashCode() {
-        return 2;
     }
 }

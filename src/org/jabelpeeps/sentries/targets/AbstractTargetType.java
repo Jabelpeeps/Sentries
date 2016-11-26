@@ -24,10 +24,11 @@ public abstract class AbstractTargetType implements TargetType {
     @Override
     public String getPrettyString() {
         return targetString;
+    }    
+    @Override
+    public int hashCode() {
+        return order;
     }
     @Override
     public abstract boolean equals( Object o );
-    
-    @Override
-    public abstract int hashCode();
 }

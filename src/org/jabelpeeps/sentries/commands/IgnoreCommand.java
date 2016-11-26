@@ -12,6 +12,7 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.targets.AllMobsTarget;
 import org.jabelpeeps.sentries.targets.AllMonstersTarget;
 import org.jabelpeeps.sentries.targets.AllNPCsTarget;
 import org.jabelpeeps.sentries.targets.AllPlayersTarget;
@@ -20,8 +21,11 @@ import org.jabelpeeps.sentries.targets.NamedNPCTarget;
 import org.jabelpeeps.sentries.targets.NamedPlayerTarget;
 import org.jabelpeeps.sentries.targets.OwnerTarget;
 import org.jabelpeeps.sentries.targets.TargetType;
+import org.jabelpeeps.sentries.targets.TraitTypeTarget;
 
+import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Owner;
 
 
@@ -74,16 +78,26 @@ public class IgnoreCommand implements SentriesComplexCommand {
                 if ( firstSubArg.equals( "all" ) ) {
                     if ( secondSubArg.equals( "monsters" ) ) 
                         target = new AllMonstersTarget();
+                    else if ( secondSubArg.equals( "mobs" ) ) 
+                        target = new AllMobsTarget();
                     else if ( secondSubArg.equals( "npcs" ) ) 
                         target = new AllNPCsTarget();
                     else if ( secondSubArg.equals( "players" ) ) 
                         target = new AllPlayersTarget();
                 }
+                
                 else if ( firstSubArg.equals( "mobtype" ) ) {
                     EntityType type = EntityType.valueOf( secondSubArg.toUpperCase() );
                     if ( type != null && Sentries.mobs.contains( type ) )
                         target = new MobTypeTarget( type );
                 }
+
+                else if ( firstSubArg.equals( "trait" ) ) {
+                    Class<? extends Trait> clazz = CitizensAPI.getTraitFactory().getTraitClass( secondSubArg );
+                    if ( clazz != null ) 
+                        target = new TraitTypeTarget( secondSubArg, clazz );
+                }
+                
                 else if ( targetArgs.length > 2 && firstSubArg.equals( "named" ) ) {
                     if ( secondSubArg.equals( "player" ) ) { 
                         try {
@@ -141,10 +155,12 @@ public class IgnoreCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
             joiner.add( String.join( "", Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );
             joiner.add( String.join( "", Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
-            joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
-            joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to ignore all mobs (passive and hostile)") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
+            joiner.add( String.join( "", Col.GOLD, "  Trait:<TraitName> ", Col.RESET, "to ignore NPC's with the named Trait" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Util.getAdditionalTargets() );

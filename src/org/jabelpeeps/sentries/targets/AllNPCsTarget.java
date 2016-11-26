@@ -17,8 +17,4 @@ public class AllNPCsTarget extends AbstractTargetType implements TargetType.Inte
     public boolean equals( Object o ) { 
         return o != null && o instanceof AllNPCsTarget;
     }
-    @Override
-    public int hashCode() {
-        return 4;
-    }
 }

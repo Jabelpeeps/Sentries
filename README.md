@@ -7,6 +7,8 @@ This is my own near-total re-write of the Sentry codebase, with a focus on updat
 
 This re-write would not have been possible without the original codebase for me to start from, and so credit and thanks are due to aufdemrand, jrbudda and mcmonkey4eva the previous maintainers of this project.
 
+You will need to be running your server on Java 8 to run this version. 
+
 COMPLETED:-
 * tidying codebase up for readability.
 * updated the code to remove uses of deprecated methods from dependencies. (re-done for 1.9 & 1.10!)
@@ -22,6 +24,7 @@ ONGOING:-
 * fixing bugs
 
 TODO:-
+* support spigot 1.11
 * expand readme giving more details of features (old and new)
 * make better use of the second (off)hand.
 * (maybe) have sentries work together better (in teams)

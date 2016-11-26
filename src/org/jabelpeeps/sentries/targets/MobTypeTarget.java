@@ -7,12 +7,12 @@ import org.bukkit.entity.LivingEntity;
 
 public class MobTypeTarget extends AbstractTargetType implements TargetType.Internal {
 
-    EntityType type;
+    private final EntityType type;
     
     public MobTypeTarget( EntityType target ) { 
         super( 15 );
         type = target;
-        targetString = String.join( ":", "MobType", type.toString() ); 
+        targetString = "MobType:" + type.toString(); 
     }
     @Override
     public boolean includes( LivingEntity entity ) {
@@ -29,5 +29,4 @@ public class MobTypeTarget extends AbstractTargetType implements TargetType.Inte
     public int hashCode() {
         return type.hashCode();
     }
-
 }

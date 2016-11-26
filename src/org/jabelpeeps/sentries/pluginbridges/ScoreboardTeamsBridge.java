@@ -33,7 +33,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
     public String getPrefix() { return PREFIX; }
 
     @Override
-    public String getActivationMessage() { return "MC Scoreboard Teams active, the TEAM: target will function"; }
+    public String getActivationMessage() { return "MC Scoreboard Teams active, the SCOREBOARD: target will function"; }
 
     @Override
     public String getCommandHelp() { return commandHelp; }
@@ -111,6 +111,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                     Util.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of ignores." );
                 else {
                     Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", team.getName() );
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return;
                 }
                 inst.checkIfEmpty( sender );
@@ -126,6 +127,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                 else 
                     Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
                 
+                call( sender, npcName, inst, 0, "", S.LIST );
                 return;
             }
             
@@ -135,7 +137,8 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                     Util.sendMessage( sender, Col.GREEN, "Scoreboard Team: ", team.getName(), " will be ignored by ", npcName );
                 else 
                     Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
-                
+
+                call( sender, npcName, inst, 0, "", S.LIST );
                 return;            
             } 
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",

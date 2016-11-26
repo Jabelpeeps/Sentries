@@ -152,7 +152,8 @@ public class SimpleClansBridge implements PluginBridge {
                         Util.sendMessage( sender, Col.GREEN, "Clan: ", clan.getName(), " will be targeted by ", npcName );
                     else 
                         Util.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
-         
+
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return;                
                 }
                 
@@ -163,6 +164,7 @@ public class SimpleClansBridge implements PluginBridge {
                     else 
                         Util.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
 
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return;              
                 }   
             }

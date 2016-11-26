@@ -141,8 +141,10 @@ public class FactionsBridge implements PluginBridge {
                         Util.sendMessage( sender, Col.GREEN, faction.getName(), " was removed from ", npcName, "'s list of ignores." );
                         inst.checkIfEmpty( sender );
                     }
-                    else
+                    else {
                         Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", faction.getName() );
+                        call( sender, npcName, inst, 0, "", S.LIST );
+                    }
                     return;
                 }
                 
@@ -154,7 +156,8 @@ public class FactionsBridge implements PluginBridge {
                         Util.sendMessage( sender, Col.GREEN, "Faction: ", faction.getName(), " will be targeted by ", npcName );
                     else 
                         Util.sendMessage( sender, Col.RED, faction.getName(), S.ALREADY_LISTED, npcName );
-         
+
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return;  
                 }
                 
@@ -165,6 +168,7 @@ public class FactionsBridge implements PluginBridge {
                     else 
                         Util.sendMessage( sender, Col.RED, faction.getName(), S.ALREADY_LISTED, npcName );
 
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return; 
                 }
             }
@@ -177,9 +181,10 @@ public class FactionsBridge implements PluginBridge {
                     
                     if ( inst.targets.remove( rivals ) && inst.ignores.remove( allies ) )
                         Util.sendMessage( sender, Col.GREEN, npcName, " will no longer fight alongside ", faction.getName() );
-                    else
+                    else {
                         Util.sendMessage( sender, Col.RED, npcName, " never considered ", faction.getName(), " to be brothers in arms!" );
-                    
+                        call( sender, npcName, inst, 0, "", S.LIST );
+                    }
                     inst.checkIfEmpty( sender );
                     return;
                 } 

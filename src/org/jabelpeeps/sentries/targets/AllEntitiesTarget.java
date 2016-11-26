@@ -20,8 +20,4 @@ public class AllEntitiesTarget extends AbstractTargetType implements TargetType.
     public boolean equals( Object o ) {         
         return o != null && o instanceof AllEntitiesTarget;
     }
-    @Override
-    public int hashCode() {
-        return 0;
-    }
 }

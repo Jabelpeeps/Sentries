@@ -1,15 +1,12 @@
 package org.jabelpeeps.sentries.commands;
 
-import java.util.EnumSet;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.StringJoiner;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
-import org.jabelpeeps.sentries.AttackType;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
@@ -24,7 +21,6 @@ import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
 public class EquipCommand implements SentriesComplexCommand {
 
     private String equipCommandHelp; 
-    private String shortList;
     private String materialList;
     
     @Override
@@ -35,27 +31,7 @@ public class EquipCommand implements SentriesComplexCommand {
             sender.sendMessage( getLongHelp() );
             return;
         }
-        if ( S.LIST.equalsIgnoreCase( args[nextArg + 1] ) ) {
-            if ( shortList == null ) {
-                Set<Material> allowed = EnumSet.copyOf( Sentries.helmets );
-                allowed.addAll( Sentries.chestplates );
-                allowed.addAll( Sentries.leggings );
-                allowed.addAll( Sentries.boots );
-                
-                for ( AttackType each : AttackType.values() ) {
-                    if ( each == AttackType.brawler ) continue;
-                    allowed.add( each.getWeapon() );
-                }
 
-                StringJoiner joiner = new StringJoiner( ", " );
-                for ( Material each : allowed ) {
-                    joiner.add( each.toString() );
-                }
-                shortList = joiner.toString();
-            }
-            sender.sendMessage( shortList );
-            return;
-        }
         if ( "listAll".equalsIgnoreCase( args[nextArg + 1] ) ) {
             
             if ( materialList == null ) {
@@ -91,8 +67,7 @@ public class EquipCommand implements SentriesComplexCommand {
             }            
             sender.sendMessage( materialList );
             return;
-        }
-        
+        }       
         NPC npc = inst.getNPC();
         
         if ( !npc.isSpawned() ) {
@@ -135,7 +110,8 @@ public class EquipCommand implements SentriesComplexCommand {
             Material mat = Material.matchMaterial( Util.joinArgs( nextArg + 1, args ) );
 
             if ( mat == null ) {
-                Util.sendMessage( sender, S.ERROR, "Could not equip: item name not recognised" );
+                Util.sendMessage( sender, S.ERROR, "Item name not recognised.  "
+                                        + "Do '/sentry help listequips' for a list of accepted item names" );
                 return;
             }            
             if ( equip != null ) {
@@ -169,16 +145,13 @@ public class EquipCommand implements SentriesComplexCommand {
 
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip <ItemName>", Col.RESET ) );
-            joiner.add( "  to give the named item to the sentry" );
-            joiner.add( "  item names are the offical MC item names" );
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clearall", Col.RESET ) );
-            joiner.add( "  to clear all equipment slots." );
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clear <slot>", Col.RESET ) );
-            joiner.add( "  to clear the specified slot, where <slot> can be one of: hand, offhand, helmet, chestplate, leggings or boots." );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip <ItemName>", Col.RESET, " to give the named item to the sentry." ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry help listequips", Col.RESET, " for a list of accepted item names" ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clearall", Col.RESET, " to clear all equipment slots." ) );
+            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clear <slot>", Col.RESET, 
+                    " to clear the specified slot, where <slot> can be one of: hand, offhand, helmet, chestplate, leggings or boots." ) );
             joiner.add( String.join( "", Col.RED, Col.BOLD, "NOTE: ", Col.RESET, "equiped armour is currently only cosmetic. Use ",
                                                 Col.GOLD, "/sentry armour ", Col.RESET, "to add protection from attacks." ) );
-
             equipCommandHelp = joiner.toString();
         }
         return equipCommandHelp;

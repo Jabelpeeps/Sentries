@@ -165,7 +165,8 @@ public class VaultBridge implements PluginBridge {
                         Util.sendMessage( sender, Col.GREEN, "Group: ", groupName, " will be targeted by ", npcName );
                     else 
                         Util.sendMessage( sender, Col.RED, groupName, S.ALREADY_LISTED, npcName );
-         
+
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return;                
                 }
                 
@@ -176,6 +177,7 @@ public class VaultBridge implements PluginBridge {
                     else 
                         Util.sendMessage( sender, Col.RED, groupName, S.ALREADY_LISTED, npcName );
 
+                    call( sender, npcName, inst, 0, "", S.LIST );
                     return;              
                 }   
             }           

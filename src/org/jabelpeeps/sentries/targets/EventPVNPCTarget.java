@@ -18,6 +18,4 @@ public class EventPVNPCTarget extends AbstractTargetType {
         return  o != null
                 && o instanceof EventPVNPCTarget;
     }
-    @Override
-    public int hashCode() { return 3; }
 }

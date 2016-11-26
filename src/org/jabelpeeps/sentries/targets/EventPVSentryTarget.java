@@ -19,6 +19,4 @@ public class EventPVSentryTarget extends AbstractTargetType {
         return  o != null
                 && o instanceof EventPVSentryTarget;
     }
-    @Override
-    public int hashCode() { return 4; }
 }

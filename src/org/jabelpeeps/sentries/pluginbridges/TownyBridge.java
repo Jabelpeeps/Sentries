@@ -33,9 +33,10 @@ public class TownyBridge implements PluginBridge {
      * (taken from http://towny.palmergames.com/towny/757-2/#How_Towny_Controls_PVP_Combat )
      */
 
-    private SentriesComplexCommand command = new TownyCommand();
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry towny ... ", Col.RESET, "commands." );
     final static String PREFIX = "TOWNY";
+    private SentriesComplexCommand command = new TownyCommand();
+    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", 
+                                                    PREFIX.toLowerCase(), " ... ", Col.RESET, "commands." );
     
     @Override
     public boolean activate() {
@@ -114,9 +115,10 @@ public class TownyBridge implements PluginBridge {
                     
                     if ( inst.targets.remove( enemies ) && inst.ignores.remove( friends ) )
                         Util.sendMessage( sender, Col.GREEN, npcName, " is no-longer a resident of ", town.getName() );
-                    else 
+                    else {
                         Util.sendMessage( sender, Col.YELLOW, npcName, " is unknown in ", town.getName() );
-                    
+                        call( sender, npcName, inst, 0, "", S.INFO );
+                    }
                     return;
                 }
                 // we only need to set the targetString on one TargetType instance, as they are created and removed in pairs.

@@ -84,7 +84,7 @@ public class WarBridge implements PluginBridge {
                                      .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );
+                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no War Team targets or ignores" );
                 else
                     Util.sendMessage( sender, Col.YELLOW, "Current War Team targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
@@ -150,6 +150,7 @@ public class WarBridge implements PluginBridge {
                 else 
                     Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
                 
+                call( sender, npcName, inst, 0, "", S.LIST );
                 return;
             }
             
@@ -159,7 +160,8 @@ public class WarBridge implements PluginBridge {
                     Util.sendMessage( sender, Col.GREEN, "War Team: ", team.getName(), " will be ignored by ", npcName );
                 else 
                     Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
-                
+
+                call( sender, npcName, inst, 0, "", S.LIST );
                 return;            
             } 
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",

@@ -20,8 +20,4 @@ public class AllPlayersTarget extends AbstractTargetType implements TargetType.I
     public boolean equals( Object o ) {
         return o != null && o instanceof AllPlayersTarget;
     }
-    @Override
-    public int hashCode() {
-        return 1;
-    }
 }
