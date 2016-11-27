@@ -24,6 +24,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jabelpeeps.sentries.commands.ImportCommand;
 
 import net.aufdemrand.denizen.Denizen;
 import net.citizensnpcs.api.CitizensAPI;
@@ -93,29 +94,36 @@ public class Sentries extends JavaPlugin {
     public void onEnable() {
 
         if ( plugin != null ) return;
-
         plugin = this;
         logger = getLogger();
         PluginManager pluginManager = Bukkit.getPluginManager();
         
-        CommandHandler handler = new CommandHandler();
-        getCommand( "sentry" ).setExecutor( handler );
-        getCommand( "sentries" ).setExecutor( handler );
-
         if ( !checkPlugin( S.CITIZENS ) ) {
             logger.log( Level.SEVERE, S.ERROR_NO_CITIZENS );
             pluginManager.disablePlugin( this );
             return;
         }
-        registry = CitizensAPI.getNPCRegistry();
         
+        CommandHandler handler = new CommandHandler();
+        getCommand( "sentries" ).setExecutor( handler );
+        
+        if ( pluginManager.isPluginEnabled( "Sentry" ) ) {
+            CommandHandler.addCommand( "import", new ImportCommand() );
+        }
+        else {
+            getCommand( "sentry" ).setExecutor( handler );
+            if ( pluginManager.isPluginEnabled( "Sentinel" ) ) {
+                CommandHandler.addCommand( "import", new ImportCommand() );               
+            }
+        }
+        registry = CitizensAPI.getNPCRegistry();     
         reloadMyConfig();
         
         if ( checkPlugin( S.DENIZEN ) ) {
 
             String vers = pluginManager.getPlugin( S.DENIZEN ).getDescription().getVersion();
 
-            if ( vers.startsWith( "0.9" ) ) {
+            if ( vers.startsWith( "0.9" ) || vers.startsWith( "1.0" ) ) {
 
                 denizenHook = new DenizenHook( (Denizen) pluginManager.getPlugin( S.DENIZEN ) );
                 denizenActive = DenizenHook.npcDeathTriggerActive || DenizenHook.npcDeathTriggerOwnerActive;

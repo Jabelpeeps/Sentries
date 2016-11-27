@@ -59,12 +59,18 @@ public class TownyBridge implements PluginBridge {
     
     public class TownyCommand implements SentriesComplexCommand {
         
-        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry towny <join|leave|info> <TownName> ", Col.RESET, 
-                "to have a player-type sentry behave as though it were a town resident.  It will attack the members of enemy nations, and ignore allies.", 
+        private String helpTxt = String.join( "", 
+                "do ", Col.GOLD, "/sentry towny <join|leave|info|clearall> <TownName> ", Col.RESET, 
+                System.lineSeparator(), "  where ", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name.",
                 System.lineSeparator(), "  use ", Col.GOLD, "join ", Col.RESET, "to join <TownName>", 
+                                        "  A player-type sentry will then behave as though it were a town resident.",
+                                        "  It will attack the members of enemy nations, and ignore allies.", 
                 System.lineSeparator(), "  use ", Col.GOLD, "leave ", Col.RESET, "to leave <TownName>",
-                System.lineSeparator(), "  (", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name.",
-                System.lineSeparator(), "  use ", Col.GOLD, "info ", Col.RESET, "to see which (if any) Town is currently configured.");
+                System.lineSeparator(), "  use ", Col.GOLD, "info ", Col.RESET, "to see which (if any) Town is currently configured.",
+                System.lineSeparator(), "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all Towny targets.",
+                System.lineSeparator(), "do  ", Col.GOLD, "/sentry towny <target|ignore|remove> <TownName> ", Col.RESET,
+                                        " to add or remove legacy Towny targets & ignores" );
+        
         
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -86,8 +92,34 @@ public class TownyBridge implements PluginBridge {
                 if ( joiner.length() < 3 )
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has not settled in a town yet." );
                 else
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " is a member of these Towns:-", Col.RESET, System.lineSeparator(), joiner.toString() );
+                    Util.sendMessage( sender, Col.YELLOW, npcName, " is a member of these Towns:-", Col.RESET, 
+                                                                                System.lineSeparator(), joiner.toString() );
+
+                StringJoiner joiner2 = new StringJoiner( ", " );
+                
+                inst.targets.stream().filter( t -> t instanceof TownyTarget )
+                                     .forEach( t -> joiner2.add( 
+                                             String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2], System.lineSeparator() ) ) );
+                
+                inst.ignores.stream().filter( t -> t instanceof TownyTarget )
+                                     .forEach( t -> joiner2.add( 
+                                             String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2], System.lineSeparator() ) ) );
+
+                if ( joiner2.length() > 3 ) 
+                    Util.sendMessage( sender, Col.YELLOW, "These legacy Towny targets are also active:- ", System.lineSeparator(),
+                                        joiner2.toString(), Col.RESET, "You could consider removing these, and using ", 
+                                        Col.GOLD, "/sentry towny join <TownName>", Col.RESET, 
+                                        " instead for behaviour that is more 'player-like'." );
                 return;    
+            }
+            
+            if ( S.CLEARALL.equals( subCommand ) ) {                
+                inst.targets.removeIf( t -> t instanceof AbstractTownyTarget );
+                inst.ignores.removeIf( t -> t instanceof AbstractTownyTarget );
+                
+                Util.sendMessage( sender, Col.GREEN, "All Towny targets cleared from ", npcName );
+                inst.checkIfEmpty( sender );
+                return;              
             }
             
             if ( args.length <= nextArg + 2 ) { 
@@ -130,7 +162,52 @@ public class TownyBridge implements PluginBridge {
                     Util.sendMessage( sender, Col.GREEN, npcName, " has settled in ", town.getName() ); 
                     return;
                 }
-            }         
+            }             
+            if ( (S.REMOVE + S.TARGET + S.IGNORE).contains( subCommand ) ) {
+                
+                TargetType target = new TownyTarget( town );
+
+                if ( S.REMOVE.equals( subCommand ) ) {
+                    
+                    if ( inst.targets.remove( target ) ) {
+                        Util.sendMessage( sender, Col.GREEN, town.getName(), " was removed from ", npcName, "'s list of targets." );
+                        inst.checkIfEmpty( sender );
+                    }
+                    else if ( inst.ignores.remove( target ) ) {
+                        Util.sendMessage( sender, Col.GREEN, town.getName(), " was removed from ", npcName, "'s list of ignores." );
+                        inst.checkIfEmpty( sender );
+                    }
+                    else {
+                        Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", town.getName() );
+                        call( sender, npcName, inst, 0, "", S.INFO );
+                    }
+                    return;
+                }
+                
+                target.setTargetString( String.join( ":", PREFIX, subCommand, townName ) );
+                
+                if ( S.TARGET.equals( subCommand ) ) {
+                    
+                    if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
+                        Util.sendMessage( sender, Col.GREEN, "Town: ", town.getName(), " will be targeted by ", npcName );
+                    else 
+                        Util.sendMessage( sender, Col.RED, town.getName(), S.ALREADY_LISTED, npcName );
+
+                    call( sender, npcName, inst, 0, "", S.LIST );
+                    return;  
+                }
+                
+                if ( S.IGNORE.equals( subCommand ) ) {
+                    
+                    if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
+                        Util.sendMessage( sender, Col.GREEN, "Town: ", town.getName(), " will be ignored by ", npcName );
+                    else 
+                        Util.sendMessage( sender, Col.RED, town.getName(), S.ALREADY_LISTED, npcName );
+
+                    call( sender, npcName, inst, 0, "", S.LIST );
+                    return; 
+                }
+            }        
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                                             Col.GOLD, "/sentry help towny", Col.RESET, " and try again." ); 
         } 
@@ -155,11 +232,35 @@ public class TownyBridge implements PluginBridge {
         public int hashCode() { return town.hashCode(); }
     }
     
+    public class TownyTarget extends AbstractTownyTarget {
+
+        protected TownyTarget( Town t ) { super( 57, t ); }
+
+        @Override
+        public boolean includes( LivingEntity entity ) {
+            try {
+                Resident resident = townyData.getResident( entity.getName() );
+                
+                return  town.hasResident( resident );
+             
+            } catch ( NotRegisteredException e ) {
+                if ( Sentries.debug ) {
+                    Sentries.debugLog( "TownyTarget has thrown NotRegisteredException" );
+                }
+                return false;
+            } 
+        }
+        @Override
+        public boolean equals( Object o ) {           
+            return  o != null 
+                    && o instanceof TownyTarget
+                    && ((TownyTarget)o).town.equals( town );   
+        }
+    }
+    
     public class TownyEnemyTarget extends AbstractTownyTarget {
         
-        TownyEnemyTarget( Town target ) { 
-            super( 55, target );
-        }     
+        protected TownyEnemyTarget( Town target ) { super( 55, target ); }     
         @Override
         public boolean includes( LivingEntity entity ) {
             try {
@@ -185,9 +286,7 @@ public class TownyBridge implements PluginBridge {
     
     public class TownyFriendTarget extends AbstractTownyTarget {
         
-        TownyFriendTarget( Town target ) { 
-            super( 56, target );
-        }        
+        protected TownyFriendTarget( Town target ) { super( 56, target ); }        
         @Override
         public boolean includes( LivingEntity entity ) {
             try {

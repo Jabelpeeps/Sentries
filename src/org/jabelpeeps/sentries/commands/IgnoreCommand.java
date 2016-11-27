@@ -150,7 +150,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
                                                 Col.RESET, " to add a target for a sentry to ignore."  ) );
             joiner.add( String.join( "", Col.BOLD, "Ignores override targets and/or events (if both apply to an entity).", Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of ignores" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current ignores" ) );
+            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear all ignores added via ", Col.GOLD, S.ADD, Col.RESET ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
             joiner.add( String.join( "", Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );

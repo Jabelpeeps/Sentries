@@ -5,7 +5,7 @@ version: ${project.version}(build-b${build.number})
 main: org.jabelpeeps.sentries.Sentries
 website: http://wiki.citizensnpcs.co/Sentry
 depend: [Citizens]
-softdepend: [Denizen, Vault, Towny, Factions, FactionsOne, War, SimpleClans]
+softdepend: [Denizen, Vault, Towny, Factions, FactionsOne, War, SimpleClans, Sentry, Sentinel]
 
 commands:
   sentries: 

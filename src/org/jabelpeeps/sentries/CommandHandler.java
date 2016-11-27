@@ -281,34 +281,35 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         int nextArg = (npcid > 0) ? 1 : 0;
 
         if ( !enoughArgs( 1 + nextArg, inargs, sender ) ) return true;
-
+        
+        if  (   inargs[nextArg].toLowerCase().equals( "import" )
+                && commandMap.containsKey( "import" )
+                && inargs[nextArg + 1].toLowerCase().equals( "all" ) ) {
+            ((SentriesComplexCommand) commandMap.get( "import" )).call( sender, null, null, nextArg, inargs );
+            return true;
+        }
         NPC thisNPC;
 
         if ( npcid == -1 ) {
-
             thisNPC = CitizensAPI.getDefaultNPCSelector().getSelected( sender );
-
-            if ( thisNPC == null ) {
-                sender.sendMessage( S.ERROR.concat( S.ERROR_NO_NPC ) );
-                return true;
-            }
-            npcid = thisNPC.getId();
+            if ( thisNPC == null )
+                Util.sendMessage( sender, S.ERROR, S.ERROR_NO_NPC );
         }
         else {
             thisNPC = Sentries.registry.getById( npcid );
-
-            if ( thisNPC == null ) {
+            if ( thisNPC == null )
                 Util.sendMessage( sender, S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) );
-                return true;
-            }
-        }
-        // We are now sure that thisNPC is valid, and that npcid contains its id.
-        if ( !thisNPC.hasTrait( SentryTrait.class ) ) {
+        }       
+        if ( thisNPC == null ) return true;
+            
+        // We are now sure that thisNPC is valid.
+        if  (   !inargs[nextArg].toLowerCase().equals( "import" ) 
+                && !thisNPC.hasTrait( SentryTrait.class ) ) {
             sender.sendMessage( S.ERROR.concat( S.ERROR_NOT_SENTRY ) );
             return true;
         }
         
-        if (    sender instanceof Player
+        if  (   sender instanceof Player
                 && !sender.isOp()
                 && !((Entity) sender).hasMetadata( "NPC" ) ) {
             // TODO consider changing this section to allow admins to modify other players' npcs.

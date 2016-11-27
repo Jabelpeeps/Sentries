@@ -11,8 +11,6 @@ import org.jabelpeeps.sentries.SentryTrait;
 
 public class InfoCommand implements SentriesComplexCommand {
 
-    private String helpTxt;
-    
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
@@ -56,16 +54,8 @@ public class InfoCommand implements SentriesComplexCommand {
 
     @Override
     public String getShortHelp() { return "view the attributes of a sentry"; }
-
     @Override
-    public String getLongHelp() {
-
-        if ( helpTxt == null ) {
-            helpTxt = "Displays a summary of all the configurable settings for a sentry.";
-        }
-        return helpTxt;
-    }
-
+    public String getLongHelp() { return "Displays a summary of all the configurable settings for a sentry."; }
     @Override
     public String getPerm() { return S.PERM_INFO; }
 }
