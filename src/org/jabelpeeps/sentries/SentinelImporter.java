@@ -167,7 +167,6 @@ public class SentinelImporter {
             else if ( each.startsWith( "sbteam:" ) )
                 CommandHandler.getCommand( "scoreboard" ).call( null, npc.getName(), sentry, 0, "scoreboard", "ignore", each );
         }
-
         /*
         These ignore specifiers are not implemented in Sentinel yet and so can't be imported
         else if (sections[0].equals("NATION"))

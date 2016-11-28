@@ -1,5 +1,8 @@
 package org.jabelpeeps.sentries.commands;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
@@ -8,6 +11,8 @@ import org.jabelpeeps.sentries.SentinelImporter;
 import org.jabelpeeps.sentries.SentryImporter;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
+
+import com.google.common.io.Files;
 
 
 public class ImportCommand implements SentriesComplexCommand {
@@ -30,8 +35,8 @@ public class ImportCommand implements SentriesComplexCommand {
                     "  use the optional argument ", Col.GOLD, "all ", Col.RESET, "to import all NPC's with the named trait.",
                     System.lineSeparator(), "  or import a single NPC, by having it selected, ",
                     " or putting its NPC id number as the first argument. ", System.lineSeparator(),
-                    Col.RED, "IMPORTANT:  Imports are irreversible, make sure you have backed up the saves.yml file ",
-                    "in the Citizens plugin folder before using this command." );
+                    Col.RED, "IMPORTANT:  As imports are irreversible, an attempt will be made to backup the Citizens saves.yml "
+                            + " before importing, and the import will not proceed if the attempt fails." );
         }
         return helpText;
     }
@@ -85,14 +90,32 @@ public class ImportCommand implements SentriesComplexCommand {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentry" ) ) {
             Util.sendMessage( sender, S.ERROR, "You need install Sentry(v1) to import from Sentry." );
             return false;
-        }
-        return true;
+        }        
+        return backupSavesYml( sender );
     }
     private boolean checkSentinel( CommandSender sender ) {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentinel" ) ) {
             Util.sendMessage( sender, S.ERROR, "You need install Sentinel to import from Sentinel." );
             return false;
         }
-        return true;
+        return backupSavesYml( sender );
+    }
+    private boolean backupSavesYml( CommandSender sender ) {
+        File folder = Bukkit.getPluginManager().getPlugin( "Citizens" ).getDataFolder();
+        File saves = new File( folder, "saves.yml" );
+        File backup = new File( folder, "backup_of_saves.yml" );
+        int i = 1;
+        while ( backup.exists() ) {
+            backup = new File( folder, "backup_of_saves" + (++i) + ".yml" );
+        }
+        try {
+            Files.copy( saves, backup );
+            return true;
+        } 
+        catch ( IOException e ) {
+            Util.sendMessage( sender, S.ERROR, "Unable to backup Citizens saves.yml. Import aborted." );
+            e.printStackTrace();
+            return false;
+        }
     }
 }
