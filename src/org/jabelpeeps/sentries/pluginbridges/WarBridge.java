@@ -18,10 +18,12 @@ import org.jabelpeeps.sentries.targets.TargetType;
 import com.tommytony.war.Team;
 import com.tommytony.war.War;
 
+import lombok.Getter;
+
 public class WarBridge implements PluginBridge {
 
     final static String PREFIX = "WAR";
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
+    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
     private SentriesComplexCommand command = new WarTeamCommand();
 
     @Override
@@ -31,13 +33,8 @@ public class WarBridge implements PluginBridge {
     }
     @Override
     public String getPrefix() { return PREFIX; }
-
     @Override
     public String getActivationMessage() { return "War is active, The WAR: target will function"; }
-
-    @Override
-    public String getCommandHelp() { return commandHelp; }
-
     
     @Override
     public void add( SentryTrait inst, String args ) {     
@@ -78,10 +75,12 @@ public class WarBridge implements PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof WarTeamTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString())[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof WarTeamTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no War Team targets or ignores" );

@@ -21,6 +21,8 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
+import lombok.Getter;
+
 public class TownyBridge implements PluginBridge {
     
     /*
@@ -35,7 +37,7 @@ public class TownyBridge implements PluginBridge {
 
     final static String PREFIX = "TOWNY";
     private SentriesComplexCommand command = new TownyCommand();
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", 
+    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", 
                                                     PREFIX.toLowerCase(), " ... ", Col.RESET, "commands." );
     
     @Override
@@ -45,13 +47,9 @@ public class TownyBridge implements PluginBridge {
     }
     @Override
     public String getPrefix() { return PREFIX; }
-
     @Override
     public String getActivationMessage() { return "Detected Towny, the TOWNY: target will function"; }
-
-    @Override
-    public String getCommandHelp() { return commandHelp; }
-
+    
     @Override
     public void add( SentryTrait inst, String args ) {       
         command.call( null, null, inst, 0, Util.colon.split( args ) );
@@ -87,7 +85,7 @@ public class TownyBridge implements PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.parallelStream().filter( t -> t instanceof TownyEnemyTarget )
-                                             .forEach( t -> joiner.add( t.getTargetString().split( ":" )[2] ) );
+                                             .forEach( t -> joiner.add( Util.colon.split( t.getTargetString() )[2] ) );
                 
                 if ( joiner.length() < 3 )
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has not settled in a town yet." );
@@ -99,11 +97,11 @@ public class TownyBridge implements PluginBridge {
                 
                 inst.targets.stream().filter( t -> t instanceof TownyTarget )
                                      .forEach( t -> joiner2.add( 
-                                             String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2], System.lineSeparator() ) ) );
+                                             String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof TownyTarget )
                                      .forEach( t -> joiner2.add( 
-                                             String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2], System.lineSeparator() ) ) );
+                                             String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2]) ) );
 
                 if ( joiner2.length() > 3 ) 
                     Util.sendMessage( sender, Col.YELLOW, "These legacy Towny targets are also active:- ", System.lineSeparator(),

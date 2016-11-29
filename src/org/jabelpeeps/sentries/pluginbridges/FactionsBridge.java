@@ -20,10 +20,12 @@ import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.FactionColl;
 import com.massivecraft.factions.entity.MPlayer;
 
+import lombok.Getter;
+
 public class FactionsBridge implements PluginBridge {
 
     private final static String PREFIX = "FACTIONS";
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
+    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new FactionsCommand();
 
     @Override
@@ -31,16 +33,11 @@ public class FactionsBridge implements PluginBridge {
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );
         return true; 
     }
-
     @Override
     public String getPrefix() { return PREFIX; }
-
     @Override
     public String getActivationMessage() { return "Factions is active, the FACTION: target will function"; }
-
-    @Override
-    public String getCommandHelp() { return commandHelp; }
-
+    
     @Override
     public void add( SentryTrait inst, String args ) {       
         command.call( null, null, inst, 0, Util.colon.split( args ) );
@@ -51,11 +48,9 @@ public class FactionsBridge implements PluginBridge {
         private String helpTxt;
         
         @Override
-        public String getShortHelp() { return ""; }
-
+        public String getShortHelp() { return "manage targets based on Factions"; }
         @Override
         public String getPerm() { return "sentry.factions"; }
-        
         @Override
         public String getLongHelp() {
 
@@ -91,13 +86,13 @@ public class FactionsBridge implements PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof FactionTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof FactionTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
  
                 inst.targets.stream().filter( t -> t instanceof FactionRivalsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", Util.colon.split( t.getTargetString() )[2] ) ) );
 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no Factions targets or ignores" );
@@ -190,7 +185,7 @@ public class FactionsBridge implements PluginBridge {
                 } 
                 
                 if ( S.JOIN.equals( subCommand ) ) {
-                    rivals.setTargetString( String.join( ":", PREFIX, subCommand, args[nextArg + 2] ) );
+                    rivals.setTargetString( String.join( ":", PREFIX, subCommand, factionName ) );
                     
                     if ( inst.targets.add( rivals ) && inst.ignores.add( allies ) )
                         Util.sendMessage( sender, Col.GREEN, npcName, " will support ", faction.getName(), " in all battles!" );

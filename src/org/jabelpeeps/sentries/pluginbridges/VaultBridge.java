@@ -18,22 +18,19 @@ import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
 
+import lombok.Getter;
 import net.milkbowl.vault.permission.Permission;
 
 public class VaultBridge implements PluginBridge {
 
     protected final static String PREFIX = "GROUP";
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
+    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new GroupCommand();
     private String activationMsg;
     protected static Permission perms;
 
     @Override
     public String getPrefix() { return PREFIX; }
-
-    @Override
-    public String getCommandHelp() { return commandHelp; }
-
     @Override
     public boolean activate() {
 
@@ -107,10 +104,12 @@ public class VaultBridge implements PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof GroupTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof GroupTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no group targets or ignores" );

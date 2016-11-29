@@ -82,7 +82,7 @@ public class SentryImporter {
             else if ( t.contains( "ENTITY:NPC" ) )
                 newSentry.targets.add( new AllNPCsTarget() );
             else {
-                String[] sections = t.split( ":" );
+                String[] sections = Util.colon.split( t );
                 if ( sections.length != 2 ) continue;
                     
                 sections[0] = sections[0].trim();
@@ -151,7 +151,7 @@ public class SentryImporter {
             else if ( t.contains( "ENTITY:OWNER" ) )
                 newSentry.ignores.add( new OwnerTarget( npc.getTrait( Owner.class ).getOwnerId() ) );
             else {
-                String[] sections = t.split( ":" );
+                String[] sections = Util.colon.split( t );
                 if ( sections.length != 2 ) continue;
 
                 sections[0] = sections[0].trim();

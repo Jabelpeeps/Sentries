@@ -7,7 +7,7 @@ import org.bukkit.entity.LivingEntity;
 
 public class OwnerTarget extends AbstractTargetType implements TargetType.Internal {
 
-    private UUID owner;
+    private final UUID owner;
     
     public OwnerTarget( UUID uuid ) { 
         super( 10 ); 

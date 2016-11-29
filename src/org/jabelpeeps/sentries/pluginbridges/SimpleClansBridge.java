@@ -14,6 +14,7 @@ import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
 
+import lombok.Getter;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
@@ -21,7 +22,7 @@ import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 public class SimpleClansBridge implements PluginBridge {
 
     final static String PREFIX = "CLAN";
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
+    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
     protected ClanManager clanManager = SimpleClans.getInstance().getClanManager();
     private SentriesComplexCommand command = new ClansCommand();
 
@@ -30,13 +31,8 @@ public class SimpleClansBridge implements PluginBridge {
         CommandHandler.addCommand( PREFIX.toLowerCase(), command );
         return true; 
     }
-
     @Override
     public String getActivationMessage() { return "SimpleClans is active, The CLAN: target will function"; }
-
-    @Override
-    public String getCommandHelp() { return commandHelp; }
-
     @Override
     public String getPrefix() { return PREFIX; }
 
@@ -51,10 +47,8 @@ public class SimpleClansBridge implements PluginBridge {
         
         @Override
         public String getShortHelp() { return "define targets by clan membership"; }
-
         @Override
         public String getPerm() { return "sentry.simpleclans"; }
-
         @Override
         public String getLongHelp() {
 
@@ -90,13 +84,16 @@ public class SimpleClansBridge implements PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof ClanTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof ClanTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.targets.stream().filter( t -> t instanceof ClanRivalsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( 
+                                             String.join( "", Col.BLUE, "Member of: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no Clan targets or ignores" );

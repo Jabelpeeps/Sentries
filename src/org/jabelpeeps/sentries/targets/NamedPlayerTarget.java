@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public class NamedPlayerTarget extends AbstractTargetType implements TargetType.Internal {
 
-    private UUID uuid;
+    private final UUID uuid;
     
     public NamedPlayerTarget( UUID player ) { 
         super( 10 ); 

@@ -8,7 +8,7 @@ import org.jabelpeeps.sentries.Sentries;
 
 public class NamedNPCTarget extends AbstractTargetType implements TargetType.Internal {
 
-    private UUID uuid;
+    private final UUID uuid;
     
     public NamedNPCTarget( UUID NPCuuid ) { 
         super( 20 ); 
@@ -25,7 +25,7 @@ public class NamedNPCTarget extends AbstractTargetType implements TargetType.Int
     } 
     @Override
     public String getPrettyString() { 
-        return String.join( ":", "Named", "NPC", Sentries.registry.getByUniqueIdGlobal( uuid ).getName() ); 
+        return String.join( ":", "Named", "NPC", Sentries.registry.getByUniqueId( uuid ).getName() ); 
     }   
     @Override
     public boolean equals( Object o ) {

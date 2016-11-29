@@ -17,12 +17,14 @@ import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
 
+import lombok.Getter;
+
 public class ScoreboardTeamsBridge implements PluginBridge {
 
     final static String PREFIX = "SCOREBOARD";
     protected Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
     private SentriesComplexCommand command = new ScoreboardTeamsCommand();
-    private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
+    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
 
     @Override
     public boolean activate() {
@@ -31,12 +33,8 @@ public class ScoreboardTeamsBridge implements PluginBridge {
     }
     @Override
     public String getPrefix() { return PREFIX; }
-
     @Override
     public String getActivationMessage() { return "MC Scoreboard Teams active, the SCOREBOARD: target will function"; }
-
-    @Override
-    public String getCommandHelp() { return commandHelp; }
 
     @Override
     public void add( SentryTrait inst, String args ) {       
@@ -45,14 +43,26 @@ public class ScoreboardTeamsBridge implements PluginBridge {
 
     public class ScoreboardTeamsCommand implements SentriesComplexCommand {
         
-        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry scoreboard <target|ignore|remove|list|clearall> <TeamName> ",
-                Col.RESET, "to have a sentry consider MC scoreboard membership when selecting targets.", System.lineSeparator(),
-                "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <TeamName>", System.lineSeparator(),
-                "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <TeamName>", System.lineSeparator(),
-                "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
-                "  use ", Col.GOLD, "list", Col.RESET, "to list the current targets and ignores", System.lineSeparator(),
-                "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all scoreboard targets and ignores from the selected sentry.", 
-                System.lineSeparator(), Col.GOLD, "    <TeamName> ", Col.RESET, "must be a currently existing scoreboard team." );
+        private String helpTxt; 
+        @Override
+        public String getLongHelp() { 
+            if ( helpTxt == null ) {
+                helpTxt = String.join( "", 
+                        "do ", Col.GOLD, "/sentry scoreboard <target|ignore|remove|list|clearall> <TeamName> ", Col.RESET, 
+                        "to have a sentry consider MC scoreboard membership when selecting targets.", System.lineSeparator(),
+                        "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <TeamName>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <TeamName>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
+                        "  use ", Col.GOLD, "list", Col.RESET, "to list the current targets and ignores", System.lineSeparator(),
+                        "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all scoreboard targets and ignores from the selected sentry.", 
+                        System.lineSeparator(), Col.GOLD, "    <TeamName> ", Col.RESET, "must be a currently existing scoreboard team." );
+            }
+            return helpTxt;
+        }
+        @Override
+        public String getShortHelp() { return "manage scoreboard-defined targets"; }
+        @Override
+        public String getPerm() { return "sentry.scoreboardteams"; }
         
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -68,10 +78,10 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof ScoreboardTeamsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof ScoreboardTeamsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", t.getTargetString().split( ":" )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Util.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );
@@ -144,15 +154,6 @@ public class ScoreboardTeamsBridge implements PluginBridge {
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                                       Col.GOLD, "/sentry help ", PREFIX.toLowerCase(), Col.RESET, " and try again." );            
         }
-        
-        @Override
-        public String getShortHelp() { return "manage scoreboard-defined targets"; }
-
-        @Override
-        public String getPerm() { return "sentry.scoreboardteams"; }
-        
-        @Override
-        public String getLongHelp() { return helpTxt; }
     }
     
     public class ScoreboardTeamsTarget extends AbstractTargetType {
