@@ -52,14 +52,13 @@ public class ImportCommand implements SentriesComplexCommand {
         int imported = 0;
         
         if ( "all".equals( subCommand ) ) {
-            if ( nextArg != 0 ) {
+            if ( nextArg != 0 )
                 Util.sendMessage( sender, S.ERROR, "You have used an NPC id number, as well as the 'all' argument." );
-            }
-            else if ( args.length <= 2 ) {
+            else if ( args.length <= 2 )
                 Util.sendMessage( sender, S.ERROR, "You need to name the plugin to import NPC's from." );
-            }
             else {
                 String pluginName = args[2].toLowerCase();
+                
                 if ( "sentry".equals( pluginName ) && checkSentry( sender) )
                     imported = SentryImporter.importAll();
                 else if ( "sentinel".equals( pluginName ) && checkSentinel( sender ) )
@@ -83,9 +82,9 @@ public class ImportCommand implements SentriesComplexCommand {
         else {
             Util.sendMessage( sender, Col.RED, "Importing ", npcName, 
                     " has failed, please check the NPC's current traits by selecting them and then doing '/npc'" );
-        }
-        
+        }  
     }
+    
     private boolean checkSentry( CommandSender sender ) {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentry" ) ) {
             Util.sendMessage( sender, S.ERROR, "You need install Sentry(v1) to import from Sentry." );
@@ -93,6 +92,7 @@ public class ImportCommand implements SentriesComplexCommand {
         }        
         return backupSavesYml( sender );
     }
+    
     private boolean checkSentinel( CommandSender sender ) {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentinel" ) ) {
             Util.sendMessage( sender, S.ERROR, "You need install Sentinel to import from Sentinel." );
@@ -100,6 +100,7 @@ public class ImportCommand implements SentriesComplexCommand {
         }
         return backupSavesYml( sender );
     }
+    
     private boolean backupSavesYml( CommandSender sender ) {
         File folder = Bukkit.getPluginManager().getPlugin( "Citizens" ).getDataFolder();
         File saves = new File( folder, "saves.yml" );

@@ -37,7 +37,6 @@ public class SentryImporter {
         SentryInstance sentry = npc.getTrait( net.aufdemrand.sentry.SentryTrait.class ).getInstance();
         if ( sentry == null ) return false;
 
-        npc.removeTrait( net.aufdemrand.sentry.SentryTrait.class );
         SentryTrait newSentry = npc.getTrait( SentryTrait.class );
         
         newSentry.armour = sentry.Armor;
@@ -84,7 +83,6 @@ public class SentryImporter {
                 newSentry.targets.add( new AllNPCsTarget() );
             else {
                 String[] sections = t.split( ":" );
-                // Invalid target identifier?
                 if ( sections.length != 2 ) continue;
                     
                 sections[0] = sections[0].trim();
@@ -128,10 +126,6 @@ public class SentryImporter {
                 else if ( sections[0].equals( "TOWN" ) ) {
                     CommandHandler.getCommand( "towny" ).call( null, npc.getName(), newSentry, 0, "towny", "target", sections[1] );
                 }
-                // I don't think this was ever properly implemented                    
-//                    else if ( sections[0].equals( "NATIONENEMIES" ) ) { }
-                // And implementing this doesn't really fit with how Towny works
-//                    else if ( sections[0].equals( "NATION" ) ) { }
                 else if ( sections[0].equals( "WARTEAM" ) ) {
                     CommandHandler.getCommand( "war" ).call( null, npc.getName(), newSentry, 0, "war", "target", sections[1] );             
                 }
@@ -186,9 +180,6 @@ public class SentryImporter {
                         newSentry.ignores.add( new MobTypeTarget( target ) );
                     }
                 }               
-// Sentries doesn't support ignoring events, just don't add them as targets, and they will be ignored.
-//                    else if ( sections[0].equals( "EVENT" ) ) { }
-                
                 else if ( sections[0].equals( "GROUP" ) ) {
                     CommandHandler.getCommand( "group" ).call( null, npc.getName(), newSentry, 0, "group", "ignore", sections[1] ); 
                 }
@@ -198,8 +189,6 @@ public class SentryImporter {
                 else if ( sections[0].equals( "TOWN" ) ) {
                     CommandHandler.getCommand( "towny" ).call( null, npc.getName(), newSentry, 0, "towny", "ignore", sections[1] );
                 }
-// This target doesn't work well with how Towny works.
-//                    else if ( sections[0].equals( "NATION" ) ) { }
                 else if ( sections[0].equals( "WARTEAM" ) ) {
                     CommandHandler.getCommand( "war" ).call( null, npc.getName(), newSentry, 0, "war", "ignore", sections[1] );
                 }
@@ -212,6 +201,8 @@ public class SentryImporter {
                 else Sentries.logger.info( "[Sentries] NPC:" + npc.getName() + ". Ignore could not be imported:- " + t );
             }
         }
-    return true;
+        npc.removeTrait( net.aufdemrand.sentry.SentryTrait.class );
+        
+        return true;
     }
 }

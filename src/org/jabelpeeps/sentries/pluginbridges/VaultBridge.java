@@ -26,7 +26,7 @@ public class VaultBridge implements PluginBridge {
     private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new GroupCommand();
     private String activationMsg;
-    protected Permission perms;
+    protected static Permission perms;
 
     @Override
     public String getPrefix() { return PREFIX; }
@@ -186,7 +186,7 @@ public class VaultBridge implements PluginBridge {
         }       
     }
     
-    public class GroupTarget extends AbstractTargetType {
+    public static class GroupTarget extends AbstractTargetType {
         
         private final String group;
         

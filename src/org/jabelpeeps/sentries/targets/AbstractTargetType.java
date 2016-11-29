@@ -10,7 +10,8 @@ public abstract class AbstractTargetType implements TargetType {
     }
     @Override
     public final int compareTo( TargetType o ) {
-        return order - ((AbstractTargetType) o).order;
+        int same = order - ((AbstractTargetType) o).order;
+        return ( same != 0 ) ? same : hashCode() - o.hashCode();
     }   
     @Override
     public TargetType setTargetString( String type ) {
@@ -31,4 +32,9 @@ public abstract class AbstractTargetType implements TargetType {
     }
     @Override
     public abstract boolean equals( Object o );
+    
+    @Override
+    public String toString() {
+        return getPrettyString();
+    }
 }

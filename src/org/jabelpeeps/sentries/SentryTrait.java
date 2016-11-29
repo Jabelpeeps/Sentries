@@ -70,10 +70,8 @@ public class SentryTrait extends Trait {
     public Location spawnLocation;
 
     public int strength, armour, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
-//    int activeStrength, activeArmour;
     public float speed;
 
-//    float activeSpeed;
     public double arrowRate, healRate, weight, maxHealth;
     public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
     
@@ -746,6 +744,7 @@ public class SentryTrait extends Trait {
      * Checks whether sufficient time has passed since the last healing, and if so restores
      * health according to the configured healrate.
      */
+    @SuppressWarnings( "deprecation" )
     void tryToHeal() {
         
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {

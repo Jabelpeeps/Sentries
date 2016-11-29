@@ -53,8 +53,6 @@ public class SentinelImporter {
         SentinelTrait sentinel = npc.getTrait( SentinelTrait.class );
         SentryTrait sentry = npc.getTrait( SentryTrait.class );
         
-        npc.removeTrait( SentinelTrait.class );
-        
         sentry.armour = (int) sentinel.armor;
         sentry.arrowRate = sentinel.attackRate / 20;
         sentry.range = (int) Math.max( sentinel.chaseRange, sentinel.range );
@@ -119,11 +117,7 @@ public class SentinelImporter {
         }
         /*
         These target specifiers are not implemented in Sentinel yet and so can't be imported
-        else if (sections[0].equals("FACTIONENEMIES"))
-        else if (sections[0].equals("NATIONENEMIES"))
-        else if (sections[0].equals("NATION"))
-        else if (sections[0].equals("WARTEAM"))
-        else if (sections[0].equals("CLAN"))
+        "FACTIONENEMIES", "NATIONENEMIES", "NATION", "WARTEAM", "CLAN"
         */
                 
         for ( SentinelTarget each : sentinel.ignores ) {
@@ -169,10 +163,11 @@ public class SentinelImporter {
         }
         /*
         These ignore specifiers are not implemented in Sentinel yet and so can't be imported
-        else if (sections[0].equals("NATION"))
-        else if (sections[0].equals("WARTEAM"))
-        else if (sections[0].equals("CLAN"))
-        */             
-    return true;
+        "NATION", "WARTEAM", "CLAN"
+        */ 
+        
+        npc.removeTrait( SentinelTrait.class );
+        
+        return true;
     }
 }
