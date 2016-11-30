@@ -24,6 +24,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jabelpeeps.sentries.commands.ExportCommand;
 import org.jabelpeeps.sentries.commands.ImportCommand;
 
 import net.aufdemrand.denizen.Denizen;
@@ -107,15 +108,19 @@ public class Sentries extends JavaPlugin {
         CommandHandler handler = new CommandHandler();
         getCommand( "sentries" ).setExecutor( handler );
         
+        boolean sentinelEnabled = pluginManager.isPluginEnabled( "Sentinel" );
         if ( pluginManager.isPluginEnabled( "Sentry" ) ) {
             CommandHandler.addCommand( "import", new ImportCommand() );
         }
         else {
             getCommand( "sentry" ).setExecutor( handler );
-            if ( pluginManager.isPluginEnabled( "Sentinel" ) ) {
+            if ( sentinelEnabled ) {
                 CommandHandler.addCommand( "import", new ImportCommand() );               
             }
         }
+        if ( sentinelEnabled )
+            CommandHandler.addCommand( "export", new ExportCommand() );
+        
         registry = CitizensAPI.getNPCRegistry();     
         reloadMyConfig();
         

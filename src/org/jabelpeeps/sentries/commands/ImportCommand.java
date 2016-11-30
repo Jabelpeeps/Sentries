@@ -107,7 +107,7 @@ public class ImportCommand implements SentriesComplexCommand {
         File backup = new File( folder, "backup_of_saves.yml" );
         int i = 1;
         while ( backup.exists() ) {
-            backup = new File( folder, "backup_of_saves" + (++i) + ".yml" );
+            backup = new File( folder, "backup_of_saves(" + (++i) + ").yml" );
         }
         try {
             Files.copy( saves, backup );
