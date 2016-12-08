@@ -101,9 +101,9 @@
             <version>1.9.0</version>
             <type>jar</type>
             <scope>provided</scope>
-            <exclusions>
+  <!--           <exclusions>
                  <exclusion>
-                    <!-- <groupId>net.sacredlabyrinth</groupId> -->
+                    <groupId>net.sacredlabyrinth</groupId>
                     <groupId>com.p000ison.dev.simpleclans2</groupId>
                     <artifactId>SimpleClans</artifactId>
                  </exclusion>
@@ -127,7 +127,7 @@
                     <groupId>net.milkbowl.vault</groupId>
                     <artifactId>Vault</artifactId>
                  </exclusion>
-            </exclusions>
+            </exclusions> -->
         </dependency>
          
         <dependency>
@@ -136,7 +136,7 @@
             <version>1.0</version>
             <type>jar</type>
             <scope>provided</scope>
-            <exclusions>
+<!--             <exclusions>
                  <exclusion>
                     <groupId>com.tommytony.war</groupId>
                     <artifactId>war</artifactId>
@@ -153,7 +153,7 @@
                     <groupId>com.massivecraft</groupId>
                     <artifactId>massivecore</artifactId>
                  </exclusion>
-             </exclusions>
+             </exclusions> -->
         </dependency> 
              
 		<dependency>
