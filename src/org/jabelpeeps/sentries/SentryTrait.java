@@ -734,8 +734,8 @@ public class SentryTrait extends Trait {
 //    }
 
     static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
-    static Set<AttackType> stormCallers = EnumSet.range( AttackType.stormCaller1, AttackType.sc3 );
-    static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.sc3 );
+    static Set<AttackType> stormCallers = EnumSet.range( AttackType.STORMCALLER1, AttackType.STORMCALLER3 );
+    static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.STORMCALLER3 );
 
     public boolean isPyromancer() { return pyros.contains( myAttack ); }
     public boolean isPyromancer1() { return myAttack == AttackType.PYRO1; }
@@ -876,7 +876,7 @@ public class SentryTrait extends Trait {
         }
         else if ( myEntity instanceof Skeleton ) myAttack = AttackType.ARCHER;
         else if ( myEntity instanceof Ghast ) myAttack = AttackType.PYRO3;
-        else if ( myEntity instanceof Snowman ) myAttack = AttackType.magi;
+        else if ( myEntity instanceof Snowman ) myAttack = AttackType.ICEMAGI;
         else if ( myEntity instanceof Wither ) myAttack = AttackType.WARLOCK2;
         else if ( myEntity instanceof Witch ) myAttack = AttackType.WITCHDOCTOR;
         else if ( myEntity instanceof Creeper ) myAttack = AttackType.CREEPER;

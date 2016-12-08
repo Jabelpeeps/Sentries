@@ -33,9 +33,7 @@ public class SentinelExporter {
         sentinel.armor = Math.min( sentry.armour * 0.1, 1.0 );
         sentinel.attackRate = (int) ( sentry.arrowRate * 20 );
         
-        if ( sentinel.attackRate < SentinelTrait.attackRateMin )
-            sentinel.attackRate = SentinelTrait.attackRateMin;
-        else if ( sentinel.attackRate > SentinelTrait.attackRateMax )
+        if ( sentinel.attackRate > SentinelTrait.attackRateMax )
             sentinel.attackRate = SentinelTrait.attackRateMax;
         
         sentinel.chaseRange = sentry.range;
@@ -53,9 +51,7 @@ public class SentinelExporter {
         double secondsPerHpPoint = sentry.healRate / hpHealedPerPeriod;
         sentinel.healRate = (int) ( 20 * secondsPerHpPoint );
         
-        if ( sentinel.healRate < SentinelTrait.healRateMin )
-            sentinel.healRate = SentinelTrait.healRateMin;
-        else if ( sentinel.healRate > SentinelTrait.healRateMax )
+        if ( sentinel.healRate > SentinelTrait.healRateMax )
             sentinel.healRate = SentinelTrait.healRateMax;
 
         double health = sentry.getHealth();
