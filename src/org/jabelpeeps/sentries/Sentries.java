@@ -179,6 +179,7 @@ public class Sentries extends JavaPlugin {
         sentryEXP = config.getInt( "Server.ExpValue", 5 );
 
         loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
+        defaultBooleans.put( S.CON_NEW_ARMOUR_CALC, false );
         loadIntoStringMap( config, "DefaultStats", defaultIntegers );
         loadIntoStringMap( config, "DefaultValues", defaultDoubles );
         defaultTargets = config.getStringList( S.DEFAULT_TARGETS );

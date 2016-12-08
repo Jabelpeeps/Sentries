@@ -10,6 +10,7 @@ import org.bukkit.entity.Egg;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowball;
@@ -18,45 +19,45 @@ import org.bukkit.entity.WitherSkull;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.citizensnpcs.api.ai.AttackStrategy;
 
 @AllArgsConstructor
-public enum AttackType {
-    // Columns:- "name"         weapon held                 projectile       incendiary? lightning level?
-    bombardier( "Bombardier",   Material.EGG,               Egg.class ), 
-    archer(     "Archer",       Material.BOW,               Arrow.class ), 
-    magi(       "IceMagi",      Material.SNOW_BALL,         Snowball.class ), 
-    pyro1(      "Pyro1",        Material.REDSTONE_TORCH_ON, SmallFireball.class ), 
-    pyro2(      "Pyro2",        Material.TORCH,             SmallFireball.class, true, 0 ),
-    pyro3(      "Pyro3",        Material.BLAZE_ROD,         Fireball.class ), 
-    sc1(        "StormCaller1", Material.PAPER,             ThrownPotion.class, false, 1 ), 
-    sc2(        "StormCaller2", Material.BOOK,              ThrownPotion.class, false, 2 ), 
-    sc3(        "StormCaller3", Material.BOOK_AND_QUILL,    ThrownPotion.class, false, 3 ), 
-    warlock1(   "Warlock1",     Material.ENDER_PEARL,       EnderPearl.class ), 
-    warlock2(   "Warlock2",     Material.SKULL_ITEM,        WitherSkull.class ),
+public enum AttackType implements AttackStrategy {
+    // Columns:-  weapon held                 projectile       incendiary? lightning level?
+    BOMBARDIER(   Material.EGG,               Egg.class ), 
+    ARCHER(       Material.BOW,               Arrow.class ), 
+    ICEMAGI(      Material.SNOW_BALL,         Snowball.class ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class ), 
+    PYRO2(        Material.TORCH,             SmallFireball.class, true, 0 ),
+    PYRO3(        Material.BLAZE_ROD,         Fireball.class ), 
+    STORMCALLER1( Material.PAPER,             ThrownPotion.class, false, 1 ), 
+    STROMCALLER2( Material.BOOK,              ThrownPotion.class, false, 2 ), 
+    STORMCALLER3( Material.BOOK_AND_QUILL,    ThrownPotion.class, false, 3 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class ),
     // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled  for now.
-    witchdoctor( "WitchDoctor", Material.SPLASH_POTION,     ThrownPotion.class ),
-    creeper(     "Creeper",     Material.SULPHUR,           null ),  
-    
-    brawler(     "Brawler",     Material.AIR,               null ) {
-
+    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class ),
+    CREEPER(      Material.SULPHUR,           null ),  
+    BRAWLER(      Material.AIR,               null ) {
+        // this override method is only used for the brawler instance.
         @Override
         public Material getWeapon( SentryTrait sentry ) {
-            return ((HumanEntity) sentry.getMyEntity())
-                                        .getInventory()
-                                        .getItemInMainHand().getType();
+            LivingEntity myEntity = sentry.getMyEntity();
+            if ( myEntity == null ) return Material.AIR;
+            
+            if ( myEntity instanceof HumanEntity )
+                return ((HumanEntity) myEntity).getInventory().getItemInMainHand().getType();
+            
+            return myEntity.getEquipment().getItemInMainHand().getType();
         }
     };
-
-    // The strings used for the names must correspond exactly with the names used in the config file.
-    String name;
     @Getter private Material weapon;
     @Getter private Class<? extends Projectile> projectile;
-
     boolean incendiary;
     int lightningLevel;
 
-    AttackType( String n, Material w, Class<? extends Projectile> p ) {
-        this( n, w, p, false, 0 );
+    AttackType( Material w, Class<? extends Projectile> p ) {
+        this( w, p, false, 0 );
     }
 
     // the argument for this method is only used in the override for the  'brawler' instance.
@@ -82,7 +83,7 @@ public enum AttackType {
      */
     static AttackType find( Material item ) {
         return reverseSearch.containsKey( item ) ? reverseSearch.get( item )
-                                                 : AttackType.brawler;
+                                                 : AttackType.BRAWLER;
     }
 
     /**
@@ -97,11 +98,9 @@ public enum AttackType {
 
         if ( config.getBoolean( "UseCustomWeapons" ) ) {
 
-            for ( AttackType attack : values() ) {
-                
-                if ( attack == brawler ) continue;
-
-                attack.weapon = Material.getMaterial( config.getString( "AttackTypes." + attack.name ) );
+            for ( AttackType attack : values() ) {                
+                if ( attack == BRAWLER ) continue;
+                attack.weapon = Material.getMaterial( config.getString( "AttackTypes." + attack.name() ) );
             }
             updateMap();
         }
@@ -115,5 +114,56 @@ public enum AttackType {
         reverseSearch.clear();
         for ( AttackType each : values() )
             reverseSearch.put( each.weapon, each );
+    }
+
+    @Override
+    public boolean handle( LivingEntity arg0, LivingEntity arg1 ) {
+        SentryTrait inst = Util.getSentryTrait( arg0 );
+        if ( inst == null ) return false;
+        
+        switch ( this ) {
+            case ARCHER: // arrows
+                
+                break;
+            case BOMBARDIER: // eggs
+                
+                break;
+            case CREEPER: // no projectile, explodes
+                
+                break;
+            case ICEMAGI: // snowballs
+                
+                break;
+            case PYRO1: // smallfireball, non-incendiary
+                
+                break;
+            case PYRO2: // smallfireball, incendiary
+                
+                break;
+            case PYRO3: // fireball
+                
+                break;
+            case STORMCALLER1: // thrownpotion, non-incendiary, Lightening 1 
+                
+                break;
+            case STROMCALLER2: // thrownpotion, non-incendiary, Lightening 2
+                
+                break;
+            case STORMCALLER3: // thrownpotion, non-incendiary, Lightening 3 (instant death)
+                
+                break;
+            case WARLOCK1: // enderpearl
+                
+                break;
+            case WARLOCK2: // witherskull
+                
+                break;
+            case WITCHDOCTOR: // potions
+                
+                break;
+            case BRAWLER: default:
+                // no projectile attack, returning false will use the default melee attack
+        }
+        return false;
     }
 }

@@ -7,15 +7,15 @@
 	<groupId>org.jabelpeeps</groupId>
 	<artifactId>sentries</artifactId>
 	<packaging>jar</packaging>
-	<version>2.0.4</version>
+	<version>2.1.0</version>
 	<name>sentries</name>
 	<description>Armed Citizens</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<build.number>${env.BUILD_NUMBER}</build.number>
-		<craftbukkit.version>1.10.2-R0.1-SNAPSHOT</craftbukkit.version>
-		<citizens.version>2.0.20-SNAPSHOT</citizens.version>
+		<craftbukkit.version>1.11-R0.1-SNAPSHOT</craftbukkit.version>
+		<citizens.version>2.0.21-SNAPSHOT</citizens.version>
 	</properties>
 
 	<!-- Repositories -->
@@ -74,11 +74,18 @@
 
 		<dependency>
 			<groupId>net.citizensnpcs</groupId>
-			<artifactId>citizens</artifactId>
+			<artifactId>citizensapi</artifactId>
 			<version>${citizens.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
+    
+        <dependency>
+            <groupId>net.citizensnpcs</groupId>
+            <artifactId>citizens</artifactId>
+            <version>${citizens.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
 		<dependency>
 			<groupId>net.aufdemrand</groupId>
 			<artifactId>denizen</artifactId>

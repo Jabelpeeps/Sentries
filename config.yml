@@ -49,11 +49,11 @@ DefaultTexts:
  
 # Default target list for new Sentries. 
 DefaultTargets:
- #- "entity:monster"
+ #- "all:monsters"
 
 # Default ignore list for new Sentries
 DefaultIgnores:
- #- "entity:owner"
+ #- "owner"
 
 UseCustomMessages: false
 # Configurable messages used by all Sentries. You can use <NPC>, <PLAYER>, <ITEM>, and <AMOUNT> as 
@@ -106,19 +106,20 @@ DenizenIntegration:
 UseCustomWeapons: false 
 # Use item names only. Remove an entry to disable that attack type. Any other item makes a Brawler.
 AttackTypes:
- Archer: BOW
- Pyro1: REDSTONE_TORCH_ON
- Pyro2: TORCH
- Pyro3: BLAZE_ROD
- Bombardier: EGG
- IceMagi: SNOW_BALL
- StormCaller1: PAPER
- StormCaller2: BOOK
- StormCaller3: BOOK_AND_QUILL
+ ARCHER: BOW
+ PYRO1: REDSTONE_TORCH_ON
+ PYRO2: TORCH
+ PYRO3: BLAZE_ROD
+ BOMBARDIER: EGG
+ ICEMAGI: SNOW_BALL
+ STORMCALLER1: PAPER
+ STORMCALLER2: BOOK
+ STORMCALLER3: BOOK_AND_QUILL
  # Note Witch Doctors need a potion equipped to know what to throw!
- WitchDoctor: POTION
- Warlock1: ENDER_PEARL
- Warlock2: SKULL_ITEM
+ WITCHDOCTOR: POTION
+ WARLOCK1: ENDER_PEARL
+ WARLOCK2: SKULL_ITEM
+ CREEPER: SULPHUR
 
 # The following items will ADD to the sentry's base armor. 
 # Decimals are allowed but all minecraft damge is in integers. 

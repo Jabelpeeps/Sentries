@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
@@ -73,7 +74,7 @@ public class SentryTrait extends Trait {
     public float speed;
 
     public double arrowRate, healRate, weight, maxHealth;
-    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
+    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals, useNewArmourCalc;
     
     boolean loaded;
     boolean ignoreLOS;
@@ -131,6 +132,7 @@ public class SentryTrait extends Trait {
         killsDrop = key.getBoolean( S.CON_KILLS_DROP, sentry.defaultBooleans.get( S.CON_KILLS_DROP ) );
         ignoreLOS = key.getBoolean( S.CON_IGNORE_LOS, sentry.defaultBooleans.get( S.CON_IGNORE_LOS ) );
         targetable = key.getBoolean( S.CON_MOBS_ATTACK, sentry.defaultBooleans.get( S.CON_MOBS_ATTACK ) );
+        useNewArmourCalc = key.getBoolean( S.CON_NEW_ARMOUR_CALC, sentry.defaultBooleans.get( S.CON_NEW_ARMOUR_CALC ) );
 
         armour = key.getInt( S.CON_ARMOUR, sentry.defaultIntegers.get( S.CON_ARMOUR ) );
         strength = key.getInt( S.CON_STRENGTH, sentry.defaultIntegers.get( S.CON_STRENGTH ) );
@@ -278,7 +280,7 @@ public class SentryTrait extends Trait {
        
         if ( tickMe == null ) {
             tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
-                    () -> {                      
+                    () -> {                  
                                 if ( Sentries.debug && oldStatus != myStatus ) {
                                     Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
                                     oldStatus = myStatus;
@@ -336,6 +338,7 @@ public class SentryTrait extends Trait {
         key.setInt( S.PERSIST_MOUNT, mountID );
         key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
         key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
+        key.setBoolean( S.CON_NEW_ARMOUR_CALC, useNewArmourCalc );
 
         Set<String> ignoreTargets = new HashSet<>();
         Set<String> validTargets = new HashSet<>();
@@ -513,9 +516,12 @@ public class SentryTrait extends Trait {
             effect = Effect.BOW_FIRE;
         }
         else if ( projectileClazz == SmallFireball.class
-                || projectileClazz == Fireball.class
-                || projectileClazz == WitherSkull.class ) {
+                || projectileClazz == Fireball.class ) {
             effect = Effect.BLAZE_SHOOT;
+            ballistics = false;
+        }
+        else if ( projectileClazz == WitherSkull.class ) {
+            effect = Effect.WITHER_SHOOT;
             ballistics = false;
         }
         else if ( projectileClazz == ThrownPotion.class ) {
@@ -668,9 +674,8 @@ public class SentryTrait extends Trait {
         return myEntity.getHealth();
     }
     
-    // TODO call this method from the right place(s)
     public void updateArmour() {
-        if ( sentry.armorBuffs.isEmpty() ) return;
+        if ( !useNewArmourCalc || sentry.armorBuffs.isEmpty() ) return;
         
         double mod = 0;
         LivingEntity myEntity = getMyEntity();
@@ -728,15 +733,15 @@ public class SentryTrait extends Trait {
 //        return (int) (strength + mod);
 //    }
 
-    static Set<AttackType> pyros = EnumSet.range( AttackType.pyro1, AttackType.pyro3 );
-    static Set<AttackType> stormCallers = EnumSet.range( AttackType.sc1, AttackType.sc3 );
-    static Set<AttackType> notFlammable = EnumSet.range( AttackType.pyro1, AttackType.sc3 );
+    static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
+    static Set<AttackType> stormCallers = EnumSet.range( AttackType.stormCaller1, AttackType.sc3 );
+    static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.sc3 );
 
     public boolean isPyromancer() { return pyros.contains( myAttack ); }
-    public boolean isPyromancer1() { return myAttack == AttackType.pyro1; }
+    public boolean isPyromancer1() { return myAttack == AttackType.PYRO1; }
     public boolean isStormcaller() { return stormCallers.contains( myAttack ); }
-    public boolean isWarlock1() { return myAttack == AttackType.warlock1; }
-    public boolean isWitchDoctor() { return myAttack == AttackType.witchdoctor; }
+    public boolean isWarlock1() { return myAttack == AttackType.WARLOCK1; }
+    public boolean isWitchDoctor() { return myAttack == AttackType.WITCHDOCTOR; }
     public boolean isFlammable() { return !notFlammable.contains( myAttack ); }
 
 
@@ -744,28 +749,24 @@ public class SentryTrait extends Trait {
      * Checks whether sufficient time has passed since the last healing, and if so restores
      * health according to the configured healrate.
      */
-    @SuppressWarnings( "deprecation" )
     void tryToHeal() {
         
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
 
-            if ( getHealth() < maxHealth ) {
+            double health = getHealth();
+            if ( health < maxHealth ) {
 
-                double heal = 1;
-
-                if ( healRate < 0.5 )
-                    heal = (0.5 / healRate);
-
-                setHealth( getHealth() + heal );
                 LivingEntity myEntity = getMyEntity();
+                if ( myEntity == null ) return;
+                myEntity.setHealth( health + 1 );
                 
                 // idk what this effect looks like, so lets see if it looks ok in-game.
-                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.HEART, 0 );
+                myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getLocation(), 5 );
 
                 if ( getHealth() >= maxHealth )
                     _myDamamgers.clear();
             }
-            oktoheal = (long) (System.currentTimeMillis() + healRate * 1000);
+            oktoheal = (long) ( System.currentTimeMillis() + ( healRate * 1000 ) );
         }
     }
     
@@ -863,25 +864,26 @@ public class SentryTrait extends Trait {
         ItemStack item = null;
         LivingEntity myEntity = getMyEntity();
 
+        myEntity.getEquipment();
         if ( myEntity instanceof HumanEntity ) {
             item = ((HumanEntity) myEntity).getInventory().getItemInMainHand();
             weapon = item.getType();
 
             myAttack = AttackType.find( weapon );
 
-            if ( myAttack != AttackType.witchdoctor )
+            if ( myAttack != AttackType.WITCHDOCTOR )
                 item.setDurability( (short) 0 );           
         }
-        else if ( myEntity instanceof Skeleton ) myAttack = AttackType.archer;
-        else if ( myEntity instanceof Ghast ) myAttack = AttackType.pyro3;
+        else if ( myEntity instanceof Skeleton ) myAttack = AttackType.ARCHER;
+        else if ( myEntity instanceof Ghast ) myAttack = AttackType.PYRO3;
         else if ( myEntity instanceof Snowman ) myAttack = AttackType.magi;
-        else if ( myEntity instanceof Wither ) myAttack = AttackType.warlock2;
-        else if ( myEntity instanceof Witch ) myAttack = AttackType.witchdoctor;
-        else if ( myEntity instanceof Creeper ) myAttack = AttackType.creeper;
-        else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttack = AttackType.pyro2;
-        else myAttack = AttackType.brawler;
+        else if ( myEntity instanceof Wither ) myAttack = AttackType.WARLOCK2;
+        else if ( myEntity instanceof Witch ) myAttack = AttackType.WITCHDOCTOR;
+        else if ( myEntity instanceof Creeper ) myAttack = AttackType.CREEPER;
+        else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttack = AttackType.PYRO2;
+        else myAttack = AttackType.BRAWLER;
 
-        if ( myAttack == AttackType.witchdoctor ) {
+        if ( myAttack == AttackType.WITCHDOCTOR ) {
             if ( item == null ) {
                 item = new ItemStack( Material.SPLASH_POTION, 1, (short) 16396 );
                 // TODO send message to owner about equipping a proper potion.

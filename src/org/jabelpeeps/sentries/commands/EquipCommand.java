@@ -123,6 +123,7 @@ public class EquipCommand implements SentriesComplexCommand {
                     equip.set( slot, item );
     
                     if ( slot == 0 ) inst.updateAttackType();
+                    else inst.updateArmour();
                     
                     Util.sendMessage( sender, " ", Col.GREEN, "equipped", mat.toString(), "on", npcName );
                 }

@@ -9,7 +9,10 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
+//import net.citizensnpcs.api.ai.GoalController;
+//import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.npc.NPC;
+//import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.NMS;
 
 /** 
