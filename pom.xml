@@ -99,8 +99,8 @@
             <groupId>net.aufdemrand</groupId>
             <artifactId>sentry</artifactId>
             <version>1.9.0</version>
-<!--             <type>jar</type>
-            <scope>provided</scope> -->
+            <type>jar</type>
+            <scope>provided</scope>
             <exclusions>
                  <exclusion>
                     <!-- <groupId>net.sacredlabyrinth</groupId> -->
@@ -134,8 +134,8 @@
             <groupId>org.mcmonkey</groupId>
             <artifactId>sentinel</artifactId>
             <version>1.0</version>
-<!--             <type>jar</type>
-            <scope>provided</scope> -->
+            <type>jar</type>
+            <scope>provided</scope>
             <exclusions>
                  <exclusion>
                     <groupId>com.tommytony.war</groupId>
