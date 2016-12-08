@@ -101,6 +101,32 @@
             <version>1.9.0</version>
             <type>jar</type>
             <scope>provided</scope>
+            <exclusions>
+                 <exclusion>
+                    <groupId>net.sacredlabyrinth</groupId>
+                    <artifactId>SimpleClans</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.tommytony</groupId>
+                    <artifactId>war</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.palmergames</groupId>
+                    <artifactId>Towny</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.massivecraft</groupId>
+                    <artifactId>Factions</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.massivecraft</groupId>
+                    <artifactId>Factions</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>net.milkbowl.vault</groupId>
+                    <artifactId>Vault</artifactId>
+                 </exclusion>
+            </exclusions>
         </dependency>
          
         <dependency>
@@ -109,6 +135,24 @@
             <version>1.0</version>
             <type>jar</type>
             <scope>provided</scope>
+            <exclusions>
+                 <exclusion>
+                    <groupId>com.tommytony</groupId>
+                    <artifactId>war</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.palmergames</groupId>
+                    <artifactId>Towny</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.massivecraft</groupId>
+                    <artifactId>Factions</artifactId>
+                 </exclusion>
+                 <exclusion>
+                    <groupId>com.massivecraft</groupId>
+                    <artifactId>Factions</artifactId>
+                 </exclusion>
+             </exclusions>
         </dependency> 
              
 		<dependency>
