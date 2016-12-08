@@ -99,28 +99,29 @@
             <groupId>net.aufdemrand</groupId>
             <artifactId>sentry</artifactId>
             <version>1.9.0</version>
-            <type>jar</type>
-            <scope>provided</scope>
+<!--             <type>jar</type>
+            <scope>provided</scope> -->
             <exclusions>
                  <exclusion>
-                    <groupId>net.sacredlabyrinth</groupId>
+                    <!-- <groupId>net.sacredlabyrinth</groupId> -->
+                    <groupId>com.p000ison.dev.simpleclans2</groupId>
                     <artifactId>SimpleClans</artifactId>
                  </exclusion>
                  <exclusion>
-                    <groupId>com.tommytony</groupId>
+                    <groupId>com.tommytony.war</groupId>
                     <artifactId>war</artifactId>
                  </exclusion>
                  <exclusion>
-                    <groupId>com.palmergames</groupId>
-                    <artifactId>Towny</artifactId>
+                    <groupId>com.palmergames.bukkit</groupId>
+                    <artifactId>towny</artifactId>
                  </exclusion>
                  <exclusion>
                     <groupId>com.massivecraft</groupId>
-                    <artifactId>Factions</artifactId>
+                    <artifactId>factions</artifactId>
                  </exclusion>
                  <exclusion>
                     <groupId>com.massivecraft</groupId>
-                    <artifactId>Factions</artifactId>
+                    <artifactId>mcore</artifactId>
                  </exclusion>
                  <exclusion>
                     <groupId>net.milkbowl.vault</groupId>
@@ -133,24 +134,24 @@
             <groupId>org.mcmonkey</groupId>
             <artifactId>sentinel</artifactId>
             <version>1.0</version>
-            <type>jar</type>
-            <scope>provided</scope>
+<!--             <type>jar</type>
+            <scope>provided</scope> -->
             <exclusions>
                  <exclusion>
-                    <groupId>com.tommytony</groupId>
+                    <groupId>com.tommytony.war</groupId>
                     <artifactId>war</artifactId>
                  </exclusion>
                  <exclusion>
-                    <groupId>com.palmergames</groupId>
-                    <artifactId>Towny</artifactId>
+                    <groupId>com.palmergames.bukkit</groupId>
+                    <artifactId>towny</artifactId>
                  </exclusion>
                  <exclusion>
                     <groupId>com.massivecraft</groupId>
-                    <artifactId>Factions</artifactId>
+                    <artifactId>factions</artifactId>
                  </exclusion>
                  <exclusion>
                     <groupId>com.massivecraft</groupId>
-                    <artifactId>Factions</artifactId>
+                    <artifactId>massivecore</artifactId>
                  </exclusion>
              </exclusions>
         </dependency> 
