@@ -72,12 +72,12 @@
 			<scope>provided</scope>
 		</dependency> -->
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>net.citizensnpcs</groupId>
 			<artifactId>citizensapi</artifactId>
 			<version>${citizens.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
     
         <dependency>
             <groupId>net.citizensnpcs</groupId>
@@ -97,14 +97,14 @@
             <groupId>net.aufdemrand</groupId>
             <artifactId>sentry</artifactId>
             <version>1.9.0</version>
-            <!-- <scope>provided</scope> -->
+            <scope>provided</scope>
         </dependency>
          
         <dependency>
             <groupId>org.mcmonkey</groupId>
             <artifactId>sentinel</artifactId>
             <version>0.9</version>
-            <!-- <scope>provided</scope> -->
+            <scope>provided</scope>
         </dependency> 
              
 		<dependency>
