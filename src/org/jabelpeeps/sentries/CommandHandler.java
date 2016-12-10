@@ -290,7 +290,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
         NPC thisNPC;
 
-        if ( npcid == -1 ) {
+        if ( npcid == Integer.MIN_VALUE ) {
             thisNPC = CitizensAPI.getDefaultNPCSelector().getSelected( sender );
             if ( thisNPC == null )
                 Util.sendMessage( sender, S.ERROR, S.ERROR_NO_NPC );

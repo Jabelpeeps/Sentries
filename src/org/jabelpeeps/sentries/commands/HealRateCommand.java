@@ -19,7 +19,7 @@ public class HealRateCommand implements SentriesNumberCommand {
         }
         else {
             double healrate = Util.string2Double( number );
-            if ( healrate < 0.0 ) {
+            if ( healrate == Double.MIN_VALUE || healrate < 0.0 ) {
                 Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }

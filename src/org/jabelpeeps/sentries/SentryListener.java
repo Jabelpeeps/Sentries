@@ -19,7 +19,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.SmallFireball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -153,8 +152,7 @@ public class SentryListener implements Listener {
         }
 
         // put out any fires from pyromancer1 fire-balls
-        if (    projectile instanceof SmallFireball 
-                && inst != null 
+        if (    inst != null 
                 && inst.isPyromancer1() ) {
 
             final Block block = projectile.getLocation().getBlock();
@@ -193,7 +191,7 @@ public class SentryListener implements Listener {
                     if ( inst.isStormcaller() ) return;
                     break;
                 case FIRE: case FIRE_TICK:
-                    if ( !inst.isFlammable() ) return;
+                    if ( !inst.isNotFlammable() ) return;
                     break;
                 case POISON:
                     if ( inst.isWitchDoctor() ) return;
@@ -220,7 +218,7 @@ public class SentryListener implements Listener {
 
             if (    cause == DamageCause.CONTACT
                     || cause == DamageCause.BLOCK_EXPLOSION ) {
-                finaldamage -= inst.armour;
+                finaldamage = inst.getFinalDamage( finaldamage );
             }
 
             if ( finaldamage > 0 ) {
@@ -326,113 +324,102 @@ public class SentryListener implements Listener {
     @SuppressWarnings( "null" )
     @EventHandler( priority = EventPriority.HIGHEST )
     public void processNPCdamage( NPCDamageByEntityEvent event ) {
-        // handles damage to sentries (including critical hits - if enabled)
+        // handles damage to sentries - including critical hits (if enabled)
 
         NPC npc = event.getNPC();
         SentryTrait instVictim = Util.getSentryTrait( npc );
         
         // tests if the victim is a sentry
-        if ( instVictim != null ) { 
+        if ( instVictim == null ) return;
             
-            // stop repeated calls to this event handler for the same NPC
-            if ( System.currentTimeMillis() < instVictim.okToTakedamage + 500 ) return;
-            instVictim.okToTakedamage = System.currentTimeMillis();
-                        
-            // Damage to a sentry cannot be handled by the server. Always cancel the event here.
-            event.setCancelled( true );
-
-            LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
-            
-            // don't take damage from the entity the sentry is guarding.
-            if ( damager == instVictim.guardeeEntity ) return;  
-            
-            // handle class protections
-            DamageCause cause = event.getCause();
-            
-            if (    cause == DamageCause.LIGHTNING
-                    && instVictim.isStormcaller() )
-                return;
-
-            if (    (   cause == DamageCause.FIRE
-                    ||  cause == DamageCause.FIRE_TICK )
-               &&   instVictim.isFlammable() )
-                return;
-
-            SentryTrait instDamager = Util.getSentryTrait( damager );
-            
-            if (    damager != null 
-                    && instDamager != null
-                    && instDamager.guardeeEntity != null
-                    && instVictim.guardeeEntity != null
-                    && instDamager.guardeeEntity == instVictim.guardeeEntity ) {
-
-                // don't take damage from co-guards.
-                return;
-            }
-             
-            Hits hit = Hits.Hit;
-            double damage = event.getDamage();
-
-            if ( instVictim.acceptsCriticals ) {
-
-                hit = Hits.getHit();
-                damage = Math.round( damage * hit.damageModifier );
-            }
-            
-            int armour = instVictim.armour;
-            Entity myEntity = npc.getEntity();
-            
-            if ( damager != null && damage > 0 ) {
-
-                // do knockback
-                myEntity.setVelocity( damager.getLocation()
-                                             .getDirection()
-                                             .multiply( 1.0 / ( instVictim.weight + (armour / 5) ) ) );
-                // Apply armour
-                damage -= armour;
-
-                // there was damage before armour.
-                if ( damage <= 0 ) {
-                    myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
-                    hit = Hits.Block;
-                }
-            }
-
-            if (    damager instanceof Player
-                    && !damager.hasMetadata("NPC") ) {
-
-                Player player = (Player) damager;
-                instVictim._myDamamgers.add( player );
-
-                String msg = hit.message;
-
-                if ( msg != null && !msg.isEmpty() ) {
-                    String formatted = Util.format( msg,
-                                                    npc,
-                                                    damager, 
-                                                    player.getInventory().getItemInMainHand().getType(),
-                                                    String.valueOf( damage ) );
-                    player.sendMessage( formatted );
+        // stop repeated calls to this event handler for the same NPC
+        if ( System.currentTimeMillis() < instVictim.okToTakedamage + 500 ) return;
+        instVictim.okToTakedamage = System.currentTimeMillis();
                     
-                    if ( Sentries.debug ) Sentries.debugLog( formatted );                               
-                }
-            }
+        // Damage to a sentry cannot be handled by the server.
+        event.setCancelled( true );
 
-            if ( damage > 0 ) {
-                
-                myEntity.playEffect( EntityEffect.HURT );
-                ((LivingEntity) myEntity).damage( damage, damager );
-                
-                // is he dead?
-                if ( instVictim.getHealth() - damage <= 0 )
-                    instVictim.die( true, event );
-
-            }
-            if ( Sentries.debug )
-                Sentries.debugLog( "Damage: from:" + damager.getName() + " to:" + npc.getName() + " cancelled:[" + event.isCancelled() 
-                                    + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
+        LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
+        
+        // don't take damage from the entity the sentry is guarding.
+        if ( damager == null || damager == instVictim.guardeeEntity ) return;  
+        
+        // handle class protections
+        switch ( event.getCause() ) {
+            case LIGHTNING:
+                if ( instVictim.isStormcaller() ) return;
+            case FIRE: case FIRE_TICK:
+                if ( instVictim.isNotFlammable() ) return;
+            default:
         }
-    }  
+        SentryTrait instDamager = Util.getSentryTrait( damager );
+        
+        // don't take damage from co-guards.
+        if (    instDamager != null
+                && instDamager.guardeeEntity != null
+                && instVictim.guardeeEntity != null
+                && instDamager.guardeeEntity == instVictim.guardeeEntity ) {
+            return;
+        }
+         
+        Hits hit = Hits.Hit;
+        double damage = event.getDamage();
+
+        if ( instVictim.acceptsCriticals ) {
+            hit = Hits.getHit();
+            damage = Math.round( damage * hit.damageModifier );
+        }
+        
+//        int armour = instVictim.armour;
+        Entity myEntity = npc.getEntity();
+        
+        if ( damage > 0 ) {
+
+            // do knockback
+            myEntity.setVelocity( damager.getLocation().getDirection().multiply( 1.0 / instVictim.weight ) );
+            // Apply armour
+            damage = instVictim.getFinalDamage( damage );
+
+            // there was damage before armour.
+            if ( damage <= 0 ) {
+                myEntity.getWorld().playEffect( myEntity.getLocation(), Effect.ZOMBIE_CHEW_IRON_DOOR, 1 );
+                hit = Hits.Block;
+            }
+        }
+
+        if (    damager instanceof Player
+                && !damager.hasMetadata("NPC") ) {
+
+            Player player = (Player) damager;
+            instVictim._myDamamgers.add( player );
+
+            String msg = hit.message;
+
+            if ( msg != null && !msg.isEmpty() ) {
+                String formatted = Util.format( msg,
+                                                npc,
+                                                damager, 
+                                                player.getInventory().getItemInMainHand().getType(),
+                                                String.valueOf( damage ) );
+                player.sendMessage( formatted );
+                
+                if ( Sentries.debug ) Sentries.debugLog( formatted );                               
+            }
+        }
+
+        if ( damage > 0 ) {
+            
+            myEntity.playEffect( EntityEffect.HURT );
+            ((LivingEntity) myEntity).damage( damage, damager );
+            
+            // is he dead?
+            if ( instVictim.getHealth() <= 0 )
+                instVictim.die( true, event );
+        }
+        if ( Sentries.debug )
+            Sentries.debugLog( "Damage: from:" + damager.getName() + " to:" + npc.getName() + " cancelled:[" + event.isCancelled() 
+                                + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
+    }
     
     @EventHandler( priority = EventPriority.MONITOR )
     public void processEventForTargets( EntityDamageByEntityEvent event ) {

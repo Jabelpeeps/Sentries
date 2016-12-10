@@ -22,11 +22,10 @@ enum Hits {
 
     static boolean useCriticalHits;
     static Random rand = new Random();
-    private static Set<Hits> randomisedHits = EnumSet.of( Hits.Crit3,
-                                                          Hits.Crit2, 
-                                                          Hits.Crit1, 
-                                                          Hits.Glance, 
-                                                          Hits.Miss );
+    private static Set<Hits> randomisedHits = EnumSet.range( Hits.Crit3, Hits.Miss );
+    static {
+        if ( Sentries.useNewArmourCalc ) randomisedHits.add( Block );
+    }
 
     Hits( double mod, int chance, String msg ) {
         damageModifier = mod;
@@ -60,8 +59,7 @@ enum Hits {
 
         useCriticalHits = config.getBoolean( "UseCriticalHits" );
 
-        if ( !useCriticalHits )
-            return;
+        if ( !useCriticalHits ) return;
 
         if ( config.getBoolean( "UseCustomMessages" ) ) {
             for ( Hits each : values() )
@@ -72,6 +70,9 @@ enum Hits {
         Hits.Crit1.percentChance = config.getInt( "HitChances.Crit1" );
         Hits.Glance.percentChance = config.getInt( "HitChances.Glance" );
         Hits.Miss.percentChance = config.getInt( "HitChances.Miss" );
+        if ( Sentries.useNewArmourCalc ) {
+            Hits.Block.percentChance = config.getInt( "HitChances.Block" );
+        }
 
         makeChanceMap();
     }

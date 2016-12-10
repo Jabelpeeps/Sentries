@@ -2,58 +2,63 @@
 
 # Server-wide options for Sentry
 Server:
- # If true Sentries will die like normal mobs, instead of being despawned. Player-type Sentry deaths will be announced in chat.
- DieLikePlayers: false
- # The amount of EXP sentries drop. Only works if Drops is turned on.
- ExpValue: 5
- # This is how often, in ticks, the Sentry performs his interal logic looking for targets, etc. Increasing this value may lighten
- # server load, but will decrease Sentries responsiveness and maximum rate of fire.
- LogicTicks: 5
- # Whether or not Sentries in bodyguard mode always deal damage regardless of other protection plugins.
- BodyguardsObeyProtection: true
- # Whether or not Sentries are immune to damage from entites on their ignore list. Immunity to damage also prevents retaliation.
- IgnoreListInvincibility: true
+  # If true Sentries will die like normal mobs, instead of being despawned. Player-type Sentry deaths will be announced in chat.
+  DieLikePlayers: false
+  # The amount of EXP sentries drop. Only works if Drops is turned on.
+  ExpValue: 5
+  # This is how often, in ticks, the Sentry performs his interal logic looking for targets, etc. Increasing this value may lighten
+  # server load, but will decrease Sentries responsiveness and maximum rate of fire.
+  LogicTicks: 5
+  # Whether or not Sentries in bodyguard mode always deal damage regardless of other protection plugins.
+  BodyguardsObeyProtection: true
+  # Whether or not Sentries are immune to damage from entites on their ignore list. Immunity to damage also prevents retaliation.
+  IgnoreListInvincibility: true
+  # Sentry (v1) had a rather odd armour calculation, in that it subtracted the armour value from the damage done, sometimes 
+  # resulting in no damage being done at all.  Vanilla MC uses armour to reduce the damage by a percentage, switching the 
+  # option below to true will use a new algorithm to handle armour in Sentries more like the vanilla calculation.  
+  # (default = false, for backwards compatability.)
+  UseNewArmourCalc: false
  
 # Default stats for new Sentries
 DefaultStats:
- Strength: 1
- Armour: 0
- NightVision: 16
- Range: 10
- VoiceRange: 0
- RespawnDelay: 10
- FollowDistance: 4
+  Strength: 1
+  NightVision: 16
+  Range: 10
+  VoiceRange: 0
+  RespawnDelay: 10
+  FollowDistance: 4
 # More default stats...
 DefaultValues:
- Speed: 1.0
- Health: 20.0
- ArrowRate: 2.0
- HealRate: 0.0
- Weight: 1.0     # used in knockback calculation
+  Speed: 1.0
+  Health: 20.0
+  Armour: 0.0     # set to -1.0 to calculate armour strength from armour worn.
+  ArrowRate: 2.0
+  HealRate: 0.0
+  Weight: 1.0     # used in knockback calculation
  
 # Default options for new Sentries
 DefaultOptions:
- DropInventory: false     # on death
- KillsDrop: true          # when killing others
- CriticalHits: true
- Invincible: false
- Retaliation: true
- FriendlyFire: false   # unused?
- MobsAttack: true
- IgnoreLOS: false
+  DropInventory: false     # on death
+  KillsDrop: true          # when killing others
+  CriticalHits: true
+  Invincible: false
+  Retaliation: true
+  FriendlyFire: false   # unused?
+  MobsAttack: true
+  IgnoreLOS: false
  
 # Default texts for new Sentries. You can use <NPC> and <PLAYER> as placeholders.
 DefaultTexts:
- Warning: "&c<NPC> says Halt! Come no closer!"
- Greeting: "&a<NPC> says Welcome, <PLAYER>"
+  Warning: "&c<NPC> says Halt! Come no closer!"
+  Greeting: "&a<NPC> says Welcome, <PLAYER>"
  
 # Default target list for new Sentries. 
 DefaultTargets:
- #- "all:monsters"
+  #- "all:monsters"
 
 # Default ignore list for new Sentries
 DefaultIgnores:
- #- "owner"
+  #- "owner"
 
 UseCustomMessages: false
 # Configurable messages used by all Sentries. You can use <NPC>, <PLAYER>, <ITEM>, and <AMOUNT> as 
@@ -71,11 +76,12 @@ GlobalTexts:
 # Whole numbers only. Set to 0 to disable a hit type.
 UseCriticalHits: true 
 HitChances:
- Crit3: 2
- Crit2: 4
- Crit1: 6
- Glance: 4
- Miss: 4
+  Crit3: 2
+  Crit2: 4
+  Crit1: 6
+  Glance: 4
+  Miss: 4
+  Block: 2   # only used if Server.UseNewrmourCalc is 'true'
  
 # List of other plugins that Sentry can integrate with to enable target selection to respect the 
 # Teams/clan/faction/town/nation of players.  (ScoreboardTeams is the standard MC scoreboard.)
@@ -104,39 +110,57 @@ DenizenIntegration:
 
 # Set true to customise the items used by each type of Sentry - configured below.
 UseCustomWeapons: false 
-# Use item names only. Remove an entry to disable that attack type. Any other item makes a Brawler.
+# Use item names only. Remove an entry to disable that attack type. Equipping any other item makes a Brawler (melee attack).
 AttackTypes:
- ARCHER: BOW
- PYRO1: REDSTONE_TORCH_ON
- PYRO2: TORCH
- PYRO3: BLAZE_ROD
- BOMBARDIER: EGG
- ICEMAGI: SNOW_BALL
- STORMCALLER1: PAPER
- STORMCALLER2: BOOK
- STORMCALLER3: BOOK_AND_QUILL
- # Note Witch Doctors need a potion equipped to know what to throw!
- WITCHDOCTOR: POTION
- WARLOCK1: ENDER_PEARL
- WARLOCK2: SKULL_ITEM
- CREEPER: SULPHUR
+  ARCHER: BOW
+  PYRO1: REDSTONE_TORCH_ON
+  PYRO2: TORCH
+  PYRO3: BLAZE_ROD
+  BOMBARDIER: EGG
+  ICEMAGI: SNOW_BALL
+  STORMCALLER1: PAPER
+  STORMCALLER2: BOOK
+  STORMCALLER3: BOOK_AND_QUILL
+  # Note Witch Doctors need a potion equipped to know what to throw!
+  WITCHDOCTOR: POTION
+  WARLOCK1: ENDER_PEARL
+  WARLOCK2: SKULL_ITEM
+  CREEPER: SULPHUR
 
-# The following items will ADD to the sentry's base armor. 
-# Decimals are allowed but all minecraft damge is in integers. 
-# You would need 2 items of 0.3 Armor buff to add 1 point of armor.
-ArmorBuffs:
- #- IRON_HELMET 1.0
- #- DIAMOND_CHESTPLATE 4.0
+# If you have set Server.UseNewArmourCalc to true, the values below will be used to calculate the percentage damage reduction
+# for each sentry that has their configured armour value set to -1 (values above 0 are used directly as the percentage reduction).
+# If Server.UseNewArmourCalc remains false, the values below will be multiplied by 10 and subtracted from any damage due. 
+ArmorValues:
+  LEATHER_HELMET: 0.04
+  LEATHER_CHESTPLATE: 0.12
+  LEATHER_LEGGINGS: 0.08
+  LEATHER_BOOTS: 0.04
+  GOLD_HELMET: 0.08
+  GOLD_CHESTPLATE: 0.20
+  GOLD_LEGGINGS: 0.12
+  GOLD_BOOTS: 0.04
+  CHAINMAIL_HELMET: 0.08
+  CHAINMAIL_CHESTPLATE: 0.20
+  CHAINMAIL_LEGGINGS: 0.16
+  CHAINMAIL_BOOTS: 0.04
+  IRON_HELMET: 0.08
+  IRON_CHESTPLATE: 0.24
+  IRON_LEGGINGS: 0.20
+  IRON_BOOTS: 0.08
+  DIAMOND_HELMET: 0.12
+  DIAMOND_CHESTPLATE: 0.32
+  DIAMOND_LEGGINGS: 0.24
+  DIAMOND_BOOTS: 0.12
  
 # The following items will ADD to the sentry's base strength. 
 StrengthBuffs:
- #- IRON_SWORD 1
- #- TORCH 5
+  #- IRON_SWORD 1
+  #- TORCH 5
 
 # The following items will ADD to the sentry's base speed. 
 SpeedBuffs:
- #- LEATHER_BOOTS 0.2
- #- IRON_BOOTS -0.1
+  #- LEATHER_BOOTS 0.2
+  #- IRON_BOOTS -0.1
 
 # Apply potion effects on hit for various weapon types. Multiple effects allowed. 
 # Use format: [item name] [potion name:duration in ticks:level] There are 20 ticks in a second. 
@@ -146,8 +170,8 @@ SpeedBuffs:
 # regeneration, damage_resistance, fire_resistance, water_breathing, blindness, hunger, weakness, 
 # poison, wither, health_boost, absorption, saturation, glowing, levitation, luck, unluck
 WeaponEffects:
- - SNOW_BALL slow:20
- #- GOLD_SWORD poison:60:2 confusion
+  - SNOW_BALL slow:20
+  #- GOLD_SWORD poison:60:2 confusion
  
  
   
@@ -156,7 +180,9 @@ WeaponEffects:
 # If you are not changing the lists from the defaults, leave the "UseCustom..." values as false. 
  
 UseCustomHelmets: false 
-# If the value above is changed to true, the following items will be equipped as helmets, you must use the correct Material name.
+# If the value above is changed to 'true', the following items will be equipable as helmets.
+# You must use the correct Material name. The default list reflects the helmets available 
+# when UseCustomHelmets is 'false'.
 Helmets:
    - PUMPKIN
    - JACK_O_LANTERN
@@ -167,7 +193,9 @@ Helmets:
    - DIAMOND_HELMET
 
 UseCustomChestplates: false
-# If the value above is changed to true, the following items will be equipped as chestplates, you must use the correct Material name.
+# If the value above is changed to 'true', the following items will be equipable as chestplates.
+# You must use the correct Material name. The default list reflects the chestplates available 
+# when UseCustomChestplates is 'false'.
 Chestplates:
     - LEATHER_CHESTPLATE
     - CHAINMAIL_CHESTPLATE
@@ -176,7 +204,9 @@ Chestplates:
     - DIAMOND_CHESTPLATE
 
 UseCustomLeggings: false
-# If the value above is changed to true, the following items will be equipped as leggings, you must use the correct Material name.
+# If the value above is changed to 'true', the following items will be equipable as leggings.
+# You must use the correct Material name. The default list reflects the leggings available 
+# when UseCustomLeggings is 'false'.
 Leggings:
     - LEATHER_LEGGINGS
     - CHAINMAIL_LEGGINGS
@@ -184,8 +214,10 @@ Leggings:
     - IRON_LEGGINGS
     - DIAMOND_LEGGINGS
     
-UseCustomBoots: false    
-# If the value above is changed to true, the following items will be equipped as boots, you must use the correct Material name.
+UseCustomBoots: false  
+# If the value above is changed to 'true', the following items will be equipable as boots.
+# You must use the correct Material name. The default list reflects the boots available 
+# when UseCustomBoots is 'false'.
 Boots:  
     - LEATHER_BOOTS
     - CHAINMAIL_BOOTS

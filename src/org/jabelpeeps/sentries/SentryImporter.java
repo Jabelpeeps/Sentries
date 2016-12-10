@@ -39,7 +39,7 @@ public class SentryImporter {
 
         SentryTrait newSentry = npc.getTrait( SentryTrait.class );
         
-        newSentry.armour = sentry.Armor;
+        newSentry.armour = sentry.Armor * 0.1;
         newSentry.arrowRate = sentry.AttackRateSeconds;
         
         if ( newSentry.arrowRate < 1 ) newSentry.arrowRate = 1;

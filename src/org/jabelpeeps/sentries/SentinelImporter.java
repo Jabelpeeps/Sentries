@@ -53,7 +53,7 @@ public class SentinelImporter {
         SentinelTrait sentinel = npc.getTrait( SentinelTrait.class );
         SentryTrait sentry = npc.getTrait( SentryTrait.class );
         
-        sentry.armour = (int) sentinel.armor;
+        sentry.armour = sentinel.armor;
         sentry.arrowRate = sentinel.attackRate / 20;
         sentry.range = (int) Math.max( sentinel.chaseRange, sentinel.range );
         sentry.strength = (int) sentinel.damage;

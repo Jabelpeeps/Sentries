@@ -19,7 +19,7 @@ public class SpeedCommand implements SentriesNumberCommand {
         }
         else {
             float speed = Util.string2Float( number );
-            if ( speed < 0.0 ) {
+            if ( speed == Float.MIN_VALUE || speed < 0.0 ) {
                 Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }

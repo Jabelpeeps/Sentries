@@ -192,7 +192,7 @@ public abstract class Util {
     /**
      * method to convert String values to int's.
      * <p>
-     * It catches any NumberFormatExceptions and returns -1.
+     * It catches any NumberFormatExceptions and returns Integer.MIN_VALUE instead.
      * 
      * @param value
      *            - the string to be converted
@@ -202,14 +202,14 @@ public abstract class Util {
         try {
             return Integer.parseInt( value );
         } catch ( NumberFormatException e ) {
-            return -1;
+            return Integer.MIN_VALUE;
         }
     }
 
     /**
      * method to convert String values to floats.
      * <p>
-     * It catches any NumberFormatExceptions and returns -1.
+     * It catches any NumberFormatExceptions and returns Float.MIN_VALUE instead.
      * 
      * @param value
      *            - the string to be converted
@@ -219,14 +219,14 @@ public abstract class Util {
         try {
             return Float.parseFloat( value );
         } catch ( NumberFormatException e ) {
-            return -1;
+            return Float.MIN_VALUE;
         }
     }
 
     /**
      * method to convert String values to doubles.
      * <p>
-     * It catches any NumberFormatExceptions and returns -1.
+     * It catches any NumberFormatExceptions and returns Double.MIN_VALUE instead.
      * 
      * @param value
      *            - the string to be converted
@@ -236,7 +236,7 @@ public abstract class Util {
         try {
             return Double.parseDouble( value );
         } catch ( NumberFormatException e ) {
-            return -1;
+            return Double.MIN_VALUE;
         }
     }
 

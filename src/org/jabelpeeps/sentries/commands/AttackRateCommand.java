@@ -19,7 +19,7 @@ public class AttackRateCommand implements SentriesNumberCommand {
         }
         else {
             double attackrate = Util.string2Double( number );
-            if ( attackrate < 0.0 ) {
+            if ( attackrate == Double.MIN_VALUE || attackrate < 0 ) {
                 sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
                 return;
             }

@@ -36,9 +36,7 @@ public class Sentries extends JavaPlugin {
 
     public static boolean debug = false;
 
-    static boolean dieLikePlayers = false;
-    static boolean bodyguardsObeyProtection = true;
-    static boolean ignoreListIsInvincible = true;
+    public static boolean dieLikePlayers, bodyguardsObeyProtection, ignoreListIsInvincible, useNewArmourCalc;
 
     static boolean denizenActive = false;
     static Set<PluginBridge> activePlugins = new HashSet<>();
@@ -68,7 +66,7 @@ public class Sentries extends JavaPlugin {
         equipmentSlots.put( "offhand", 5 );
     }
     
-    Map<Material, Double> armorBuffs = new EnumMap<>( Material.class );
+    Map<Material, Double> armorValues = new EnumMap<>( Material.class );
     Map<Material, Double> speedBuffs = new EnumMap<>( Material.class );
     Map<Material, Double> strengthBuffs = new EnumMap<>( Material.class );
     Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<>( Material.class );
@@ -157,7 +155,7 @@ public class Sentries extends JavaPlugin {
 
         FileConfiguration config = getConfig();
 
-        loadIntoMaterialMap( config, "ArmorBuffs", armorBuffs );
+        loadIntoMaterialMap( config, "ArmorValues", armorValues );
         loadIntoMaterialMap( config, "StrengthBuffs", strengthBuffs );
         loadIntoMaterialMap( config, "SpeedBuffs", speedBuffs );
 
@@ -171,15 +169,15 @@ public class Sentries extends JavaPlugin {
         AttackType.loadWeapons( config );
         Hits.loadConfig( config );
 
-        dieLikePlayers = config.getBoolean( "Server.DieLikePlayers" );
+        dieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
         bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
         ignoreListIsInvincible = config.getBoolean( "Server.IgnoreListInvincibility", true );
+        useNewArmourCalc = config.getBoolean( "Server.UseNewArmourCalc", false );
 
         logicTicks = config.getInt( "Server.LogicTicks", 10 );
         sentryEXP = config.getInt( "Server.ExpValue", 5 );
 
         loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
-        defaultBooleans.put( S.CON_NEW_ARMOUR_CALC, false );
         loadIntoStringMap( config, "DefaultStats", defaultIntegers );
         loadIntoStringMap( config, "DefaultValues", defaultDoubles );
         defaultTargets = config.getStringList( S.DEFAULT_TARGETS );
@@ -250,8 +248,7 @@ public class Sentries extends JavaPlugin {
             Material item = Material.getMaterial( args[0] );
 
             if (    item != null 
-                    && val > 0 
-                    && !map.containsKey( item ) ) {
+                    && val != Double.MIN_VALUE ) {
 
                 map.put( item, val );
             }

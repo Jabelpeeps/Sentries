@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -70,11 +71,11 @@ public class SentryTrait extends Trait {
     Sentries sentry;
     public Location spawnLocation;
 
-    public int strength, armour, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
+    public int strength, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
     public float speed;
 
-    public double arrowRate, healRate, weight, maxHealth;
-    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals, useNewArmourCalc;
+    public double arrowRate, healRate, armour, weight, maxHealth;
+    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
     
     boolean loaded;
     boolean ignoreLOS;
@@ -132,7 +133,6 @@ public class SentryTrait extends Trait {
         killsDrop = key.getBoolean( S.CON_KILLS_DROP, sentry.defaultBooleans.get( S.CON_KILLS_DROP ) );
         ignoreLOS = key.getBoolean( S.CON_IGNORE_LOS, sentry.defaultBooleans.get( S.CON_IGNORE_LOS ) );
         targetable = key.getBoolean( S.CON_MOBS_ATTACK, sentry.defaultBooleans.get( S.CON_MOBS_ATTACK ) );
-        useNewArmourCalc = key.getBoolean( S.CON_NEW_ARMOUR_CALC, sentry.defaultBooleans.get( S.CON_NEW_ARMOUR_CALC ) );
 
         armour = key.getInt( S.CON_ARMOUR, sentry.defaultIntegers.get( S.CON_ARMOUR ) );
         strength = key.getInt( S.CON_STRENGTH, sentry.defaultIntegers.get( S.CON_STRENGTH ) );
@@ -143,6 +143,7 @@ public class SentryTrait extends Trait {
         nightVision = key.getInt( S.CON_NIGHT_VIS, sentry.defaultIntegers.get( S.CON_NIGHT_VIS ) );
         mountID = key.getInt( S.PERSIST_MOUNT, -1 );
 
+        armour = key.getDouble( S.CON_ARMOUR, sentry.defaultDoubles.get( S.CON_ARMOUR ) );
         speed = (float) key.getDouble( S.CON_SPEED, sentry.defaultDoubles.get( S.CON_SPEED ) );
         weight = key.getDouble( S.CON_WEIGHT, sentry.defaultDoubles.get( S.CON_WEIGHT ) );
         maxHealth = key.getDouble( S.CON_HEALTH, sentry.defaultDoubles.get( S.CON_HEALTH ) );
@@ -201,6 +202,8 @@ public class SentryTrait extends Trait {
             eventTargets.addAll( (Set<String>) key.getRaw( S.EVENTS ) );
         
         eventTargets.parallelStream().forEach( e -> CommandHandler.getCommand( S.EVENT ).call( null, null, this, 0, "", "add", e ) );
+        
+        updateArmour();
         
         loaded = true;      
         if ( Sentries.debug ) {      
@@ -338,7 +341,6 @@ public class SentryTrait extends Trait {
         key.setInt( S.PERSIST_MOUNT, mountID );
         key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
         key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
-        key.setBoolean( S.CON_NEW_ARMOUR_CALC, useNewArmourCalc );
 
         Set<String> ignoreTargets = new HashSet<>();
         Set<String> validTargets = new HashSet<>();
@@ -373,7 +375,7 @@ public class SentryTrait extends Trait {
         key.setDouble( S.CON_SPEED, speed );
         key.setDouble( S.CON_WEIGHT, weight );
         key.setDouble( S.CON_HEAL_RATE, healRate );
-        key.setInt( S.CON_ARMOUR, armour );
+        key.setDouble( S.CON_ARMOUR, armour );
         key.setInt( S.CON_STRENGTH, strength );
         key.setInt( S.CON_VOICE_RANGE, voiceRange );
         key.setDouble( S.CON_ARROW_RATE, arrowRate );
@@ -391,8 +393,6 @@ public class SentryTrait extends Trait {
 
     @Override
     public void onCopy() {
-        if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onCopy()" );
-
         Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getEntity().getLocation(), 10 );
     }
 
@@ -661,8 +661,7 @@ public class SentryTrait extends Trait {
         
         if ( effect != null )
             myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
-
-        
+       
         if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        
     }
@@ -674,25 +673,47 @@ public class SentryTrait extends Trait {
         return myEntity.getHealth();
     }
     
-    public void updateArmour() {
-        if ( !useNewArmourCalc || sentry.armorBuffs.isEmpty() ) return;
-        
-        double mod = 0;
-        LivingEntity myEntity = getMyEntity();
-        
-        ItemStack[] myArmour;  
-        if ( myEntity instanceof Player )
-            myArmour = ((Player) myEntity).getInventory().getArmorContents();
-        else
-            myArmour = myEntity.getEquipment().getArmorContents();
-        
-        for ( ItemStack is : myArmour ) {
-            Material item = is.getType();
-
-            if ( sentry.armorBuffs.containsKey( item ) )
-                mod += sentry.armorBuffs.get( item );
+    /**
+     * Calculates the damage to inflict on a sentry in the light of the current Armour settings.
+     * It does not actually inflict the damage on the NPC.
+     * @param finaldamage
+     * @return the amount of the damage.
+     */
+    public double getFinalDamage( double finaldamage ) {
+        return Sentries.useNewArmourCalc ? Math.abs( finaldamage * armour ) : Math.min( finaldamage - armour, 0 );
+    }
+   
+    /**
+     * recalculated the NPC's armour value from the currently equipped armour.
+     * @return true if the NPC is wearing armour, false if not (or no armour values are configured).
+     */
+    public boolean updateArmour() {
+        if ( sentry.armorValues.isEmpty() ) {
+            Sentries.logger.log( Level.WARNING, "ERROR: no armour vales have been loaded from config." );
+            return false;
         }
-        armour = (int) mod;
+        if ( armour < 0 ) { // values less than 0 indicate a calculated value that needs refreshing
+            armour = 0;
+            LivingEntity myEntity = getMyEntity();
+            ItemStack[] myArmour;  
+            
+            if ( myEntity instanceof Player )
+                myArmour = ((Player) myEntity).getInventory().getArmorContents();
+            else
+                myArmour = myEntity.getEquipment().getArmorContents();
+            
+            boolean armourWorn = false;
+            for ( ItemStack is : myArmour ) {
+                Material item = is.getType();
+                armourWorn = true;
+                if ( sentry.armorValues.containsKey( item ) )
+                    armour -= sentry.armorValues.get( item );
+            }
+            if ( !Sentries.useNewArmourCalc ) armour *= 10;
+            
+            return armourWorn;
+        }
+        return false;
     }
     
     public float getSpeed() {
@@ -742,7 +763,7 @@ public class SentryTrait extends Trait {
     public boolean isStormcaller() { return stormCallers.contains( myAttack ); }
     public boolean isWarlock1() { return myAttack == AttackType.WARLOCK1; }
     public boolean isWitchDoctor() { return myAttack == AttackType.WITCHDOCTOR; }
-    public boolean isFlammable() { return !notFlammable.contains( myAttack ); }
+    public boolean isNotFlammable() { return notFlammable.contains( myAttack ); }
 
 
     /** 
