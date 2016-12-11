@@ -10,6 +10,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
@@ -269,7 +270,10 @@ public abstract class Util {
 
             if ( source instanceof Entity )
                 damager = (Entity) source;
-        }      
+        }  
+        else if ( damager instanceof TNTPrimed ) {
+            damager = ((TNTPrimed) damager).getSource();
+        }
         return damager;   
     }
     
