@@ -85,7 +85,7 @@ public class Sentries extends JavaPlugin {
     public Queue<Projectile> arrows = new LinkedList<>();
 
     static Logger logger;
-    static Plugin plugin;
+    public static Plugin plugin;
     static DenizenHook denizenHook;
     public static NPCRegistry registry;
 

@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
@@ -23,7 +23,7 @@ import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import lombok.Getter;
 
-public class TownyBridge implements PluginBridge {
+public class TownyBridge implements PluginTargetBridge {
     
     /*
      * Notes for self:
@@ -35,21 +35,17 @@ public class TownyBridge implements PluginBridge {
      * (taken from http://towny.palmergames.com/towny/757-2/#How_Towny_Controls_PVP_Combat )
      */
 
-    final static String PREFIX = "TOWNY";
+    @Getter final String prefix = "TOWNY";
+    @Getter final String activationMessage = "Detected Towny, the TOWNY: target will function";
     private SentriesComplexCommand command = new TownyCommand();
     @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", 
-                                                    PREFIX.toLowerCase(), " ... ", Col.RESET, "commands." );
+                                                    prefix.toLowerCase(), " ... ", Col.RESET, "commands." );
     
     @Override
     public boolean activate() {
-        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public String getPrefix() { return PREFIX; }
-    @Override
-    public String getActivationMessage() { return "Detected Towny, the TOWNY: target will function"; }
-    
     @Override
     public void add( SentryTrait inst, String args ) {       
         command.call( null, null, inst, 0, Util.colon.split( args ) );
@@ -57,18 +53,27 @@ public class TownyBridge implements PluginBridge {
     
     public class TownyCommand implements SentriesComplexCommand {
         
-        private String helpTxt = String.join( "", 
-                "do ", Col.GOLD, "/sentry towny <join|leave|info|clearall> <TownName> ", Col.RESET, 
-                System.lineSeparator(), "  where ", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name.",
-                System.lineSeparator(), "  use ", Col.GOLD, "join ", Col.RESET, "to join <TownName>", 
-                                        "  A player-type sentry will then behave as though it were a town resident.",
-                                        "  It will attack the members of enemy nations, and ignore allies.", 
-                System.lineSeparator(), "  use ", Col.GOLD, "leave ", Col.RESET, "to leave <TownName>",
-                System.lineSeparator(), "  use ", Col.GOLD, "info ", Col.RESET, "to see which (if any) Town is currently configured.",
-                System.lineSeparator(), "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all Towny targets.",
-                System.lineSeparator(), "do  ", Col.GOLD, "/sentry towny <target|ignore|remove> <TownName> ", Col.RESET,
-                                        " to add or remove legacy Towny targets & ignores" );
+        @Getter final String shortHelp = "have a sentry join a town";
+        @Getter final String perm = "sentry.towny";
+        private String helpTxt;
         
+        @Override
+        public String getLongHelp() {
+            if ( helpTxt == null ) {
+                helpTxt = String.join( "", 
+                        "do ", Col.GOLD, "/sentry towny <join|leave|info|clearall> <TownName> ", Col.RESET, 
+                        System.lineSeparator(), "  where ", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name.",
+                        System.lineSeparator(), "  use ", Col.GOLD, "join ", Col.RESET, "to join <TownName>", 
+                                                "  A player-type sentry will then behave as though it were a town resident.",
+                                                "  It will attack the members of enemy nations, and ignore allies.", 
+                        System.lineSeparator(), "  use ", Col.GOLD, "leave ", Col.RESET, "to leave <TownName>",
+                        System.lineSeparator(), "  use ", Col.GOLD, "info ", Col.RESET, "to see which (if any) Town is currently configured.",
+                        System.lineSeparator(), "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all Towny targets.",
+                        System.lineSeparator(), "do  ", Col.GOLD, "/sentry towny <target|ignore|remove> <TownName> ", Col.RESET,
+                                                " to add or remove legacy Towny targets & ignores" );
+            }
+            return helpTxt; 
+        }  
         
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -152,7 +157,7 @@ public class TownyBridge implements PluginBridge {
                     return;
                 }
                 // we only need to set the targetString on one TargetType instance, as they are created and removed in pairs.
-                enemies.setTargetString( String.join( ":", PREFIX, S.JOIN, townName ) );
+                enemies.setTargetString( String.join( ":", prefix, S.JOIN, townName ) );
                 
                 if ( S.JOIN.equals( subCommand ) 
                         && inst.targets.add( enemies ) 
@@ -182,7 +187,7 @@ public class TownyBridge implements PluginBridge {
                     return;
                 }
                 
-                target.setTargetString( String.join( ":", PREFIX, subCommand, townName ) );
+                target.setTargetString( String.join( ":", prefix, subCommand, townName ) );
                 
                 if ( S.TARGET.equals( subCommand ) ) {
                     
@@ -208,29 +213,20 @@ public class TownyBridge implements PluginBridge {
             }        
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                                             Col.GOLD, "/sentry help towny", Col.RESET, " and try again." ); 
-        } 
-        
-        @Override
-        public String getShortHelp() { return "have a sentry join a town"; }
-        
-        @Override
-        public String getPerm() { return "sentry.towny"; }  
-
-        @Override
-        public String getLongHelp() { return helpTxt; }    
+        }   
     }
     
-    protected abstract class AbstractTownyTarget extends AbstractTargetType {
+    protected abstract static class AbstractTownyTarget extends AbstractTargetType {
 
         protected final Town town;
-        protected TownyDataSource townyData = TownyUniverse.getDataSource();
+        protected static TownyDataSource townyData = TownyUniverse.getDataSource();
         
         protected AbstractTownyTarget( int i, Town t ) { super( i ); town = t; }
         @Override
         public int hashCode() { return town.hashCode(); }
     }
     
-    public class TownyTarget extends AbstractTownyTarget {
+    public static class TownyTarget extends AbstractTownyTarget {
 
         protected TownyTarget( Town t ) { super( 57, t ); }
 
@@ -256,7 +252,7 @@ public class TownyBridge implements PluginBridge {
         }
     }
     
-    public class TownyEnemyTarget extends AbstractTownyTarget {
+    public static class TownyEnemyTarget extends AbstractTownyTarget {
         
         protected TownyEnemyTarget( Town target ) { super( 55, target ); }     
         @Override
@@ -282,7 +278,7 @@ public class TownyBridge implements PluginBridge {
         }
     }
     
-    public class TownyFriendTarget extends AbstractTownyTarget {
+    public static class TownyFriendTarget extends AbstractTownyTarget {
         
         protected TownyFriendTarget( Town target ) { super( 56, target ); }        
         @Override

@@ -9,7 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -21,16 +21,15 @@ import org.jabelpeeps.sentries.targets.TargetType;
 import lombok.Getter;
 import net.milkbowl.vault.permission.Permission;
 
-public class VaultBridge implements PluginBridge {
+public class VaultBridge implements PluginTargetBridge {
 
-    protected final static String PREFIX = "GROUP";
-    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
+    @Getter final String prefix = "GROUP";
+    @Getter private String commandHelp = 
+            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new GroupCommand();
     private String activationMsg;
     protected static Permission perms;
 
-    @Override
-    public String getPrefix() { return PREFIX; }
     @Override
     public boolean activate() {
 
@@ -53,12 +52,11 @@ public class VaultBridge implements PluginBridge {
             activationMsg = "Vault integration: No permission groups found.";
             perms = null;
             return false;
-        }
-        
+        }        
         activationMsg = "Sucessfully interfaced with Vault: " + groups.length
                             + " groups found. The GROUP: target will function.";
         
-        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true;
     }
 
@@ -71,24 +69,25 @@ public class VaultBridge implements PluginBridge {
     }
    
     public class GroupCommand implements SentriesComplexCommand {
-
-        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry group <target|ignore|remove|list|clearall> <GroupName> ",
-                Col.RESET, "to have a sentry consider permission group membership when selecting targets.", System.lineSeparator(),
-                "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <GroupName>", System.lineSeparator(),
-                "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <GroupName>", System.lineSeparator(),
-                "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <GroupName> as either a target or ignore", System.lineSeparator(),
-                "  use ", Col.GOLD, "list ", Col.RESET, "to list current group targets and ignores", System.lineSeparator(),
-                "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all perm group targets and ignores from a sentry.", 
-                System.lineSeparator(), Col.GOLD, "    <GroupName> ", Col.RESET, "must be a currently existing permission group." );
         
-        @Override
-        public String getShortHelp() { return "define targets by permission groups"; }
+        @Getter final String shortHelp = "define targets by permission groups"; 
+        @Getter final String perm = "sentry.groups";
 
+        private String helpTxt;
         @Override
-        public String getPerm() { return "sentry.groups"; }
-
-        @Override
-        public String getLongHelp() { return helpTxt; }
+        public String getLongHelp() { 
+            if ( helpTxt == null ) {
+                helpTxt = String.join( "", "do ", Col.GOLD, "/sentry group <target|ignore|remove|list|clearall> <GroupName> ",
+                        Col.RESET, "to have a sentry consider permission group membership when selecting targets.", System.lineSeparator(),
+                        "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <GroupName>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <GroupName>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <GroupName> as either a target or ignore", System.lineSeparator(),
+                        "  use ", Col.GOLD, "list ", Col.RESET, "to list current group targets and ignores", System.lineSeparator(),
+                        "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all perm group targets and ignores from a sentry.", 
+                        System.lineSeparator(), Col.GOLD, "    <GroupName> ", Col.RESET, "must be a currently existing permission group." );
+            }
+            return helpTxt;
+        }
         
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -128,7 +127,7 @@ public class VaultBridge implements PluginBridge {
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", PREFIX.toLowerCase() );
+                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             String groupName = args[nextArg + 2];
@@ -156,7 +155,7 @@ public class VaultBridge implements PluginBridge {
                         Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", groupName );                  
                     return;
                 }
-                target.setTargetString( String.join( ":", PREFIX, subCommand, groupName ) );
+                target.setTargetString( String.join( ":", prefix, subCommand, groupName ) );
                 
                 if ( S.TARGET.equals( subCommand ) ) {
                     
@@ -181,7 +180,7 @@ public class VaultBridge implements PluginBridge {
                 }   
             }           
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
-                    Col.GOLD, "/sentry help ", PREFIX.toLowerCase(), Col.RESET, " and try again." );            
+                    Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );            
         }       
     }
     

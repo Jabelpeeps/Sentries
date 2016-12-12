@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -19,22 +19,20 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 
-public class SimpleClansBridge implements PluginBridge {
+public class SimpleClansBridge implements PluginTargetBridge {
 
-    final static String PREFIX = "CLAN";
-    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
-    protected ClanManager clanManager = SimpleClans.getInstance().getClanManager();
+    @Getter final String prefix = "CLAN";
+    @Getter final String activationMessage = "SimpleClans is active, The CLAN: target will function";
+    @Getter private String commandHelp = 
+            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
+    protected static ClanManager clanManager = SimpleClans.getInstance().getClanManager();
     private SentriesComplexCommand command = new ClansCommand();
 
     @Override
     public boolean activate() { 
-        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public String getActivationMessage() { return "SimpleClans is active, The CLAN: target will function"; }
-    @Override
-    public String getPrefix() { return PREFIX; }
 
     @Override
     public void add( SentryTrait inst, String args ) {
@@ -43,15 +41,12 @@ public class SimpleClansBridge implements PluginBridge {
 
     public class ClansCommand implements SentriesComplexCommand {
 
+        @Getter final String shortHelp = "define targets by clan membership";
+        @Getter final String perm = "sentry.simpleclans";
         private String helpTxt;
         
         @Override
-        public String getShortHelp() { return "define targets by clan membership"; }
-        @Override
-        public String getPerm() { return "sentry.simpleclans"; }
-        @Override
         public String getLongHelp() {
-
             if ( helpTxt == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
                 
@@ -112,7 +107,7 @@ public class SimpleClansBridge implements PluginBridge {
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", PREFIX.toLowerCase() );
+                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             
@@ -141,7 +136,7 @@ public class SimpleClansBridge implements PluginBridge {
                         Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", clan.getName() );                  
                     return;
                 }
-                target.setTargetString( String.join( ":", PREFIX, subCommand, args[nextArg + 2] ) );
+                target.setTargetString( String.join( ":", prefix, subCommand, args[nextArg + 2] ) );
                 
                 if ( S.TARGET.equals( subCommand ) ) {
                     
@@ -182,7 +177,7 @@ public class SimpleClansBridge implements PluginBridge {
                 } 
                 
                 if ( S.JOIN.equals( subCommand ) ) {                
-                    rivals.setTargetString( String.join( ":", PREFIX, subCommand, args[nextArg + 2] ) );
+                    rivals.setTargetString( String.join( ":", prefix, subCommand, args[nextArg + 2] ) );
                     
                     if ( inst.targets.add( rivals ) && inst.ignores.add( allies ) )
                         Util.sendMessage( sender, Col.GREEN, npcName, " will support ", clan.getName(), " in all things!" );
@@ -190,11 +185,11 @@ public class SimpleClansBridge implements PluginBridge {
                 }
             }            
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
-                                        Col.GOLD, "/sentry help ", PREFIX.toLowerCase(), Col.RESET, " and try again." );            
+                                        Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );            
         }       
     }
     
-    protected abstract class AbstractClanTarget extends AbstractTargetType {
+    protected static abstract class AbstractClanTarget extends AbstractTargetType {
 
         protected final Clan clan;
         
@@ -206,11 +201,9 @@ public class SimpleClansBridge implements PluginBridge {
         public int hashCode() { return clan.hashCode(); }       
     }
     
-    public class ClanTarget extends AbstractClanTarget {
+    public static class ClanTarget extends AbstractClanTarget {
 
-        ClanTarget( Clan myClan ) {
-            super( 60, myClan );
-        }  
+        ClanTarget( Clan myClan ) { super( 60, myClan ); }  
 
         @Override
         public boolean includes( LivingEntity entity ) {            
@@ -218,7 +211,6 @@ public class SimpleClansBridge implements PluginBridge {
             
             return check != null && check.equals( clan );
         }
-        
         @Override
         public boolean equals( Object o ) {
             return  o != null
@@ -227,11 +219,9 @@ public class SimpleClansBridge implements PluginBridge {
         }
     }
     
-    public class ClanAlliesTarget extends AbstractClanTarget {
+    public static class ClanAlliesTarget extends AbstractClanTarget {
         
-        ClanAlliesTarget( Clan myClan ) {
-            super( 61, myClan );
-        } 
+        ClanAlliesTarget( Clan myClan ) { super( 61, myClan );} 
         
         @Override
         public boolean includes( LivingEntity entity ) {            
@@ -239,7 +229,6 @@ public class SimpleClansBridge implements PluginBridge {
             
             return check != null && clan.isAlly( check.getTag() );
         }  
-        
         @Override
         public boolean equals( Object o ) {
             return  o != null
@@ -248,11 +237,9 @@ public class SimpleClansBridge implements PluginBridge {
         }       
     }
  
-    public class ClanRivalsTarget extends AbstractClanTarget {
+    public static class ClanRivalsTarget extends AbstractClanTarget {
         
-        ClanRivalsTarget( Clan myClan ) {
-            super( 62, myClan );
-        } 
+        ClanRivalsTarget( Clan myClan ) { super( 62, myClan ); } 
         
         @Override
         public boolean includes( LivingEntity entity ) {           
@@ -261,8 +248,7 @@ public class SimpleClansBridge implements PluginBridge {
             return check != null 
                     && (    clan.isRival( check.getTag() ) 
                             || clan.isWarring( check ) );
-        } 
-        
+        }
         @Override
         public boolean equals( Object o ) {           
             return  o != null

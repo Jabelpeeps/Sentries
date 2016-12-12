@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -19,23 +19,20 @@ import org.jabelpeeps.sentries.targets.TargetType;
 
 import lombok.Getter;
 
-public class ScoreboardTeamsBridge implements PluginBridge {
+public class ScoreboardTeamsBridge implements PluginTargetBridge {
 
-    final static String PREFIX = "SCOREBOARD";
-    protected Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+    @Getter final String prefix = "SCOREBOARD";
+    @Getter final String activationMessage = "MC Scoreboard Teams active, the SCOREBOARD: target will function";
+    protected static Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
     private SentriesComplexCommand command = new ScoreboardTeamsCommand();
-    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
+    @Getter private String commandHelp = 
+            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
 
     @Override
     public boolean activate() {
-        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public String getPrefix() { return PREFIX; }
-    @Override
-    public String getActivationMessage() { return "MC Scoreboard Teams active, the SCOREBOARD: target will function"; }
-
     @Override
     public void add( SentryTrait inst, String args ) {       
         command.call( null, null, inst, 0, Util.colon.split( args ) );
@@ -43,6 +40,8 @@ public class ScoreboardTeamsBridge implements PluginBridge {
 
     public class ScoreboardTeamsCommand implements SentriesComplexCommand {
         
+        @Getter final String shortHelp = "manage scoreboard-defined targets";
+        @Getter final String perm = "sentry.scoreboardteams";
         private String helpTxt; 
         @Override
         public String getLongHelp() { 
@@ -59,10 +58,6 @@ public class ScoreboardTeamsBridge implements PluginBridge {
             }
             return helpTxt;
         }
-        @Override
-        public String getShortHelp() { return "manage scoreboard-defined targets"; }
-        @Override
-        public String getPerm() { return "sentry.scoreboardteams"; }
         
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -100,7 +95,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", PREFIX.toLowerCase() );
+                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             String teamName = args[nextArg + 2];
@@ -128,7 +123,7 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                 return;
             }
             
-            target.setTargetString( String.join( ":", PREFIX, subCommand, teamName ) );
+            target.setTargetString( String.join( ":", prefix, subCommand, teamName ) );
             
             if ( S.TARGET.equals( subCommand ) ) {
                 
@@ -152,11 +147,11 @@ public class ScoreboardTeamsBridge implements PluginBridge {
                 return;            
             } 
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
-                                      Col.GOLD, "/sentry help ", PREFIX.toLowerCase(), Col.RESET, " and try again." );            
+                                      Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );            
         }
     }
     
-    public class ScoreboardTeamsTarget extends AbstractTargetType {
+    public static class ScoreboardTeamsTarget extends AbstractTargetType {
 
         private final Team team;
         

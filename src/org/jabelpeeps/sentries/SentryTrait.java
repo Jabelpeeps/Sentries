@@ -101,7 +101,7 @@ public class SentryTrait extends Trait {
     long oktoFire = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
     long reassesTime = System.currentTimeMillis();
-    long okToTakedamage = 0;
+    public long okToTakedamage = 0;
 
     List<PotionEffect> weaponSpecialEffects;
     ItemStack potionItem;
@@ -218,6 +218,8 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug ) Sentries.debugLog( "checkBridges() called with: " + target );
         
         Sentries.activePlugins.parallelStream()
+                              .filter( p -> p instanceof PluginTargetBridge )
+                              .map( p -> (PluginTargetBridge) p )
                               .filter( p -> target.contains( p.getPrefix() ) )
                               .forEach( b -> b.add( this, target ) );
     }

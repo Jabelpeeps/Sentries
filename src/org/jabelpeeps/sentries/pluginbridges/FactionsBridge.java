@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -22,22 +22,19 @@ import com.massivecraft.factions.entity.MPlayer;
 
 import lombok.Getter;
 
-public class FactionsBridge implements PluginBridge {
+public class FactionsBridge implements PluginTargetBridge {
 
-    private final static String PREFIX = "FACTIONS";
-    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." );
+    @Getter final String prefix = "FACTIONS";
+    @Getter String activationMessage = "Factions is active, the FACTION: target will function";
+    @Getter String commandHelp = 
+            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new FactionsCommand();
 
     @Override
     public boolean activate() { 
-        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public String getPrefix() { return PREFIX; }
-    @Override
-    public String getActivationMessage() { return "Factions is active, the FACTION: target will function"; }
-    
     @Override
     public void add( SentryTrait inst, String args ) {       
         command.call( null, null, inst, 0, Util.colon.split( args ) );
@@ -45,20 +42,19 @@ public class FactionsBridge implements PluginBridge {
 
     public class FactionsCommand implements SentriesComplexCommand {
 
+        @Getter final String shortHelp = "manage targets based on Factions";
+        @Getter final String perm = "sentry.factions";
         private String helpTxt;
         
-        @Override
-        public String getShortHelp() { return "manage targets based on Factions"; }
-        @Override
-        public String getPerm() { return "sentry.factions"; }
         @Override
         public String getLongHelp() {
 
             if ( helpTxt == null ){
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
                 
-                joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", PREFIX.toLowerCase(), " <target|ignore|list|remove|join|leave|clearall> <Faction> ", 
-                                                    Col.RESET, "where <Faction> is a valid current Faction name." ) );
+                joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", prefix.toLowerCase(), 
+                                            " <target|ignore|list|remove|join|leave|clearall> <Faction> ", Col.RESET, 
+                                            "where <Faction> is a valid current Faction name." ) );
                 joiner.add( String.join( "", "  use ", Col.GOLD, "target ", Col.RESET, "to have a sentry attack members of <Faction>" ) );
                 joiner.add( String.join( "", "  use ", Col.GOLD, "ignore ", Col.RESET, "to have a sentry ignore members of <Faction>" ) );
                 joiner.add( String.join( "", "  use ", Col.GOLD, "list ", Col.RESET, "to display the current Factions target information." ) );
@@ -143,7 +139,7 @@ public class FactionsBridge implements PluginBridge {
                     return;
                 }
                 
-                target.setTargetString( String.join( ":", PREFIX, subCommand, factionName ) );
+                target.setTargetString( String.join( ":", prefix, subCommand, factionName ) );
                 
                 if ( S.TARGET.equals( subCommand ) ) {
                     
@@ -185,7 +181,7 @@ public class FactionsBridge implements PluginBridge {
                 } 
                 
                 if ( S.JOIN.equals( subCommand ) ) {
-                    rivals.setTargetString( String.join( ":", PREFIX, subCommand, factionName ) );
+                    rivals.setTargetString( String.join( ":", prefix, subCommand, factionName ) );
                     
                     if ( inst.targets.add( rivals ) && inst.ignores.add( allies ) )
                         Util.sendMessage( sender, Col.GREEN, npcName, " will support ", faction.getName(), " in all battles!" );
@@ -197,7 +193,7 @@ public class FactionsBridge implements PluginBridge {
         }       
     }
     
-    protected abstract class AbstractFactionTarget extends AbstractTargetType {
+    protected static abstract class AbstractFactionTarget extends AbstractTargetType {
         
         protected final Faction faction;
 
@@ -209,11 +205,10 @@ public class FactionsBridge implements PluginBridge {
         public int hashCode() { return faction.hashCode(); }
     }
     
-    public class FactionTarget extends AbstractFactionTarget {
+    public static class FactionTarget extends AbstractFactionTarget {
 
-        FactionTarget( Faction f ) {
-            super( 57, f );
-        }
+        FactionTarget( Faction f ) { super( 57, f ); }
+        
         @Override
         public boolean includes( LivingEntity entity ) {            
             if ( !(entity instanceof Player) ) return false;
@@ -230,11 +225,10 @@ public class FactionsBridge implements PluginBridge {
         }        
     }
     
-    public class FactionRivalsTarget extends AbstractFactionTarget {
+    public static class FactionRivalsTarget extends AbstractFactionTarget {
                
-        FactionRivalsTarget(  Faction f ) {
-            super( 56, f );
-        }
+        FactionRivalsTarget(  Faction f ) { super( 56, f ); }
+        
         @Override
         public boolean includes( LivingEntity entity ) {          
             if ( !(entity instanceof Player) ) return false;
@@ -253,11 +247,10 @@ public class FactionsBridge implements PluginBridge {
         }  
    }
     
-   public class FactionAlliesTarget extends AbstractFactionTarget {
+   public static class FactionAlliesTarget extends AbstractFactionTarget {
         
-        FactionAlliesTarget(  Faction f ) {
-            super( 55, f );
-        }
+        FactionAlliesTarget(  Faction f ) { super( 55, f ); }
+        
         @Override
         public boolean includes( LivingEntity entity ) {           
             if ( !(entity instanceof Player) ) return false;

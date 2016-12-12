@@ -258,23 +258,25 @@ public abstract class Util {
     }
     
     /**
-     * Returns the shooter of a projectile, if possible.
+     * Returns the shooter of a projectile, if possible. (or the source of primed TNT)
      * @param damager - the entity that did some damage.
-     * @return The shooter, if damager is a projectile, or damager if not.
+     * @return damager - if it is already an instanceof living entity. 
+     *         The shooter or source - if damager is a projectile or primed TNT.
+     *         otherwise - null.
      */
     static Entity getArcher( Entity damager ) {
         
+        if ( damager instanceof LivingEntity ) return damager;
+        
         if ( damager instanceof Projectile ) {
-
             ProjectileSource source = ((Projectile) damager).getShooter();
 
-            if ( source instanceof Entity )
-                damager = (Entity) source;
+            if ( source instanceof Entity ) return (Entity) source;
         }  
-        else if ( damager instanceof TNTPrimed ) {
-            damager = ((TNTPrimed) damager).getSource();
-        }
-        return damager;   
+        else if ( damager instanceof TNTPrimed ) 
+            return ((TNTPrimed) damager).getSource();
+        
+        return null;
     }
     
     /**
@@ -337,7 +339,9 @@ public abstract class Util {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
     
             joiner.add( "These additional options are available:- " );    
-            Sentries.activePlugins.parallelStream().forEach( p -> joiner.add( p.getCommandHelp() ) );
+            Sentries.activePlugins.parallelStream()
+                                  .filter( p -> p instanceof PluginTargetBridge )
+                                  .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
             
             return joiner.toString();
         }

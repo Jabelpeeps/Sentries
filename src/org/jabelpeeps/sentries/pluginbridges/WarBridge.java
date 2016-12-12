@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginBridge;
+import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -20,46 +20,44 @@ import com.tommytony.war.War;
 
 import lombok.Getter;
 
-public class WarBridge implements PluginBridge {
+public class WarBridge implements PluginTargetBridge {
 
-    final static String PREFIX = "WAR";
-    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", PREFIX.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
+    @Getter final String prefix = "WAR";
+    @Getter final String activationMessage = "War is active, The WAR: target will function";
+    @Getter private String commandHelp = 
+            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
     private SentriesComplexCommand command = new WarTeamCommand();
 
     @Override
     public boolean activate() { 
-        CommandHandler.addCommand( PREFIX.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public String getPrefix() { return PREFIX; }
-    @Override
-    public String getActivationMessage() { return "War is active, The WAR: target will function"; }
-    
     @Override
     public void add( SentryTrait inst, String args ) {     
         command.call( null, null, inst, 0, Util.colon.split( args ) );
     }
 
     public class WarTeamCommand implements SentriesComplexCommand {
-
-        private String helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", PREFIX.toLowerCase(), " <target|ignore|remove|list|clearall> <WarTeam> ",
-                Col.RESET, "to have a sentry consider War Team membership when selecting targets.", System.lineSeparator(),
-                "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <WarTeam>", System.lineSeparator(),
-                "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <WarTeam>", System.lineSeparator(),
-                "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
-                "  use ", Col.GOLD, "list", Col.RESET, "to list the current targets and ignores", System.lineSeparator(),
-                "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all War team targets and ignores from the selected sentry.", 
-                System.lineSeparator(), Col.GOLD, "    <WarTeam> ", Col.RESET, "must be a currently existing War Team." );
+        
+        @Getter final String shortHelp = "define targets according to War Team"; 
+        @Getter final String perm = "sentry.warteam";
+        private String helpTxt;
         
         @Override
-        public String getShortHelp() { return "define targets according to War Team"; }
-
-        @Override
-        public String getLongHelp() { return helpTxt; }
-
-        @Override
-        public String getPerm() { return "sentry.warteam"; }
+        public String getLongHelp() { 
+            if ( helpTxt == null ) {
+                helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", prefix.toLowerCase(), " <target|ignore|remove|list|clearall> <WarTeam> ",
+                        Col.RESET, "to have a sentry consider War Team membership when selecting targets.", System.lineSeparator(),
+                        "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <WarTeam>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <WarTeam>", System.lineSeparator(),
+                        "  use ", Col.GOLD, "remove ", Col.RESET, "to remove <TeamName> as either a target or ignore", System.lineSeparator(),
+                        "  use ", Col.GOLD, "list", Col.RESET, "to list the current targets and ignores", System.lineSeparator(),
+                        "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all War team targets and ignores from the selected sentry.", 
+                        System.lineSeparator(), Col.GOLD, "    <WarTeam> ", Col.RESET, "must be a currently existing War Team." );
+            }
+            return helpTxt; 
+        }
 
         @Override
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -99,7 +97,7 @@ public class WarBridge implements PluginBridge {
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", PREFIX.toLowerCase() );
+                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             String teamName = args[nextArg + 2];
@@ -140,7 +138,7 @@ public class WarBridge implements PluginBridge {
                 return;
             }
             
-            target.setTargetString( String.join( ":", PREFIX, subCommand, teamName ) );
+            target.setTargetString( String.join( ":", prefix, subCommand, teamName ) );
             
             if ( S.TARGET.equals( subCommand ) ) {
                 
@@ -164,11 +162,11 @@ public class WarBridge implements PluginBridge {
                 return;            
             } 
             Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
-                                      Col.GOLD, "/sentry help ", PREFIX.toLowerCase(), Col.RESET, " and try again." );   
+                                      Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );   
         }       
     }
     
-    public class WarTeamTarget extends AbstractTargetType {
+    public static class WarTeamTarget extends AbstractTargetType {
         
         private final Team team;
 
