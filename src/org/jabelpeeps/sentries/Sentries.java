@@ -180,6 +180,8 @@ public class Sentries extends JavaPlugin {
         loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
         loadIntoStringMap( config, "DefaultStats", defaultIntegers );
         loadIntoStringMap( config, "DefaultValues", defaultDoubles );
+        if ( !defaultDoubles.containsKey( S.CON_ARMOUR ) )
+            defaultDoubles.put( S.CON_ARMOUR, 0.0 );
         defaultTargets = config.getStringList( S.DEFAULT_TARGETS );
         defaultIgnores = config.getStringList( S.DEFAULT_IGNORES );
         defaultWarning = config.getString( "DefaultTexts.Warning" );
