@@ -88,12 +88,13 @@ HitChances:
 # To disable an option, remove or comment it out.
 # NB Changes in these settings are not loaded by the /sentry reload command, only a server restart.
 OtherPlugins:
+  - ScoreboardTeams 
   - Vault
   - Towny
   - Factions
-  - SimpleClans
-  - War
-  - ScoreboardTeams 
+ # - SimpleClans
+ # - War
+ # - CrackShot
   
 # Settings to enable or disable the denizen integration features. These are enabled by default for
 # backwards compatability, but only need to be active if you have Denizen scripts that are using them. 
@@ -130,6 +131,7 @@ AttackTypes:
 # If you have set Server.UseNewArmourCalc to true, the values below will be used to calculate the percentage damage reduction
 # for each sentry that has their configured armour value set to -1 (values above 0 are used directly as the percentage reduction).
 # If Server.UseNewArmourCalc remains false, the values below will be multiplied by 10 and subtracted from any damage due. 
+# The default values reflect the armour values in vanilla MC (e.g 0.04 = a 4% reduction in damage sustained).
 ArmorValues:
   LEATHER_HELMET: 0.04
   LEATHER_CHESTPLATE: 0.12
@@ -175,8 +177,8 @@ WeaponEffects:
  
  
   
-# The lists below control what items are equipped as armor. These should only be changed to disable 
-# specific armors or add extended (i.e. Spout) items.
+# The lists below control what items are equipped as armour. These should only be changed to disable 
+# specific armors or add extended items.
 # If you are not changing the lists from the defaults, leave the "UseCustom..." values as false. 
  
 UseCustomHelmets: false 

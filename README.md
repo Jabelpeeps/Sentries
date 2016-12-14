@@ -18,9 +18,11 @@ COMPLETED:-
 * removing use of NMS and direct import of classes from CraftBukkit.
 * reworking the command handling to improve UX.
 * implement new target handling/selection system.
+* added optional module to work with CrackShot plugin.
 
 ONGOING:-
 * re-organising the code to improve performance in critical sections.
+* add integration with a wider range of plugins 
 * fixing bugs
 
 TODO:-
@@ -29,7 +31,6 @@ TODO:-
 * make better use of the second (off)hand.
 * (maybe) have sentries work together better (in teams)
 * improve functioning of mounted sentries (i.e. better integration between the two npc's)
-* add integration with a wider range of plugins 
 * add more features... 
 
 (pls post any suggestions as issues and/or PR's)
