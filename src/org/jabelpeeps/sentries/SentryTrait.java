@@ -11,10 +11,10 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
@@ -253,7 +253,8 @@ public class SentryTrait extends Trait {
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
 
-        myEntity.setMaxHealth( maxHealth );
+        myEntity.getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( maxHealth );;
+//        myEntity.setMaxHealth( maxHealth );
         setHealth( maxHealth );
         _myDamamgers.clear();
         NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
@@ -505,35 +506,7 @@ public class SentryTrait extends Trait {
     public void fire( LivingEntity theTarget ) {
 
         LivingEntity myEntity = getMyEntity();
-        Class<? extends Projectile> projectileClazz = myAttack.getProjectile();
-        Effect effect = null;
-
-        double v = 34;
-        double g = 20;
-
-        boolean ballistics = true;
-
-        if ( projectileClazz == Arrow.class ) {
-            effect = Effect.BOW_FIRE;
-        }
-        else if ( projectileClazz == SmallFireball.class
-                || projectileClazz == Fireball.class ) {
-            effect = Effect.BLAZE_SHOOT;
-            ballistics = false;
-        }
-        else if ( projectileClazz == WitherSkull.class ) {
-            effect = Effect.WITHER_SHOOT;
-            ballistics = false;
-        }
-        else if ( projectileClazz == ThrownPotion.class ) {
-            v = 21;
-            g = 20;
-        }
-        else {
-            v = 17.75;
-            g = 13.5;
-        }
-
+        
         // calc shooting spot.
         Location myLocation = Util.getFireSource( myEntity, theTarget );
         Location targetsHeart = theTarget.getLocation().add( 0, .33, 0 );
@@ -541,14 +514,14 @@ public class SentryTrait extends Trait {
         Vector test = targetsHeart.clone().subtract( myLocation ).toVector();
 
         double elev = test.getY();
-        Double testAngle = Util.launchAngle( myLocation, targetsHeart, v, elev, g );
+        Double testAngle = Util.launchAngle( myLocation, targetsHeart, myAttack.v, elev, myAttack.g );
 
         if ( testAngle == null ) {
             clearTarget();
             return;
         }
 
-        double hangtime = Util.hangtime( testAngle, v, elev, g );
+        double hangtime = Util.hangtime( testAngle, myAttack.v, elev, myAttack.g );
         Vector targetVelocity = theTarget.getLocation().subtract( attackTarget.getLocation() ).toVector();
 
         targetVelocity.multiply( 20 / Sentries.logicTicks );
@@ -565,71 +538,65 @@ public class SentryTrait extends Trait {
             clearTarget();
             return;
         }
-        if ( myAttack.lightningLevel > 0 ) {
-            ballistics = false;
-            effect = null;
-        }
-        
-        if ( ballistics ) {
 
-            Double launchAngle = Util.launchAngle( myLocation, to, v, elev, g );
-
-            if ( launchAngle == null ) {
-                clearTarget();
-                return;
-            }
-
-            // Apply angle
-            victor.setY( Math.tan( launchAngle ) * dist );
-
-            victor = Util.normalizeVector( victor );
-
-            // Vector noise = Vector.getRandom();
-            // noise = noise.multiply( 0.1 );
-
-            // victor = victor.add(noise);
-
-            if ( projectileClazz == Arrow.class
-                    || projectileClazz == ThrownPotion.class )
-                v += (1.188 * Math.pow( hangtime, 2 ));
-            else
-                v += (0.5 * Math.pow( hangtime, 2 ));
-
-            v += (random.nextDouble() - 0.8) / 2;
-
-            // apply power
-            victor = victor.multiply( v / 20.0 );
-
-        }
-        switch ( myAttack.lightningLevel ) {
-
-            case 1:
+        switch ( myAttack ) {
+            case STORMCALLER1:
                 to.getWorld().strikeLightningEffect( to );
                 theTarget.damage( strength, myEntity );
                 break;
-            case 2:
+            case STROMCALLER2:
                 to.getWorld().strikeLightning( to );
                 break;
-            case 3:
+            case STORMCALLER3:
                 to.getWorld().strikeLightningEffect( to );
                 theTarget.setHealth( 0 );
                 break;
-            default:
-                // not lightning
-                Projectile projectile =  myEntity.getWorld().spawn( myLocation, projectileClazz );
-//                myEntity.launchProjectile( projectileClazz );
+            
+            case ARCHER: case BOMBARDIER: case ICEMAGI: case WARLOCK1: case WITCHDOCTOR:               
+                Double launchAngle = Util.launchAngle( myLocation, to, myAttack.v, elev, myAttack.g );
+
+                if ( launchAngle == null ) {
+                    clearTarget();
+                    return;
+                }
+                // Apply angle
+                victor.setY( Math.tan( launchAngle ) * dist );
+
+                victor = Util.normalizeVector( victor );
+
+                // Vector noise = Vector.getRandom();
+                // noise = noise.multiply( 0.1 );
+
+                // victor = victor.add(noise);
+
+                double v = myAttack.v;
                 
-                if (    projectileClazz == ThrownPotion.class 
+                if ( myAttack.projectile == Arrow.class
+                        || myAttack.projectile == ThrownPotion.class )
+                    v += (1.188 * Math.pow( hangtime, 2 ));
+                else
+                    v += (0.5 * Math.pow( hangtime, 2 ));
+
+                v += (random.nextDouble() - 0.8) / 2;
+
+                // apply power
+                victor = victor.multiply( v / 20.0 );
+                
+                // no break, carry over is intentional
+                
+            default:
+                Projectile projectile =  myEntity.getWorld().spawn( myLocation, myAttack.projectile );
+                
+                if (    myAttack.projectile == ThrownPotion.class 
                         && potionItem != null ) {
                     
- //                   projectile = myEntity.getWorld().spawn( myLocation, ThrownPotion.class );
                     ((ThrownPotion) projectile).setItem( potionItem.clone() );
                 }
-                else if (    projectileClazz == Fireball.class
-                        || projectileClazz == WitherSkull.class ) {
+                else if (    myAttack.projectile == Fireball.class
+                        || myAttack.projectile == WitherSkull.class ) {
                     victor = victor.multiply( 1 / 1000000000 );
                 }
-                else if ( projectileClazz == SmallFireball.class ) {
+                else if ( myAttack.projectile == SmallFireball.class ) {
 
                     victor = victor.multiply( 1 / 1000000000 );
                     ((SmallFireball) projectile).setIsIncendiary( myAttack.incendiary );
@@ -639,7 +606,7 @@ public class SentryTrait extends Trait {
                         ((SmallFireball) projectile).setYield( 0 );
                     }
                 }
-                else if ( projectileClazz == EnderPearl.class ) {
+                else if ( myAttack.projectile == EnderPearl.class ) {
 
                     // TODO why are we counting enderpearls?
                     epCount++;
@@ -649,7 +616,7 @@ public class SentryTrait extends Trait {
                     if ( Sentries.debug ) Sentries.debugLog( "epCount: " + String.valueOf( epCount ) );
                 }
 
-                if ( projectileClazz == Arrow.class ) sentry.arrows.add( projectile );
+                if ( myAttack.projectile == Arrow.class ) sentry.arrows.add( projectile );
                 
                 projectile.setShooter( myEntity );
                 
@@ -658,10 +625,11 @@ public class SentryTrait extends Trait {
                 else
                     projectile.setVelocity( victor ); 
         }
+        
         NMS.look( myEntity, theTarget );
         
-        if ( effect != null )
-            myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
+        if ( myAttack.effect != null )
+            myEntity.getWorld().playEffect( myEntity.getLocation(), myAttack.effect, null );
        
         if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        

@@ -1,5 +1,6 @@
 package org.jabelpeeps.sentries.commands;
 
+import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
@@ -26,7 +27,7 @@ public class HealthCommand implements SentriesNumberCommand {
             if ( HPs > 2000000 ) HPs = 2000000;
             
             inst.maxHealth = HPs;
-            inst.getMyEntity().setMaxHealth( HPs );
+            inst.getMyEntity().getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( HPs );
             inst.setHealth( HPs );
             Util.sendMessage( sender, Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) );
         }

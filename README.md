@@ -18,19 +18,20 @@ COMPLETED:-
 * removing use of NMS and direct import of classes from CraftBukkit.
 * reworking the command handling to improve UX.
 * implement new target handling/selection system.
+* greatly extpand the amount of online/ingame help available to users.
 * added optional module to work with CrackShot plugin.
+* support spigot 1.11
 
 ONGOING:-
 * re-organising the code to improve performance in critical sections.
 * add integration with a wider range of plugins 
 * fixing bugs
+* adding more features... 
 
 TODO:-
-* support spigot 1.11
-* expand readme giving more details of features (old and new)
+* expand readme +/- start wiki giving more details of features (old and new)
 * make better use of the second (off)hand.
 * (maybe) have sentries work together better (in teams)
 * improve functioning of mounted sentries (i.e. better integration between the two npc's)
-* add more features... 
 
 (pls post any suggestions as issues and/or PR's)

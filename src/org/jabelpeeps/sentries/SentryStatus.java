@@ -267,7 +267,7 @@ public enum SentryStatus {
                 if ( !navigator.isNavigating() )
                     NMS.look( myEntity, inst.attackTarget );
                 
-                if ( inst.myAttack.getProjectile() != null ) {
+                if ( inst.myAttack.projectile != null ) {
 
                     if ( !navigator.isPaused() ) {
                         navigator.setPaused( true );
