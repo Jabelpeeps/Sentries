@@ -14,13 +14,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
@@ -31,18 +30,15 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowman;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
-import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -253,9 +249,9 @@ public class SentryTrait extends Trait {
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
 
-        myEntity.getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( maxHealth );;
-//        myEntity.setMaxHealth( maxHealth );
+        myEntity.getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( maxHealth );
         setHealth( maxHealth );
+        
         _myDamamgers.clear();
         NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
 
@@ -275,11 +271,6 @@ public class SentryTrait extends Trait {
         navigatorParams.range( myRange );
         navigatorParams.stationaryTicks( 5 * 20 );
         navigatorParams.useNewPathfinder( false );
-
-//        if ( myEntity instanceof Creeper )
-//            navigatorParams.attackStrategy( new CreeperAttackStrategy() );
-//        else if ( myEntity instanceof Spider )
-//            navigatorParams.attackStrategy( new SpiderAttackStrategy() );
 
         updateAttackType();
        
@@ -508,128 +499,185 @@ public class SentryTrait extends Trait {
         LivingEntity myEntity = getMyEntity();
         
         // calc shooting spot.
-        Location myLocation = Util.getFireSource( myEntity, theTarget );
-        Location targetsHeart = theTarget.getLocation().add( 0, .33, 0 );
+//        Location myLocation = Util.getFireSource( myEntity, theTarget );
+//        Location targetsHeart = theTarget.getLocation().add( 0, .33, 0 );
+//
+//        Vector test = targetsHeart.clone().subtract( myLocation ).toVector();
+//
+//        double elev = test.getY();
+//        Double testAngle = Util.launchAngle( myLocation, targetsHeart, myAttack.v, elev, myAttack.g );
+//
+//        if ( testAngle == null ) {
+//            clearTarget();
+//            return;
+//        }
+//
+//        double hangtime = Util.hangtime( testAngle, myAttack.v, elev, myAttack.g );
+//        Vector targetVelocity = theTarget.getLocation().subtract( attackTarget.getLocation() ).toVector();
+//
+//        targetVelocity.multiply( 20 / Sentries.logicTicks );
+//
+//        Location to = targetsHeart.clone().add( targetVelocity.clone().multiply( hangtime ) );
+//        Vector victor = to.clone().subtract( myLocation ).toVector();
+//
+//        double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
+//        elev = victor.getY();
 
-        Vector test = targetsHeart.clone().subtract( myLocation ).toVector();
+//        if ( dist == 0 ) return;
 
-        double elev = test.getY();
-        Double testAngle = Util.launchAngle( myLocation, targetsHeart, myAttack.v, elev, myAttack.g );
-
-        if ( testAngle == null ) {
+        if ( !hasLOS( theTarget ) ) {
             clearTarget();
             return;
         }
-
-        double hangtime = Util.hangtime( testAngle, myAttack.v, elev, myAttack.g );
-        Vector targetVelocity = theTarget.getLocation().subtract( attackTarget.getLocation() ).toVector();
-
-        targetVelocity.multiply( 20 / Sentries.logicTicks );
-
-        Location to = targetsHeart.clone().add( targetVelocity.clone().multiply( hangtime ) );
-        Vector victor = to.clone().subtract( myLocation ).toVector();
-
-        double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
-        elev = victor.getY();
-
-        if ( dist == 0 ) return;
-
-        if ( !hasLOS( theTarget ) || dist > range ) {
-            clearTarget();
-            return;
-        }
-
+        Location myLoc = myEntity.getLocation();
+        World world = myEntity.getWorld();
+        Location targetLoc = theTarget.getLocation();
+        
         switch ( myAttack ) {
-            case STORMCALLER1:
-                to.getWorld().strikeLightningEffect( to );
-                theTarget.damage( strength, myEntity );
+            case BRAWLER:  return;
+
+            case CREEPER: 
+                world.createExplosion( myLoc, 4F );
+                setHealth( 0 );
+                return;
+                
+            case STORMCALLER1: 
+                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                theTarget.damage( strength, myEntity );               
                 break;
-            case STROMCALLER2:
-                to.getWorld().strikeLightning( to );
+                
+            case STROMCALLER2: 
+                world.strikeLightning( targetLoc.add( 0, .33, 0 ) );                
                 break;
-            case STORMCALLER3:
-                to.getWorld().strikeLightningEffect( to );
+                
+            case STORMCALLER3: 
+                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
                 theTarget.setHealth( 0 );
                 break;
-            
-            case ARCHER: case BOMBARDIER: case ICEMAGI: case WARLOCK1: case WITCHDOCTOR:               
-                Double launchAngle = Util.launchAngle( myLocation, to, myAttack.v, elev, myAttack.g );
-
-                if ( launchAngle == null ) {
+                
+            case ARCHER: // arrows, ballistics   
+            case BOMBARDIER: // eggs, ballistic
+            case ICEMAGI: // snowballs, ballistic
+            case WARLOCK1: // enderpearl, ballistics
+            case WITCHDOCTOR: // potions, ballistic
+                
+                double projRange = Util.getRange( myAttack.v, myAttack.g, myLoc.getY() );
+                if ( Math.min( projRange * projRange, range * range ) < myLoc.distanceSquared( targetLoc ) ) {
+                    // can't hit target
                     clearTarget();
+                    myStatus = SentryStatus.is_A_Guard( this );
                     return;
                 }
-                // Apply angle
-                victor.setY( Math.tan( launchAngle ) * dist );
-
-                victor = Util.normalizeVector( victor );
-
-                // Vector noise = Vector.getRandom();
-                // noise = noise.multiply( 0.1 );
-
-                // victor = victor.add(noise);
-
-                double v = myAttack.v;
                 
-                if ( myAttack.projectile == Arrow.class
-                        || myAttack.projectile == ThrownPotion.class )
-                    v += (1.188 * Math.pow( hangtime, 2 ));
-                else
-                    v += (0.5 * Math.pow( hangtime, 2 ));
-
-                v += (random.nextDouble() - 0.8) / 2;
-
-                // apply power
-                victor = victor.multiply( v / 20.0 );
-                
-                // no break, carry over is intentional
-                
-            default:
-                Projectile projectile =  myEntity.getWorld().spawn( myLocation, myAttack.projectile );
-                
-                if (    myAttack.projectile == ThrownPotion.class 
+                Projectile proj = world.spawn( myLoc, myAttack.projectile );
+                if  (   myAttack == AttackType.WITCHDOCTOR 
                         && potionItem != null ) {
-                    
-                    ((ThrownPotion) projectile).setItem( potionItem.clone() );
+                    ((ThrownPotion) proj).setItem( potionItem.clone() );
                 }
-                else if (    myAttack.projectile == Fireball.class
-                        || myAttack.projectile == WitherSkull.class ) {
-                    victor = victor.multiply( 1 / 1000000000 );
-                }
-                else if ( myAttack.projectile == SmallFireball.class ) {
+                proj.setShooter( myEntity );
+                proj.setVelocity( Util.getFiringVector( myLoc.toVector(), myAttack.v, targetLoc.toVector(), myAttack.g ) );
+                break;
 
-                    victor = victor.multiply( 1 / 1000000000 );
-                    ((SmallFireball) projectile).setIsIncendiary( myAttack.incendiary );
-
-                    if ( !myAttack.incendiary ) {
-                        ((SmallFireball) projectile).setFireTicks( 0 );
-                        ((SmallFireball) projectile).setYield( 0 );
-                    }
-                }
-                else if ( myAttack.projectile == EnderPearl.class ) {
-
-                    // TODO why are we counting enderpearls?
-                    epCount++;
-                    if ( epCount > Integer.MAX_VALUE - 1 )
-                        epCount = 0;
-                    
-                    if ( Sentries.debug ) Sentries.debugLog( "epCount: " + String.valueOf( epCount ) );
-                }
-
-                if ( myAttack.projectile == Arrow.class ) sentry.arrows.add( projectile );
-                
-                projectile.setShooter( myEntity );
-                
-                if ( projectile instanceof Fireball ) 
-                    ((Fireball) projectile).setDirection( victor );
-                else
-                    projectile.setVelocity( victor ); 
-        }
+            case PYRO1: // smallfireball, non-incendiary
+            case PYRO2: // smallfireball, incendiary
+            case PYRO3: // fireball   
+            case WARLOCK2: // witherskull (also a sub-class of fireball)
+                Fireball fireball = (Fireball) world.spawn( myLoc, myAttack.projectile );
+                fireball.setIsIncendiary( myAttack.incendiary );
+                fireball.setShooter( myEntity );
+                fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
+                break;       
+        } 
+//        switch ( myAttack ) {
+//            case STORMCALLER1:
+//                to.getWorld().strikeLightningEffect( to );
+//                theTarget.damage( strength, myEntity );
+//                break;
+//            case STROMCALLER2:
+//                to.getWorld().strikeLightning( to );
+//                break;
+//            case STORMCALLER3:
+//                to.getWorld().strikeLightningEffect( to );
+//                theTarget.setHealth( 0 );
+//                break;
+//            
+//            case ARCHER: case BOMBARDIER: case ICEMAGI: case WARLOCK1: case WITCHDOCTOR:               
+//                Double launchAngle = Util.launchAngle( myLocation, to, myAttack.v, elev, myAttack.g );
+//
+//                if ( launchAngle == null ) {
+//                    clearTarget();
+//                    return;
+//                }
+//                // Apply angle
+//                victor.setY( Math.tan( launchAngle ) * dist );
+//                victor.normalize(); // = Util.normalizeVector( victor );
+//
+//                // Vector noise = Vector.getRandom();
+//                // noise = noise.multiply( 0.1 );
+//
+//                // victor = victor.add(noise);
+//
+//                double v = myAttack.v;
+//                
+//                if ( myAttack.projectile == Arrow.class
+//                        || myAttack.projectile == ThrownPotion.class )
+//                    v += (1.188 * Math.pow( hangtime, 2 ));
+//                else
+//                    v += (0.5 * Math.pow( hangtime, 2 ));
+//
+//                v += (random.nextDouble() - 0.8) / 2;
+//
+//                // apply power
+//                victor.multiply( v / 20.0 );
+//                
+//                // no break, carry over is intentional
+//                
+//            default:
+//                Projectile projectile =  myEntity.getWorld().spawn( myLocation, myAttack.projectile );
+//                
+//                if (    myAttack.projectile == ThrownPotion.class 
+//                        && potionItem != null ) {
+//                    
+//                    ((ThrownPotion) projectile).setItem( potionItem.clone() );
+//                }
+////                else if (    myAttack.projectile == Fireball.class
+////                        || myAttack.projectile == WitherSkull.class ) {
+//////                    victor.multiply( 1 / 1000000000 );
+////                }
+//                else if ( myAttack.projectile == SmallFireball.class ) {
+//
+////                    victor.multiply( 1 / 1000000000 );
+//                    ((SmallFireball) projectile).setIsIncendiary( myAttack.incendiary );
+//
+//                    if ( !myAttack.incendiary ) {
+//                        ((SmallFireball) projectile).setFireTicks( 0 );
+//                        ((SmallFireball) projectile).setYield( 0 );
+//                    }
+//                }
+//                else if ( myAttack.projectile == EnderPearl.class ) {
+//
+//                    // TODO why are we counting enderpearls?
+//                    epCount++;
+//                    if ( epCount > Integer.MAX_VALUE - 1 )
+//                        epCount = 0;
+//                    
+//                    if ( Sentries.debug ) Sentries.debugLog( "epCount: " + String.valueOf( epCount ) );
+//                }
+//
+//                if ( myAttack.projectile == Arrow.class ) sentry.arrows.add( projectile );
+//                
+//                projectile.setShooter( myEntity );
+//                
+//                if ( projectile instanceof Fireball ) 
+//                    ((Fireball) projectile).setDirection( victor );
+//                else
+//                    projectile.setVelocity( victor ); 
+//        }
         
         NMS.look( myEntity, theTarget );
         
         if ( myAttack.effect != null )
-            myEntity.getWorld().playEffect( myEntity.getLocation(), myAttack.effect, null );
+            world.playEffect( myLoc, myAttack.effect, null );
        
         if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        
@@ -772,61 +820,58 @@ public class SentryTrait extends Trait {
     }
 
     /**
-     * Searches for an Entity with a name that matches the provided String, and
+     * Searches all online players for one with a name that matches the provided String, and
      * if successful saves it in the field 'guardeeEntity' and the name in
      * 'guardeeName'
      * 
-     * @param name
-     *            - The name that you wish to search for.
-     * @param onlyCheckAllPlayers
-     *            - if true, the search is conducted on all online Players<br>
-     * @param onlyCheckAllPlayers
-     *            - if false, all LivingEntities within range are checked.
-     * 
+     * @param name - The name that you wish to search for.
      * @return true if an Entity with the supplied name is found, otherwise
      *         returns false.
      */
-    public boolean findGuardEntity( String name, boolean onlyCheckAllPlayers ) {
-
+    public boolean findPlayerGuardEntity( String name ) { 
         if ( npc == null || name == null ) return false;
 
-        if ( onlyCheckAllPlayers ) {
+        for ( Player player : Bukkit.getOnlinePlayers() ) {
 
-            for ( Player player : Bukkit.getOnlinePlayers() ) {
+            if ( name.equals( player.getName() ) ) {
 
-                if ( name.equals( player.getName() ) ) {
-
-                    guardeeEntity = player;
-                    guardeeName = name;
-
-                    return true;
-                }
+                guardeeEntity = player;
+                guardeeName = name;
+                return true;
             }
         }
-        else if ( !onlyCheckAllPlayers ) {
-            for ( Entity each : getMyEntity().getNearbyEntities( range, range, range ) ) {
+        return false;
+    }
+    /**
+     * Searches all LivingEntities within range for one with a name that matches the provided String, and
+     * if successful saves it in the field 'guardeeEntity' and the name in
+     * 'guardeeName'
+     * 
+     * @param name - The name that you wish to search for. 
+     * @return true if an Entity with the supplied name is found, otherwise
+     *         returns false.
+     */
+    public boolean findOtherGuardEntity( String name ) {
+        if ( npc == null || name == null ) return false;
 
-                String ename = null;
+        for ( Entity each : getMyEntity().getNearbyEntities( range, range, range ) ) {
 
-                if ( each instanceof Player )
-                    ename = ((Player) each).getName();
+            String ename = null;
 
-                else if ( each instanceof LivingEntity )
-                    ename = ((LivingEntity) each).getCustomName();
+            if ( each instanceof Player )
+                ename = ((Player) each).getName();
 
-                // if the entity for this loop isn't a player or living, move along...
-                else continue;
+            else if ( each instanceof LivingEntity )
+                ename = ((LivingEntity) each).getCustomName();
 
-                if ( ename == null ) continue;
+            // if the entity for this loop isn't a player or living, move along...
+            else continue;
 
-                // name found! now is it the name we are looking for?
-                if ( name.equals( ename ) ) {
+            if ( ename != null && name.equals( ename ) ) {
 
-                    guardeeEntity = (LivingEntity) each;
-                    guardeeName = name;
-
-                    return true;
-                }
+                guardeeEntity = (LivingEntity) each;
+                guardeeName = name;
+                return true;
             }
         }
         return false;
@@ -885,6 +930,10 @@ public class SentryTrait extends Trait {
             potionItem = null;
             weaponSpecialEffects = sentry.weaponEffects.get( weapon );
         }
+        // TODO uncomment these to activate new attack system
+//        NavigatorParameters params = npc.getNavigator().getDefaultParameters();
+//        params.attackStrategy( myAttack );
+//        params.attackRange( range );
     }
 
     /**
@@ -894,8 +943,7 @@ public class SentryTrait extends Trait {
     public void clearTarget() {
 
         getNavigator().cancelNavigation();
-        attackTarget = null;       
-//        draw( false );
+        attackTarget = null; 
     }
 
     public void checkIfEmpty ( CommandSender sender ) {

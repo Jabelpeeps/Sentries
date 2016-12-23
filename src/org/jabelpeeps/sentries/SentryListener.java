@@ -595,12 +595,19 @@ public class SentryListener implements Listener {
     
     @EventHandler
     public void onFinishedNavigating( NavigationCompleteEvent event ) {
-        
+
         SentryTrait inst = Util.getSentryTrait( event.getNPC() );
         
         if ( inst == null ) return;
         
         if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
             inst.myStatus = SentryStatus.LOOKING;
+        
+        // TODO remove this block when AttackType enum is complete.
+        else if ( inst.myAttack == AttackType.CREEPER ) {
+            Location loc = inst.getMyEntity().getLocation();
+            loc.getWorld().createExplosion( loc, 4F );
+            inst.setHealth( 0 );
+        }
     }
 }

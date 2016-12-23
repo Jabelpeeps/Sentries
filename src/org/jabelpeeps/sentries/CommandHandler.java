@@ -197,7 +197,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         
                         for ( AttackType each : AttackType.values() ) {
                             if ( each == AttackType.BRAWLER ) continue;
-                            allowed.add( each.getWeapon( null ) );
+                            allowed.add( each.getWeapon() );
                         }
 
                         StringJoiner joiner = new StringJoiner( ", " );

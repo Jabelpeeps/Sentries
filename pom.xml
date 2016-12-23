@@ -16,6 +16,7 @@
 		<build.number>${env.BUILD_NUMBER}</build.number>
 		<craftbukkit.version>1.11-R0.1-SNAPSHOT</craftbukkit.version>
 		<citizens.version>2.0.21-SNAPSHOT</citizens.version>
+        <denizen.version>1.0.1-SNAPSHOT</denizen.version>
 	</properties>
 
 	<!-- Repositories -->
@@ -71,7 +72,7 @@
     
         <dependency>
             <groupId>net.citizensnpcs</groupId>
-            <artifactId>citizens</artifactId>
+            <artifactId>citizens-main</artifactId>
             <version>${citizens.version}</version>
             <type>jar</type>
             <scope>provided</scope>
@@ -80,7 +81,7 @@
 		<dependency>
 			<groupId>net.aufdemrand</groupId>
 			<artifactId>denizen</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${denizen.version}</version>
             <type>jar</type>
 			<scope>provided</scope>
 		</dependency>

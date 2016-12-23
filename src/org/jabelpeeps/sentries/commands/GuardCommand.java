@@ -19,28 +19,28 @@ public class GuardCommand implements SentriesComplexCommand {
         if ( args.length > nextArg + 1 ) {
             
             if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
-                inst.findGuardEntity( null, false );
+                inst.guardeeName = null;
+                inst.guardeeEntity = null;
             }
             else {
-                boolean localonly = false;
-                boolean playersonly = false;
+                boolean checklocal = true, checkplayers = true;
                 int start = 1;
                 boolean ok = false;
 
                 if ( args[nextArg + 1].equalsIgnoreCase( "-p" ) ) {
                     start = 2;
-                    playersonly = true;
+                    checklocal = false;
                 }
 
                 if ( args[nextArg + 1].equalsIgnoreCase( "-l" ) ) {
                     start = 2;
-                    localonly = true;
+                    checkplayers = false;
                 }
 
                 String arg = Util.joinArgs( start + nextArg, args );
 
-                if ( !playersonly ) ok = inst.findGuardEntity( arg, false );   
-                if ( !localonly ) ok = inst.findGuardEntity( arg, true );
+                if ( checkplayers ) ok = inst.findPlayerGuardEntity( arg );   
+                if ( !ok && checklocal ) ok = inst.findOtherGuardEntity( arg );
 
                 if ( ok )
                     Util.sendMessage( sender, Col.GREEN, npcName, " is now guarding ", arg );

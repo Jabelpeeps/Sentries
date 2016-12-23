@@ -20,6 +20,58 @@ import net.citizensnpcs.api.npc.NPC;
  * An abstract collection of useful static methods.
  */
 public abstract class Util {
+    private static double sqr( double d ) {
+        return d * d;
+    }
+    final static double angle = Math.toRadians( 45 ); 
+    final static double cos = Math.cos( angle );   
+    final static double sin = Math.sin( angle );
+    /** 
+     * Calculate the maximum range that a ballistic projectile can be fired on given speed and gravity.
+     *
+     * @param speed: projectile velocity
+     * @param gravity: force of gravity, positive is down
+     * @param initial_height: distance above flat terrain
+     *
+     * @return the maximum range
+     */
+     public static double getRange( double v, double g, double d ) {
+    
+         double range = ( v * cos / g ) 
+                         * ( v * sin + Math.sqrt( sqr( v ) * sqr( sin ) + 2 * g * d ) );
+         return range;
+     }
+
+     /** 
+      * Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
+     *
+     * @param myLoc - point projectile will fire from
+     * @param v - scalar speed of projectile
+     * @param targetLoc - point projectile is trying to hit
+     * @param g - force of gravity, positive down
+    
+     *
+     * @return the low-angle Vector to hit the target.
+     */
+     public static Vector getFiringVector( Vector myLoc, double v, Vector targetLoc, double g ) {
+    
+         Vector diff = targetLoc.subtract( myLoc );
+         Vector diffXZ = new Vector( diff.getX(), 0.0, diff.getZ() );
+         double groundDist = diffXZ.length();
+         diffXZ.normalize();
+    
+         double speed2 = sqr( v );
+         double y = diff.getY();
+    
+         double root = sqr( speed2 ) - g * ( g * sqr( groundDist ) + 2 * y * speed2 );
+    
+         // No solution
+         if ( root < 0 ) return null;
+    
+         double lowAng = Math.atan2( speed2 - Math.sqrt( root ), g * groundDist );
+    
+         return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
+     }
 
     /**
      * This method appears to be tracing the source of a projectile travelling
@@ -30,27 +82,15 @@ public abstract class Util {
      * @param LivingEntity
      *            to
      */
-    public static Location getFireSource( LivingEntity from, LivingEntity to ) {
+     public static Location getFireSource( LivingEntity from, LivingEntity to ) {
 
         Location loco = from.getEyeLocation();
         Vector victor = to.getEyeLocation().subtract( loco ).toVector();
 
-        victor = normalizeVector( victor );
+        victor.normalize(); // = normalizeVector( victor );
         victor.multiply( 0.5 );
 
         return loco.add( victor );
-    }
-
-    public static Vector normalizeVector( Vector victor ) {
-
-        double mag = Math.sqrt( Math.pow( victor.getX(), 2 )
-                              + Math.pow( victor.getY(), 2 ) 
-                              + Math.pow( victor.getZ(), 2 ) );
-
-        if ( mag != 0 )
-            return victor.multiply( 1 / mag );
-
-        return victor.multiply( 0 );
     }
 
     public static void removeMount( int npcid ) {
@@ -81,9 +121,9 @@ public abstract class Util {
         if ( entity instanceof Player ) {
 
             Player player = (Player) entity;
-            String worldPerm = S.PERM_BODYGUARD.concat( worldname );
+            String worldPerm = S.PERM_BODYGUARD + worldname;
             
-            if ( player.hasPermission( S.PERM_BODYGUARD.concat( "*" ) ) ) {
+            if ( player.hasPermission( S.PERM_BODYGUARD + "*" ) ) {
                 // all players have "*" perm by default.
                
                 if (    player.isPermissionSet( worldPerm )
@@ -106,10 +146,10 @@ public abstract class Util {
         double a = v * Math.sin( launchAngle );
         double b = -2 * g * elev;
 
-        if ( Math.pow( a, 2 ) + b < 0 ) {
+        if ( ( a * a ) + b < 0 ) {
             return 0;
         }
-        return ( a + Math.sqrt( Math.pow( a, 2 ) + b ) ) / g;
+        return ( a + Math.sqrt( ( a * a ) + b ) ) / g;
     }
 
     public static Double launchAngle( Location from, Location to, double v, double elev, double g ) {
@@ -120,7 +160,7 @@ public abstract class Util {
         double v2 = Math.pow( v, 2 );
         double v4 = Math.pow( v, 4 );
 
-        double derp = g * (g * Math.pow( dist, 2 ) + 2 * elev * v2);
+        double derp = g * ( g * Math.pow( dist, 2 ) + 2 * elev * v2);
 
         // Check unhittable.
         if ( v4 < derp ) {

@@ -127,8 +127,8 @@ public enum SentryStatus {
             }
             else if ( inst.guardeeName != null 
                     && inst.guardeeEntity == null
-                    && !inst.findGuardEntity( inst.guardeeName, false ) ) {
-                inst.findGuardEntity( inst.guardeeName, true );
+                    && !inst.findPlayerGuardEntity( inst.guardeeName ) ) {
+                inst.findOtherGuardEntity( inst.guardeeName );
             }
 
             if ( inst.guardeeEntity != null ) {
@@ -275,8 +275,6 @@ public enum SentryStatus {
                         navigator.setTarget( inst.attackTarget, true );
                     }
 
-//                    inst.draw( true );
-
                     if ( System.currentTimeMillis() > inst.oktoFire ) {
 
                         inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
@@ -298,8 +296,6 @@ public enum SentryStatus {
                 }
 
                 double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
-                // block if in range
-//                inst.draw( dist < 9 );
                 // is it still in range? then keep attacking...
                 if ( dist <= inst.range * inst.range )
                     return this;

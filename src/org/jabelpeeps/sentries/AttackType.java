@@ -6,12 +6,12 @@ import java.util.Map;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Fireball;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -21,6 +21,7 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
@@ -42,20 +43,22 @@ public enum AttackType implements AttackStrategy {
     // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled  for now.
     WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   20 ),
     CREEPER(      Material.SULPHUR ),  
-    BRAWLER(      Material.AIR ) {
-        @Override
-        public Material getWeapon( SentryTrait sentry ) {
-            LivingEntity myEntity = sentry.getMyEntity();
-            if ( myEntity == null ) return Material.AIR;
-            
-            if ( myEntity instanceof HumanEntity )
-                return ((HumanEntity) myEntity).getInventory().getItemInMainHand().getType();
-            
-            return myEntity.getEquipment().getItemInMainHand().getType();
-        }
-    };
+    BRAWLER(      Material.AIR ); //{
+        
+//  This does seem to be being used anymore....
+//        @Override
+//        public Material getWeapon( SentryTrait sentry ) {
+//            LivingEntity myEntity = sentry.getMyEntity();
+//            if ( myEntity == null ) return Material.AIR;
+//            
+//            if ( myEntity instanceof HumanEntity )
+//                return ((HumanEntity) myEntity).getInventory().getItemInMainHand().getType();
+//            
+//            return myEntity.getEquipment().getItemInMainHand().getType();
+//        }
+ //   };
     
-    private Material weapon;
+    @Getter private Material weapon;
     final Class<? extends Projectile> projectile;
     final double v;
     final double g;
@@ -70,7 +73,7 @@ public enum AttackType implements AttackStrategy {
     AttackType( Material w ) { this( w, null, 0, 0, null, false ); }
 
     // the argument for this method is only used in the override for the  'BRAWLER' instance.
-    public Material getWeapon( SentryTrait sentry ) { return weapon; }
+//    public Material getWeapon( SentryTrait sentry ) { return weapon; }
 
     /**
      * Quickly returns the appropriate AttackType by searching an EnumMap that
@@ -84,8 +87,7 @@ public enum AttackType implements AttackStrategy {
      * @return a reference to the appropriate AttackType instance.
      */
     static AttackType find( Material item ) {
-        return reverseSearch.containsKey( item ) ? reverseSearch.get( item )
-                                                 : AttackType.BRAWLER;
+        return reverseSearch.containsKey( item ) ? reverseSearch.get( item ) : AttackType.BRAWLER;
     }
 
     /**
@@ -121,76 +123,79 @@ public enum AttackType implements AttackStrategy {
     public boolean handle( LivingEntity myEntity, LivingEntity victim ) {
         SentryTrait inst = Util.getSentryTrait( myEntity );
         if ( inst == null ) return false;
+
+        if ( System.currentTimeMillis() < inst.oktoFire ) return false;
+
+        inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
+ 
+        Location myLoc = myEntity.getLocation();
+        World world = myEntity.getWorld();
+        Location targetLoc = victim.getLocation();
         
+        switch ( this ) {
+            case BRAWLER: // returning false will use the default melee attack 
+                return false;
+
+            case CREEPER: 
+                world.createExplosion( myLoc, 4F );
+                inst.setHealth( 0 );
+                return true;
+                
+            case STORMCALLER1: 
+                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                victim.damage( inst.strength, myEntity );               
+                break;
+                
+            case STROMCALLER2: 
+                world.strikeLightning( targetLoc.add( 0, .33, 0 ) );                
+                break;
+                
+            case STORMCALLER3: 
+                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                victim.setHealth( 0 );
+                break;
+                
+            case ARCHER: // arrows, ballistics   
+            case BOMBARDIER: // eggs, ballistic
+            case ICEMAGI: // snowballs, ballistic
+            case WARLOCK1: // enderpearl, ballistics
+            case WITCHDOCTOR: // potions, ballistic
+                
+                double range = Util.getRange( v, g, myLoc.getY() );
+                if ( Math.min( range * range, inst.range * inst.range ) < myLoc.distanceSquared( targetLoc ) ) {
+                    // can't hit target
+                    inst.clearTarget();
+                    inst.myStatus = SentryStatus.is_A_Guard( inst );
+                    return true;
+                }
+                
+                Projectile proj = world.spawn( myLoc, projectile );
+                if  (   this == WITCHDOCTOR 
+                        && inst.potionItem != null ) {
+                    ((ThrownPotion) proj).setItem( inst.potionItem.clone() );
+                }
+                proj.setShooter( myEntity );
+                proj.setVelocity( Util.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g ) );
+                break;
+
+            case PYRO1: // smallfireball, non-incendiary
+            case PYRO2: // smallfireball, incendiary
+            case PYRO3: // fireball   
+            case WARLOCK2: // witherskull (also a sub-class of fireball)
+                Fireball fireball = (Fireball) world.spawn( myLoc, projectile );
+                fireball.setIsIncendiary( incendiary );
+                fireball.setShooter( myEntity );
+                fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
+                break;       
+        }        
         NMS.look( myEntity, victim );
         
         if ( effect != null )
-            myEntity.getWorld().playEffect( myEntity.getLocation(), effect, null );
+            world.playEffect( myLoc, effect, null );
         
         if ( myEntity instanceof Player ) 
             PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 ); 
         
-        Location loc = victim.getLocation();
-        
-        switch ( this ) {
-            case ARCHER: // arrows, ballistics   
-
-                break;
-                
-            case BOMBARDIER: // eggs, ballistic
-
-                break;
-                
-            case ICEMAGI: // snowballs, ballistic
-
-                break;
-                
-            case PYRO1: // smallfireball, non-incendiary
-
-                break;
-                
-            case PYRO2: // smallfireball, incendiary
-
-                break;
-                
-            case PYRO3: // fireball   
-
-                break;
-                
-            case STORMCALLER1: // thrownpotion, non-incendiary 
-                loc.getWorld().strikeLightningEffect( loc.add( 0, .33, 0 ) );
-                victim.damage( inst.strength, myEntity );               
-                break;
-                
-            case STROMCALLER2: // thrownpotion, non-incendiary
-                loc.getWorld().strikeLightning( loc.add( 0, .33, 0 ) );                
-                break;
-                
-            case STORMCALLER3: // thrownpotion, non-incendiary
-                loc.getWorld().strikeLightningEffect( loc.add( 0, .33, 0 ) );
-                victim.setHealth( 0 );
-                break;
-                
-            case WARLOCK1: // enderpearl, ballistics
-
-                break;
-                
-            case WARLOCK2: // witherskull
-
-                break;
-                
-            case WITCHDOCTOR: // potions, ballistic
-
-                break;
-                
-            case CREEPER: // no projectile, explodes
-                // TODO
-                break;
-                
-            case BRAWLER: default:
-                return false;
-                // as there is no projectile attack, returning false will use the default melee attack
-        }
         return true;
     }
 }
