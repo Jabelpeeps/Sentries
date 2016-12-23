@@ -130,25 +130,20 @@ public class SentryListener implements Listener {
 
         Projectile projectile = event.getEntity();
         SentryTrait inst = Util.getSentryTrait( (Entity) projectile.getShooter() );
+        if ( inst == null ) return;
 
-        if ( projectile instanceof EnderPearl ) {
+        if ( inst.isWarlock1() || projectile instanceof EnderPearl ) {
 
-            if ( inst != null ) {
+            inst.epCount--;
+            if ( inst.epCount < 0 ) inst.epCount = 0;
 
-                inst.epCount--;
-                if ( inst.epCount < 0 )
-                    inst.epCount = 0;
-
-                projectile.getWorld().playEffect(
-                        event.getEntity().getLocation(),
-                        Effect.ENDER_SIGNAL, 1, 100 );
-            }
+            projectile.getWorld().playEffect(
+                    event.getEntity().getLocation(),
+                    Effect.ENDER_SIGNAL, 1, 100 );
             return;
         }
-
         // put out any fires from pyromancer1 fire-balls
-        if (    inst != null 
-                && inst.isPyromancer1() ) {
+        if ( inst.isPyromancer1() ) {
 
             final Block block = projectile.getLocation().getBlock();
 

@@ -45,7 +45,7 @@ public enum AttackType implements AttackStrategy {
     CREEPER(      Material.SULPHUR ),  
     BRAWLER(      Material.AIR ); //{
         
-//  This does seem to be being used anymore....
+//  This doesn't seem to be being used anymore....
 //        @Override
 //        public Material getWeapon( SentryTrait sentry ) {
 //            LivingEntity myEntity = sentry.getMyEntity();

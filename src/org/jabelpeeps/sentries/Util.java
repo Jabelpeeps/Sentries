@@ -3,7 +3,6 @@ package org.jabelpeeps.sentries;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -73,25 +72,25 @@ public abstract class Util {
          return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
      }
 
-    /**
-     * This method appears to be tracing the source of a projectile travelling
-     * between two LivingEntity objects.
-     * 
-     * @param LivingEntity
-     *            from
-     * @param LivingEntity
-     *            to
-     */
-     public static Location getFireSource( LivingEntity from, LivingEntity to ) {
-
-        Location loco = from.getEyeLocation();
-        Vector victor = to.getEyeLocation().subtract( loco ).toVector();
-
-        victor.normalize(); // = normalizeVector( victor );
-        victor.multiply( 0.5 );
-
-        return loco.add( victor );
-    }
+//    /**
+//     * This method appears to be tracing the source of a projectile travelling
+//     * between two LivingEntity objects.
+//     * 
+//     * @param LivingEntity
+//     *            from
+//     * @param LivingEntity
+//     *            to
+//     */
+//     public static Location getFireSource( LivingEntity from, LivingEntity to ) {
+//
+//        Location loco = from.getEyeLocation();
+//        Vector victor = to.getEyeLocation().subtract( loco ).toVector();
+//
+//        victor.normalize(); // = normalizeVector( victor );
+//        victor.multiply( 0.5 );
+//
+//        return loco.add( victor );
+//    }
 
     public static void removeMount( int npcid ) {
 
@@ -141,36 +140,36 @@ public abstract class Util {
         return false;
     }
 
-    public static double hangtime( double launchAngle, double v, double elev, double g ) {
-
-        double a = v * Math.sin( launchAngle );
-        double b = -2 * g * elev;
-
-        if ( ( a * a ) + b < 0 ) {
-            return 0;
-        }
-        return ( a + Math.sqrt( ( a * a ) + b ) ) / g;
-    }
-
-    public static Double launchAngle( Location from, Location to, double v, double elev, double g ) {
-
-        Vector victor = from.clone().subtract( to ).toVector();
-        Double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
-
-        double v2 = Math.pow( v, 2 );
-        double v4 = Math.pow( v, 4 );
-
-        double derp = g * ( g * Math.pow( dist, 2 ) + 2 * elev * v2);
-
-        // Check unhittable.
-        if ( v4 < derp ) {
-            // target unreachable
-            // use this to fire at optimal max angle launchAngle = Math.atan( ( 2*g*elev + v2) / (2*g*elev + 2*v2));
-            return null;
-        }
-        // calc angle
-        return Math.atan( (v2 - Math.sqrt( v4 - derp )) / (g * dist) );
-    }
+//    public static double hangtime( double launchAngle, double v, double elev, double g ) {
+//
+//        double a = v * Math.sin( launchAngle );
+//        double b = -2 * g * elev;
+//
+//        if ( ( a * a ) + b < 0 ) {
+//            return 0;
+//        }
+//        return ( a + Math.sqrt( ( a * a ) + b ) ) / g;
+//    }
+//
+//    public static Double launchAngle( Location from, Location to, double v, double elev, double g ) {
+//
+//        Vector victor = from.clone().subtract( to ).toVector();
+//        Double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
+//
+//        double v2 = Math.pow( v, 2 );
+//        double v4 = Math.pow( v, 4 );
+//
+//        double derp = g * ( g * Math.pow( dist, 2 ) + 2 * elev * v2);
+//
+//        // Check unhittable.
+//        if ( v4 < derp ) {
+//            // target unreachable
+//            // use this to fire at optimal max angle launchAngle = Math.atan( ( 2*g*elev + v2) / (2*g*elev + 2*v2));
+//            return null;
+//        }
+//        // calc angle
+//        return Math.atan( (v2 - Math.sqrt( v4 - derp )) / (g * dist) );
+//    }
 
     /**
      * Reformat the supplied String, replacing the tags <NPC>, <PLAYER>, <ITEM>,

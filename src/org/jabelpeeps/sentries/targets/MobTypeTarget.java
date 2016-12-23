@@ -16,7 +16,7 @@ public class MobTypeTarget extends AbstractTargetType implements TargetType.Inte
     }
     @Override
     public boolean includes( LivingEntity entity ) {
-        return  !(entity instanceof Creature ) 
+        return  entity instanceof Creature 
                 && entity.getType().equals( type );
     }
     @Override

@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.SentryStatus;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Util;
 
@@ -42,8 +43,10 @@ public class GuardCommand implements SentriesComplexCommand {
                 if ( checkplayers ) ok = inst.findPlayerGuardEntity( arg );   
                 if ( !ok && checklocal ) ok = inst.findOtherGuardEntity( arg );
 
-                if ( ok )
+                if ( ok ) {
                     Util.sendMessage( sender, Col.GREEN, npcName, " is now guarding ", arg );
+                    inst.myStatus = SentryStatus.FOLLOWING;
+                }
                 else
                     Util.sendMessage( sender, Col.RED, npcName, " could not find ", arg );
                 return;

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -101,7 +100,7 @@ public class SentryTrait extends Trait {
 
     List<PotionEffect> weaponSpecialEffects;
     ItemStack potionItem;
-    private Random random = new Random();
+//    private Random random = new Random();
 
     public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
@@ -529,9 +528,9 @@ public class SentryTrait extends Trait {
             clearTarget();
             return;
         }
-        Location myLoc = myEntity.getLocation();
+        Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = theTarget.getLocation();
+        Location targetLoc = theTarget.getLocation().add( 0, .33, 0 );
         
         switch ( myAttack ) {
             case BRAWLER:  return;
@@ -542,16 +541,16 @@ public class SentryTrait extends Trait {
                 return;
                 
             case STORMCALLER1: 
-                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                world.strikeLightningEffect( targetLoc );
                 theTarget.damage( strength, myEntity );               
                 break;
                 
             case STROMCALLER2: 
-                world.strikeLightning( targetLoc.add( 0, .33, 0 ) );                
+                world.strikeLightning( targetLoc );                
                 break;
                 
             case STORMCALLER3: 
-                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                world.strikeLightningEffect( targetLoc );
                 theTarget.setHealth( 0 );
                 break;
                 
@@ -567,13 +566,15 @@ public class SentryTrait extends Trait {
                     clearTarget();
                     myStatus = SentryStatus.is_A_Guard( this );
                     return;
-                }
-                
+                }               
                 Projectile proj = world.spawn( myLoc, myAttack.projectile );
+                
                 if  (   myAttack == AttackType.WITCHDOCTOR 
                         && potionItem != null ) {
                     ((ThrownPotion) proj).setItem( potionItem.clone() );
                 }
+                else if ( myAttack == AttackType.WARLOCK1 ) epCount++;
+                
                 proj.setShooter( myEntity );
                 proj.setVelocity( Util.getFiringVector( myLoc.toVector(), myAttack.v, targetLoc.toVector(), myAttack.g ) );
                 break;
@@ -581,7 +582,7 @@ public class SentryTrait extends Trait {
             case PYRO1: // smallfireball, non-incendiary
             case PYRO2: // smallfireball, incendiary
             case PYRO3: // fireball   
-            case WARLOCK2: // witherskull (also a sub-class of fireball)
+            case WARLOCK2: // witherskull (also a child-class of fireball)
                 Fireball fireball = (Fireball) world.spawn( myLoc, myAttack.projectile );
                 fireball.setIsIncendiary( myAttack.incendiary );
                 fireball.setShooter( myEntity );
