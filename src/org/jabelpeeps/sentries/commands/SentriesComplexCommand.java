@@ -10,5 +10,4 @@ public interface SentriesComplexCommand extends SentriesCommand {
                   SentryTrait inst,     // the NPC's SentryTrait
                   int nextArg,          // the next argument to be parsed
                   String... args );     // the arguments array.
-  
 }

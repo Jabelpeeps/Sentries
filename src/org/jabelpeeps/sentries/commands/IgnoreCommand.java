@@ -114,12 +114,9 @@ public class IgnoreCommand implements SentriesComplexCommand {
                     else if ( secondSubArg.equals( "npc" ) ) {
     
                         for ( NPC npc : Sentries.registry ) {
-                            if ( npc.getName().equalsIgnoreCase( targetArgs[2] ) ) {
+                            if  (   npc.getName().equalsIgnoreCase( targetArgs[2] )
+                                    || npc.getUniqueId().toString().equals( targetArgs[2] ) ) {
                                 target = new NamedNPCTarget( npc.getUniqueId() );
-                                break;
-                            }
-                            else if ( npc.getUniqueId().toString().equals( targetArgs[2] ) ) {
-                                target = new NamedNPCTarget( UUID.fromString( targetArgs[2] ) );
                                 break;
                             }
                         }

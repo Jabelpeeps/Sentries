@@ -40,24 +40,10 @@ public enum AttackType implements AttackStrategy {
     STORMCALLER3( Material.BOOK_AND_QUILL,    ThrownPotion.class,  21,   20 ), 
     WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 13.5 ), 
     WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   34,   20,  Effect.WITHER_SHOOT ),
-    // warlock3( "Warlock3" ), // No default weapon in config.yml so disabled  for now.
     WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   20 ),
     CREEPER(      Material.SULPHUR ),  
     BRAWLER(      Material.AIR ); //{
         
-//  This doesn't seem to be being used anymore....
-//        @Override
-//        public Material getWeapon( SentryTrait sentry ) {
-//            LivingEntity myEntity = sentry.getMyEntity();
-//            if ( myEntity == null ) return Material.AIR;
-//            
-//            if ( myEntity instanceof HumanEntity )
-//                return ((HumanEntity) myEntity).getInventory().getItemInMainHand().getType();
-//            
-//            return myEntity.getEquipment().getItemInMainHand().getType();
-//        }
- //   };
-    
     @Getter private Material weapon;
     final Class<? extends Projectile> projectile;
     final double v;
@@ -71,9 +57,6 @@ public enum AttackType implements AttackStrategy {
     AttackType( Material w, Class<? extends Projectile> p, double V, double G ) { this( w, p, V, G, null, false ); }
     AttackType( Material w, Class<? extends Projectile> p, double V, double G, Effect e ) { this( w, p, V, G, e, false ); }
     AttackType( Material w ) { this( w, null, 0, 0, null, false ); }
-
-    // the argument for this method is only used in the override for the  'BRAWLER' instance.
-//    public Material getWeapon( SentryTrait sentry ) { return weapon; }
 
     /**
      * Quickly returns the appropriate AttackType by searching an EnumMap that
@@ -128,13 +111,13 @@ public enum AttackType implements AttackStrategy {
 
         inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
  
-        Location myLoc = myEntity.getLocation();
+        Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = victim.getLocation();
+        Location targetLoc = victim.getLocation().add( 0, .33, 0 );       
+        NMS.look( myEntity, victim );
         
         switch ( this ) {
-            case BRAWLER: // returning false will use the default melee attack 
-                return false;
+            case BRAWLER:  return false;
 
             case CREEPER: 
                 world.createExplosion( myLoc, 4F );
@@ -142,23 +125,23 @@ public enum AttackType implements AttackStrategy {
                 return true;
                 
             case STORMCALLER1: 
-                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                world.strikeLightningEffect( targetLoc );
                 victim.damage( inst.strength, myEntity );               
                 break;
                 
             case STROMCALLER2: 
-                world.strikeLightning( targetLoc.add( 0, .33, 0 ) );                
+                world.strikeLightning( targetLoc );                
                 break;
                 
             case STORMCALLER3: 
-                world.strikeLightningEffect( targetLoc.add( 0, .33, 0 ) );
+                world.strikeLightningEffect( targetLoc );
                 victim.setHealth( 0 );
                 break;
                 
             case ARCHER: // arrows, ballistics   
             case BOMBARDIER: // eggs, ballistic
             case ICEMAGI: // snowballs, ballistic
-            case WARLOCK1: // enderpearl, ballistics
+            case WARLOCK1: // enderpearl, ballistic
             case WITCHDOCTOR: // potions, ballistic
                 
                 double range = Util.getRange( v, g, myLoc.getY() );
@@ -167,13 +150,15 @@ public enum AttackType implements AttackStrategy {
                     inst.clearTarget();
                     inst.myStatus = SentryStatus.is_A_Guard( inst );
                     return true;
-                }
-                
+                }               
                 Projectile proj = world.spawn( myLoc, projectile );
+                
                 if  (   this == WITCHDOCTOR 
                         && inst.potionItem != null ) {
                     ((ThrownPotion) proj).setItem( inst.potionItem.clone() );
                 }
+                else if ( this == AttackType.WARLOCK1 ) inst.epCount++;
+                
                 proj.setShooter( myEntity );
                 proj.setVelocity( Util.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g ) );
                 break;
@@ -187,8 +172,7 @@ public enum AttackType implements AttackStrategy {
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
                 break;       
-        }        
-        NMS.look( myEntity, victim );
+        } 
         
         if ( effect != null )
             world.playEffect( myLoc, effect, null );

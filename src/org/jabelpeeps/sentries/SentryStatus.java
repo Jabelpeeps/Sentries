@@ -7,7 +7,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
-import net.citizensnpcs.api.ai.GoalController;
 import net.citizensnpcs.api.ai.Navigator;
 //import net.citizensnpcs.api.ai.GoalController;
 //import net.citizensnpcs.api.ai.Navigator;
@@ -116,7 +115,7 @@ public enum SentryStatus {
             LivingEntity myEntity = inst.getMyEntity();            
             NPC npc = inst.getNPC();
 
-            if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
+            inst.getNavigator().setPaused( false );
 
             if ( myEntity.isInsideVehicle() ) 
                 NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
@@ -154,7 +153,7 @@ public enum SentryStatus {
                     }
                     return this;
                 }
-                inst.getGoalController().setPaused( true );
+//                inst.getGoalController().setPaused( true );
                 Navigator navigator = inst.getNavigator();
                 boolean isNavigating = navigator.isNavigating();
                 double dist = npcLoc.distanceSquared( guardEntLoc );
@@ -165,7 +164,7 @@ public enum SentryStatus {
                 if ( dist > 1024 ) {
                     inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
                 }
-                else if ( dist > inst.followDistance && !isNavigating ) {
+                else if ( dist > inst.followDistance * inst.followDistance && !isNavigating ) {
                     navigator.setTarget( inst.guardeeEntity, false );
                     navigator.getLocalParameters().stationaryTicks( 3 * 20 );
                     return this;
@@ -194,18 +193,22 @@ public enum SentryStatus {
             if ( navigator.isNavigating() ) return this;
             
             LivingEntity myEntity = inst.getMyEntity(); 
-
-            if ( inst.getNavigator().isPaused() ) inst.getNavigator().setPaused( false );
-
-            if ( myEntity.isInsideVehicle() ) 
-                NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
             
-            if (    myEntity.getWorld() != inst.spawnLocation.getWorld() 
-                    || myEntity.getLocation().distanceSquared( inst.spawnLocation ) > 1024 ) {
-                
+            double distanceSqrd = Double.MAX_VALUE;
+            if ( myEntity.getWorld() == inst.spawnLocation.getWorld() )
+                distanceSqrd = myEntity.getLocation().distanceSquared( inst.spawnLocation );
+
+            if ( distanceSqrd < 2 ) return SentryStatus.LOOKING;
+                              
+            if ( distanceSqrd > 1024 ) {               
                 inst.ifMountedGetMount().teleport( inst.spawnLocation, TeleportCause.PLUGIN );
                 return SentryStatus.LOOKING;
             }
+            
+            if ( myEntity.isInsideVehicle() ) 
+                NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );  
+            
+            navigator.setPaused( false );
             navigator.setTarget( inst.spawnLocation );
             
             return this;
@@ -221,11 +224,11 @@ public enum SentryStatus {
             
             inst.tryToHeal();
             
-            GoalController goalController = inst.getGoalController();
-            
-            if ( goalController.isPaused() )
-                goalController.setPaused( false );
-            
+//            GoalController goalController = inst.getGoalController();
+//            
+//            if ( goalController.isPaused() )
+//                goalController.setPaused( false );
+//            
             LivingEntity target = null;
 
             // find and set a target to attack (if no current target)
@@ -241,7 +244,7 @@ public enum SentryStatus {
                     return SentryStatus.ATTACKING;
                 }
             }
-            return this;
+            return SentryStatus.is_A_Guard( inst );
         }
     },   
     /** The status for Sentries who are attacking! */
@@ -269,11 +272,11 @@ public enum SentryStatus {
                 
                 if ( inst.myAttack != AttackType.BRAWLER ) {
 
-                    if ( !navigator.isPaused() ) {
-                        navigator.setPaused( true );
-                        navigator.cancelNavigation();
+//                    if ( !navigator.isPaused() ) {
+//                        navigator.setPaused( true );
+//                        navigator.cancelNavigation();
                         navigator.setTarget( inst.attackTarget, true );
-                    }
+//                    }
 
                     if ( System.currentTimeMillis() > inst.oktoFire ) {
 
@@ -284,10 +287,10 @@ public enum SentryStatus {
                 else if (    navigator.getEntityTarget() == null
                             || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
                         
-                    GoalController goalController = inst.getGoalController();
-                    // pause goalcontroller to keep sentry focused on this attack
-                    if ( !goalController.isPaused() )
-                        goalController.setPaused( true );
+//                    GoalController goalController = inst.getGoalController();
+//                    // pause goalcontroller to keep sentry focused on this attack
+//                    if ( !goalController.isPaused() )
+//                        goalController.setPaused( true );
 
                     navigator.setTarget( inst.attackTarget, true );
                     navigator.getLocalParameters().speedModifier( inst.getSpeed() );

@@ -19,12 +19,12 @@ import net.citizensnpcs.api.npc.NPC;
  * An abstract collection of useful static methods.
  */
 public abstract class Util {
-    private static double sqr( double d ) {
-        return d * d;
-    }
+    
+    public static double sqr( double d ) { return d * d; }
     final static double angle = Math.toRadians( 45 ); 
     final static double cos = Math.cos( angle );   
     final static double sin = Math.sin( angle );
+    
     /** 
      * Calculate the maximum range that a ballistic projectile can be fired on given speed and gravity.
      *
@@ -71,26 +71,6 @@ public abstract class Util {
     
          return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
      }
-
-//    /**
-//     * This method appears to be tracing the source of a projectile travelling
-//     * between two LivingEntity objects.
-//     * 
-//     * @param LivingEntity
-//     *            from
-//     * @param LivingEntity
-//     *            to
-//     */
-//     public static Location getFireSource( LivingEntity from, LivingEntity to ) {
-//
-//        Location loco = from.getEyeLocation();
-//        Vector victor = to.getEyeLocation().subtract( loco ).toVector();
-//
-//        victor.normalize(); // = normalizeVector( victor );
-//        victor.multiply( 0.5 );
-//
-//        return loco.add( victor );
-//    }
 
     public static void removeMount( int npcid ) {
 
@@ -139,37 +119,6 @@ public abstract class Util {
         }
         return false;
     }
-
-//    public static double hangtime( double launchAngle, double v, double elev, double g ) {
-//
-//        double a = v * Math.sin( launchAngle );
-//        double b = -2 * g * elev;
-//
-//        if ( ( a * a ) + b < 0 ) {
-//            return 0;
-//        }
-//        return ( a + Math.sqrt( ( a * a ) + b ) ) / g;
-//    }
-//
-//    public static Double launchAngle( Location from, Location to, double v, double elev, double g ) {
-//
-//        Vector victor = from.clone().subtract( to ).toVector();
-//        Double dist = Math.sqrt( Math.pow( victor.getX(), 2 ) + Math.pow( victor.getZ(), 2 ) );
-//
-//        double v2 = Math.pow( v, 2 );
-//        double v4 = Math.pow( v, 4 );
-//
-//        double derp = g * ( g * Math.pow( dist, 2 ) + 2 * elev * v2);
-//
-//        // Check unhittable.
-//        if ( v4 < derp ) {
-//            // target unreachable
-//            // use this to fire at optimal max angle launchAngle = Math.atan( ( 2*g*elev + v2) / (2*g*elev + 2*v2));
-//            return null;
-//        }
-//        // calc angle
-//        return Math.atan( (v2 - Math.sqrt( v4 - derp )) / (g * dist) );
-//    }
 
     /**
      * Reformat the supplied String, replacing the tags <NPC>, <PLAYER>, <ITEM>,

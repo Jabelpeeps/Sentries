@@ -42,6 +42,7 @@ import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.event.NPCDespawnEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.editor.Editor;
 
 public class SentryListener implements Listener {
     
@@ -575,16 +576,23 @@ public class SentryListener implements Listener {
 
     @EventHandler
     public void onNPCRightClick( NPCRightClickEvent event ) {
-        // stops players, other than the guardeeEntity, from using right-click on horses
 
         SentryTrait inst = Util.getSentryTrait( event.getNPC() );
-
         if ( inst == null ) return;
+        
+        Player player = event.getClicker();
 
+        // stops players, other than the guardeeEntity, from using right-click on horses
         if (    inst.getNPC().getEntity() instanceof Horse
-                && inst.guardeeEntity != event.getClicker() ) {
+                && inst.guardeeEntity != player ) {
 
             event.setCancelled( true );
+        }
+        
+        // updates Armour and attackType if a sentry's equipment is being edited with the citizens editor.
+        if ( Editor.hasEditor( player ) ) {
+            inst.updateArmour();
+            inst.updateAttackType();
         }
     }
     
@@ -597,12 +605,5 @@ public class SentryListener implements Listener {
         
         if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
             inst.myStatus = SentryStatus.LOOKING;
-        
-        // TODO remove this block when AttackType enum is complete.
-        else if ( inst.myAttack == AttackType.CREEPER ) {
-            Location loc = inst.getMyEntity().getLocation();
-            loc.getWorld().createExplosion( loc, 4F );
-            inst.setHealth( 0 );
-        }
     }
 }

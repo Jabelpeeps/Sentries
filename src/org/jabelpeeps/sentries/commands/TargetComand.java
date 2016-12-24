@@ -125,12 +125,9 @@ public class TargetComand implements SentriesComplexCommand {
                 else if ( secondSubArg.equals( "npc" ) ) {
 
                     for ( NPC npc : Sentries.registry ) {
-                        if ( npc.getName().equalsIgnoreCase( thirdSubArg ) ) {
+                        if  (   npc.getName().equalsIgnoreCase( thirdSubArg ) 
+                                || npc.getUniqueId().toString().equals( thirdSubArg ) ) {
                             target = new NamedNPCTarget( npc.getUniqueId() );
-                            break;
-                        }
-                        else if ( npc.getUniqueId().toString().equals( thirdSubArg ) ) {
-                            target = new NamedNPCTarget( UUID.fromString( thirdSubArg ) );
                             break;
                         }
                     }
