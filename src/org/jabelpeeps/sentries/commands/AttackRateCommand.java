@@ -14,33 +14,33 @@ public class AttackRateCommand implements SentriesNumberCommand {
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
-            sender.sendMessage( String.join( "", Col.GOLD, npcName, "'s ranged attack rate is:- ", 
-                                String.valueOf( inst.arrowRate), " seconds between shots." ) );
+            Util.sendMessage( sender, Col.GOLD, npcName, "'s attack rate is:- ", 
+                                String.valueOf( inst.attackRate), " seconds between blows/shots." );
         }
         else {
             double attackrate = Util.string2Double( number );
             if ( attackrate == Double.MIN_VALUE || attackrate < 0 ) {
-                sender.sendMessage( String.join( "", S.ERROR, number, S.ERROR_NOT_NUMBER ) );
+                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( attackrate > 30.0 ) attackrate = 30.0;
             
-            inst.arrowRate = attackrate;
-            sender.sendMessage( String.join( "", Col.GREEN, npcName, "'s ranged attack rate set to:- ", String.valueOf( attackrate ) ) );
+            inst.attackRate = attackrate;
+            Util.sendMessage( sender, Col.GREEN, npcName, "'s attack rate set to:- ", String.valueOf( attackrate ) );
         }
     }
 
     @Override
     public String getShortHelp() {
-        return "sets the delay between ranged attacks";
+        return "sets the delay between attacks";
     }
 
     @Override
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ARROW_RATE, " (#)", Col.RESET,
-            ", where # is the number of seconds (0-30) to wait between ranged (all projectile) attacks.",
+            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ATTACK_RATE, " (#)", Col.RESET,
+            ", where # is the number of seconds (0-30) to wait between attacks.",
             System.lineSeparator(), "  If no number is given the current value is shown.");
         }
         return helpTxt;

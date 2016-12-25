@@ -13,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Blaze;
@@ -21,16 +20,13 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Snowman;
-import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
 import org.bukkit.event.EventHandler;
@@ -58,7 +54,6 @@ import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.util.NMS;
-import net.citizensnpcs.util.PlayerAnimation;
 
 public class SentryTrait extends Trait {
 
@@ -68,7 +63,7 @@ public class SentryTrait extends Trait {
     public int strength, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
     public float speed;
 
-    public double arrowRate, healRate, armour, weight, maxHealth;
+    public double attackRate, healRate, armour, weight, maxHealth;
     public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
     
     boolean loaded;
@@ -92,7 +87,7 @@ public class SentryTrait extends Trait {
     public Set<TargetType> events = new TreeSet<>();
 
     long respawnTime = System.currentTimeMillis();
-    long oktoFire = System.currentTimeMillis();
+    long okToAttack = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
     long reassesTime = System.currentTimeMillis();
     public long okToTakedamage = 0;
@@ -139,7 +134,7 @@ public class SentryTrait extends Trait {
         speed = (float) key.getDouble( S.CON_SPEED, sentry.defaultDoubles.get( S.CON_SPEED ) );
         weight = key.getDouble( S.CON_WEIGHT, sentry.defaultDoubles.get( S.CON_WEIGHT ) );
         maxHealth = key.getDouble( S.CON_HEALTH, sentry.defaultDoubles.get( S.CON_HEALTH ) );
-        arrowRate = key.getDouble( S.CON_ARROW_RATE, sentry.defaultDoubles.get( S.CON_ARROW_RATE ) );
+        attackRate = key.getDouble( S.CON_ARROW_RATE, sentry.defaultDoubles.get( S.CON_ARROW_RATE ) );
         healRate = key.getDouble( S.CON_HEAL_RATE, sentry.defaultDoubles.get( S.CON_HEAL_RATE ) );
 
         guardeeName = key.getString( S.PERSIST_GUARDEE, null );
@@ -232,7 +227,7 @@ public class SentryTrait extends Trait {
 
         // check for illegal values
         if ( weight <= 0 ) weight = 1.0;
-        if ( arrowRate > 30 ) arrowRate = 30.0;
+        if ( attackRate > 30 ) attackRate = 30.0;
         if ( maxHealth < 1 ) maxHealth = 1;
         if ( range < 1 ) range = 1;
         if ( range > 200 ) range = 200;
@@ -369,7 +364,7 @@ public class SentryTrait extends Trait {
         key.setDouble( S.CON_ARMOUR, armour );
         key.setInt( S.CON_STRENGTH, strength );
         key.setInt( S.CON_VOICE_RANGE, voiceRange );
-        key.setDouble( S.CON_ARROW_RATE, arrowRate );
+        key.setDouble( S.CON_ARROW_RATE, attackRate );
         key.setInt( S.CON_NIGHT_VIS, nightVision );
         key.setInt( S.CON_FOLLOW_DIST, followDistance );
 
@@ -493,84 +488,85 @@ public class SentryTrait extends Trait {
         return theTarget;
     }
 
-    public void fire( LivingEntity theTarget ) {
-
-        LivingEntity myEntity = getMyEntity();
-        
-        if ( !hasLOS( theTarget ) ) {
-            clearTarget();
-            return;
-        }
-        
-        Location myLoc = myEntity.getEyeLocation();
-        World world = myEntity.getWorld();
-        Location targetLoc = theTarget.getLocation().add( 0, 1.33, 0 );        
-        NMS.look( myEntity, theTarget );
-        
-        switch ( myAttack ) {
-            case BRAWLER:  return;
-
-            case CREEPER: 
-                world.createExplosion( myLoc, 4F );
-                setHealth( 0 );
-                return;
-                
-            case STORMCALLER1: 
-                world.strikeLightningEffect( targetLoc );
-                theTarget.damage( strength, myEntity );               
-                break;
-                
-            case STROMCALLER2: 
-                world.strikeLightning( targetLoc );                
-                break;
-                
-            case STORMCALLER3: 
-                world.strikeLightningEffect( targetLoc );
-                theTarget.setHealth( 0 );
-                break;
-                
-            case ARCHER: // arrows, ballistics   
-            case BOMBARDIER: // eggs, ballistic
-            case ICEMAGI: // snowballs, ballistic
-            case WARLOCK1: // enderpearl, ballistics
-            case WITCHDOCTOR: // potions, ballistic
-                
-                double projRange = Util.getRange( myAttack.v, myAttack.g, myLoc.getY() );
-                if ( Math.min( projRange * projRange, range * range ) < myLoc.distanceSquared( targetLoc ) ) {
-                    // can't hit target
-                    clearTarget();
-                    myStatus = SentryStatus.is_A_Guard( this );
-                    return;
-                }               
-                Projectile proj = world.spawn( myLoc, myAttack.projectile );
-                
-                if  (   myAttack == AttackType.WITCHDOCTOR 
-                        && potionItem != null ) {
-                    ((ThrownPotion) proj).setItem( potionItem.clone() );
-                }
-                else if ( myAttack == AttackType.WARLOCK1 ) epCount++;
-                
-                proj.setShooter( myEntity );
-                proj.setVelocity( Util.getFiringVector( myLoc.toVector(), myAttack.v, targetLoc.toVector(), myAttack.g ) );
-                break;
-
-            case PYRO1: // smallfireball, non-incendiary
-            case PYRO2: // smallfireball, incendiary
-            case PYRO3: // fireball   
-            case WARLOCK2: // witherskull (also a child-class of fireball)
-                Fireball fireball = (Fireball) world.spawn( myLoc, myAttack.projectile );
-                fireball.setIsIncendiary( myAttack.incendiary );
-                fireball.setShooter( myEntity );
-                fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
-                break;       
-        } 
-
-        if ( myAttack.effect != null )
-            world.playEffect( myLoc, myAttack.effect, null );
-       
-        if ( myEntity instanceof Player ) 
-            PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        
-    }
+//    public void fire( LivingEntity theTarget ) {
+//
+//        LivingEntity myEntity = getMyEntity();
+//        
+//        if ( !hasLOS( theTarget ) ) {
+//            clearTarget();
+//            return;
+//        }
+//        
+//        Location myLoc = myEntity.getEyeLocation();
+//        World world = myEntity.getWorld();
+//        Location targetLoc = theTarget.getLocation().add( 0, 1.33, 0 );        
+//        NMS.look( myEntity, theTarget );
+//        
+//        switch ( myAttack ) {
+//            case BRAWLER:  return;
+//
+//            case CREEPER: 
+//                world.createExplosion( myLoc, strength );
+//                setHealth( 0 );
+//                myStatus = SentryStatus.DEAD;
+//                return;
+//                
+//            case STORMCALLER1: 
+//                world.strikeLightningEffect( targetLoc );
+//                theTarget.damage( strength, myEntity );               
+//                break;
+//                
+//            case STROMCALLER2: 
+//                world.strikeLightning( targetLoc );                
+//                break;
+//                
+//            case STORMCALLER3: 
+//                world.strikeLightningEffect( targetLoc );
+//                theTarget.setHealth( 0 );
+//                break;
+//                
+//            case ARCHER: // arrows, ballistics   
+//            case BOMBARDIER: // eggs, ballistic
+//            case ICEMAGI: // snowballs, ballistic
+//            case WARLOCK1: // enderpearl, ballistics
+//            case WITCHDOCTOR: // potions, ballistic
+//                
+//                double projRange = Util.getRange( myAttack.v, myAttack.g, myLoc.getY() );
+//                if ( Math.min( projRange * projRange, range * range ) < myLoc.distanceSquared( targetLoc ) ) {
+//                    // can't hit target
+//                    clearTarget();
+//                    myStatus = SentryStatus.is_A_Guard( this );
+//                    return;
+//                }               
+//                Projectile proj = world.spawn( myLoc, myAttack.projectile );
+//                
+//                if  (   myAttack == AttackType.WITCHDOCTOR 
+//                        && potionItem != null ) {
+//                    ((ThrownPotion) proj).setItem( potionItem.clone() );
+//                }
+//                else if ( myAttack == AttackType.WARLOCK1 ) epCount++;
+//                
+//                proj.setShooter( myEntity );
+//                proj.setVelocity( Util.getFiringVector( myLoc.toVector(), myAttack.v, targetLoc.toVector(), myAttack.g ) );
+//                break;
+//
+//            case PYRO1: // smallfireball, non-incendiary
+//            case PYRO2: // smallfireball, incendiary
+//            case PYRO3: // fireball   
+//            case WARLOCK2: // witherskull (also a child-class of fireball)
+//                Fireball fireball = (Fireball) world.spawn( myLoc, myAttack.projectile );
+//                fireball.setIsIncendiary( myAttack.incendiary );
+//                fireball.setShooter( myEntity );
+//                fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
+//                break;       
+//        } 
+//
+//        if ( myAttack.effect != null )
+//            world.playEffect( myLoc, myAttack.effect, null );
+//       
+//        if ( myEntity instanceof Player ) 
+//            PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        
+//    }
 
     public double getHealth() {
         LivingEntity myEntity = getMyEntity();
@@ -820,9 +816,12 @@ public class SentryTrait extends Trait {
             weaponSpecialEffects = sentry.weaponEffects.get( weapon );
         }
         // TODO uncomment these to activate new attack system
-//        NavigatorParameters params = npc.getNavigator().getDefaultParameters();
-//        params.attackStrategy( myAttack );
-//        params.attackRange( range );
+        NavigatorParameters params = npc.getNavigator().getDefaultParameters();
+        params.attackStrategy( myAttack );
+        params.attackRange( range );
+        params.stuckAction( giveup );
+        params.stationaryTicks( 60 ); // = 3 seconds
+        params.baseSpeed( speed );
     }
 
     /**

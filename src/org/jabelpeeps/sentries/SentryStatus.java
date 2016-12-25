@@ -24,9 +24,7 @@ public enum SentryStatus {
     /** Sentries with this status will have their death's handled, and then 
      * various items tidied up before having their status set to {@link SentryStatus#DEAD} */
     DIEING {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
             // item drop handling moved to SentryListener.
             
             inst.clearTarget();
@@ -68,9 +66,7 @@ public enum SentryStatus {
     },    
     /** Sentries with this status will be re-spawned after the configured time. */
     DEAD {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
             
             if (    System.currentTimeMillis() > inst.respawnTime
                     && inst.respawnDelay > 0
@@ -90,9 +86,7 @@ public enum SentryStatus {
         }
     },    
     NOT_SPAWNED {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
             
             if ( inst.getHealth() == 0.0 ) return SentryStatus.DEAD;
             
@@ -110,9 +104,7 @@ public enum SentryStatus {
      *  Once reunited with the guardee (or none it set), the status will be changed to 
      *  {@link SentryStatus#LOOKING} */
     FOLLOWING {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
             
             LivingEntity myEntity = inst.getMyEntity(); 
             
@@ -189,9 +181,7 @@ public enum SentryStatus {
      *  will update their status to {@link#LOOKING}
      */
     RETURNING_TO_SPAWNPOINT {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
 
             inst.tryToHeal();
             
@@ -210,8 +200,7 @@ public enum SentryStatus {
             if ( distanceSqrd > 1024 ) {   // equals a distance > 32 blocks             
                 inst.ifMountedGetMount().teleport( inst.spawnLocation, TeleportCause.PLUGIN );
                 return SentryStatus.LOOKING;
-            }
-            
+            }           
             if ( myEntity.isInsideVehicle() ) 
                 NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );  
             
@@ -225,9 +214,7 @@ public enum SentryStatus {
     /** Sentries with this status will search for possible targets, and be receptive to _events 
      *  within their detection range. <p>  They will also heal whilst in this state. */
     LOOKING {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
             
             inst.tryToHeal();
             
@@ -256,59 +243,22 @@ public enum SentryStatus {
     },   
     /** The status for Sentries who are attacking! */
     ATTACKING {
-
-        @Override
-        SentryStatus update( SentryTrait inst ) {
+        @Override SentryStatus update( SentryTrait inst ) {
             
-            if ( !inst.isMyChunkLoaded() ) {
-                inst.clearTarget();
-                return SentryStatus.is_A_Guard( inst );
-            }
+            if ( inst.isMyChunkLoaded() ) {    
+                LivingEntity myEntity = inst.getMyEntity();
+    
+                // attack the current target
+                if (    inst.attackTarget != null 
+                        && !inst.attackTarget.isDead()
+                        && inst.attackTarget.getWorld() == myEntity.getWorld() ) {
+    
+                    inst.getNavigator().setTarget( inst.attackTarget, true );
 
-            LivingEntity myEntity = inst.getMyEntity();
-
-            // attack the current target
-            if (    inst.attackTarget != null 
-                    && !inst.attackTarget.isDead()
-                    && inst.attackTarget.getWorld() == myEntity.getWorld() ) {
-
-                Navigator navigator = inst.getNavigator();
-                
-                if ( !navigator.isNavigating() )
-                    NMS.look( myEntity, inst.attackTarget );
-                
-                if ( inst.myAttack != AttackType.BRAWLER ) {
-
-//                    if ( !navigator.isPaused() ) {
-//                        navigator.setPaused( true );
-//                        navigator.cancelNavigation();
-                        navigator.setTarget( inst.attackTarget, true );
-//                    }
-
-                    if ( System.currentTimeMillis() > inst.oktoFire ) {
-
-                        inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
-                        inst.fire( inst.attackTarget );
-                    }
+                    double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
+                    // is it still in range? then keep attacking...
+                    if ( dist <= inst.range * inst.range + 10 ) return this;
                 }
-                else if (    navigator.getEntityTarget() == null
-                            || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
-                        
-//                    GoalController goalController = inst.getGoalController();
-//                    // pause goalcontroller to keep sentry focused on this attack
-//                    if ( !goalController.isPaused() )
-//                        goalController.setPaused( true );
-
-                    navigator.setTarget( inst.attackTarget, true );
-                    navigator.getLocalParameters().speedModifier( inst.getSpeed() );
-                    navigator.getLocalParameters().stuckAction( SentryTrait.giveup );
-                    navigator.getLocalParameters().stationaryTicks( 5 * 20 );                 
-                }
-
-                double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
-                // is it still in range? then keep attacking...
-                if ( dist <= inst.range * inst.range )
-                    return this;
             }            
             // somehow we failed to attack the chosen target, so lets clear it, and look for another.
             inst.clearTarget();

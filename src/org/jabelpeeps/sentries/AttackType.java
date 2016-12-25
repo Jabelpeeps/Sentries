@@ -42,7 +42,7 @@ public enum AttackType implements AttackStrategy {
     WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   34,   20,  Effect.WITHER_SHOOT ),
     WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   20 ),
     CREEPER(      Material.SULPHUR ),  
-    BRAWLER(      Material.AIR ); //{
+    BRAWLER(      Material.AIR ); 
         
     @Getter private Material weapon;
     final Class<? extends Projectile> projectile;
@@ -107,9 +107,9 @@ public enum AttackType implements AttackStrategy {
         SentryTrait inst = Util.getSentryTrait( myEntity );
         if ( inst == null ) return false;
 
-        if ( System.currentTimeMillis() < inst.oktoFire ) return false;
+        if ( System.currentTimeMillis() < inst.okToAttack ) return false;
 
-        inst.oktoFire = (long) (System.currentTimeMillis() + inst.arrowRate * 1000.0);
+        inst.okToAttack = (long) (System.currentTimeMillis() + inst.attackRate * 1000.0);
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
@@ -120,8 +120,9 @@ public enum AttackType implements AttackStrategy {
             case BRAWLER:  return false;
 
             case CREEPER: 
-                world.createExplosion( myLoc, 4F );
+                world.createExplosion( myLoc.getX(), myLoc.getY(), myLoc.getZ(), inst.strength, false, false );
                 inst.setHealth( 0 );
+                inst.myStatus = SentryStatus.DEAD;
                 return true;
                 
             case STORMCALLER1: 
@@ -173,7 +174,6 @@ public enum AttackType implements AttackStrategy {
                 fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
                 break;       
         } 
-        
         if ( effect != null )
             world.playEffect( myLoc, effect, null );
         

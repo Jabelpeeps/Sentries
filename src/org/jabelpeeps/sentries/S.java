@@ -71,7 +71,7 @@ public abstract class S {
     public final static String STRENGTH = "strength";
     public final static String RESPAWN = "respawn";
     public final static String SPEED = "speed";
-    public final static String ARROW_RATE = "arrowrate";
+    public final static String ATTACK_RATE = "attackrate";
     public final static String HEALRATE = "healrate";
     public final static String RANGE = "range";
     public final static String VOICE_RANGE = "voicerange";

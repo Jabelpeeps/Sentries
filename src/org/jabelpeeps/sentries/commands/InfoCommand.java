@@ -25,7 +25,7 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ),
                 Col.RED, " [Speed]:", Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
                 Col.RED, " [Range]:", Col.WHITE, String.valueOf( inst.range ),
-                Col.RED, " [ArrowRate]:", Col.WHITE, String.valueOf( inst.arrowRate ),
+                Col.RED, " [AttackRate]:", Col.WHITE, String.valueOf( inst.attackRate ),
                 Col.RED, " [NightVision]:", Col.WHITE, String.valueOf( inst.nightVision ),
                 Col.RED, " [HealRate]:", Col.WHITE, String.valueOf( inst.healRate ),
                 Col.RED, " [VoiceRange]:", Col.WHITE, String.valueOf( inst.voiceRange ),

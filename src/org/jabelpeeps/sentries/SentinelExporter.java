@@ -31,7 +31,7 @@ public class SentinelExporter {
         SentryTrait sentry = npc.getTrait( SentryTrait.class );
         
         sentinel.armor = Math.abs( sentry.armour );
-        sentinel.attackRate = (int) ( sentry.arrowRate * 20 );
+        sentinel.attackRate = (int) ( sentry.attackRate * 20 );
         
         if ( sentinel.attackRate > SentinelTrait.attackRateMax )
             sentinel.attackRate = SentinelTrait.attackRateMax;
