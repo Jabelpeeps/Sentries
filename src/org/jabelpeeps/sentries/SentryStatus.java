@@ -94,6 +94,8 @@ public enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
+            if ( inst.getHealth() == 0.0 ) return SentryStatus.DEAD;
+            
             inst.tryToHeal();  
             
             if ( inst.getNPC().isSpawned() ) {
@@ -112,10 +114,13 @@ public enum SentryStatus {
         @Override
         SentryStatus update( SentryTrait inst ) {
             
-            LivingEntity myEntity = inst.getMyEntity();            
+            LivingEntity myEntity = inst.getMyEntity(); 
+            
+            if ( myEntity == null ) return SentryStatus.NOT_SPAWNED;
+            
             NPC npc = inst.getNPC();
-
-            inst.getNavigator().setPaused( false );
+            Navigator navigator = inst.getNavigator();
+            navigator.setPaused( false );
 
             if ( myEntity.isInsideVehicle() ) 
                 NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
@@ -154,22 +159,21 @@ public enum SentryStatus {
                     return this;
                 }
 //                inst.getGoalController().setPaused( true );
-                Navigator navigator = inst.getNavigator();
                 boolean isNavigating = navigator.isNavigating();
-                double dist = npcLoc.distanceSquared( guardEntLoc );
+                double distSqrd = npcLoc.distanceSquared( guardEntLoc );
 
                 if ( Sentries.debug )
                     Sentries.debugLog( npc.getName() + ": following " + navigator.getEntityTarget().getTarget().getName() );
 
-                if ( dist > 1024 ) {
+                if ( distSqrd > 1024 ) {
                     inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
                 }
-                else if ( dist > inst.followDistance * inst.followDistance && !isNavigating ) {
+                else if ( distSqrd < inst.followDistance * inst.followDistance && !isNavigating ) {
                     navigator.setTarget( inst.guardeeEntity, false );
                     navigator.getLocalParameters().stationaryTicks( 3 * 20 );
                     return this;
                 }
-                else if ( dist < inst.followDistance && isNavigating ) {
+                else if ( distSqrd < inst.followDistance && isNavigating ) {
                     navigator.cancelNavigation();
                 }
                 return SentryStatus.LOOKING;
@@ -188,11 +192,14 @@ public enum SentryStatus {
 
         @Override
         SentryStatus update( SentryTrait inst ) {
+
+            inst.tryToHeal();
+            
+            LivingEntity myEntity = inst.getMyEntity(); 
+            if ( myEntity == null ) return SentryStatus.NOT_SPAWNED;
             
             Navigator navigator = inst.getNavigator();
             if ( navigator.isNavigating() ) return this;
-            
-            LivingEntity myEntity = inst.getMyEntity(); 
             
             double distanceSqrd = Double.MAX_VALUE;
             if ( myEntity.getWorld() == inst.spawnLocation.getWorld() )
@@ -200,7 +207,7 @@ public enum SentryStatus {
 
             if ( distanceSqrd < 2 ) return SentryStatus.LOOKING;
                               
-            if ( distanceSqrd > 1024 ) {               
+            if ( distanceSqrd > 1024 ) {   // equals a distance > 32 blocks             
                 inst.ifMountedGetMount().teleport( inst.spawnLocation, TeleportCause.PLUGIN );
                 return SentryStatus.LOOKING;
             }

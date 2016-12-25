@@ -113,7 +113,7 @@ public enum AttackType implements AttackStrategy {
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = victim.getLocation().add( 0, .33, 0 );       
+        Location targetLoc = victim.getLocation().add( 0, 1.33, 0 );       
         NMS.look( myEntity, victim );
         
         switch ( this ) {

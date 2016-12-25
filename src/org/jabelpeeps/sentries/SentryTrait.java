@@ -504,7 +504,7 @@ public class SentryTrait extends Trait {
         
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = theTarget.getLocation().add( 0, .33, 0 );        
+        Location targetLoc = theTarget.getLocation().add( 0, 1.33, 0 );        
         NMS.look( myEntity, theTarget );
         
         switch ( myAttack ) {
