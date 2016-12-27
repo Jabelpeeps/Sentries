@@ -530,7 +530,7 @@ public class SentryListener implements Listener {
         
             items.parallelStream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );
         
-            if ( Sentries.dieLikePlayers )
+            if ( Sentries.dieLikePlayers && deceased instanceof Player )
                 deceased.setHealth( 0 );
             else
                 Bukkit.getPluginManager().callEvent( new EntityDeathEvent( deceased, items ) );            

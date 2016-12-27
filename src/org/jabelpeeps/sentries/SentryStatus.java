@@ -68,6 +68,8 @@ public enum SentryStatus {
     DEAD {
         @Override SentryStatus update( SentryTrait inst ) {
             
+            inst.tryToHeal();
+            
             if (    System.currentTimeMillis() > inst.respawnTime
                     && inst.respawnDelay > 0
                     && inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,

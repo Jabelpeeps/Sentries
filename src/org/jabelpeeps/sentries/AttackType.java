@@ -3,9 +3,12 @@ package org.jabelpeeps.sentries;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Effect;
+import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Arrow;
@@ -19,6 +22,7 @@ import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -120,9 +124,27 @@ public enum AttackType implements AttackStrategy {
             case BRAWLER:  return false;
 
             case CREEPER: 
-                world.createExplosion( myLoc.getX(), myLoc.getY(), myLoc.getZ(), inst.strength, false, false );
-                inst.setHealth( 0 );
-                inst.myStatus = SentryStatus.DEAD;
+                final BukkitScheduler sch = Bukkit.getScheduler();
+                final int task = sch.scheduleSyncRepeatingTask( Sentries.plugin, 
+                    new Runnable() { 
+                        int runcount = 0;
+                        boolean outOfRange = false;
+                        @Override public void run() {
+                            if ( outOfRange || myLoc.distanceSquared( targetLoc ) > 50 ) {
+                                outOfRange = true;
+                            }
+                            else if ( ++runcount <= 3 ) {
+                                world.playSound( myLoc, Sound.ENTITY_CREEPER_PRIMED, 5, 1 );
+                                myEntity.playEffect( EntityEffect.HURT );
+                            } 
+                            else {
+                                world.createExplosion( 
+                                        myLoc.getX(), myLoc.getY(), myLoc.getZ(), inst.strength, false, false );
+                                inst.myStatus = SentryStatus.DEAD;
+                                inst.getNPC().despawn();
+                            }
+                        }}, 0, 10 );
+                sch.scheduleSyncDelayedTask( Sentries.plugin, () -> sch.cancelTask( task ), 35 );
                 return true;
                 
             case STORMCALLER1: 
@@ -168,6 +190,7 @@ public enum AttackType implements AttackStrategy {
             case PYRO2: // smallfireball, incendiary
             case PYRO3: // fireball   
             case WARLOCK2: // witherskull (also a sub-class of fireball)
+                
                 Fireball fireball = (Fireball) world.spawn( myLoc, projectile );
                 fireball.setIsIncendiary( incendiary );
                 fireball.setShooter( myEntity );
