@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class FollowDistanceCommand implements SentriesNumberCommand {
@@ -15,18 +15,18 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            sender.sendMessage( String.join( "", S.Col.GOLD, npcName, "'s follow distance is ", String.valueOf( inst.followDistance ) ) );
+            Utils.sendMessage( sender, S.Col.GOLD, npcName, "'s follow distance is ", String.valueOf( inst.followDistance ) );
         }
         else {
-            int dist = Util.string2Int( number );
+            int dist = Utils.string2Int( number );
             if ( dist < 0 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( dist > 32 ) dist = 32;
             
             inst.followDistance = dist * dist;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s follow distance set to ", String.valueOf( dist ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s follow distance set to ", String.valueOf( dist ) );
         }
     }
 

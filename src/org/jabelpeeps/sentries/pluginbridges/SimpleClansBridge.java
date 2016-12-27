@@ -9,7 +9,7 @@ import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -36,7 +36,7 @@ public class SimpleClansBridge implements PluginTargetBridge {
 
     @Override
     public void add( SentryTrait inst, String args ) {
-        command.call( null, null, inst, 0, Util.colon.split( args ) );
+        command.call( null, null, inst, 0, Utils.colon.split( args ) );
     }
 
     public class ClansCommand implements SentriesComplexCommand {
@@ -69,7 +69,7 @@ public class SimpleClansBridge implements PluginTargetBridge {
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
             if ( args.length <= nextArg + 1 ) {
-                Util.sendMessage( sender, getLongHelp() );
+                Utils.sendMessage( sender, getLongHelp() );
                 return;
             }
             
@@ -80,20 +80,20 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 
                 inst.targets.stream().filter( t -> t instanceof ClanTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                             String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof ClanTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                             String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.targets.stream().filter( t -> t instanceof ClanRivalsTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.BLUE, "Member of: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                             String.join( "", Col.BLUE, "Member of: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no Clan targets or ignores" );
+                    Utils.sendMessage( sender, Col.YELLOW, npcName, " has no Clan targets or ignores" );
                 else
-                    Util.sendMessage( sender, Col.YELLOW, "Current Clan targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
+                    Utils.sendMessage( sender, Col.YELLOW, "Current Clan targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             
@@ -101,20 +101,20 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 inst.targets.removeIf( t -> t instanceof ClanTarget );
                 inst.ignores.removeIf( t -> t instanceof ClanTarget );
                 
-                Util.sendMessage( sender, Col.GREEN, "All Clan Targets cleared from ", npcName );
+                Utils.sendMessage( sender, Col.GREEN, "All Clan Targets cleared from ", npcName );
                 inst.checkIfEmpty( sender );
                 return;              
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
+                Utils.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             
             Clan clan = clanManager.getClan( args[nextArg + 2] );
             
             if ( clan == null ) {
-                Util.sendMessage( sender, S.ERROR, "No Clan was found matching:- ", args[nextArg + 2] );
+                Utils.sendMessage( sender, S.ERROR, "No Clan was found matching:- ", args[nextArg + 2] );
                 return;
             } 
             
@@ -125,15 +125,15 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 if ( S.REMOVE.equals( subCommand ) ) {
                     
                     if ( inst.targets.remove( target ) ) {
-                        Util.sendMessage( sender, Col.GREEN, clan.getName(), " was removed from ", npcName, "'s list of targets." );
+                        Utils.sendMessage( sender, Col.GREEN, clan.getName(), " was removed from ", npcName, "'s list of targets." );
                         inst.checkIfEmpty( sender );
                     }
                     else if ( inst.ignores.remove( target ) ) {
-                        Util.sendMessage( sender, Col.GREEN, clan.getName(), " was removed from ", npcName, "'s list of ignores." );
+                        Utils.sendMessage( sender, Col.GREEN, clan.getName(), " was removed from ", npcName, "'s list of ignores." );
                         inst.checkIfEmpty( sender );
                     }
                     else 
-                        Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", clan.getName() );                  
+                        Utils.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", clan.getName() );                  
                     return;
                 }
                 target.setTargetString( String.join( ":", prefix, subCommand, args[nextArg + 2] ) );
@@ -141,9 +141,9 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 if ( S.TARGET.equals( subCommand ) ) {
                     
                     if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
-                        Util.sendMessage( sender, Col.GREEN, "Clan: ", clan.getName(), " will be targeted by ", npcName );
+                        Utils.sendMessage( sender, Col.GREEN, "Clan: ", clan.getName(), " will be targeted by ", npcName );
                     else 
-                        Util.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
+                        Utils.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
 
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return;                
@@ -152,9 +152,9 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 if ( S.IGNORE.equals( subCommand ) ) {
                     
                     if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
-                        Util.sendMessage( sender, Col.GREEN, "Clan: ", clan.getName(), " will be ignored by ", npcName );
+                        Utils.sendMessage( sender, Col.GREEN, "Clan: ", clan.getName(), " will be ignored by ", npcName );
                     else 
-                        Util.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
+                        Utils.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
 
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return;              
@@ -168,9 +168,9 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 if ( S.LEAVE.equals( subCommand ) ) {
                     
                     if ( inst.targets.remove( rivals ) && inst.ignores.remove( allies ) )
-                        Util.sendMessage( sender, Col.GREEN, npcName, " will no longer fight alongside ", clan.getName() );
+                        Utils.sendMessage( sender, Col.GREEN, npcName, " will no longer fight alongside ", clan.getName() );
                     else
-                        Util.sendMessage( sender, Col.RED, npcName, " never considered ", clan.getName(), " to be brothers in arms!" );
+                        Utils.sendMessage( sender, Col.RED, npcName, " never considered ", clan.getName(), " to be brothers in arms!" );
                     
                     inst.checkIfEmpty( sender );
                     return;                
@@ -180,11 +180,11 @@ public class SimpleClansBridge implements PluginTargetBridge {
                     rivals.setTargetString( String.join( ":", prefix, subCommand, args[nextArg + 2] ) );
                     
                     if ( inst.targets.add( rivals ) && inst.ignores.add( allies ) )
-                        Util.sendMessage( sender, Col.GREEN, npcName, " will support ", clan.getName(), " in all things!" );
+                        Utils.sendMessage( sender, Col.GREEN, npcName, " will support ", clan.getName(), " in all things!" );
                     return; 
                 }
             }            
-            Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+            Utils.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                                         Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );            
         }       
     }

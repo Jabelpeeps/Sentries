@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class DropsCommand implements SentriesToggleCommand {
@@ -14,9 +15,8 @@ public class DropsCommand implements SentriesToggleCommand {
         
         inst.dropInventory = (set == null) ? !inst.dropInventory : set;
 
-        sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, 
-                            inst.dropInventory ? "will drop items"
-                                               : "will not drop items" ) );
+        Utils.sendMessage( sender, S.Col.GREEN, npcName, inst.dropInventory ? "will drop items"
+                                                                            : "will not drop items" );
     }
 
     @Override

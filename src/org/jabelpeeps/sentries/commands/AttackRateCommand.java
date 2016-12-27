@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class AttackRateCommand implements SentriesNumberCommand {
@@ -14,19 +14,19 @@ public class AttackRateCommand implements SentriesNumberCommand {
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s attack rate is:- ", 
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s attack rate is:- ", 
                                 String.valueOf( inst.attackRate), " seconds between blows/shots." );
         }
         else {
-            double attackrate = Util.string2Double( number );
+            double attackrate = Utils.string2Double( number );
             if ( attackrate == Double.MIN_VALUE || attackrate < 0 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( attackrate > 30.0 ) attackrate = 30.0;
             
             inst.attackRate = attackrate;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s attack rate set to:- ", String.valueOf( attackrate ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s attack rate set to:- ", String.valueOf( attackrate ) );
         }
     }
 

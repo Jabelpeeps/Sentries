@@ -246,7 +246,7 @@ public class Sentries extends JavaPlugin {
 
             if ( args.length != 2 ) continue;
 
-            double val = Util.string2Double( args[1] );
+            double val = Utils.string2Double( args[1] );
             Material item = Material.getMaterial( args[0] );
 
             if (    item != null 
@@ -301,12 +301,12 @@ public class Sentries extends JavaPlugin {
         if ( type == null ) return null;
 
         if ( args.length > 1 ) {
-            dur = Util.string2Int( args[1] );
+            dur = Utils.string2Int( args[1] );
 
             if ( dur < 0 ) dur = 10;
         }
         if ( args.length > 2 ) {
-            amp = Util.string2Int( args[2] );
+            amp = Utils.string2Int( args[2] );
 
             if ( amp < 0 ) amp = 1;
         }

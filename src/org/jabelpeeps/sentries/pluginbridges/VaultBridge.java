@@ -13,7 +13,7 @@ import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -65,7 +65,7 @@ public class VaultBridge implements PluginTargetBridge {
 
     @Override
     public void add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, Util.colon.split( args ) );
+        command.call( null, null, inst, 0, Utils.colon.split( args ) );
     }
    
     public class GroupCommand implements SentriesComplexCommand {
@@ -93,7 +93,7 @@ public class VaultBridge implements PluginTargetBridge {
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
             if ( args.length <= nextArg + 1 ) {
-                Util.sendMessage( sender, getLongHelp() );
+                Utils.sendMessage( sender, getLongHelp() );
                 return;
             }
             
@@ -104,16 +104,16 @@ public class VaultBridge implements PluginTargetBridge {
                 
                 inst.targets.stream().filter( t -> t instanceof GroupTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                             String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof GroupTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                             String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no group targets or ignores" );
+                    Utils.sendMessage( sender, Col.YELLOW, npcName, " has no group targets or ignores" );
                 else
-                    Util.sendMessage( sender, Col.YELLOW, "Current Group targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
+                    Utils.sendMessage( sender, Col.YELLOW, "Current Group targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             
@@ -121,19 +121,19 @@ public class VaultBridge implements PluginTargetBridge {
                 inst.targets.removeIf( t -> t instanceof GroupTarget );
                 inst.ignores.removeIf( t -> t instanceof GroupTarget );
                 
-                Util.sendMessage( sender, Col.GREEN, "All group targets cleared from ", npcName );
+                Utils.sendMessage( sender, Col.GREEN, "All group targets cleared from ", npcName );
                 inst.checkIfEmpty( sender );
                 return;              
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
+                Utils.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             String groupName = args[nextArg + 2];
             
             if ( !Arrays.asList( perms.getGroups() ).contains( groupName ) ) {
-                Util.sendMessage( sender, S.ERROR, "No Group was found matching:- ", args[nextArg + 2] );
+                Utils.sendMessage( sender, S.ERROR, "No Group was found matching:- ", args[nextArg + 2] );
                 return;
             }
             
@@ -144,15 +144,15 @@ public class VaultBridge implements PluginTargetBridge {
                 if ( S.REMOVE.equals( subCommand ) ) {
                     
                     if ( inst.targets.remove( target ) ) {
-                        Util.sendMessage( sender, Col.GREEN, groupName, " was removed from ", npcName, "'s list of targets." );
+                        Utils.sendMessage( sender, Col.GREEN, groupName, " was removed from ", npcName, "'s list of targets." );
                         inst.checkIfEmpty( sender );
                     }
                     else if ( inst.ignores.remove( target ) ) {
-                        Util.sendMessage( sender, Col.GREEN, groupName, " was removed from ", npcName, "'s list of ignores." );
+                        Utils.sendMessage( sender, Col.GREEN, groupName, " was removed from ", npcName, "'s list of ignores." );
                         inst.checkIfEmpty( sender );
                     }
                     else 
-                        Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", groupName );                  
+                        Utils.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", groupName );                  
                     return;
                 }
                 target.setTargetString( String.join( ":", prefix, subCommand, groupName ) );
@@ -160,9 +160,9 @@ public class VaultBridge implements PluginTargetBridge {
                 if ( S.TARGET.equals( subCommand ) ) {
                     
                     if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
-                        Util.sendMessage( sender, Col.GREEN, "Group: ", groupName, " will be targeted by ", npcName );
+                        Utils.sendMessage( sender, Col.GREEN, "Group: ", groupName, " will be targeted by ", npcName );
                     else 
-                        Util.sendMessage( sender, Col.RED, groupName, S.ALREADY_LISTED, npcName );
+                        Utils.sendMessage( sender, Col.RED, groupName, S.ALREADY_LISTED, npcName );
 
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return;                
@@ -171,15 +171,15 @@ public class VaultBridge implements PluginTargetBridge {
                 if ( S.IGNORE.equals( subCommand ) ) {
                     
                     if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
-                        Util.sendMessage( sender, Col.GREEN, "Group: ", groupName, " will be ignored by ", npcName );
+                        Utils.sendMessage( sender, Col.GREEN, "Group: ", groupName, " will be ignored by ", npcName );
                     else 
-                        Util.sendMessage( sender, Col.RED, groupName, S.ALREADY_LISTED, npcName );
+                        Utils.sendMessage( sender, Col.RED, groupName, S.ALREADY_LISTED, npcName );
 
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return;              
                 }   
             }           
-            Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+            Utils.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                     Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );            
         }       
     }

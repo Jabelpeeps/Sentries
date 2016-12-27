@@ -60,7 +60,7 @@ public class SentinelExporter {
         else if ( health > SentinelTrait.healthMax )
             health = SentinelTrait.healthMax;
         
-        sentinel.setHealth( sentry.getHealth() );
+        sentinel.setHealth( health );
         sentinel.invincible = sentry.invincible;
         sentinel.needsAmmo = false;
         sentinel.respawnTime = sentry.respawnDelay * 20;
@@ -93,7 +93,7 @@ public class SentinelExporter {
             else if ( t.contains( "All:NPCs" ) )
                 sentinel.targets.add( SentinelTarget.NPCS );
             else {
-                String[] sections = Util.colon.split( t );
+                String[] sections = Utils.colon.split( t );
                 if ( sections.length >= 2 ) {
     
                     sections[0] = sections[0].trim();
@@ -156,7 +156,7 @@ public class SentinelExporter {
             else if ( t.contains( "Owner" ) )
                 sentinel.ignores.add( SentinelTarget.OWNER );
             else {
-                String[] sections = Util.colon.split( t );
+                String[] sections = Utils.colon.split( t );
                 if ( sections.length >= 2 ) {
                     sections[0] = sections[0].trim();
                     sections[1] = sections[1].trim();

@@ -11,7 +11,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.targets.AllEntitiesTarget;
 import org.jabelpeeps.sentries.targets.AllMobsTarget;
 import org.jabelpeeps.sentries.targets.AllMonstersTarget;
@@ -47,28 +47,28 @@ public class TargetComand implements SentriesComplexCommand {
             inst.targets.forEach( t -> joiner.add( t.getPrettyString() ) );
             inst.events.forEach( e -> joiner.add( e.getPrettyString() ) );
 
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s Targets: ", joiner.toString() );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s Targets: ", joiner.toString() );
             return;
         }
         
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.targets.removeIf( i -> i instanceof TargetType.Internal );
             inst.clearTarget();
-            Util.sendMessage( sender, Col.GREEN, npcName, ": Targets cleared" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, ": Targets cleared" );
             return;
         }
         
         if ( (S.ADD + S.REMOVE).contains( subCommand ) ) {    
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help target'" );
+                Utils.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help target'" );
                 return;
             }
             TargetType target = null;
-            String[] targetArgs = Util.colon.split( args[nextArg + 2] );
+            String[] targetArgs = Utils.colon.split( args[nextArg + 2] );
             
             if ( targetArgs.length < 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, " try '/sentry help target'" );
+                Utils.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, " try '/sentry help target'" );
                 return;
             }
             String firstSubArg = targetArgs[0].toLowerCase();
@@ -104,7 +104,7 @@ public class TargetComand implements SentriesComplexCommand {
             else if ( firstSubArg.equals( "named" ) ) {
                 
                 if ( targetArgs.length < 3 ) {
-                    Util.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, " try '/sentry help target'" );
+                    Utils.sendMessage( sender, S.ERROR, "Malformed target token!", Col.RESET, " try '/sentry help target'" );
                     return;  
                 }
                 String thirdSubArg = targetArgs[2];
@@ -119,7 +119,7 @@ public class TargetComand implements SentriesComplexCommand {
                                   .orElse( Bukkit.getOfflinePlayer( UUID.fromString( thirdSubArg ) ) )
                                   .getUniqueId() );
                     } catch (IllegalArgumentException e) {
-                        Util.sendMessage( sender, S.ERROR, "No player called:- ", thirdSubArg, " was found." );
+                        Utils.sendMessage( sender, S.ERROR, "No player called:- ", thirdSubArg, " was found." );
                     }                  
                 }
                 else if ( secondSubArg.equals( "npc" ) ) {
@@ -134,11 +134,11 @@ public class TargetComand implements SentriesComplexCommand {
                 }
             }
             if ( target == null )
-                Util.sendMessage( sender, "The intended target was not recognised" );
+                Utils.sendMessage( sender, "The intended target was not recognised" );
             else if ( S.ADD.equals( subCommand ) && inst.targets.add( target ) )
-                Util.sendMessage( sender, "Target Added" );
+                Utils.sendMessage( sender, "Target Added" );
             else if ( S.REMOVE.equals( subCommand ) && inst.targets.remove( target ) )
-                Util.sendMessage( sender, "Target Removed" );            
+                Utils.sendMessage( sender, "Target Removed" );            
         }                
     }
 
@@ -169,7 +169,7 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to target all mobs of <Type>.") );
             joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
 //          joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
-            joiner.add( Util.getAdditionalTargets() );
+            joiner.add( Utils.getAdditionalTargets() );
 
             targetCommandHelp = joiner.toString();
         }       

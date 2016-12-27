@@ -54,6 +54,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.util.NMS;
+import net.citizensnpcs.util.Util;
 
 public class SentryTrait extends Trait {
 
@@ -283,7 +284,7 @@ public class SentryTrait extends Trait {
     public void onRemove() {        
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
 
-        if ( hasMount() ) Util.removeMount( mountID );
+        if ( hasMount() ) Utils.removeMount( mountID );
         
         cancelRunnable();
     }
@@ -452,7 +453,7 @@ public class SentryTrait extends Trait {
 
                                 Player player = (Player) aTarget;
 
-                                player.sendMessage( Util.format( warningMsg, npc, player, null, null ) );
+                                player.sendMessage( Utils.format( warningMsg, npc, player, null, null ) );
 
                                 if ( !getNavigator().isNavigating() )
                                     NMS.look( myEntity, aTarget );
@@ -478,7 +479,7 @@ public class SentryTrait extends Trait {
 
                     Player player = (Player) aTarget;
 
-                    player.sendMessage( Util.format( greetingMsg, npc, player, null, null ) );
+                    player.sendMessage( Utils.format( greetingMsg, npc, player, null, null ) );
                     NMS.look( myEntity, aTarget );
 
                     warningsGiven.put( player, System.currentTimeMillis() );
@@ -570,7 +571,7 @@ public class SentryTrait extends Trait {
 
     public double getHealth() {
         LivingEntity myEntity = getMyEntity();
-        if ( npc == null || myEntity == null ) return 0;
+        if ( myEntity == null ) return 0;
 
         return myEntity.getHealth();
     }
@@ -656,17 +657,17 @@ public class SentryTrait extends Trait {
 //        return (int) (strength + mod);
 //    }
 
-    static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
-    static Set<AttackType> stormCallers = EnumSet.range( AttackType.STORMCALLER1, AttackType.STORMCALLER3 );
-    static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.STORMCALLER3 );
+    private static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
+    private static Set<AttackType> stormCallers = EnumSet.range( AttackType.STORMCALLER1, AttackType.STORMCALLER3 );
+    private static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.STORMCALLER3 );
+    private static Set<AttackType> lightsFires = EnumSet.of( AttackType.PYRO1, AttackType.STROMCALLER2 );
 
     public boolean isPyromancer() { return pyros.contains( myAttack ); }
-    public boolean isPyromancer1() { return myAttack == AttackType.PYRO1; }
     public boolean isStormcaller() { return stormCallers.contains( myAttack ); }
     public boolean isWarlock1() { return myAttack == AttackType.WARLOCK1; }
     public boolean isWitchDoctor() { return myAttack == AttackType.WITCHDOCTOR; }
     public boolean isNotFlammable() { return notFlammable.contains( myAttack ); }
-
+    public boolean lightsFires() { return lightsFires.contains( myAttack ); }
 
     /** 
      * Checks whether sufficient time has passed since the last healing, and if so restores
@@ -694,14 +695,10 @@ public class SentryTrait extends Trait {
     }
     
     boolean isMyChunkLoaded() {
-
         LivingEntity myEntity = getMyEntity();
-
         if ( myEntity == null ) return false;
 
-        Location npcLoc = myEntity.getLocation();
-
-        return npcLoc.getWorld().isChunkLoaded( npcLoc.getBlockX() >> 4, npcLoc.getBlockZ() >> 4 );
+        return Util.isLoaded( myEntity.getLocation() );
     }
 
     /**
@@ -738,8 +735,10 @@ public class SentryTrait extends Trait {
      */
     public boolean findOtherGuardEntity( String name ) {
         if ( npc == null || name == null ) return false;
+        LivingEntity myEntity = getMyEntity();
+        if ( myEntity == null ) return false;
 
-        for ( Entity each : getMyEntity().getNearbyEntities( range, range, range ) ) {
+        for ( Entity each : myEntity.getNearbyEntities( range, range, range ) ) {
 
             String ename = null;
 
@@ -763,13 +762,10 @@ public class SentryTrait extends Trait {
     }
 
     public void setHealth( double health ) {
-
         LivingEntity myEntity = getMyEntity();
-
         if ( myEntity == null ) return;
 
-        myEntity.setHealth( health > maxHealth ? maxHealth 
-                                               : health );
+        myEntity.setHealth( health > maxHealth ? maxHealth : health );
     }
 
     /**
@@ -839,17 +835,15 @@ public class SentryTrait extends Trait {
             sender.sendMessage( String.join( "", Col.YELLOW, npc.getName(), " now has no defined targets." ) );
     }
     
-    void setAttackTarget( LivingEntity theEntity ) {
-
+    boolean setAttackTarget( LivingEntity theEntity ) {
         LivingEntity myEntity = getMyEntity();
-
-        if ( myEntity == null || theEntity == myEntity || theEntity == guardeeEntity ) return;
-
+        if ( myEntity == null || theEntity == myEntity || theEntity == guardeeEntity ) return false;
         // don't attack when bodyguard target isn't around.
-        if ( guardeeName != null && guardeeEntity == null ) return;
+        if ( guardeeName != null && guardeeEntity == null ) return false;
 
         attackTarget = theEntity;
         myStatus = SentryStatus.ATTACKING;
+        return true;
     }
 
     Navigator getNavigator() {
@@ -988,11 +982,12 @@ public class SentryTrait extends Trait {
     //------------------------------------------end of methods for mounts
     
     public boolean hasLOS( Entity other ) {
-
+        if ( ignoreLOS ) return true;
+        
         LivingEntity myEntity = getMyEntity();
         
         if ( myEntity != null ) {
-            return ignoreLOS || myEntity.hasLineOfSight( other );
+            return myEntity.hasLineOfSight( other );
         }
         return false;
     }
@@ -1027,7 +1022,7 @@ public class SentryTrait extends Trait {
                     && present.distanceSquared( target ) <= 4 ) {
                 return true;
             }
-            SentryTrait inst = Util.getSentryTrait( npc );
+            SentryTrait inst = Utils.getSentryTrait( npc );
             inst.clearTarget();
             inst.myStatus = SentryStatus.is_A_Guard( inst );
             return false;

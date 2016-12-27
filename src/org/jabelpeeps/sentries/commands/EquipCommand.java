@@ -11,7 +11,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
@@ -27,7 +27,7 @@ public class EquipCommand implements SentriesComplexCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= 1 + nextArg ) {
-            Util.sendMessage( sender, "", S.ERROR, "More arguments needed.");
+            Utils.sendMessage( sender, "", S.ERROR, "More arguments needed.");
             sender.sendMessage( getLongHelp() );
             return;
         }
@@ -71,7 +71,7 @@ public class EquipCommand implements SentriesComplexCommand {
         NPC npc = inst.getNPC();
         
         if ( !npc.isSpawned() ) {
-            Util.sendMessage( sender, S.ERROR, "You can only modify equipment when a sentry is spawned." );
+            Utils.sendMessage( sender, S.ERROR, "You can only modify equipment when a sentry is spawned." );
             return;
         }
 
@@ -82,7 +82,7 @@ public class EquipCommand implements SentriesComplexCommand {
             for ( EquipmentSlot each : EquipmentSlot.values() ) {
                 equip.set( each, null );
             }
-            Util.sendMessage( sender, Col.YELLOW, npcName, "'s equipment cleared" );
+            Utils.sendMessage( sender, Col.YELLOW, npcName, "'s equipment cleared" );
         }
         
         else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
@@ -98,19 +98,19 @@ public class EquipCommand implements SentriesComplexCommand {
                         
                         if ( "hand".equalsIgnoreCase( slotName ) ) slotName = "held item";
                         
-                        Util.sendMessage( sender, Col.GREEN, "removed ", npcName, "'s ", slotName );
+                        Utils.sendMessage( sender, Col.GREEN, "removed ", npcName, "'s ", slotName );
                         break;
                     }
-                    Util.sendMessage( sender, S.ERROR, "Unable to set equipment, does the sentry's type support the specified slot?" );
+                    Utils.sendMessage( sender, S.ERROR, "Unable to set equipment, does the sentry's type support the specified slot?" );
                 }
-                Util.sendMessage( sender, S.ERROR, slotName, " was not recognised." );
+                Utils.sendMessage( sender, S.ERROR, slotName, " was not recognised." );
             }
         }
         else {
-            Material mat = Material.matchMaterial( Util.joinArgs( nextArg + 1, args ) );
+            Material mat = Material.matchMaterial( Utils.joinArgs( nextArg + 1, args ) );
 
             if ( mat == null ) {
-                Util.sendMessage( sender, S.ERROR, "Item name not recognised.  "
+                Utils.sendMessage( sender, S.ERROR, "Item name not recognised.  "
                                         + "Do '/sentry help listequips' for a list of accepted item names" );
                 return;
             }            
@@ -125,10 +125,10 @@ public class EquipCommand implements SentriesComplexCommand {
                     if ( slot == 0 ) inst.updateAttackType();
                     else inst.updateArmour();
                     
-                    Util.sendMessage( sender, " ", Col.GREEN, "equipped", mat.toString(), "on", npcName );
+                    Utils.sendMessage( sender, " ", Col.GREEN, "equipped", mat.toString(), "on", npcName );
                 }
             }
-            else Util.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
+            else Utils.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
         }
     }
 

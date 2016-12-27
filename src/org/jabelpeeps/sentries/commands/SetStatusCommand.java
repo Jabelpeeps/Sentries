@@ -5,7 +5,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryStatus;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class SetStatusCommand implements SentriesComplexCommand {
@@ -29,10 +29,10 @@ public class SetStatusCommand implements SentriesComplexCommand {
             if ( status == null ) throw new IllegalArgumentException();
             
             inst.myStatus = status;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s stats has been set to:- ", status.name() );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s stats has been set to:- ", status.name() );
         }
         catch ( IllegalArgumentException e ) {
-            Util.sendMessage( sender, S.ERROR, args[nextArg + 1], " was not recogised as a valid SentryStatus" );
+            Utils.sendMessage( sender, S.ERROR, args[nextArg + 1], " was not recogised as a valid SentryStatus" );
         }
     }
 }

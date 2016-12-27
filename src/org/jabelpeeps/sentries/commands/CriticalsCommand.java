@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class CriticalsCommand implements SentriesToggleCommand {
@@ -14,8 +15,8 @@ public class CriticalsCommand implements SentriesToggleCommand {
 
         inst.acceptsCriticals = (set == null) ? !inst.acceptsCriticals : set;
 
-        sender.sendMessage( String.join( " ", S.Col.GREEN, npcName, inst.acceptsCriticals ? "will take critical hits"
-                                                                                          : "will take normal damage" ) );
+        Utils.sendMessage( sender, S.Col.GREEN, npcName, inst.acceptsCriticals ? "will take critical hits"
+                                                                               : "will take normal damage" );
     }
 
     @Override

@@ -12,7 +12,7 @@ import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -35,7 +35,7 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
     }
     @Override
     public void add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, Util.colon.split( args ) );
+        command.call( null, null, inst, 0, Utils.colon.split( args ) );
     }
 
     public class ScoreboardTeamsCommand implements SentriesComplexCommand {
@@ -63,7 +63,7 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
             if ( args.length <= nextArg + 1 ) {
-                Util.sendMessage( sender, getLongHelp() );
+                Utils.sendMessage( sender, getLongHelp() );
                 return;
             }
             
@@ -73,15 +73,15 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof ScoreboardTeamsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof ScoreboardTeamsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );
+                    Utils.sendMessage( sender, Col.YELLOW, npcName, " has no scoreboard targets or ignores" );
                 else
-                    Util.sendMessage( sender, Col.YELLOW, "Current Scoreboard Team targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
+                    Utils.sendMessage( sender, Col.YELLOW, "Current Scoreboard Team targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             
@@ -89,20 +89,20 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
                 inst.targets.removeIf( t -> t instanceof ScoreboardTeamsTarget );
                 inst.ignores.removeIf( t -> t instanceof ScoreboardTeamsTarget );
                 
-                Util.sendMessage( sender, Col.GREEN, "All Scoreboard Targets cleared from ", npcName );
+                Utils.sendMessage( sender, Col.GREEN, "All Scoreboard Targets cleared from ", npcName );
                 inst.checkIfEmpty( sender );
                 return;
             }
             
             if ( args.length <= nextArg + 2 ) { 
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
+                Utils.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help ", prefix.toLowerCase() );
                 return;
             }
             String teamName = args[nextArg + 2];
             Team team = scoreboard.getTeam( teamName );
             
             if ( team == null ) {
-                Util.sendMessage( sender, S.ERROR, "No Team was found matching:- ", teamName );
+                Utils.sendMessage( sender, S.ERROR, "No Team was found matching:- ", teamName );
                 return;
             } 
             
@@ -111,11 +111,11 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
             if ( S.REMOVE.equals( subCommand ) ) {
                 
                 if ( inst.targets.remove( target ) ) 
-                    Util.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of targets." );
+                    Utils.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of targets." );
                 else if ( inst.ignores.remove( target ) ) 
-                    Util.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of ignores." );
+                    Utils.sendMessage( sender, Col.GREEN, team.getName(), " was removed from ", npcName, "'s list of ignores." );
                 else {
-                    Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", team.getName() );
+                    Utils.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", team.getName() );
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return;
                 }
@@ -128,9 +128,9 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
             if ( S.TARGET.equals( subCommand ) ) {
                 
                 if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
-                    Util.sendMessage( sender, Col.GREEN, "Scoreboard Team: ", team.getName(), " will be targeted by ", npcName );
+                    Utils.sendMessage( sender, Col.GREEN, "Scoreboard Team: ", team.getName(), " will be targeted by ", npcName );
                 else 
-                    Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
+                    Utils.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
                 
                 call( sender, npcName, inst, 0, "", S.LIST );
                 return;
@@ -139,14 +139,14 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
             if ( S.IGNORE.equals( subCommand ) ) {
                 
                 if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
-                    Util.sendMessage( sender, Col.GREEN, "Scoreboard Team: ", team.getName(), " will be ignored by ", npcName );
+                    Utils.sendMessage( sender, Col.GREEN, "Scoreboard Team: ", team.getName(), " will be ignored by ", npcName );
                 else 
-                    Util.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
+                    Utils.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
 
                 call( sender, npcName, inst, 0, "", S.LIST );
                 return;            
             } 
-            Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+            Utils.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                                       Col.GOLD, "/sentry help ", prefix.toLowerCase(), Col.RESET, " and try again." );            
         }
     }

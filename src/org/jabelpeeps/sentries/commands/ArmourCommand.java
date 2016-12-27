@@ -5,7 +5,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class ArmourCommand implements SentriesNumberCommand {
@@ -22,15 +22,15 @@ public class ArmourCommand implements SentriesNumberCommand {
         
         if ( number == null ) {
             if ( inst.armour >= 0 )
-                Util.sendMessage( sender, Col.GOLD, npcName, "'s armour value is:- ", String.valueOf( inst.armour ) );
+                Utils.sendMessage( sender, Col.GOLD, npcName, "'s armour value is:- ", String.valueOf( inst.armour ) );
             else
-                Util.sendMessage( sender, Col.GOLD, npcName, " has a calculated armour value of ", 
+                Utils.sendMessage( sender, Col.GOLD, npcName, " has a calculated armour value of ", 
                                                                     String.valueOf( Math.abs( inst.armour ) ) );
         }
         else {
-            int armour = Util.string2Int( number );
+            int armour = Utils.string2Int( number );
             if ( armour < -1 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( armour > 100 ) armour = 100;
@@ -39,13 +39,13 @@ public class ArmourCommand implements SentriesNumberCommand {
             
             if ( armour == -1 ) {
                 if ( inst.updateArmour() )
-                    Util.sendMessage( sender, Col.GREEN, npcName, "'s armour is now calculated from the equipped armour. ",
+                    Utils.sendMessage( sender, Col.GREEN, npcName, "'s armour is now calculated from the equipped armour. ",
                             System.lineSeparator(), "The current value is:- ", String.valueOf( Math.abs( inst.armour ) ) );
                 else
-                    Util.sendMessage( sender, Col.RED, npcName, "is not wearing any armour! Add some with '/sentry armour'" );
+                    Utils.sendMessage( sender, Col.RED, npcName, "is not wearing any armour! Add some with '/sentry armour'" );
             }
             else 
-                Util.sendMessage( sender, Col.GREEN, npcName, "'s armour set to:- ", String.valueOf( armour ) );
+                Utils.sendMessage( sender, Col.GREEN, npcName, "'s armour set to:- ", String.valueOf( armour ) );
         }
     }
 

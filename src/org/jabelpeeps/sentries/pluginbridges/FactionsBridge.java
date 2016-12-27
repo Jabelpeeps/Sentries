@@ -10,7 +10,7 @@ import org.jabelpeeps.sentries.PluginTargetBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -37,7 +37,7 @@ public class FactionsBridge implements PluginTargetBridge {
     }
     @Override
     public void add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, Util.colon.split( args ) );
+        command.call( null, null, inst, 0, Utils.colon.split( args ) );
     }
 
     public class FactionsCommand implements SentriesComplexCommand {
@@ -72,7 +72,7 @@ public class FactionsBridge implements PluginTargetBridge {
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
             if ( args.length <= nextArg + 1 ) {
-                Util.sendMessage( sender, getLongHelp() );
+                Utils.sendMessage( sender, getLongHelp() );
                 return;
             }
             
@@ -82,18 +82,18 @@ public class FactionsBridge implements PluginTargetBridge {
                 StringJoiner joiner = new StringJoiner( ", " );
                 
                 inst.targets.stream().filter( t -> t instanceof FactionTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof FactionTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
  
                 inst.targets.stream().filter( t -> t instanceof FactionRivalsTarget )
-                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", Util.colon.split( t.getTargetString() )[2] ) ) );
+                                     .forEach( t -> joiner.add( String.join( "", Col.BLUE, "Member of: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
 
                 if ( joiner.length() < 1 ) 
-                    Util.sendMessage( sender, Col.YELLOW, npcName, " has no Factions targets or ignores" );
+                    Utils.sendMessage( sender, Col.YELLOW, npcName, " has no Factions targets or ignores" );
                 else
-                    Util.sendMessage( sender, Col.YELLOW, "Current Factions targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
+                    Utils.sendMessage( sender, Col.YELLOW, "Current Factions targets are:-", Col.RESET, System.lineSeparator(), joiner.toString() );
                 return;
             }
             
@@ -101,20 +101,20 @@ public class FactionsBridge implements PluginTargetBridge {
                 inst.targets.removeIf( t -> t instanceof AbstractFactionTarget );
                 inst.ignores.removeIf( t -> t instanceof AbstractFactionTarget );
                 
-                Util.sendMessage( sender, Col.GREEN, "All Factions targets cleared from ", npcName );
+                Utils.sendMessage( sender, Col.GREEN, "All Factions targets cleared from ", npcName );
                 inst.checkIfEmpty( sender );
                 return;              
             }
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help factions" );
+                Utils.sendMessage( sender, S.ERROR, "Not enough arguments. ", Col.RESET, "Try /sentry help factions" );
                 return;    
             }
             String factionName = args[nextArg + 2];
             Faction faction = FactionColl.get().getByName( factionName );
             
             if ( faction == null ) {
-                Util.sendMessage( sender, S.ERROR, "No Faction was found matching:- ", factionName );
+                Utils.sendMessage( sender, S.ERROR, "No Faction was found matching:- ", factionName );
                 return;    
             }
           
@@ -125,15 +125,15 @@ public class FactionsBridge implements PluginTargetBridge {
                 if ( S.REMOVE.equals( subCommand ) ) {
                     
                     if ( inst.targets.remove( target ) ) {
-                        Util.sendMessage( sender, Col.GREEN, faction.getName(), " was removed from ", npcName, "'s list of targets." );
+                        Utils.sendMessage( sender, Col.GREEN, faction.getName(), " was removed from ", npcName, "'s list of targets." );
                         inst.checkIfEmpty( sender );
                     }
                     else if ( inst.ignores.remove( target ) ) {
-                        Util.sendMessage( sender, Col.GREEN, faction.getName(), " was removed from ", npcName, "'s list of ignores." );
+                        Utils.sendMessage( sender, Col.GREEN, faction.getName(), " was removed from ", npcName, "'s list of ignores." );
                         inst.checkIfEmpty( sender );
                     }
                     else {
-                        Util.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", faction.getName() );
+                        Utils.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", faction.getName() );
                         call( sender, npcName, inst, 0, "", S.LIST );
                     }
                     return;
@@ -144,9 +144,9 @@ public class FactionsBridge implements PluginTargetBridge {
                 if ( S.TARGET.equals( subCommand ) ) {
                     
                     if ( !inst.ignores.contains( target ) && inst.targets.add( target ) ) 
-                        Util.sendMessage( sender, Col.GREEN, "Faction: ", faction.getName(), " will be targeted by ", npcName );
+                        Utils.sendMessage( sender, Col.GREEN, "Faction: ", faction.getName(), " will be targeted by ", npcName );
                     else 
-                        Util.sendMessage( sender, Col.RED, faction.getName(), S.ALREADY_LISTED, npcName );
+                        Utils.sendMessage( sender, Col.RED, faction.getName(), S.ALREADY_LISTED, npcName );
 
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return;  
@@ -155,9 +155,9 @@ public class FactionsBridge implements PluginTargetBridge {
                 if ( S.IGNORE.equals( subCommand ) ) {
                     
                     if ( !inst.targets.contains( target ) && inst.ignores.add( target ) ) 
-                        Util.sendMessage( sender, Col.GREEN, "Faction: ", faction.getName(), " will be ignored by ", npcName );
+                        Utils.sendMessage( sender, Col.GREEN, "Faction: ", faction.getName(), " will be ignored by ", npcName );
                     else 
-                        Util.sendMessage( sender, Col.RED, faction.getName(), S.ALREADY_LISTED, npcName );
+                        Utils.sendMessage( sender, Col.RED, faction.getName(), S.ALREADY_LISTED, npcName );
 
                     call( sender, npcName, inst, 0, "", S.LIST );
                     return; 
@@ -171,9 +171,9 @@ public class FactionsBridge implements PluginTargetBridge {
                 if ( S.LEAVE.equals( subCommand ) ) {
                     
                     if ( inst.targets.remove( rivals ) && inst.ignores.remove( allies ) )
-                        Util.sendMessage( sender, Col.GREEN, npcName, " will no longer fight alongside ", faction.getName() );
+                        Utils.sendMessage( sender, Col.GREEN, npcName, " will no longer fight alongside ", faction.getName() );
                     else {
-                        Util.sendMessage( sender, Col.RED, npcName, " never considered ", faction.getName(), " to be brothers in arms!" );
+                        Utils.sendMessage( sender, Col.RED, npcName, " never considered ", faction.getName(), " to be brothers in arms!" );
                         call( sender, npcName, inst, 0, "", S.LIST );
                     }
                     inst.checkIfEmpty( sender );
@@ -184,11 +184,11 @@ public class FactionsBridge implements PluginTargetBridge {
                     rivals.setTargetString( String.join( ":", prefix, subCommand, factionName ) );
                     
                     if ( inst.targets.add( rivals ) && inst.ignores.add( allies ) )
-                        Util.sendMessage( sender, Col.GREEN, npcName, " will support ", faction.getName(), " in all battles!" );
+                        Utils.sendMessage( sender, Col.GREEN, npcName, " will support ", faction.getName(), " in all battles!" );
                     return;
                 }
             }
-            Util.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
+            Utils.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",
                                     Col.GOLD, "/sentry help factions", Col.RESET, " and try again." );            
         }       
     }

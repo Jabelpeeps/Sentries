@@ -7,7 +7,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryStatus;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class GuardCommand implements SentriesComplexCommand {
@@ -38,26 +38,26 @@ public class GuardCommand implements SentriesComplexCommand {
                     checkplayers = false;
                 }
 
-                String arg = Util.joinArgs( start + nextArg, args );
+                String arg = Utils.joinArgs( start + nextArg, args );
 
                 if ( checkplayers ) ok = inst.findPlayerGuardEntity( arg );   
                 if ( !ok && checklocal ) ok = inst.findOtherGuardEntity( arg );
 
                 if ( ok ) {
-                    Util.sendMessage( sender, Col.GREEN, npcName, " is now guarding ", arg );
+                    Utils.sendMessage( sender, Col.GREEN, npcName, " is now guarding ", arg );
                     inst.myStatus = SentryStatus.FOLLOWING;
                 }
                 else
-                    Util.sendMessage( sender, Col.RED, npcName, " could not find ", arg );
+                    Utils.sendMessage( sender, Col.RED, npcName, " could not find ", arg );
                 return;
             }
         }
         if ( inst.guardeeName == null )
             sender.sendMessage( Col.GREEN.concat( "Guarding: My Surroundings" ) );
         else if ( inst.guardeeEntity == null )
-            Util.sendMessage( sender, Col.GREEN, npcName, " is configured to guard ", inst.guardeeName, " but cannot find them at the moment." );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " is configured to guard ", inst.guardeeName, " but cannot find them at the moment." );
         else
-            Util.sendMessage( sender, Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() );
+            Utils.sendMessage( sender, Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() );
     }
 
     @Override

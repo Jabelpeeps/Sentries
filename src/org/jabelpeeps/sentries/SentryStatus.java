@@ -36,7 +36,7 @@ public enum SentryStatus {
 
                 if ( inst.killer != null ) {
                     
-                    Entity killer = Util.getArcher( inst.killer );
+                    Entity killer = Utils.getArcher( inst.killer );
 
                     if ( Sentries.debug )
                         Sentries.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
@@ -140,7 +140,7 @@ public enum SentryStatus {
                     if ( System.currentTimeMillis() > inst.reassesTime ) {
                         String worldname = inst.guardeeEntity.getWorld().getName();
                     
-                        if ( Util.CanWarp( inst.guardeeEntity, worldname ) ) {
+                        if ( Utils.CanWarp( inst.guardeeEntity, worldname ) ) {
                             
                             inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
                             return SentryStatus.LOOKING;
@@ -191,7 +191,9 @@ public enum SentryStatus {
             if ( myEntity == null ) return SentryStatus.NOT_SPAWNED;
             
             Navigator navigator = inst.getNavigator();
-            if ( navigator.isNavigating() ) return this;
+            if  (   navigator.isNavigating() 
+                    && navigator.getTargetAsLocation().getBlock().equals( inst.spawnLocation.getBlock() ) ) 
+                return this;
             
             double distanceSqrd = Double.MAX_VALUE;
             if ( myEntity.getWorld() == inst.spawnLocation.getWorld() )
@@ -211,7 +213,6 @@ public enum SentryStatus {
             
             return this;
         }
-        
     },
     /** Sentries with this status will search for possible targets, and be receptive to _events 
      *  within their detection range. <p>  They will also heal whilst in this state. */
@@ -225,18 +226,17 @@ public enum SentryStatus {
 //            if ( goalController.isPaused() )
 //                goalController.setPaused( false );
 //            
-            LivingEntity target = null;
+            //target = null;
 
             // find and set a target to attack (if no current target)
             if (    !inst.targets.isEmpty() 
-                    && inst.attackTarget == null
                     && System.currentTimeMillis() > inst.reassesTime ) {
 
-                target = inst.findTarget();
+                LivingEntity target = inst.findTarget();
                 inst.reassesTime = System.currentTimeMillis() + 3000;
                 
-                if ( target != null ) {
-                    inst.setAttackTarget( target );
+                if  (   target != null &&
+                        inst.setAttackTarget( target ) ) {
                     return SentryStatus.ATTACKING;
                 }
             }
@@ -254,7 +254,7 @@ public enum SentryStatus {
                 if (    inst.attackTarget != null 
                         && !inst.attackTarget.isDead()
                         && inst.attackTarget.getWorld() == myEntity.getWorld() ) {
-    
+                    
                     inst.getNavigator().setTarget( inst.attackTarget, true );
 
                     double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );

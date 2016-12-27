@@ -39,9 +39,9 @@ public enum AttackType implements AttackStrategy {
     PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 34,   20,  Effect.BLAZE_SHOOT ), 
     PYRO2(        Material.TORCH,             SmallFireball.class, 34,   20,  Effect.BLAZE_SHOOT, true ),
     PYRO3(        Material.BLAZE_ROD,         Fireball.class,      34,   20,  Effect.BLAZE_SHOOT ), 
-    STORMCALLER1( Material.PAPER,             ThrownPotion.class,  21,   20 ), 
-    STROMCALLER2( Material.BOOK,              ThrownPotion.class,  21,   20 ), 
-    STORMCALLER3( Material.BOOK_AND_QUILL,    ThrownPotion.class,  21,   20 ), 
+    STORMCALLER1( Material.PAPER ), //             ThrownPotion.class,  21,   20 ), 
+    STROMCALLER2( Material.BOOK ),  //            ThrownPotion.class,  21,   20 ), 
+    STORMCALLER3( Material.BOOK_AND_QUILL ), //    ThrownPotion.class,  21,   20 ), 
     WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 13.5 ), 
     WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   34,   20,  Effect.WITHER_SHOOT ),
     WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   20 ),
@@ -49,11 +49,11 @@ public enum AttackType implements AttackStrategy {
     BRAWLER(      Material.AIR ); 
         
     @Getter private Material weapon;
-    final Class<? extends Projectile> projectile;
-    final double v;
-    final double g;
-    final Effect effect;
-    final boolean incendiary;
+    private final Class<? extends Projectile> projectile;
+    private final double v;
+    private final double g;
+    private final Effect effect;
+    private final boolean incendiary;
     
     static Map<Material, AttackType> reverseSearch = new EnumMap<>( Material.class );
     static { updateMap(); }
@@ -108,7 +108,7 @@ public enum AttackType implements AttackStrategy {
 
     @Override
     public boolean handle( LivingEntity myEntity, LivingEntity victim ) {
-        SentryTrait inst = Util.getSentryTrait( myEntity );
+        SentryTrait inst = Utils.getSentryTrait( myEntity );
         if ( inst == null ) return false;
 
         if ( System.currentTimeMillis() < inst.okToAttack ) return false;
@@ -167,7 +167,7 @@ public enum AttackType implements AttackStrategy {
             case WARLOCK1: // enderpearl, ballistic
             case WITCHDOCTOR: // potions, ballistic
                 
-                double range = Util.getRange( v, g, myLoc.getY() );
+                double range = Utils.getRange( v, g, myLoc.getY() );
                 if ( Math.min( range * range, inst.range * inst.range ) < myLoc.distanceSquared( targetLoc ) ) {
                     // can't hit target
                     inst.clearTarget();
@@ -183,7 +183,7 @@ public enum AttackType implements AttackStrategy {
                 else if ( this == AttackType.WARLOCK1 ) inst.epCount++;
                 
                 proj.setShooter( myEntity );
-                proj.setVelocity( Util.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g ) );
+                proj.setVelocity( Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g ) );
                 break;
 
             case PYRO1: // smallfireball, non-incendiary

@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class WarningCommand implements SentriesComplexCommand {
@@ -17,14 +17,14 @@ public class WarningCommand implements SentriesComplexCommand {
         
         if ( inargs.length >= 2 + nextArg ) {
 
-            String str = Util.removeQuotes( Util.joinArgs( 1 + nextArg, inargs ) );
+            String str = Utils.removeQuotes( Utils.joinArgs( 1 + nextArg, inargs ) );
             str = ChatColor.translateAlternateColorCodes( '&', str );
             inst.warningMsg = str;
             
-            Util.sendMessage( sender, Col.GREEN, npcName, ": Warning message set to:- ", Col.RESET, str );
+            Utils.sendMessage( sender, Col.GREEN, npcName, ": Warning message set to:- ", Col.RESET, str );
         }
         else {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s Warning message is:- ", Col.RESET, inst.warningMsg );
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s Warning message is:- ", Col.RESET, inst.warningMsg );
         }
     }
 

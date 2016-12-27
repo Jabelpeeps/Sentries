@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class HealRateCommand implements SentriesNumberCommand {
@@ -15,18 +15,18 @@ public class HealRateCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName," will heal every ", String.valueOf( inst.healRate ), " seconds" );
+            Utils.sendMessage( sender, Col.GOLD, npcName," will heal every ", String.valueOf( inst.healRate ), " seconds" );
         }
         else {
-            double healrate = Util.string2Double( number );
+            double healrate = Utils.string2Double( number );
             if ( healrate == Double.MIN_VALUE || healrate < 0.0 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( healrate > 300.0 ) healrate = 300.0;
             
             inst.healRate = healrate;
-            Util.sendMessage( sender, Col.GREEN, npcName, " will now heal every ", String.valueOf( healrate ), " seconds" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " will now heal every ", String.valueOf( healrate ), " seconds" );
         }
     }
 

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.targets.EventPVETarget;
 import org.jabelpeeps.sentries.targets.EventPVNPCTarget;
 import org.jabelpeeps.sentries.targets.EventPVPTarget;
@@ -31,21 +31,21 @@ public class EventCommand implements SentriesComplexCommand {
             StringJoiner joiner = new StringJoiner( ", " );
             inst.events.forEach( t -> joiner.add( t.getTargetString() ) );
             
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s Events: ", joiner.toString() );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s Events: ", joiner.toString() );
             return;
         }
         
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.events.clear();
             inst.clearTarget();
-            Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Events cleared" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, ": ALL Events cleared" );
             return;
         }
         
         if ( (S.ADD + S.REMOVE).contains( subCommand ) ) {
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Missing argument!", Col.RESET, " try '/sentry help event'" );
+                Utils.sendMessage( sender, S.ERROR, "Missing argument!", Col.RESET, " try '/sentry help event'" );
                 return;
             }
             TargetType target = null;
@@ -61,11 +61,11 @@ public class EventCommand implements SentriesComplexCommand {
                 target = new EventPVSentryTarget();
             
             if ( target == null )
-                Util.sendMessage( sender, "The event name was not recognised" );
+                Utils.sendMessage( sender, "The event name was not recognised" );
             else if ( S.ADD.equals( subCommand ) && inst.events.add( target ) )
-                Util.sendMessage( sender, "Event Added" );
+                Utils.sendMessage( sender, "Event Added" );
             else if ( S.REMOVE.equals( subCommand ) && inst.events.remove( target ) )
-                Util.sendMessage( sender, "Event Removed" );  
+                Utils.sendMessage( sender, "Event Removed" );  
         }
     }
     @Override

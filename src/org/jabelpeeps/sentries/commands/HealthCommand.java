@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class HealthCommand implements SentriesNumberCommand {
@@ -16,12 +16,12 @@ public class HealthCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s Health is:- ", String.valueOf( inst.maxHealth ) );
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s Health is:- ", String.valueOf( inst.maxHealth ) );
         }
         else {
-            int HPs = Util.string2Int( number );
+            int HPs = Utils.string2Int( number );
             if ( HPs < 1 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( HPs > 2000000 ) HPs = 2000000;
@@ -29,7 +29,7 @@ public class HealthCommand implements SentriesNumberCommand {
             inst.maxHealth = HPs;
             inst.getMyEntity().getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( HPs );
             inst.setHealth( HPs );
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) );
         }
     }
 

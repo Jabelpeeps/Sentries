@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class RangeCommand implements SentriesNumberCommand {
@@ -15,18 +15,18 @@ public class RangeCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s attack range is:- ", String.valueOf( inst.range ) );
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s attack range is:- ", String.valueOf( inst.range ) );
         }
         else {
-            int range = Util.string2Int( number );
+            int range = Utils.string2Int( number );
             if ( range < 1 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( range > 100 ) range = 100;
             
             inst.range = range;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s attack range set to:- ", String.valueOf( range ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s attack range set to:- ", String.valueOf( range ) );
         }
     }
 

@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class RetaliateCommand implements SentriesToggleCommand {
@@ -16,8 +16,8 @@ public class RetaliateCommand implements SentriesToggleCommand {
         
         inst.iRetaliate = (set == null) ? !inst.iRetaliate : set;
 
-        Util.sendMessage( sender, Col.GREEN, npcName, inst.iRetaliate ? " will retalitate against all attackers" : " will not retaliate when attacked" );
-
+        Utils.sendMessage( sender, Col.GREEN, npcName, inst.iRetaliate ? " will retalitate against all attackers" 
+                                                                       : " will not retaliate when attacked" );
     }
 
     @Override

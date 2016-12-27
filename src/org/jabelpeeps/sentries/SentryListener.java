@@ -74,7 +74,7 @@ public class SentryListener implements Listener {
                 // (e.g. it is possible killer references a projectile shot by a dispenser.)
             }
         }
-        SentryTrait inst = Util.getSentryTrait( Util.getArcher( killer ) );
+        SentryTrait inst = Utils.getSentryTrait( Utils.getArcher( killer ) );
 
         if ( inst != null && !inst.killsDrop ) {
             event.getDrops().clear();
@@ -88,13 +88,17 @@ public class SentryListener implements Listener {
         
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
 
-        SentryTrait inst = Util.getSentryTrait( event.getNPC() );
+        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
 
         if (    inst != null 
-                && event.getReason() == DespawnReason.CHUNK_UNLOAD
-                && inst.guardeeEntity != null ) {
-            event.setCancelled( true );
-            inst.myStatus = SentryStatus.FOLLOWING;
+                && event.getReason() == DespawnReason.CHUNK_UNLOAD ) {
+
+            if ( inst.guardeeEntity != null ) {
+                event.setCancelled( true );
+                inst.myStatus = SentryStatus.FOLLOWING;
+            }
+            else 
+                inst.myStatus = SentryStatus.NOT_SPAWNED;
         }
     }
 
@@ -102,7 +106,7 @@ public class SentryListener implements Listener {
     public void entteleportevent( EntityTeleportEvent event ) {
         // stop warlocks teleporting when they throw enderpearls
 
-        SentryTrait inst = Util.getSentryTrait( event.getEntity() );
+        SentryTrait inst = Utils.getSentryTrait( event.getEntity() );
 
         if (    inst != null 
                 && inst.epCount != 0 
@@ -115,7 +119,7 @@ public class SentryListener implements Listener {
     public void entteleportevent( PlayerTeleportEvent event ) {
         // stop player-type warlocks teleporting when they throw enderpearls
 
-        SentryTrait inst = Util.getSentryTrait( event.getPlayer() );
+        SentryTrait inst = Utils.getSentryTrait( event.getPlayer() );
 
         if (    inst != null 
                 && inst.epCount != 0 
@@ -130,7 +134,7 @@ public class SentryListener implements Listener {
         // event to handle thrown enderpearls & put out fires from small fireballs
 
         Projectile projectile = event.getEntity();
-        SentryTrait inst = Util.getSentryTrait( (Entity) projectile.getShooter() );
+        SentryTrait inst = Utils.getSentryTrait( (Entity) projectile.getShooter() );
         if ( inst == null ) return;
 
         if ( inst.isWarlock1() || projectile instanceof EnderPearl ) {
@@ -143,8 +147,8 @@ public class SentryListener implements Listener {
                     Effect.ENDER_SIGNAL, 1, 100 );
             return;
         }
-        // put out any fires from pyromancer1 fire-balls
-        if ( inst.isPyromancer1() ) {
+        // put out any fires caused by attacks. 
+        if ( inst.lightsFires() ) {
 
             final Block block = projectile.getLocation().getBlock();
 
@@ -166,7 +170,7 @@ public class SentryListener implements Listener {
         if ( event instanceof NPCDamageByEntityEvent ) return;     
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getName() );
 
-        SentryTrait inst = Util.getSentryTrait( event.getNPC() );
+        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
 
         if ( inst == null ) return;
 
@@ -183,7 +187,7 @@ public class SentryListener implements Listener {
                 if ( inst.isStormcaller() ) return;
                 break;
             case FIRE: case FIRE_TICK: case LAVA: 
-                if ( !inst.isNotFlammable() ) return;
+                if ( inst.isNotFlammable() ) return;
                 break;
             case POISON: case MAGIC:
                 if ( inst.isWitchDoctor() ) return;
@@ -234,9 +238,9 @@ public class SentryListener implements Listener {
         LivingEntity victim = (LivingEntity) entity;
         
         Entity damagerEnt = event.getDamager();        
-        LivingEntity shooter = (LivingEntity) Util.getArcher( damagerEnt );
+        LivingEntity shooter = (LivingEntity) Utils.getArcher( damagerEnt );
                
-        SentryTrait instDamager = Util.getSentryTrait( shooter );
+        SentryTrait instDamager = Utils.getSentryTrait( shooter );
 
         if ( instDamager != null ) {
             // projectiles go through ignore targets.
@@ -265,7 +269,7 @@ public class SentryListener implements Listener {
                     || !Sentries.bodyguardsObeyProtection )
                 event.setCancelled( false );
 
-            SentryTrait instVictim = Util.getSentryTrait( victim );
+            SentryTrait instVictim = Utils.getSentryTrait( victim );
             
             // cancel if invulnerable, non-sentry npc
             if ( instVictim == null ) {
@@ -310,7 +314,7 @@ public class SentryListener implements Listener {
         // handles damage to sentries - including critical hits (if enabled)
 
         NPC npc = event.getNPC();
-        SentryTrait instVictim = Util.getSentryTrait( npc );
+        SentryTrait instVictim = Utils.getSentryTrait( npc );
        
         if ( instVictim == null ) return;
             
@@ -321,7 +325,7 @@ public class SentryListener implements Listener {
         // Damage to a sentry cannot be handled by the server.
         event.setCancelled( true );
 
-        LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
+        LivingEntity damager = (LivingEntity) Utils.getArcher( event.getDamager() );
         
         // don't take damage from the entity the sentry is guarding.
         if ( damager == null || damager == instVictim.guardeeEntity ) return;  
@@ -334,7 +338,7 @@ public class SentryListener implements Listener {
                 if ( instVictim.isNotFlammable() ) return;
             default:
         }
-        SentryTrait instDamager = Util.getSentryTrait( damager );
+        SentryTrait instDamager = Utils.getSentryTrait( damager );
         
         // don't take damage from co-guards.
         if (    instDamager != null
@@ -377,7 +381,7 @@ public class SentryListener implements Listener {
             String msg = hit.message;
 
             if ( msg != null && !msg.isEmpty() ) {
-                String formatted = Util.format( msg,
+                String formatted = Utils.format( msg,
                                                 npc,
                                                 damager, 
                                                 player.getInventory().getItemInMainHand().getType(),
@@ -406,7 +410,7 @@ public class SentryListener implements Listener {
     public void processEventForTargets( EntityDamageByEntityEvent event ) {
         // event to check each sentry for events that need a response.
         
-        LivingEntity damager = (LivingEntity) Util.getArcher( event.getDamager() );
+        LivingEntity damager = (LivingEntity) Utils.getArcher( event.getDamager() );
         if ( damager == null ) return;
         
         Entity victim = event.getEntity();        
@@ -424,29 +428,27 @@ public class SentryListener implements Listener {
         if (    damager != victim
                 && damage > 0 ) {
 
-            SentryTrait victimInst = Util.getSentryTrait( victim );
+            SentryTrait victimInst = Utils.getSentryTrait( victim );
             
             if ( victimInst != null && victimInst.iRetaliate )
                 victimInst.setAttackTarget( damager );
             
             for ( NPC npc : Sentries.registry ) {
-
-                SentryTrait inst = Util.getSentryTrait( npc );
-
-                if (    inst == null 
-                        || inst == victimInst
-                        || !npc.isSpawned()
+                
+                if  (   !npc.isSpawned()
                         || npc.getEntity().getWorld() != victim.getWorld() ) {
-                    // not a sentry, or not this world, or dead.
+                     continue;       
+                }
+                SentryTrait inst = Utils.getSentryTrait( npc );
+
+                if ( inst == null || inst == victimInst || inst.isIgnoring( damager ) ) {
                     continue; 
                 }
-
                 // is the sentry guarding the victim?
                 if (    inst.guardeeEntity == victim ) {
                     inst.setAttackTarget( damager );
                     continue;
                 }
-
                 // is the sentry set to retaliate, and its mount was the victim?
                 if (    inst.iRetaliate
                         && inst.hasMount()
@@ -454,13 +456,11 @@ public class SentryListener implements Listener {
                     inst.setAttackTarget( damager );
                     continue;
                 }
-
                 // respond to configured event targetTypes
                 if (    inst.myStatus == SentryStatus.LOOKING
                         && damager instanceof Player
                         && !damager.hasMetadata( "NPC" )
-                        && inst.events.parallelStream().anyMatch( e -> e.includes( victim ) )
-                        && !inst.isIgnoring( damager ) ) {
+                        && inst.events.parallelStream().anyMatch( e -> e.includes( victim ) ) ) {
                     
                     Location npcLoc = npc.getEntity().getLocation();
                     // is the event within range of the sentry?
@@ -489,7 +489,7 @@ public class SentryListener implements Listener {
 
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + npc.getFullName() );
         
-        SentryTrait inst = Util.getSentryTrait( npc );
+        SentryTrait inst = Utils.getSentryTrait( npc );
         LivingEntity deceased = (LivingEntity) npc.getEntity();
         
         if ( inst != null && deceased != null ) {
@@ -535,13 +535,13 @@ public class SentryListener implements Listener {
             else
                 Bukkit.getPluginManager().callEvent( new EntityDeathEvent( deceased, items ) );            
         
-        
+            
             // if the mount dies carry aggression over.
             
             // first we need to find out whether the dead entity was a mount.
             for ( NPC each : Sentries.registry ) {
     
-                SentryTrait eachInst = Util.getSentryTrait( each );
+                SentryTrait eachInst = Utils.getSentryTrait( each );
                 
                 if ( eachInst == null || !each.isSpawned() || !eachInst.hasMount() )
                     continue; // not a sentry, not spawned, or not mounted
@@ -556,7 +556,7 @@ public class SentryListener implements Listener {
                         if (    ev != null
                                 && ev instanceof EntityDamageByEntityEvent ) {
     
-                            killer = Util.getArcher( ((EntityDamageByEntityEvent) ev).getDamager() );
+                            killer = Utils.getArcher( ((EntityDamageByEntityEvent) ev).getDamager() );
                         }
                     }
     
@@ -577,7 +577,7 @@ public class SentryListener implements Listener {
     @EventHandler
     public void onNPCRightClick( NPCRightClickEvent event ) {
 
-        SentryTrait inst = Util.getSentryTrait( event.getNPC() );
+        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
         if ( inst == null ) return;
         
         Player player = event.getClicker();
@@ -599,7 +599,7 @@ public class SentryListener implements Listener {
     @EventHandler
     public void onFinishedNavigating( NavigationCompleteEvent event ) {
 
-        SentryTrait inst = Util.getSentryTrait( event.getNPC() );
+        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
         
         if ( inst == null ) return;
         

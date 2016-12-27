@@ -18,7 +18,7 @@ import net.citizensnpcs.api.npc.NPC;
 /**
  * An abstract collection of useful static methods.
  */
-public abstract class Util {
+public abstract class Utils {
     
     public static double sqr( double d ) { return d * d; }
     final static double angle = Math.toRadians( 45 ); 
@@ -134,7 +134,7 @@ public abstract class Util {
 
         input = input.replace( "<NPC>", (npc == null) ? "" : npc.getName() );
         input = input.replace( "<PLAYER>", (player == null) ? "" : player.getName() );
-        input = input.replace( "<ITEM>", (item == null) ? "" : Util.getLocalItemName( item ) );
+        input = input.replace( "<ITEM>", (item == null) ? "" : Utils.getLocalItemName( item ) );
         input = input.replace( "<AMOUNT>", (amount == null) ? "" : amount );
 
         return input;

@@ -11,7 +11,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 import org.jabelpeeps.sentries.targets.AllMobsTarget;
 import org.jabelpeeps.sentries.targets.AllMonstersTarget;
 import org.jabelpeeps.sentries.targets.AllNPCsTarget;
@@ -47,13 +47,13 @@ public class IgnoreCommand implements SentriesComplexCommand {
             StringJoiner joiner = new StringJoiner( ", " );           
             inst.ignores.forEach( t -> joiner.add( t.getPrettyString() ) );
             
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s Ignores: ", joiner.toString() );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s Ignores: ", joiner.toString() );
             return;
         }
 
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.ignores.removeIf( i -> i instanceof TargetType.Internal );
-            Util.sendMessage( sender, Col.GREEN, npcName, ": ALL Ignores cleared" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, ": ALL Ignores cleared" );
             return;
         }
 
@@ -62,11 +62,11 @@ public class IgnoreCommand implements SentriesComplexCommand {
             // TODO add more user feedback for success or failure conditions
             
             if ( args.length <= nextArg + 2 ) {
-                Util.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help ignore'" );
+                Utils.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help ignore'" );
                 return;
             }
             TargetType target = null;
-            String[] targetArgs = Util.colon.split( args[nextArg + 2] );           
+            String[] targetArgs = Utils.colon.split( args[nextArg + 2] );           
             String firstSubArg = targetArgs[0].toLowerCase();
             
             if ( targetArgs.length == 1 && firstSubArg.equals( "owner" ) ) {
@@ -108,7 +108,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
                                       .orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
                                       .getUniqueId() );
                         } catch (IllegalArgumentException e) {
-                            Util.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
+                            Utils.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
                         }
                     }
                     else if ( secondSubArg.equals( "npc" ) ) {
@@ -125,11 +125,11 @@ public class IgnoreCommand implements SentriesComplexCommand {
             }
             
             if ( target == null )
-                Util.sendMessage( sender, "The intended target was not recognised" );
+                Utils.sendMessage( sender, "The intended target was not recognised" );
             else if ( S.ADD.equals( subCommand ) && inst.ignores.add( target ) )
-                Util.sendMessage( sender, "Ignore Added" );
+                Utils.sendMessage( sender, "Ignore Added" );
             else if ( S.REMOVE.equals( subCommand ) && inst.ignores.remove( target ) )
-                Util.sendMessage( sender, "Ignore Removed" );  
+                Utils.sendMessage( sender, "Ignore Removed" );  
         }
     }
 
@@ -160,7 +160,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  Trait:<TraitName> ", Col.RESET, "to ignore NPC's with the named Trait" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
-            joiner.add( Util.getAdditionalTargets() );
+            joiner.add( Utils.getAdditionalTargets() );
 
             ignoreCommandHelp = joiner.toString();
         }

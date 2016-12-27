@@ -10,7 +10,7 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentinelImporter;
 import org.jabelpeeps.sentries.SentryImporter;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 import com.google.common.io.Files;
 
@@ -53,9 +53,9 @@ public class ImportCommand implements SentriesComplexCommand {
         
         if ( "all".equals( subCommand ) ) {
             if ( nextArg != 0 )
-                Util.sendMessage( sender, S.ERROR, "You have used an NPC id number, as well as the 'all' argument." );
+                Utils.sendMessage( sender, S.ERROR, "You have used an NPC id number, as well as the 'all' argument." );
             else if ( args.length <= 2 )
-                Util.sendMessage( sender, S.ERROR, "You need to name the plugin to import NPC's from." );
+                Utils.sendMessage( sender, S.ERROR, "You need to name the plugin to import NPC's from." );
             else {
                 String pluginName = args[2].toLowerCase();
                 
@@ -64,30 +64,30 @@ public class ImportCommand implements SentriesComplexCommand {
                 else if ( "sentinel".equals( pluginName ) && checkSentinel( sender ) )
                     imported = SentinelImporter.importAll();
                 else {
-                    Util.sendMessage( sender, S.ERROR, "plugin - ", pluginName, ", was not recognised." );
+                    Utils.sendMessage( sender, S.ERROR, "plugin - ", pluginName, ", was not recognised." );
                     return;
                 }
                 if ( imported == 0 )
-                    Util.sendMessage( sender, Col.YELLOW, "No NPC's with trait ", pluginName, " were found to import." );
+                    Utils.sendMessage( sender, Col.YELLOW, "No NPC's with trait ", pluginName, " were found to import." );
                 else
-                    Util.sendMessage( sender, Col.GREEN, "Successfully imported ", String.valueOf( imported ), 
+                    Utils.sendMessage( sender, Col.GREEN, "Successfully imported ", String.valueOf( imported ), 
                                                 " NPC's into Sentries from ", pluginName );
             }
             return;
         }
         if ( "sentry".equals( subCommand ) && checkSentry( sender ) && SentryImporter.importNPC( inst.getNPC() ) ) 
-            Util.sendMessage( sender, Col.GREEN, npcName, " has been successfully imported from Sentry(v1)" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " has been successfully imported from Sentry(v1)" );
         else if ( "sentinel".equals( subCommand ) && checkSentinel( sender ) && SentinelImporter.importNPC( inst.getNPC() ) ) 
-            Util.sendMessage( sender, Col.GREEN, npcName, " has been succesfully imported from Sentinel" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " has been succesfully imported from Sentinel" );
         else {
-            Util.sendMessage( sender, Col.RED, "Importing ", npcName, 
+            Utils.sendMessage( sender, Col.RED, "Importing ", npcName, 
                     " has failed, please check the NPC's current traits by selecting them and then doing '/npc'" );
         }  
     }
     
     private boolean checkSentry( CommandSender sender ) {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentry" ) ) {
-            Util.sendMessage( sender, S.ERROR, "You need install Sentry(v1) to import from Sentry." );
+            Utils.sendMessage( sender, S.ERROR, "You need install Sentry(v1) to import from Sentry." );
             return false;
         }        
         return backupSavesYml( sender );
@@ -95,7 +95,7 @@ public class ImportCommand implements SentriesComplexCommand {
     
     private boolean checkSentinel( CommandSender sender ) {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentinel" ) ) {
-            Util.sendMessage( sender, S.ERROR, "You need install Sentinel to import from Sentinel." );
+            Utils.sendMessage( sender, S.ERROR, "You need install Sentinel to import from Sentinel." );
             return false;
         }
         return backupSavesYml( sender );
@@ -114,7 +114,7 @@ public class ImportCommand implements SentriesComplexCommand {
             return true;
         } 
         catch ( IOException e ) {
-            Util.sendMessage( sender, S.ERROR, "Unable to backup Citizens saves.yml. Import aborted." );
+            Utils.sendMessage( sender, S.ERROR, "Unable to backup Citizens saves.yml. Import aborted." );
             e.printStackTrace();
             return false;
         }

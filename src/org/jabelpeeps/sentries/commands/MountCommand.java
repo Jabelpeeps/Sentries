@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class MountCommand implements SentriesToggleCommand {
@@ -17,15 +17,15 @@ public class MountCommand implements SentriesToggleCommand {
 
         if ( set ) {
             inst.mount();
-            Util.sendMessage( sender, Col.GREEN, npcName, " is now mounted" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " is now mounted" );
         }
         else {
             if ( inst.hasMount() ) {
-                Util.removeMount( inst.mountID );
+                Utils.removeMount( inst.mountID );
                 inst.mountID = -1;
-                Util.sendMessage( sender, Col.GREEN, npcName, " is no longer mounted" );
+                Utils.sendMessage( sender, Col.GREEN, npcName, " is no longer mounted" );
             }
-            else Util.sendMessage( sender, Col.YELLOW, npcName, " is not mounted" );
+            else Utils.sendMessage( sender, Col.YELLOW, npcName, " is not mounted" );
         }
     }
 

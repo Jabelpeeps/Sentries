@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class KillsDropCommand implements SentriesToggleCommand {
@@ -15,7 +15,7 @@ public class KillsDropCommand implements SentriesToggleCommand {
 
         inst.killsDrop = (set == null) ? !inst.killsDrop : set;
 
-        Util.sendMessage( sender, Col.GREEN, npcName, 
+        Utils.sendMessage( sender, Col.GREEN, npcName, 
                             inst.killsDrop ? "'s kills will drop items or exp"
                                            : "'s kills will not drop items or exp" ) ;
     }

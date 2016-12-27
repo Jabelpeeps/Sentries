@@ -5,7 +5,7 @@ import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class SetSpawnCommand implements SentriesComplexCommand {
@@ -21,7 +21,7 @@ public class SetSpawnCommand implements SentriesComplexCommand {
             sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is dead" ) );
         else {
             inst.spawnLocation = entity.getLocation();
-            Util.sendMessage( sender, Col.GREEN, npcName, " will respawn at its present location" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " will respawn at its present location" );
         }
     }
     

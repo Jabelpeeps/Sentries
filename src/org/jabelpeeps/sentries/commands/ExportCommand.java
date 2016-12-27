@@ -10,7 +10,7 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentinelExporter;
 import org.jabelpeeps.sentries.SentinelImporter;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 import com.google.common.io.Files;
 
@@ -23,7 +23,6 @@ public class ExportCommand implements SentriesComplexCommand {
     public String getShortHelp() { return "export NPC settings to Sentinel"; }
     @Override
     public String getPerm() { return "sentries.export"; }
-
     @Override
     public String getLongHelp() {
 
@@ -53,31 +52,31 @@ public class ExportCommand implements SentriesComplexCommand {
         
         if ( "all".equals( subCommand ) ) {
             if ( nextArg != 0 )
-                Util.sendMessage( sender, S.ERROR, "You have used an NPC id number, as well as the 'all' argument." );
+                Utils.sendMessage( sender, S.ERROR, "You have used an NPC id number, as well as the 'all' argument." );
             else {
                 
                 if ( checkSentinel( sender ) ) {
                     imported = SentinelExporter.exportAll();
                 }
                 if ( imported == 0 )
-                    Util.sendMessage( sender, Col.YELLOW, "No NPC's were found to export." );
+                    Utils.sendMessage( sender, Col.YELLOW, "No NPC's were found to export." );
                 else
-                    Util.sendMessage( sender, Col.GREEN, "Successfully exported ", String.valueOf( imported ), 
+                    Utils.sendMessage( sender, Col.GREEN, "Successfully exported ", String.valueOf( imported ), 
                                                 " NPC's into Senntinel" );
             }
             return;
         }
         if ( checkSentinel( sender ) && SentinelImporter.importNPC( inst.getNPC() ) ) 
-            Util.sendMessage( sender, Col.GREEN, npcName, " has been succesfully exprted to Sentinel" );
+            Utils.sendMessage( sender, Col.GREEN, npcName, " has been succesfully exprted to Sentinel" );
         else {
-            Util.sendMessage( sender, Col.RED, "Exporting ", npcName, 
+            Utils.sendMessage( sender, Col.RED, "Exporting ", npcName, 
                     " has failed, please check the NPC's current traits by selecting them and then doing '/npc'" );
         }  
     }
    
     private boolean checkSentinel( CommandSender sender ) {
         if ( !Bukkit.getPluginManager().isPluginEnabled( "Sentinel" ) ) {
-            Util.sendMessage( sender, S.ERROR, "You need install Sentinel to export to Sentinel." );
+            Utils.sendMessage( sender, S.ERROR, "You need install Sentinel to export to Sentinel." );
             return false;
         }
         return backupSavesYml( sender );
@@ -96,7 +95,7 @@ public class ExportCommand implements SentriesComplexCommand {
             return true;
         } 
         catch ( IOException e ) {
-            Util.sendMessage( sender, S.ERROR, "Unable to backup Citizens saves.yml. Exmport aborted." );
+            Utils.sendMessage( sender, S.ERROR, "Unable to backup Citizens saves.yml. Exmport aborted." );
             e.printStackTrace();
             return false;
         }

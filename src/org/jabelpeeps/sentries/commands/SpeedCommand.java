@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class SpeedCommand implements SentriesNumberCommand {
@@ -15,19 +15,19 @@ public class SpeedCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s Speed is:- " + inst.speed );
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s Speed is:- " + inst.speed );
         }
         else {
-            float speed = Util.string2Float( number );
+            float speed = Utils.string2Float( number );
             if ( speed == Float.MIN_VALUE || speed < 0.0 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
 
             if ( speed > 2.0 ) speed = 2.0f;
             
             inst.speed = speed;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s speed set to:- ", String.valueOf( speed ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s speed set to:- ", String.valueOf( speed ) );
         }
     }
 

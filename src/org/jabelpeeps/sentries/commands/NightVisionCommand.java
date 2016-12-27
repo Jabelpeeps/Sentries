@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class NightVisionCommand implements SentriesNumberCommand {
@@ -14,18 +14,18 @@ public class NightVisionCommand implements SentriesNumberCommand {
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s night-vision is:- ", String.valueOf( inst.nightVision ) );
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s night-vision is:- ", String.valueOf( inst.nightVision ) );
         }
         else {
-            int vision = Util.string2Int( number );
+            int vision = Utils.string2Int( number );
             if ( vision < 0 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( vision > 16 ) vision = 16;
             
             inst.nightVision = vision;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s night_vision set to:- ", String.valueOf( vision ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s night_vision set to:- ", String.valueOf( vision ) );
         }
     }
 

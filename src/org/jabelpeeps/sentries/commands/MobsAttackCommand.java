@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 import net.citizensnpcs.api.npc.NPC;
 
@@ -20,9 +20,8 @@ public class MobsAttackCommand implements SentriesToggleCommand {
 
         inst.getNPC().data().set( NPC.TARGETABLE_METADATA, inst.targetable );
 
-        Util.sendMessage( sender, Col.GREEN, npcName, 
-                            inst.targetable ? " will be targeted by mobs"
-                                            : " will not be targeted by mobs" );
+        Utils.sendMessage( sender, Col.GREEN, npcName, inst.targetable ? " will be targeted by mobs"
+                                                                       : " will not be targeted by mobs" );
     }
 
     @Override

@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class RespawnDelayCommand implements SentriesNumberCommand {
@@ -18,9 +18,9 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
             respawnCommandMessage( inst.respawnDelay, npcName, sender );
         }
         else {
-            int respawn = Util.string2Int( number );
+            int respawn = Utils.string2Int( number );
             if ( respawn < -1 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( respawn > 2000000 ) respawn = 2000000;
@@ -43,11 +43,11 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
     static void respawnCommandMessage( int value, String npcName, CommandSender player ) {
 
         if ( value == -1 )
-            player.sendMessage( String.join( "", Col.GOLD, npcName, " will be deleted upon death" ) );
+            Utils.sendMessage( player, Col.GOLD, npcName, " will be deleted upon death" );
         if ( value == 0 )
-            player.sendMessage( String.join( "", Col.GOLD, npcName, " will not automatically respawn" ) );
+            Utils.sendMessage( player, Col.GOLD, npcName, " will not automatically respawn" );
         if ( value > 0 )
-            player.sendMessage( String.join( "", Col.GOLD, npcName, " respawns after ", String.valueOf( value ), S.SECONDS ) );
+            Utils.sendMessage( player, Col.GOLD, npcName, " respawns after ", String.valueOf( value ), S.SECONDS );
     }
     
     @Override

@@ -112,7 +112,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         @Override public String getLongHelp() { return null; }
         @Override public String getPerm() { return null; }
         @Override public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
-            Sentries.logger.info( "[Sentries] NPC:" + npcName + ". Target/Ignore could not be imported:- " + Util.joinArgs( 0, args ) );
+            Sentries.logger.info( "[Sentries] NPC:" + npcName + ". Target/Ignore could not be imported:- " + Utils.joinArgs( 0, args ) );
         }
     };
     
@@ -233,15 +233,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 SentriesCommand command = each.getValue();
                 
                 if ( sender.hasPermission( command.getPerm() ) ) {
-                    Util.sendMessage( sender, Col.GOLD, "/sentry ", each.getKey(), " ... ", Col.RESET, command.getShortHelp() );
+                    Utils.sendMessage( sender, Col.GOLD, "/sentry ", each.getKey(), " ... ", Col.RESET, command.getShortHelp() );
                 }
             }
             // two special commands to add to the list...
             if ( checkCommandPerm( S.PERM_RELOAD, sender ) )
-                Util.sendMessage( sender, Col.GOLD, "/sentry reload", Col.RESET, " - reloads the config file" );
+                Utils.sendMessage( sender, Col.GOLD, "/sentry reload", Col.RESET, " - reloads the config file" );
             
             if ( sender instanceof ConsoleCommandSender )
-                Util.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, 
+                Utils.sendMessage( sender, Col.GOLD, "/sentry debug", Col.RESET, 
                         " - toggles display of debug info on the console  ", Col.RED, "NOTE: Debug Reduces Performance!" );
 
             if ( mainHelpOutro == null ) {
@@ -277,7 +277,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         // -------------------------------------------------------------------------------------
         
         // did player specify an integer as the first argument?
-        int npcid = Util.string2Int( inargs[0] );
+        int npcid = Utils.string2Int( inargs[0] );
 
         // if a positive number was found, the next argument to parse will be at position 1, otherwise 0.
         int nextArg = (npcid > 0) ? 1 : 0;
@@ -295,12 +295,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( npcid == Integer.MIN_VALUE ) {
             thisNPC = CitizensAPI.getDefaultNPCSelector().getSelected( sender );
             if ( thisNPC == null )
-                Util.sendMessage( sender, S.ERROR, S.ERROR_NO_NPC );
+                Utils.sendMessage( sender, S.ERROR, S.ERROR_NO_NPC );
         }
         else {
             thisNPC = Sentries.registry.getById( npcid );
             if ( thisNPC == null )
-                Util.sendMessage( sender, S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) );
+                Utils.sendMessage( sender, S.ERROR, S.ERROR_ID_INVALID, String.valueOf( npcid ) );
         }       
         if ( thisNPC == null ) return true;
             
@@ -346,7 +346,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     Boolean set = null;
                     
                     if ( inargs.length > nextArg + 2 ) {
-                        Util.sendMessage( sender, S.ERROR, "Too many arguments given.", Col.RESET, " This command accepts 1 argument (at most)." );
+                        Utils.sendMessage( sender, S.ERROR, "Too many arguments given.", Col.RESET, " This command accepts 1 argument (at most)." );
                         return true;
                     }
                     else if ( inargs.length == 2 + nextArg ) {
@@ -364,7 +364,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 else if ( command instanceof SentriesNumberCommand ) {
                     
                     if ( inargs.length > nextArg + 2 )
-                        Util.sendMessage( sender, S.ERROR, "Too many arguments given.", Col.RESET, " Only one number value can be processesd." );
+                        Utils.sendMessage( sender, S.ERROR, "Too many arguments given.", Col.RESET, " Only one number value can be processesd." );
                     else {
                         String number = null;
                         if ( inargs.length == nextArg + 2 ) number = inargs[nextArg + 1];
@@ -375,7 +375,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
             return true;
         }
-        Util.sendMessage( sender, S.ERROR, "Command not recognised, try '/sentry help'" );
+        Utils.sendMessage( sender, S.ERROR, "Command not recognised, try '/sentry help'" );
         return true;
     }
 }

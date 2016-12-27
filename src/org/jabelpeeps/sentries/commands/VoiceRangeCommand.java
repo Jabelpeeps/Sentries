@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class VoiceRangeCommand implements SentriesNumberCommand {
@@ -15,18 +15,18 @@ public class VoiceRangeCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
 
         if ( number == null ) {
-            Util.sendMessage( sender, Col.GOLD, npcName, "'s voice range is:- " + inst.voiceRange );
+            Utils.sendMessage( sender, Col.GOLD, npcName, "'s voice range is:- " + inst.voiceRange );
         }
         else {
-            int range = Util.string2Int( number );
+            int range = Utils.string2Int( number );
             if ( range < 0 ) {
-                Util.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
+                Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
             if ( range > 50 ) range = 50;
             
             inst.voiceRange = range;
-            Util.sendMessage( sender, Col.GREEN, npcName, "'s voice range set to:- ", String.valueOf( range ) );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s voice range set to:- ", String.valueOf( range ) );
         }
     }
 

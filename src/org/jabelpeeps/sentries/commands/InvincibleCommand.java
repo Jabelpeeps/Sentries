@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class InvincibleCommand implements SentriesToggleCommand {
@@ -16,7 +16,7 @@ public class InvincibleCommand implements SentriesToggleCommand {
         
         inst.invincible = (set == null) ? !inst.invincible : set;
 
-        Util.sendMessage( sender, Col.GREEN, npcName, inst.invincible ? " is now INVINCIBLE" : " now takes damage" );
+        Utils.sendMessage( sender, Col.GREEN, npcName, inst.invincible ? " is now INVINCIBLE" : " now takes damage" );
     }
 
     @Override

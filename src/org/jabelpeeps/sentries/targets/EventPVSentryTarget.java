@@ -1,7 +1,7 @@
 package org.jabelpeeps.sentries.targets;
 
 import org.bukkit.entity.LivingEntity;
-import org.jabelpeeps.sentries.Util;
+import org.jabelpeeps.sentries.Utils;
 
 
 public class EventPVSentryTarget extends AbstractTargetType {
@@ -12,7 +12,7 @@ public class EventPVSentryTarget extends AbstractTargetType {
     }
     @Override
     public boolean includes( LivingEntity entity ) {
-        return Util.getSentryTrait( entity ) != null;
+        return Utils.getSentryTrait( entity ) != null;
     }
     @Override
     public boolean equals( Object o ) {
