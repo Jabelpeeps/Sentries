@@ -15,7 +15,8 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         
         if ( number == null ) {
-            Utils.sendMessage( sender, S.Col.GOLD, npcName, "'s follow distance is ", String.valueOf( inst.followDistance ) );
+            Utils.sendMessage( sender, S.Col.GOLD, npcName, "'s follow distance is ", 
+                                                    String.valueOf( Math.sqrt( inst.followDistance ) ) );
         }
         else {
             int dist = Utils.string2Int( number );
@@ -39,7 +40,7 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
         if ( helpTxt == null ) {
             helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.FOLLOW, " (#)", Col.RESET, 
                     ", where # is the number (0-32) of blocks that a sentry configured to guard will follow behind their guardees.",
-                    System.lineSeparator(), "  If no number is given the current value is shown. (Default = 4)");
+                    System.lineSeparator(), "  If no number is given the current value is shown. (Default = 2)");
         }
         return helpTxt;
     }

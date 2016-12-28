@@ -263,8 +263,8 @@ public class SentryTrait extends Trait {
         npc.data().set( NPC.TARGETABLE_METADATA, targetable );
 
         navigatorParams.range( myRange );
-        navigatorParams.stationaryTicks( 5 * 20 );
-        navigatorParams.useNewPathfinder( false );
+        navigatorParams.stationaryTicks( 60 ); // = 3 seconds
+        navigatorParams.useNewPathfinder( true );
 
         updateAttackType();
        
@@ -811,10 +811,9 @@ public class SentryTrait extends Trait {
             potionItem = null;
             weaponSpecialEffects = sentry.weaponEffects.get( weapon );
         }
-        // TODO uncomment these to activate new attack system
         NavigatorParameters params = npc.getNavigator().getDefaultParameters();
         params.attackStrategy( myAttack );
-        params.attackRange( range );
+        params.attackRange( range * range );
         params.stuckAction( giveup );
         params.stationaryTicks( 60 ); // = 3 seconds
         params.baseSpeed( speed );
@@ -904,7 +903,7 @@ public class SentryTrait extends Trait {
                 mountParams.attackStrategy( new MountAttackStrategy() );
                 mountParams.useNewPathfinder( false );
                 mountParams.speedModifier( myParams.speedModifier() * 2 );
-                mountParams.range( myParams.range() + 5 );
+                mountParams.range( range * range + 5 );
 
                 Entity ent = mount.getEntity();
                 ent.setCustomNameVisible( false );

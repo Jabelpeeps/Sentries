@@ -162,9 +162,10 @@ public enum SentryStatus {
                 if ( distSqrd > 1024 ) {
                     inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
                 }
-                else if ( distSqrd < inst.followDistance * inst.followDistance && !isNavigating ) {
+                // inst.followDistance holds the square of the intended distance.
+                else if ( distSqrd < inst.followDistance && !isNavigating ) {
                     navigator.setTarget( inst.guardeeEntity, false );
-                    navigator.getLocalParameters().stationaryTicks( 3 * 20 );
+//                    navigator.getLocalParameters().stationaryTicks( 3 * 20 );
                     return this;
                 }
                 else if ( distSqrd < inst.followDistance && isNavigating ) {

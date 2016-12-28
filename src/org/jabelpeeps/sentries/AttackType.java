@@ -201,7 +201,7 @@ public enum AttackType implements AttackStrategy {
             world.playEffect( myLoc, effect, null );
         
         if ( myEntity instanceof Player ) 
-            PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 ); 
+            PlayerAnimation.ARM_SWING.play( (Player) myEntity ); 
         
         return true;
     }
