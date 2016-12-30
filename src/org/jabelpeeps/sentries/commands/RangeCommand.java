@@ -31,14 +31,14 @@ public class RangeCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getShortHelp() { return "set the range a sentry's target detection"; }
+    public String getShortHelp() { return "set the sentry's target detection range"; }
 
     @Override
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
             helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.RANGE, " (#)", Col.RESET, System.lineSeparator(),
-            "  where # is the number (1-100) of blocks distance at which the sentry will detect entities, and assess them as possible targets",
+            "  where # is the number (1-100) of blocks distance at which the sentry will assess entities as possible targets",
             System.lineSeparator(), "If no number is given the current value is shown. (Default = 10)" );
         }
         return helpTxt;

@@ -74,7 +74,6 @@ public enum SentryStatus {
                     && inst.respawnDelay > 0
                     && inst.spawnLocation.getWorld().isChunkLoaded( inst.spawnLocation.getBlockX() >> 4,
                                                                     inst.spawnLocation.getBlockZ() >> 4 ) ) {
-
                 NPC npc = inst.getNPC();
                 
                 if ( inst.guardeeEntity == null )
@@ -95,7 +94,6 @@ public enum SentryStatus {
             inst.tryToHeal();  
             
             if ( inst.getNPC().isSpawned() ) {
-
                 inst.reMountMount();
                 return is_A_Guard( inst );
             }
@@ -114,7 +112,6 @@ public enum SentryStatus {
             
             NPC npc = inst.getNPC();
             Navigator navigator = inst.getNavigator();
-            navigator.setPaused( false );
 
             if ( myEntity.isInsideVehicle() ) 
                 NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );
@@ -145,14 +142,12 @@ public enum SentryStatus {
                             inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
                             return SentryStatus.LOOKING;
                         }
-                        
-                        ((Player) inst.guardeeEntity).sendMessage( String.join( " ", npc.getName(), S.CANT_FOLLOW, worldname ) );
+                        Utils.sendMessage( inst.guardeeEntity, npc.getName(), S.CANT_FOLLOW, worldname );
                         inst.guardeeEntity = null;
                         inst.reassesTime = System.currentTimeMillis() + 3000;
                     }
                     return this;
                 }
-//                inst.getGoalController().setPaused( true );
                 boolean isNavigating = navigator.isNavigating();
                 double distSqrd = npcLoc.distanceSquared( guardEntLoc );
 
@@ -162,10 +157,9 @@ public enum SentryStatus {
                 if ( distSqrd > 1024 ) {
                     inst.ifMountedGetMount().teleport( guardEntLoc.add( 1, 0, 1 ), TeleportCause.PLUGIN );
                 }
-                // inst.followDistance holds the square of the intended distance.
+                // Note to self:- inst.followDistance holds the square of the intended distance.
                 else if ( distSqrd < inst.followDistance && !isNavigating ) {
                     navigator.setTarget( inst.guardeeEntity, false );
-//                    navigator.getLocalParameters().stationaryTicks( 3 * 20 );
                     return this;
                 }
                 else if ( distSqrd < inst.followDistance && isNavigating ) {
@@ -209,25 +203,25 @@ public enum SentryStatus {
             if ( myEntity.isInsideVehicle() ) 
                 NMS.look( myEntity, myEntity.getVehicle().getLocation().getYaw(), 0 );  
             
-            navigator.setPaused( false );
             navigator.setTarget( inst.spawnLocation );
             
             return this;
         }
     },
-    /** Sentries with this status will search for possible targets, and be receptive to _events 
+    /** A status for Sentries who have become stuck while navigating, or have become separated from 
+     *  the entity they are guarding. */
+     STUCK {
+        @Override SentryStatus update( SentryTrait inst ) {
+            //TODO add some more logic to check whether current location is acceptable
+            return is_A_Guard( inst );
+        }
+    },
+    /** Sentries with this status will search for possible targets, and be receptive to events 
      *  within their detection range. <p>  They will also heal whilst in this state. */
     LOOKING {
         @Override SentryStatus update( SentryTrait inst ) {
             
             inst.tryToHeal();
-            
-//            GoalController goalController = inst.getGoalController();
-//            
-//            if ( goalController.isPaused() )
-//                goalController.setPaused( false );
-//            
-            //target = null;
 
             // find and set a target to attack (if no current target)
             if (    !inst.targets.isEmpty() 

@@ -24,7 +24,7 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.RED, " [Armour]:", Col.WHITE, String.valueOf( inst.armour ),
                 Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ),
                 Col.RED, " [Speed]:", Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
-                Col.RED, " [Range]:", Col.WHITE, String.valueOf( inst.range ),
+                Col.RED, " [AttackRange]:", Col.WHITE, String.valueOf( inst.range ),
                 Col.RED, " [AttackRate]:", Col.WHITE, String.valueOf( inst.attackRate ),
                 Col.RED, " [NightVision]:", Col.WHITE, String.valueOf( inst.nightVision ),
                 Col.RED, " [HealRate]:", Col.WHITE, String.valueOf( inst.healRate ),
@@ -32,20 +32,20 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.RED, " [FollowDistance]:", Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
         joiner.add( String.join( "", S.Col.GREEN, "Invincible: ", String.valueOf( inst.invincible ), 
-                                                "  Retaliate: ", String.valueOf( inst.iRetaliate ) ) );
-        joiner.add( String.join( "", S.Col.GREEN, "Drops Items: ", String.valueOf( inst.dropInventory ), 
-                                                "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ) ) );
-        joiner.add( String.join( "", S.Col.GREEN, "Kills Drop Items: ", String.valueOf( inst.killsDrop ), 
+                                                "  Retaliate: ", String.valueOf( inst.iRetaliate ),
+                                                "  Drops Items: ", String.valueOf( inst.dropInventory ), 
+                                                "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ),
+                                                "  Kills Drop Items: ", String.valueOf( inst.killsDrop ), 
                                                 "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
         joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 
         if ( inst.attackTarget == null )
-            joiner.add( Col.BLUE.concat( "Current Target: None" ) );
+            joiner.add( Col.BLUE.concat( "Currently Targetting: nothing" ) );
         else
-            joiner.add( String.join( "", Col.BLUE, "Current Target: ", inst.attackTarget.getName() ) );
+            joiner.add( String.join( "", Col.BLUE, "Currently Targetting: ", inst.attackTarget.getName() ) );
 
         if ( inst.guardeeEntity == null )
-            joiner.add( Col.BLUE.concat( "Guarding: My Surroundings" ) );
+            joiner.add( Col.BLUE.concat( "Guarding: my spawnpoint" ) );
         else
             joiner.add( String.join( "", Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() ) );
 

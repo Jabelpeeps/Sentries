@@ -35,10 +35,10 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.attackstrategies.MountAttackStrategy;
 import org.jabelpeeps.sentries.targets.TargetType;
 
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
+import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.ai.StuckAction;
@@ -58,7 +58,7 @@ import net.citizensnpcs.util.Util;
 
 public class SentryTrait extends Trait {
 
-    Sentries sentry;
+    final Sentries sentry;
     public Location spawnLocation;
 
     public int strength, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
@@ -70,7 +70,8 @@ public class SentryTrait extends Trait {
     boolean loaded;
     boolean ignoreLOS;
 
-    static GiveUpStuckAction giveup = new GiveUpStuckAction();
+    static SentryStuckAction setStuckStatus = new SentryStuckAction();
+    static AttackStrategy mountedAttack = new MountAttackStrategy();
 
     public String greetingMsg = "", warningMsg = "";
 
@@ -253,18 +254,14 @@ public class SentryTrait extends Trait {
             npc.teleport( spawnLocation, TeleportCause.PLUGIN );
 
         NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
-        float myRange = navigatorParams.range();
-
-        if ( myRange < range + 5 ) {
-            myRange = range + 5;
-        }
 
         npc.setProtected( false );
         npc.data().set( NPC.TARGETABLE_METADATA, targetable );
 
-        navigatorParams.range( myRange );
         navigatorParams.stationaryTicks( 60 ); // = 3 seconds
         navigatorParams.useNewPathfinder( true );
+        navigatorParams.stuckAction( setStuckStatus );
+        navigatorParams.baseSpeed( speed );
 
         updateAttackType();
        
@@ -488,86 +485,6 @@ public class SentryTrait extends Trait {
         }
         return theTarget;
     }
-
-//    public void fire( LivingEntity theTarget ) {
-//
-//        LivingEntity myEntity = getMyEntity();
-//        
-//        if ( !hasLOS( theTarget ) ) {
-//            clearTarget();
-//            return;
-//        }
-//        
-//        Location myLoc = myEntity.getEyeLocation();
-//        World world = myEntity.getWorld();
-//        Location targetLoc = theTarget.getLocation().add( 0, 1.33, 0 );        
-//        NMS.look( myEntity, theTarget );
-//        
-//        switch ( myAttack ) {
-//            case BRAWLER:  return;
-//
-//            case CREEPER: 
-//                world.createExplosion( myLoc, strength );
-//                setHealth( 0 );
-//                myStatus = SentryStatus.DEAD;
-//                return;
-//                
-//            case STORMCALLER1: 
-//                world.strikeLightningEffect( targetLoc );
-//                theTarget.damage( strength, myEntity );               
-//                break;
-//                
-//            case STROMCALLER2: 
-//                world.strikeLightning( targetLoc );                
-//                break;
-//                
-//            case STORMCALLER3: 
-//                world.strikeLightningEffect( targetLoc );
-//                theTarget.setHealth( 0 );
-//                break;
-//                
-//            case ARCHER: // arrows, ballistics   
-//            case BOMBARDIER: // eggs, ballistic
-//            case ICEMAGI: // snowballs, ballistic
-//            case WARLOCK1: // enderpearl, ballistics
-//            case WITCHDOCTOR: // potions, ballistic
-//                
-//                double projRange = Util.getRange( myAttack.v, myAttack.g, myLoc.getY() );
-//                if ( Math.min( projRange * projRange, range * range ) < myLoc.distanceSquared( targetLoc ) ) {
-//                    // can't hit target
-//                    clearTarget();
-//                    myStatus = SentryStatus.is_A_Guard( this );
-//                    return;
-//                }               
-//                Projectile proj = world.spawn( myLoc, myAttack.projectile );
-//                
-//                if  (   myAttack == AttackType.WITCHDOCTOR 
-//                        && potionItem != null ) {
-//                    ((ThrownPotion) proj).setItem( potionItem.clone() );
-//                }
-//                else if ( myAttack == AttackType.WARLOCK1 ) epCount++;
-//                
-//                proj.setShooter( myEntity );
-//                proj.setVelocity( Util.getFiringVector( myLoc.toVector(), myAttack.v, targetLoc.toVector(), myAttack.g ) );
-//                break;
-//
-//            case PYRO1: // smallfireball, non-incendiary
-//            case PYRO2: // smallfireball, incendiary
-//            case PYRO3: // fireball   
-//            case WARLOCK2: // witherskull (also a child-class of fireball)
-//                Fireball fireball = (Fireball) world.spawn( myLoc, myAttack.projectile );
-//                fireball.setIsIncendiary( myAttack.incendiary );
-//                fireball.setShooter( myEntity );
-//                fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
-//                break;       
-//        } 
-//
-//        if ( myAttack.effect != null )
-//            world.playEffect( myLoc, myAttack.effect, null );
-//       
-//        if ( myEntity instanceof Player ) 
-//            PlayerAnimation.ARM_SWING.play( (Player) myEntity, 64 );        
-//    }
 
     public double getHealth() {
         LivingEntity myEntity = getMyEntity();
@@ -813,10 +730,11 @@ public class SentryTrait extends Trait {
         }
         NavigatorParameters params = npc.getNavigator().getDefaultParameters();
         params.attackStrategy( myAttack );
-        params.attackRange( range * range );
-        params.stuckAction( giveup );
-        params.stationaryTicks( 60 ); // = 3 seconds
-        params.baseSpeed( speed );
+        
+        if ( myAttack == AttackType.BRAWLER || myAttack == AttackType.CREEPER )
+            params.attackRange( 1.75 );
+        else
+            params.attackRange( 10 );
     }
 
     /**
@@ -849,10 +767,6 @@ public class SentryTrait extends Trait {
         return ifMountedGetMount().getNavigator();
     }
 
-//    GoalController getGoalController() {
-//        return ifMountedGetMount().getDefaultGoalController();
-//    }
-    
     //--------------------------------methods dealing with Mounts----------
     /** Returns true if mountID >= 0 */
     public boolean hasMount() { return mountID >= 0; }
@@ -860,10 +774,7 @@ public class SentryTrait extends Trait {
     /** Returns the NPC with the current mountID or null if the id = -1 (the default) */
     // TODO convert to use uuid's
     NPC getMountNPC() {
-        if ( hasMount() ) {
-            return Sentries.registry.getById( mountID );
-        }
-        return null;
+        return hasMount() ? Sentries.registry.getById( mountID ) : null;
     }
 
     NPC ifMountedGetMount() {
@@ -887,12 +798,9 @@ public class SentryTrait extends Trait {
             NPC mount = getMountNPC();
 
             if ( mount == null || !mount.isSpawned() ) {
-
                 mount = spawnMount();
             }
-
             if ( mount != null ) {
-
                 if ( !mount.isSpawned() ) return; // dead mount
 
                 mount.setProtected( false );
@@ -900,10 +808,11 @@ public class SentryTrait extends Trait {
                 NavigatorParameters mountParams = mount.getNavigator().getDefaultParameters();
                 NavigatorParameters myParams = npc.getNavigator().getDefaultParameters();
 
-                mountParams.attackStrategy( new MountAttackStrategy() );
-                mountParams.useNewPathfinder( false );
+                mountParams.attackStrategy( mountedAttack );
+                mountParams.useNewPathfinder( true );
+                mountParams.stuckAction( setStuckStatus );
                 mountParams.speedModifier( myParams.speedModifier() * 2 );
-                mountParams.range( range * range + 5 );
+                mountParams.distanceMargin( followDistance );
 
                 Entity ent = mount.getEntity();
                 ent.setCustomNameVisible( false );
@@ -991,16 +900,9 @@ public class SentryTrait extends Trait {
         return false;
     }
 
-    /** Returns the entity of this NPC *only* if the NPC is spawned, and the entity is not dead. Otherwise returns null. */
+    /** Returns the entity of this NPC *only* if the NPC is spawned. Otherwise returns null. */
     public LivingEntity getMyEntity() {
-        
-        Entity entity = npc.getEntity();
-        
-        if (    entity != null
-                && !entity.isDead() ) {
-            return (LivingEntity) entity;
-        }
-        return null;
+        return (LivingEntity) npc.getEntity();
     }
 
     @EventHandler
@@ -1008,22 +910,38 @@ public class SentryTrait extends Trait {
         cancelRunnable();
     }    
     
-    static class GiveUpStuckAction implements StuckAction {
+    static class SentryStuckAction implements StuckAction {
         @Override
         public boolean run( NPC npc, Navigator navigator ) {
 
-            if ( !npc.isSpawned() ) return false;
-
-            Location target = navigator.getTargetAsLocation();
-            Location present = npc.getEntity().getLocation();
-
-            if ( target.getWorld() == present.getWorld()
-                    && present.distanceSquared( target ) <= 4 ) {
-                return true;
-            }
             SentryTrait inst = Utils.getSentryTrait( npc );
-            inst.clearTarget();
-            inst.myStatus = SentryStatus.is_A_Guard( inst );
+            
+            if ( inst == null && navigator.getLocalParameters().attackStrategy() == mountedAttack ) 
+                inst = Utils.getSentryTrait( npc.getEntity().getPassenger() );
+            
+            if ( inst != null )
+                inst.myStatus = SentryStatus.STUCK;
+            
+            return false;
+        }
+    }
+    
+    static class MountAttackStrategy implements AttackStrategy {
+        // make the rider attack when in range.
+        @Override
+        public boolean handle( LivingEntity attacker, LivingEntity bukkitTarget ) {
+
+            if ( attacker == bukkitTarget ) return true;
+
+            Entity passenger = attacker.getPassenger();
+
+            if ( passenger != null ) {
+                return Sentries.registry.getNPC( passenger )
+                                        .getNavigator()
+                                        .getLocalParameters()
+                                        .attackStrategy()
+                                        .handle( (LivingEntity) passenger, bukkitTarget );
+            }
             return false;
         }
     }
