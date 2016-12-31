@@ -32,19 +32,19 @@ import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
-    // Columns:-  weapon held                 projectile           v     g    Effect?           incendiary? 
-    ARCHER(       Material.BOW,               Arrow.class,         34,   20,  Effect.BOW_FIRE ), 
-    BOMBARDIER(   Material.EGG,               Egg.class,           17.5, 13.5 ), 
-    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      17.5, 13.5 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 34,   20,  Effect.BLAZE_SHOOT ), 
-    PYRO2(        Material.TORCH,             SmallFireball.class, 34,   20,  Effect.BLAZE_SHOOT, true ),
-    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      34,   20,  Effect.BLAZE_SHOOT ), 
-    STORMCALLER1( Material.PAPER ), //             ThrownPotion.class,  21,   20 ), 
-    STROMCALLER2( Material.BOOK ),  //            ThrownPotion.class,  21,   20 ), 
-    STORMCALLER3( Material.BOOK_AND_QUILL ), //    ThrownPotion.class,  21,   20 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 13.5 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   34,   20,  Effect.WITHER_SHOOT ),
-    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   20 ),
+    // Columns:-  weapon held                 projectile           v     g    Effect?           
+    ARCHER(       Material.BOW,               Arrow.class,         21,   20,  Effect.BOW_FIRE ), 
+    BOMBARDIER(   Material.EGG,               Egg.class,           17.5, 12 ), 
+    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      17.5, 12 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 34,   0,  Effect.BLAZE_SHOOT ), 
+    PYRO2(        Material.TORCH,             SmallFireball.class, 34,   0,  Effect.BLAZE_SHOOT ),
+    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      34,   0,  Effect.BLAZE_SHOOT ), 
+    STORMCALLER1( Material.PAPER ),
+    STROMCALLER2( Material.BOOK ),
+    STORMCALLER3( Material.BOOK_AND_QUILL ), 
+    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 12 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   34,   0,  Effect.WITHER_SHOOT ),
+    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   12 ),
     CREEPER(      Material.SULPHUR ),  
     BRAWLER(      Material.AIR ); 
         
@@ -53,14 +53,12 @@ public enum AttackType implements AttackStrategy {
     private final double v;
     private final double g;
     private final Effect effect;
-    private final boolean incendiary;
     
     static Map<Material, AttackType> reverseSearch = new EnumMap<>( Material.class );
     static { updateMap(); }
 
-    AttackType( Material w, Class<? extends Projectile> p, double V, double G ) { this( w, p, V, G, null, false ); }
-    AttackType( Material w, Class<? extends Projectile> p, double V, double G, Effect e ) { this( w, p, V, G, e, false ); }
-    AttackType( Material w ) { this( w, null, 0, 0, null, false ); }
+    AttackType( Material w, Class<? extends Projectile> p, double V, double G ) { this( w, p, V, G, null ); }
+    AttackType( Material w ) { this( w, null, 0, 0, null ); }
 
     /**
      * Quickly returns the appropriate AttackType by searching an EnumMap that
@@ -111,7 +109,7 @@ public enum AttackType implements AttackStrategy {
         SentryTrait inst = Utils.getSentryTrait( myEntity );
         if ( inst == null ) return false;
 
-        if ( System.currentTimeMillis() < inst.okToAttack ) return false;
+        if ( System.currentTimeMillis() < inst.okToAttack ) return true;
 
         inst.okToAttack = (long) (System.currentTimeMillis() + inst.attackRate * 1000.0);
  
@@ -140,7 +138,7 @@ public enum AttackType implements AttackStrategy {
                             else {
                                 world.createExplosion( 
                                         myLoc.getX(), myLoc.getY(), myLoc.getZ(), inst.strength, false, false );
-                                inst.myStatus = SentryStatus.DEAD;
+                                inst.kill();
                                 inst.getNPC().despawn();
                             }
                         }}, 0, 10 );
@@ -192,7 +190,7 @@ public enum AttackType implements AttackStrategy {
             case WARLOCK2: // witherskull (also a sub-class of fireball)
                 
                 Fireball fireball = (Fireball) world.spawn( myLoc, projectile );
-                fireball.setIsIncendiary( incendiary );
+                fireball.setIsIncendiary( this == PYRO2 );
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
                 break;       

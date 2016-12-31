@@ -41,25 +41,21 @@ public enum SentryStatus {
                     if ( Sentries.debug )
                         Sentries.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
 
-                    if ( killer instanceof OfflinePlayer ) {
+                    if ( killer instanceof OfflinePlayer )
                         DenizenHook.denizenAction( inst.getNPC(), "death by player", (OfflinePlayer) killer );
-                    }
                     else {
                         DenizenHook.denizenAction( inst.getNPC(), "death by entity", null );
                         DenizenHook.denizenAction( inst.getNPC(), "death by " + killer.getType().toString(), null );
                     }
                 }
             }
-
             if ( inst.respawnDelay == -1 ) {
-
                 if ( inst.hasMount() ) inst.dismount();
-
                 inst.cancelRunnable();
                 inst.getNPC().destroy();
             }
             else
-                inst.respawnTime = System.currentTimeMillis() + inst.respawnDelay * 1000;
+                inst.kill();
 
             return SentryStatus.DEAD;
         }
@@ -88,8 +84,6 @@ public enum SentryStatus {
     },    
     NOT_SPAWNED {
         @Override SentryStatus update( SentryTrait inst ) {
-            
-            if ( inst.getHealth() == 0.0 ) return SentryStatus.DEAD;
             
             inst.tryToHeal();  
             

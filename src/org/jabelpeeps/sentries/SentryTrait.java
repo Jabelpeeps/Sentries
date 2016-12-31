@@ -492,6 +492,10 @@ public class SentryTrait extends Trait {
 
         return myEntity.getHealth();
     }
+    public void kill() {
+        respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
+        myStatus = SentryStatus.DEAD;
+    }
     
     /**
      * Calculates the damage to inflict on a sentry in the light of the current Armour settings.
