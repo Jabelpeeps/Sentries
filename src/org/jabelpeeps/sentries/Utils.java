@@ -13,6 +13,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
+import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.npc.NPC;
 
 /**
@@ -35,10 +36,7 @@ public abstract class Utils {
      * @return the maximum range
      */
      public static double getRange( double v, double g, double d ) {
-    
-         double range = ( v * cos / g ) 
-                         * ( v * sin + Math.sqrt( sqr( v ) * sqr( sin ) + 2 * g * d ) );
-         return range;
+         return ( v * cos / g ) * ( v * sin + Math.sqrt( sqr( v ) * sqr( sin ) + 2 * g * d ) );
      }
 
      /** 
@@ -72,6 +70,11 @@ public abstract class Utils {
          return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
      }
 
+     public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
+         to.distanceMargin( from.distanceMargin() );
+         to.attackDelayTicks( from.attackDelayTicks() );
+     }
+     
     public static void removeMount( int npcid ) {
 
         NPC npc = Sentries.registry.getById( npcid );

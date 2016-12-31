@@ -15,7 +15,7 @@ public class AttackRateCommand implements SentriesNumberCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
         if ( number == null ) {
             Utils.sendMessage( sender, Col.GOLD, npcName, "'s attack rate is:- ", 
-                                String.valueOf( inst.attackRate), " seconds between blows/shots." );
+                                String.valueOf( inst.attackRate ), " seconds between blows/shots." );
         }
         else {
             double attackrate = Utils.string2Double( number );
@@ -26,6 +26,7 @@ public class AttackRateCommand implements SentriesNumberCommand {
             if ( attackrate > 30.0 ) attackrate = 30.0;
             
             inst.attackRate = attackrate;
+            inst.getNavigator().getDefaultParameters().attackDelayTicks( (int) (attackrate * 20) );
             Utils.sendMessage( sender, Col.GREEN, npcName, "'s attack rate set to:- ", String.valueOf( attackrate ) );
         }
     }
@@ -40,7 +41,7 @@ public class AttackRateCommand implements SentriesNumberCommand {
 
         if ( helpTxt == null ) {
             helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.ATTACK_RATE, " (#)", Col.RESET,
-            ", where # is the number of seconds (0-30) to wait between attacks.",
+            ", where # is the number of seconds (0-30) to wait between attacks. (decimal values are accepted)",
             System.lineSeparator(), "  If no number is given the current value is shown.");
         }
         return helpTxt;

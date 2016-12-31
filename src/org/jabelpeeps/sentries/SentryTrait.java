@@ -89,7 +89,7 @@ public class SentryTrait extends Trait {
     public Set<TargetType> events = new TreeSet<>();
 
     long respawnTime = System.currentTimeMillis();
-    long okToAttack = System.currentTimeMillis();
+//    long okToAttack = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
     long reassesTime = System.currentTimeMillis();
     public long okToTakedamage = 0;
@@ -262,6 +262,7 @@ public class SentryTrait extends Trait {
         navigatorParams.useNewPathfinder( true );
         navigatorParams.stuckAction( setStuckStatus );
         navigatorParams.baseSpeed( speed );
+        navigatorParams.attackDelayTicks( (int) (attackRate * 20) );
 
         updateAttackType();
        
@@ -281,8 +282,7 @@ public class SentryTrait extends Trait {
     public void onRemove() {        
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onRemove()" );
 
-        if ( hasMount() ) Utils.removeMount( mountID );
-        
+        if ( hasMount() ) Utils.removeMount( mountID );       
         cancelRunnable();
     }
     
@@ -767,7 +767,7 @@ public class SentryTrait extends Trait {
         return true;
     }
 
-    Navigator getNavigator() {
+    public Navigator getNavigator() {
         return ifMountedGetMount().getNavigator();
     }
 
@@ -816,18 +816,17 @@ public class SentryTrait extends Trait {
                 mountParams.useNewPathfinder( true );
                 mountParams.stuckAction( setStuckStatus );
                 mountParams.speedModifier( myParams.speedModifier() * 2 );
-                mountParams.distanceMargin( followDistance );
+                Utils.copyNavParams( myParams, mountParams );
 
                 Entity ent = mount.getEntity();
                 ent.setCustomNameVisible( false );
                 ent.setPassenger( null );
                 ent.setPassenger( myEntity );
             }
-            else
-                mountID = -1;
         }
     }
 
+    
     /** 
      * Spawns and returns a mountNPC, creating a new NPC of type horse if the sentry does not already have a mount.
      * The method will do nothing and return null if the Sentry is not spawned.  */
@@ -853,6 +852,7 @@ public class SentryTrait extends Trait {
 
             if ( mount == null ) {
                 Sentries.logger.info( "Cannot create mount NPC!" );
+                mountID = -1;
             }
             else {
                 mount.spawn( getMyEntity().getLocation() );
@@ -867,7 +867,7 @@ public class SentryTrait extends Trait {
         return null;
     }
 
-    void dismount() {
+    public void dismount() {
 
         LivingEntity myEntity = getMyEntity();
         
@@ -876,6 +876,7 @@ public class SentryTrait extends Trait {
             NPC mount = getMountNPC();
 
             if ( mount != null ) {
+                Utils.copyNavParams( mount.getNavigator().getDefaultParameters(), npc.getNavigator().getDefaultParameters() );
                 myEntity.getVehicle().setPassenger( null );
                 mount.despawn( DespawnReason.PENDING_RESPAWN );
             }

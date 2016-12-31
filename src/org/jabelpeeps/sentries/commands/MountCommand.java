@@ -21,6 +21,7 @@ public class MountCommand implements SentriesToggleCommand {
         }
         else {
             if ( inst.hasMount() ) {
+                inst.dismount();
                 Utils.removeMount( inst.mountID );
                 inst.mountID = -1;
                 Utils.sendMessage( sender, Col.GREEN, npcName, " is no longer mounted" );

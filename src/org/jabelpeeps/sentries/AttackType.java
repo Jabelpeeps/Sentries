@@ -33,18 +33,18 @@ import net.citizensnpcs.util.PlayerAnimation;
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
     // Columns:-  weapon held                 projectile           v     g    Effect?           
-    ARCHER(       Material.BOW,               Arrow.class,         21,   20,  Effect.BOW_FIRE ), 
+    ARCHER(       Material.BOW,               Arrow.class,         16,   20,  Effect.BOW_FIRE ), 
     BOMBARDIER(   Material.EGG,               Egg.class,           17.5, 12 ), 
     ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      17.5, 12 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 34,   0,  Effect.BLAZE_SHOOT ), 
-    PYRO2(        Material.TORCH,             SmallFireball.class, 34,   0,  Effect.BLAZE_SHOOT ),
-    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      34,   0,  Effect.BLAZE_SHOOT ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 16,   Effect.BLAZE_SHOOT ), 
+    PYRO2(        Material.TORCH,             SmallFireball.class, 16,   Effect.BLAZE_SHOOT ),
+    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      16,   Effect.BLAZE_SHOOT ), 
     STORMCALLER1( Material.PAPER ),
     STROMCALLER2( Material.BOOK ),
     STORMCALLER3( Material.BOOK_AND_QUILL ), 
     WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 12 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   34,   0,  Effect.WITHER_SHOOT ),
-    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  21,   12 ),
+    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   16,   Effect.WITHER_SHOOT ),
+    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  16,   12 ),
     CREEPER(      Material.SULPHUR ),  
     BRAWLER(      Material.AIR ); 
         
@@ -58,6 +58,7 @@ public enum AttackType implements AttackStrategy {
     static { updateMap(); }
 
     AttackType( Material w, Class<? extends Projectile> p, double V, double G ) { this( w, p, V, G, null ); }
+    AttackType( Material w, Class<? extends Projectile> p, double V, Effect e ) { this( w, p, V, 0, e ); }
     AttackType( Material w ) { this( w, null, 0, 0, null ); }
 
     /**
@@ -109,9 +110,9 @@ public enum AttackType implements AttackStrategy {
         SentryTrait inst = Utils.getSentryTrait( myEntity );
         if ( inst == null ) return false;
 
-        if ( System.currentTimeMillis() < inst.okToAttack ) return true;
-
-        inst.okToAttack = (long) (System.currentTimeMillis() + inst.attackRate * 1000.0);
+//        if ( System.currentTimeMillis() < inst.okToAttack ) return true;
+//
+//        inst.okToAttack = (long) (System.currentTimeMillis() + inst.attackRate * 1000.0);
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
@@ -192,7 +193,10 @@ public enum AttackType implements AttackStrategy {
                 Fireball fireball = (Fireball) world.spawn( myLoc, projectile );
                 fireball.setIsIncendiary( this == PYRO2 );
                 fireball.setShooter( myEntity );
-                fireball.setDirection( targetLoc.toVector().subtract( myLoc.toVector() ) );       
+                fireball.setDirection( targetLoc.toVector()
+                                                .subtract( myLoc.toVector() )
+                                                .normalize()
+                                                .multiply( v ) );       
                 break;       
         } 
         if ( effect != null )
