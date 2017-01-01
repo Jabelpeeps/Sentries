@@ -246,7 +246,8 @@ public enum SentryStatus {
                         && inst.attackTarget.getWorld() == myEntity.getWorld() ) {
                     Navigator navigator = inst.getNavigator();
                     
-                    if ( navigator.getEntityTarget().getTarget() != inst.attackTarget )
+                    if  (   navigator.getEntityTarget() == null 
+                            || navigator.getEntityTarget().getTarget() != inst.attackTarget )
                         navigator.setTarget( inst.attackTarget, true );
 
                     double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
