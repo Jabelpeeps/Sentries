@@ -240,11 +240,14 @@ public enum SentryStatus {
                 LivingEntity myEntity = inst.getMyEntity();
     
                 // attack the current target
-                if (    inst.attackTarget != null 
+                if (    myEntity != null
+                        && inst.attackTarget != null 
                         && !inst.attackTarget.isDead()
                         && inst.attackTarget.getWorld() == myEntity.getWorld() ) {
+                    Navigator navigator = inst.getNavigator();
                     
-                    inst.getNavigator().setTarget( inst.attackTarget, true );
+                    if ( navigator.getEntityTarget().getTarget() != inst.attackTarget )
+                        navigator.setTarget( inst.attackTarget, true );
 
                     double dist = inst.attackTarget.getLocation().distanceSquared( myEntity.getLocation() );
                     // is it still in range? then keep attacking...

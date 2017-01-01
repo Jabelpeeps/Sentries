@@ -65,10 +65,7 @@ public class SentryTrait extends Trait {
     public float speed;
 
     public double attackRate, healRate, armour, weight, maxHealth;
-    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals;
-    
-    boolean loaded;
-    boolean ignoreLOS;
+    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals, loaded, ignoreLOS;
 
     static SentryStuckAction setStuckStatus = new SentryStuckAction();
     static AttackStrategy mountedAttack = new MountAttackStrategy();
@@ -78,8 +75,7 @@ public class SentryTrait extends Trait {
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> _myDamamgers = new HashSet<>();
 
-    public LivingEntity guardeeEntity;
-    public LivingEntity attackTarget;
+    public LivingEntity guardeeEntity, attackTarget;
     public String guardeeName;
     DamageCause causeOfDeath;
     Entity killer;
@@ -89,7 +85,6 @@ public class SentryTrait extends Trait {
     public Set<TargetType> events = new TreeSet<>();
 
     long respawnTime = System.currentTimeMillis();
-//    long okToAttack = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
     long reassesTime = System.currentTimeMillis();
     public long okToTakedamage = 0;
@@ -113,8 +108,7 @@ public class SentryTrait extends Trait {
     public void load( DataKey key ) throws NPCLoadException {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() start" );
   
-        if ( key.keyExists( "traits" ) ) 
-            key = key.getRelative( "traits" );
+        if ( key.keyExists( "traits" ) ) key = key.getRelative( "traits" );
 
         iRetaliate = key.getBoolean( S.CON_RETALIATION, sentry.defaultBooleans.get( S.CON_RETALIATION ) );
         invincible = key.getBoolean( S.CON_INVINCIBLE, sentry.defaultBooleans.get( S.CON_INVINCIBLE ) );
@@ -201,7 +195,6 @@ public class SentryTrait extends Trait {
             Sentries.debugLog( "ignoreTargets: " + ignoreTargets.toString() );
             Sentries.debugLog( "eventTargets: " + eventTargets.toString() );
         }
-        
     }
     
     private void checkBridges( String target ) {
@@ -492,6 +485,7 @@ public class SentryTrait extends Trait {
 
         return myEntity.getHealth();
     }
+    
     public void kill() {
         respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
         myStatus = SentryStatus.DEAD;
@@ -616,10 +610,10 @@ public class SentryTrait extends Trait {
     }
     
     boolean isMyChunkLoaded() {
-        LivingEntity myEntity = getMyEntity();
-        if ( myEntity == null ) return false;
+//        LivingEntity myEntity = getMyEntity();
+//        if ( myEntity == null ) return false;
 
-        return Util.isLoaded( myEntity.getLocation() );
+        return Util.isLoaded( npc.getStoredLocation() );
     }
 
     /**
@@ -840,10 +834,8 @@ public class SentryTrait extends Trait {
             if ( hasMount() ) {
                 mount = Sentries.registry.getById( mountID );
 
-                if ( mount != null )
-                    mount.despawn();
-                else
-                    Sentries.logger.info( "Cannot find mount NPC " + mountID );
+                if ( mount != null ) mount.despawn();
+                else Sentries.logger.info( "Cannot find mount NPC " + mountID );
             }
             else {
                 mount = Sentries.registry.createNPC( EntityType.HORSE, npc.getName() + "_Mount" );
