@@ -20,11 +20,11 @@ import net.citizensnpcs.api.npc.NPC;
  * An abstract collection of useful static methods.
  */
 public abstract class Utils {
-    
-    public static double sqr( double d ) { return d * d; }
     final static double angle = Math.toRadians( 45 ); 
     final static double cos = Math.cos( angle );   
     final static double sin = Math.sin( angle );
+    
+    public static double sqr( double d ) { return d * d; }
     
     /** 
      * Calculate the maximum range that a ballistic projectile can be fired on given speed and gravity.
@@ -71,7 +71,7 @@ public abstract class Utils {
      }
 
      public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
-         to.distanceMargin( from.distanceMargin() );
+         to.attackRange( from.attackRange() );
          to.attackDelayTicks( from.attackDelayTicks() );
      }
      

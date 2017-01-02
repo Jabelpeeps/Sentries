@@ -115,11 +115,9 @@ public class DenizenHook {
             LivingEntity ent = (LivingEntity) dnpc.getEntity();
 
             if ( ent != null ) {
-
-                if ( dnpc.getCitizen().hasTrait( SentryTrait.class ) ) {
-
-                    SentryTrait inst = dnpc.getCitizen().getTrait( SentryTrait.class );
-
+                SentryTrait inst = Utils.getSentryTrait( dnpc.getCitizen() );
+                
+                if ( inst != null ) {
                     boolean deaggro = false;
 
                     for ( String arg : theEntry.getArguments() ) {
@@ -128,17 +126,12 @@ public class DenizenHook {
                     }
                     String db = "RISE! " + dnpc.getName() + "!";
 
-                    if ( deaggro )
+                    if ( deaggro ) {
                         db += " ..And fight no more!";
-
-                    dB.log( db );
-
-                    if ( inst != null ) {
-                        inst.myStatus = SentryStatus.is_A_Guard( inst );
-
-                        if ( deaggro )
-                            inst.clearTarget();
+                        inst.clearTarget();
                     }
+                    dB.log( db );
+                    inst.myStatus = SentryStatus.NOT_SPAWNED;
                 }
             }
             else {
@@ -161,7 +154,7 @@ public class DenizenHook {
 
             LivingEntity ent = (LivingEntity) dnpc.getEntity();
 
-            SentryTrait inst = dnpc.getCitizen().getTrait( SentryTrait.class );
+            SentryTrait inst = Utils.getSentryTrait( dnpc.getCitizen() );
 
             if ( inst != null ) {
                 dB.log( "Goodbye, cruel world... " );

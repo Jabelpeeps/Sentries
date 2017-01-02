@@ -17,7 +17,7 @@ public class SetStatusCommand implements SentriesComplexCommand {
     public String getLongHelp() { return null; }
 
     @Override
-    public String getPerm() { return "citizens.admin"; }
+    public String getPerm() { return S.PERM_CITS_ADMIN; }
 
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {

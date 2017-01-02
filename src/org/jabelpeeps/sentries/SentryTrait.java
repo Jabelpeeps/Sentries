@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -31,7 +32,6 @@ import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.jabelpeeps.sentries.S.Col;
@@ -48,6 +48,7 @@ import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
@@ -76,7 +77,8 @@ public class SentryTrait extends Trait {
     Set<Player> _myDamamgers = new HashSet<>();
 
     public LivingEntity guardeeEntity, attackTarget;
-    public String guardeeName;
+    @Persist UUID guardeeID;
+    @Persist public String guardeeName;
     DamageCause causeOfDeath;
     Entity killer;
 
@@ -90,7 +92,7 @@ public class SentryTrait extends Trait {
     public long okToTakedamage = 0;
 
     List<PotionEffect> weaponSpecialEffects;
-    ItemStack potionItem;
+    @Persist ItemStack potionItem;
 
     public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
@@ -133,7 +135,9 @@ public class SentryTrait extends Trait {
         attackRate = key.getDouble( S.CON_ARROW_RATE, sentry.defaultDoubles.get( S.CON_ARROW_RATE ) );
         healRate = key.getDouble( S.CON_HEAL_RATE, sentry.defaultDoubles.get( S.CON_HEAL_RATE ) );
 
-        guardeeName = key.getString( S.PERSIST_GUARDEE, null );
+        String guardee = key.getString( S.PERSIST_GUARDEE, null );
+        if ( guardee != null ) guardeeName = guardee;
+        
         greetingMsg = key.getString( S.CON_GREETING, sentry.defaultGreeting );
         warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
@@ -148,8 +152,8 @@ public class SentryTrait extends Trait {
             if ( spawnLocation.getWorld() == null )
                 spawnLocation = null;
         }
-        if ( guardeeName != null && guardeeName.isEmpty() )
-            guardeeName = null;
+//        if ( guardeeName != null && guardeeName.isEmpty() )
+//            guardeeName = null;
         
         Set<String> validTargets = new HashSet<>();
         
@@ -188,6 +192,7 @@ public class SentryTrait extends Trait {
         
         updateArmour();
         updateAttackType();
+        checkForGuardee();
         
         loaded = true;      
         if ( Sentries.debug ) {      
@@ -214,10 +219,8 @@ public class SentryTrait extends Trait {
         if ( !loaded ) {
             try {
                 load( new MemoryDataKey() );
-
             } catch ( NPCLoadException e ) { e.printStackTrace(); }
-        }
-        
+        }      
         LivingEntity myEntity = getMyEntity();
 
         // check for illegal values
@@ -225,9 +228,9 @@ public class SentryTrait extends Trait {
         if ( attackRate > 30 ) attackRate = 30.0;
         if ( maxHealth < 1 ) maxHealth = 1;
         if ( range < 1 ) range = 1;
-        if ( range > 200 ) range = 200;
+        if ( range > 100 ) range = 100;
         if ( respawnDelay < -1 ) respawnDelay = -1;
-        if ( spawnLocation == null ) spawnLocation = myEntity.getLocation();
+        if ( spawnLocation == null ) onCopy();
 
         // Allow Denizen to handle the sentry's health if it is active.
         if (    DenizenHook.sentryHealthByDenizen 
@@ -243,13 +246,13 @@ public class SentryTrait extends Trait {
         _myDamamgers.clear();
         NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
 
-        if ( guardeeName == null )
-            npc.teleport( spawnLocation, TeleportCause.PLUGIN );
-
-        NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
+//        if ( guardeeName == null )
+//            npc.teleport( spawnLocation, TeleportCause.PLUGIN );
 
         npc.setProtected( false );
         npc.data().set( NPC.TARGETABLE_METADATA, targetable );
+        
+        NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
 
         navigatorParams.stationaryTicks( 60 ); // = 3 seconds
         navigatorParams.useNewPathfinder( true );
@@ -359,10 +362,10 @@ public class SentryTrait extends Trait {
         key.setInt( S.CON_NIGHT_VIS, nightVision );
         key.setInt( S.CON_FOLLOW_DIST, followDistance );
 
-        if ( guardeeName != null )
-            key.setString( S.PERSIST_GUARDEE, guardeeName );
-        else if ( key.keyExists( S.PERSIST_GUARDEE ) )
-            key.removeKey( S.PERSIST_GUARDEE );
+//        if ( guardeeName != null )
+//            key.setString( S.PERSIST_GUARDEE, guardeeName );
+//        else if ( key.keyExists( S.PERSIST_GUARDEE ) )
+//            key.removeKey( S.PERSIST_GUARDEE );
 
         key.setString( S.CON_WARNING, warningMsg );
         key.setString( S.CON_GREETING, greetingMsg );
@@ -610,12 +613,65 @@ public class SentryTrait extends Trait {
     }
     
     boolean isMyChunkLoaded() {
-//        LivingEntity myEntity = getMyEntity();
-//        if ( myEntity == null ) return false;
-
         return Util.isLoaded( npc.getStoredLocation() );
     }
 
+    public void checkForGuardee() {
+        if ( guardeeID != null ) {
+        
+            Player player = Bukkit.getPlayer( guardeeID );
+            if ( player != null && player.isOnline() )
+                guardeeEntity = player;
+            
+            NPC guardeeNPC = Sentries.registry.getByUniqueId( guardeeID );
+            if ( guardeeNPC != null && guardeeNPC.isSpawned() ) 
+                guardeeEntity = (LivingEntity) guardeeNPC.getEntity();
+            
+            guardeeName = guardeeEntity.getName();
+        }
+        else if ( guardeeName != null && !guardeeName.isEmpty() ) {
+            
+            Player player = Bukkit.getPlayer( guardeeName );
+            if ( player != null && player.isOnline() )
+                guardeeEntity = player;
+            
+            for ( NPC each : Sentries.registry ) {
+                if ( each.getName().equalsIgnoreCase( guardeeName ) && each.isSpawned() ) {
+                    guardeeEntity = (LivingEntity) each.getEntity();
+                    break;
+                }
+            }
+            guardeeID = guardeeEntity.getUniqueId();
+        }
+    }
+    public void checkForGuardee( Player joined ) {
+        if ( guardeeID != null ) {
+            if ( guardeeID.equals( joined.getUniqueId() ) ) {
+                guardeeEntity = joined;
+                guardeeName = joined.getName();
+            }
+        }
+        else if ( guardeeName != null ) {
+            if ( guardeeName.equalsIgnoreCase( joined.getName() ) ) {
+                guardeeEntity = joined;
+                guardeeID = joined.getUniqueId();
+            }
+        }
+    }
+    public void checkForGuardee( NPC spawned ) {
+        if ( guardeeID != null ) {
+            if ( guardeeID.equals( spawned.getUniqueId() ) ) {
+                guardeeEntity = (LivingEntity) spawned.getEntity();
+                guardeeName = spawned.getName();
+            }
+        }
+        else if ( guardeeName != null ) {
+            if ( guardeeName.equalsIgnoreCase( spawned.getName() ) ) {
+                guardeeEntity = (LivingEntity) spawned.getEntity();
+                guardeeID = spawned.getUniqueId();
+            }
+        }
+    }
     /**
      * Searches all online players for one with a name that matches the provided String, and
      * if successful saves it in the field 'guardeeEntity' and the name in
@@ -632,6 +688,7 @@ public class SentryTrait extends Trait {
 
             if ( name.equals( player.getName() ) ) {
 
+                guardeeID = player.getUniqueId();
                 guardeeEntity = player;
                 guardeeName = name;
                 return true;
@@ -668,6 +725,7 @@ public class SentryTrait extends Trait {
 
             if ( ename != null && name.equals( ename ) ) {
 
+                guardeeID = each.getUniqueId();
                 guardeeEntity = (LivingEntity) each;
                 guardeeName = name;
                 return true;
@@ -732,7 +790,7 @@ public class SentryTrait extends Trait {
         if ( myAttack == AttackType.BRAWLER || myAttack == AttackType.CREEPER )
             params.attackRange( 1.75 );
         else
-            params.attackRange( 10 );
+            params.attackRange( 100 );
     }
 
     /**
@@ -740,14 +798,13 @@ public class SentryTrait extends Trait {
      *  clears the held reference for the target. 
      */
     public void clearTarget() {
-
         getNavigator().cancelNavigation();
         attackTarget = null; 
     }
 
     public void checkIfEmpty ( CommandSender sender ) {
-        if ( targets.isEmpty() && ignores.isEmpty() )
-            sender.sendMessage( String.join( "", Col.YELLOW, npc.getName(), " now has no defined targets." ) );
+        if ( targets.isEmpty() && events.isEmpty() )
+            Utils.sendMessage( sender, Col.YELLOW, npc.getName(), " now has no defined targets." );
     }
     
     boolean setAttackTarget( LivingEntity theEntity ) {
@@ -795,68 +852,34 @@ public class SentryTrait extends Trait {
 
             NPC mount = getMountNPC();
 
-            if ( mount == null || !mount.isSpawned() ) {
-                mount = spawnMount();
-            }
-            if ( mount != null ) {
-                if ( !mount.isSpawned() ) return; // dead mount
-
-                mount.setProtected( false );
-
-                NavigatorParameters mountParams = mount.getNavigator().getDefaultParameters();
-                NavigatorParameters myParams = npc.getNavigator().getDefaultParameters();
-
-                mountParams.attackStrategy( mountedAttack );
-                mountParams.useNewPathfinder( true );
-                mountParams.stuckAction( setStuckStatus );
-                mountParams.speedModifier( myParams.speedModifier() * 2 );
-                Utils.copyNavParams( myParams, mountParams );
-
-                Entity ent = mount.getEntity();
-                ent.setCustomNameVisible( false );
-                ent.setPassenger( null );
-                ent.setPassenger( myEntity );
-            }
-        }
-    }
-
-    
-    /** 
-     * Spawns and returns a mountNPC, creating a new NPC of type horse if the sentry does not already have a mount.
-     * The method will do nothing and return null if the Sentry is not spawned.  */
-    NPC spawnMount() {
-        if ( Sentries.debug ) Sentries.debugLog( "Creating mount for " + npc.getName() );
-
-        if ( npc.isSpawned() ) {
-
-            NPC mount = null;
-
-            if ( hasMount() ) {
-                mount = Sentries.registry.getById( mountID );
-
-                if ( mount != null ) mount.despawn();
-                else Sentries.logger.info( "Cannot find mount NPC " + mountID );
-            }
-            else {
+            if ( mount == null ) {
                 mount = Sentries.registry.createNPC( EntityType.HORSE, npc.getName() + "_Mount" );
                 mount.getTrait( MobType.class ).setType( EntityType.HORSE );
-            }
-
-            if ( mount == null ) {
-                Sentries.logger.info( "Cannot create mount NPC!" );
-                mountID = -1;
-            }
-            else {
-                mount.spawn( getMyEntity().getLocation() );
                 mount.getTrait( Owner.class ).setOwner( npc.getTrait( Owner.class ).getOwner() );
-
                 ((Horse) mount.getEntity()).getInventory().setSaddle( new ItemStack( Material.SADDLE ) );
                 mountID = mount.getId();
-
-                return mount;
+                mount.setProtected( false );
             }
+            else if ( !mount.isSpawned() ) {
+                mount.despawn( DespawnReason.PENDING_RESPAWN );
+            }
+            mount.spawn( getMyEntity().getLocation() );
+
+            NavigatorParameters mountParams = mount.getNavigator().getDefaultParameters();
+            NavigatorParameters myParams = npc.getNavigator().getDefaultParameters();
+
+            mountParams.attackStrategy( mountedAttack );
+            mountParams.useNewPathfinder( true );
+            mountParams.stuckAction( setStuckStatus );
+            mountParams.speedModifier( myParams.speedModifier() * 2 );
+            Utils.copyNavParams( myParams, mountParams );
+
+            Entity ent = mount.getEntity();
+            ent.setCustomNameVisible( false );
+            ent.setPassenger( null );
+            ent.setPassenger( myEntity );
+            
         }
-        return null;
     }
 
     public void dismount() {

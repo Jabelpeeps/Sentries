@@ -109,10 +109,6 @@ public enum AttackType implements AttackStrategy {
     public boolean handle( LivingEntity myEntity, LivingEntity victim ) {
         SentryTrait inst = Utils.getSentryTrait( myEntity );
         if ( inst == null ) return false;
-
-//        if ( System.currentTimeMillis() < inst.okToAttack ) return true;
-//
-//        inst.okToAttack = (long) (System.currentTimeMillis() + inst.attackRate * 1000.0);
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
@@ -170,7 +166,7 @@ public enum AttackType implements AttackStrategy {
                 if ( Math.min( range * range, inst.range * inst.range ) < myLoc.distanceSquared( targetLoc ) ) {
                     // can't hit target
                     inst.clearTarget();
-                    inst.myStatus = SentryStatus.is_A_Guard( inst );
+                    inst.myStatus = SentryStatus.LOOKING;
                     return true;
                 }               
                 Projectile proj = world.spawn( myLoc, projectile );

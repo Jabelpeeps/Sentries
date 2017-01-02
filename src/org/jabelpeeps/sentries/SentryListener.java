@@ -28,6 +28,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -41,6 +42,7 @@ import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.event.NPCDespawnEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.event.NPCSpawnEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.editor.Editor;
 
@@ -605,5 +607,25 @@ public class SentryListener implements Listener {
         
         if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
             inst.myStatus = SentryStatus.LOOKING;
+    }
+    
+    @EventHandler( priority = EventPriority.MONITOR )
+    public void onNPCSpawning( NPCSpawnEvent event ) {
+        NPC npc = event.getNPC();
+        for ( NPC each : Sentries.registry ) {
+            SentryTrait inst = Utils.getSentryTrait( each );
+            if ( inst != null )
+                inst.checkForGuardee( npc );
+        }
+    }
+    
+    @EventHandler( priority = EventPriority.MONITOR )
+    public void onPlayerJoining( PlayerJoinEvent event ) {
+        Player player = event.getPlayer();
+        for ( NPC each : Sentries.registry ) {
+            SentryTrait inst = Utils.getSentryTrait( each );
+            if ( inst != null )
+                inst.checkForGuardee( player );
+        }
     }
 }
