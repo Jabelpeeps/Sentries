@@ -29,7 +29,7 @@ public enum SentryStatus {
         @Override SentryStatus update( SentryTrait inst ) {
             // item drop handling moved to SentryListener.
             
-            inst.clearTarget();
+            inst.cancelAttack();
 
             if ( Sentries.denizenActive ) {
 
@@ -204,7 +204,7 @@ public enum SentryStatus {
                 }
             } 
             // somehow we failed to attack the chosen target, so lets clear it.           
-            else inst.clearTarget();
+            else inst.cancelAttack();
             
             return checkPosition( inst );
         }
@@ -221,27 +221,28 @@ public enum SentryStatus {
         
         Location myLocation = inst.getNPC().getStoredLocation();
         
-        if ( inst.guardeeName != null && inst.guardeeEntity != null ) {
-            // TODO fix code (elsewhere) for checking whether the guardee is online.
-            Location destination = inst.guardeeEntity.getLocation();
-
+        if ( inst.guardeeEntity != null ) {
             // Note to self:- inst.followDistance holds the square of the intended distance.
-            if ( myLocation.distanceSquared( destination ) >= inst.followDistance ) {
+            if ( myLocation.distanceSquared( inst.guardeeEntity.getLocation() ) >= inst.followDistance ) {
                 return SentryStatus.FOLLOWING;
             }           
         }
-        else if ( myLocation.distanceSquared( inst.spawnLocation ) > Utils.sqr( inst.range + inst.voiceRange ) ) {
+        else if ( myLocation.distanceSquared( inst.spawnLocation ) > Utils.sqr( inst.range ) ) {
             return SentryStatus.RETURNING_TO_SPAWNPOINT;
         } 
         
         switch ( this ) {
             case ATTACKING:
                 if  (   inst.attackTarget == null 
-                        || myLocation.distanceSquared( inst.attackTarget.getLocation() ) < Utils.sqr( inst.range ) + 10 ) {
-                    break;
+                        || inst.attackTarget.isDead()
+                        || myLocation.distanceSquared( inst.attackTarget.getLocation() ) > Utils.sqr( inst.range ) + 10 ) {
+                    inst.cancelAttack();
+                    return SentryStatus.LOOKING;                   
                 }
+                break;
             case FOLLOWING: 
-            case STUCK: 
+            case STUCK:
+            case RETURNING_TO_SPAWNPOINT:
                 inst.getNavigator().cancelNavigation();
                 return SentryStatus.LOOKING;
             default:           

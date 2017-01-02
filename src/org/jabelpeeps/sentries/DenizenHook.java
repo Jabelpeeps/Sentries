@@ -128,7 +128,7 @@ public class DenizenHook {
 
                     if ( deaggro ) {
                         db += " ..And fight no more!";
-                        inst.clearTarget();
+                        inst.cancelAttack();
                     }
                     dB.log( db );
                     inst.myStatus = SentryStatus.NOT_SPAWNED;

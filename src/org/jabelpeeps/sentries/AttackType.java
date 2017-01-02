@@ -165,7 +165,7 @@ public enum AttackType implements AttackStrategy {
                 double range = Utils.getRange( v, g, myLoc.getY() );
                 if ( Math.min( range * range, inst.range * inst.range ) < myLoc.distanceSquared( targetLoc ) ) {
                     // can't hit target
-                    inst.clearTarget();
+                    inst.cancelAttack();
                     inst.myStatus = SentryStatus.LOOKING;
                     return true;
                 }               

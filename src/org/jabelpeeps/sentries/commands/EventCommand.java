@@ -37,7 +37,7 @@ public class EventCommand implements SentriesComplexCommand {
         
         if ( S.CLEARALL.equals( subCommand ) ) {
             inst.events.clear();
-            inst.clearTarget();
+            inst.cancelAttack();
             Utils.sendMessage( sender, Col.GREEN, npcName, ": ALL Events cleared" );
             return;
         }

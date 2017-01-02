@@ -795,9 +795,10 @@ public class SentryTrait extends Trait {
 
     /**
      *  Cancels the current navigation (including targetted attacks) and 
-     *  clears the held reference for the target. 
+     *  clears the held reference for the target. <p>
+     *  Note: this method does not change the sentry's status.
      */
-    public void clearTarget() {
+    public void cancelAttack() {
         getNavigator().cancelNavigation();
         attackTarget = null; 
     }
