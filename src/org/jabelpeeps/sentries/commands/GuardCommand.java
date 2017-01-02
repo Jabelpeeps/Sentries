@@ -19,6 +19,7 @@ public class GuardCommand implements SentriesComplexCommand {
         if ( args.length > nextArg + 1 ) {
             
             if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
+                inst.guardeeID = null;
                 inst.guardeeName = null;
                 inst.guardeeEntity = null;
             }
@@ -49,12 +50,12 @@ public class GuardCommand implements SentriesComplexCommand {
                 return;
             }
         }
-        if ( inst.guardeeName == null )
-            sender.sendMessage( Col.GREEN.concat( "Guarding: My Surroundings" ) );
-        else if ( inst.guardeeEntity == null )
-            Utils.sendMessage( sender, Col.GREEN, npcName, " is configured to guard ", inst.guardeeName, " but cannot find them at the moment." );
-        else
+        if ( inst.guardeeEntity != null )
             Utils.sendMessage( sender, Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() );
+        else if ( inst.guardeeName != null && !inst.guardeeName.isEmpty() )
+            Utils.sendMessage( sender, Col.GREEN, npcName, " is configured to guard ", inst.guardeeName, 
+                                                                   " but cannot find them at the moment." );
+        else Utils.sendMessage( sender, Col.GREEN, "Guarding: My Surroundings" );
     }
 
     @Override

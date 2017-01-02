@@ -84,7 +84,7 @@ public class SentryListener implements Listener {
         }
     }
 
-    @EventHandler( ignoreCancelled = true )
+    @EventHandler( priority = EventPriority.HIGHEST, ignoreCancelled = true )
     public void despawn( NPCDespawnEvent event ) {
         // don't despawn active bodyguards on chunk unload
         

@@ -131,6 +131,7 @@ public enum SentryStatus {
                 }        
                 if ( navigateOrTP( inst, guardEntLoc.add( 1, 0, 1 ) ) ) {
                     navigator.setTarget( inst.guardeeEntity, false );
+                    return this;
                 }
             }
             return checkPosition( inst );

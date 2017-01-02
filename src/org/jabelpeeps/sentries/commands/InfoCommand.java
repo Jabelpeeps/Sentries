@@ -31,12 +31,14 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.RED, " [VoiceRange]:", Col.WHITE, String.valueOf( inst.voiceRange ),
                 Col.RED, " [FollowDistance]:", Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
-        joiner.add( String.join( "", S.Col.GREEN, "Invincible: ", String.valueOf( inst.invincible ), 
-                                                "  Retaliate: ", String.valueOf( inst.iRetaliate ),
-                                                "  Drops Items: ", String.valueOf( inst.dropInventory ), 
-                                                "  Critical Hits: ", String.valueOf( inst.acceptsCriticals ),
-                                                "  Kills Drop Items: ", String.valueOf( inst.killsDrop ), 
-                                                "  Respawn Delay: ", String.valueOf( inst.respawnDelay ), "secs" ) );
+        joiner.add( String.join( "", 
+                S.Col.GREEN, "Invincible: ", Col.WHITE, String.valueOf( inst.invincible ), 
+                S.Col.GREEN, "  Retaliate: ", Col.WHITE, String.valueOf( inst.iRetaliate ),
+                S.Col.GREEN, "  Drops Items: ", Col.WHITE, String.valueOf( inst.dropInventory ), 
+                S.Col.GREEN, "  Critical Hits: ", Col.WHITE, String.valueOf( inst.acceptsCriticals ),
+                S.Col.GREEN, "  Kills Drop Items: ", Col.WHITE, String.valueOf( inst.killsDrop ), 
+                S.Col.GREEN, "  Respawn Delay: ", Col.WHITE, String.valueOf( inst.respawnDelay ), "secs" ) );
+        
         joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 
         if ( inst.attackTarget == null )
@@ -44,10 +46,12 @@ public class InfoCommand implements SentriesComplexCommand {
         else
             joiner.add( String.join( "", Col.BLUE, "Currently Targetting: ", inst.attackTarget.getName() ) );
 
-        if ( inst.guardeeEntity == null )
-            joiner.add( Col.BLUE.concat( "Guarding: my spawnpoint" ) );
-        else
-            joiner.add( String.join( "", Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() ) );
+        if ( inst.guardeeEntity != null )
+            joiner.add( String.join( "", Col.BLUE, "Guarding: ", inst.guardeeEntity.getName() ) );          
+        else if ( inst.guardeeName != null && !inst.guardeeName.isEmpty() )
+            joiner.add( String.join( "", Col.BLUE, npcName, " is configured to guard ", inst.guardeeName, 
+                                                                       " but cannot find them at the moment." ) );
+        else joiner.add( Col.BLUE.concat( "Guarding: my spawnpoint" ) );
 
         sender.sendMessage( joiner.toString() );
     }

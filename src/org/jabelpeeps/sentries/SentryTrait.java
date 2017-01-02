@@ -60,24 +60,25 @@ import net.citizensnpcs.util.Util;
 public class SentryTrait extends Trait {
 
     final Sentries sentry;
-    public Location spawnLocation;
+    
+    static SentryStuckAction setStuckStatus = new SentryStuckAction();
+    static AttackStrategy mountedAttack = new MountAttackStrategy();
 
+    @Persist public Location spawnLocation;
     public int strength, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
     public float speed;
 
     public double attackRate, healRate, armour, weight, maxHealth;
     public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals, loaded, ignoreLOS;
 
-    static SentryStuckAction setStuckStatus = new SentryStuckAction();
-    static AttackStrategy mountedAttack = new MountAttackStrategy();
-
-    public String greetingMsg = "", warningMsg = "";
+    @Persist(S.CON_GREETING) public String greetingMsg = "";
+    @Persist(S.CON_WARNING) public String warningMsg = "";
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> _myDamamgers = new HashSet<>();
 
     public LivingEntity guardeeEntity, attackTarget;
-    @Persist UUID guardeeID;
+    @Persist public UUID guardeeID;
     @Persist public String guardeeName;
     DamageCause causeOfDeath;
     Entity killer;
@@ -141,7 +142,7 @@ public class SentryTrait extends Trait {
         greetingMsg = key.getString( S.CON_GREETING, sentry.defaultGreeting );
         warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
-        if ( key.keyExists( S.PERSIST_SPAWN ) ) {
+        if ( spawnLocation == null && key.keyExists( S.PERSIST_SPAWN ) ) {
             spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
                                          key.getDouble( "Spawn.x" ), 
                                          key.getDouble( "Spawn.y" ),
@@ -152,8 +153,6 @@ public class SentryTrait extends Trait {
             if ( spawnLocation.getWorld() == null )
                 spawnLocation = null;
         }
-//        if ( guardeeName != null && guardeeName.isEmpty() )
-//            guardeeName = null;
         
         Set<String> validTargets = new HashSet<>();
         
@@ -195,11 +194,6 @@ public class SentryTrait extends Trait {
         checkForGuardee();
         
         loaded = true;      
-        if ( Sentries.debug ) {      
-            Sentries.debugLog( "validTargets: " + validTargets.toString() );
-            Sentries.debugLog( "ignoreTargets: " + ignoreTargets.toString() );
-            Sentries.debugLog( "eventTargets: " + eventTargets.toString() );
-        }
     }
     
     private void checkBridges( String target ) {
@@ -245,9 +239,6 @@ public class SentryTrait extends Trait {
         
         _myDamamgers.clear();
         NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
-
-//        if ( guardeeName == null )
-//            npc.teleport( spawnLocation, TeleportCause.PLUGIN );
 
         npc.setProtected( false );
         npc.data().set( NPC.TARGETABLE_METADATA, targetable );
@@ -330,25 +321,18 @@ public class SentryTrait extends Trait {
         ignores.forEach( s -> ignoreTargets.add( s.getTargetString() ) ); 
         events.forEach( e -> eventTargets.add( e.getTargetString() ) );
         
-        if ( Sentries.debug ) {
-            Sentries.debugLog( "validTargets: " + validTargets.toString() + System.lineSeparator() +
-                                "ignoreTargets: " + ignoreTargets.toString() + System.lineSeparator() +
-                                "eventTargets: " + eventTargets.toString() );
-        }
-        
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
         key.setRaw( S.EVENTS, eventTargets );
 
-        if ( spawnLocation != null ) {
-            key.setDouble( "Spawn.x", spawnLocation.getX() );
-            key.setDouble( "Spawn.y", spawnLocation.getY() );
-            key.setDouble( "Spawn.z", spawnLocation.getZ() );
-            key.setString( "Spawn.world", spawnLocation.getWorld().getName() );
-            key.setDouble( "Spawn.yaw", spawnLocation.getYaw() );
-            key.setDouble( "Spawn.pitch", spawnLocation.getPitch() );
-        }
-
+//        if ( spawnLocation != null ) {
+//            key.setDouble( "Spawn.x", spawnLocation.getX() );
+//            key.setDouble( "Spawn.y", spawnLocation.getY() );
+//            key.setDouble( "Spawn.z", spawnLocation.getZ() );
+//            key.setString( "Spawn.world", spawnLocation.getWorld().getName() );
+//            key.setDouble( "Spawn.yaw", spawnLocation.getYaw() );
+//            key.setDouble( "Spawn.pitch", spawnLocation.getPitch() );
+//        }
         key.setDouble( S.CON_HEALTH, maxHealth );
         key.setInt( S.CON_RANGE, range );
         key.setInt( S.CON_RESPAWN_DELAY, respawnDelay );
@@ -361,14 +345,6 @@ public class SentryTrait extends Trait {
         key.setDouble( S.CON_ARROW_RATE, attackRate );
         key.setInt( S.CON_NIGHT_VIS, nightVision );
         key.setInt( S.CON_FOLLOW_DIST, followDistance );
-
-//        if ( guardeeName != null )
-//            key.setString( S.PERSIST_GUARDEE, guardeeName );
-//        else if ( key.keyExists( S.PERSIST_GUARDEE ) )
-//            key.removeKey( S.PERSIST_GUARDEE );
-
-        key.setString( S.CON_WARNING, warningMsg );
-        key.setString( S.CON_GREETING, greetingMsg );
     }
 
     @Override
@@ -408,80 +384,63 @@ public class SentryTrait extends Trait {
         int combinedRange = range + voiceRange;
         Location myLoc = myEntity.getLocation();
 
-        List<Entity> entitiesInRange = myEntity.getNearbyEntities( combinedRange, combinedRange / 2, combinedRange );
         LivingEntity theTarget = null;
         Double distanceToBeat = 99999.0;
 
-        for ( Entity aTarget : entitiesInRange ) {
+        for ( Entity aTarget : myEntity.getNearbyEntities( combinedRange, combinedRange / 2, combinedRange ) ) {
 
-            if ( !(aTarget instanceof LivingEntity) ) continue;
+            if  (   !(aTarget instanceof LivingEntity) 
+                    || !hasLOS( aTarget ) ) 
+                continue;
 
-            // find closest target
             if (    !isIgnoring( (LivingEntity) aTarget )
                     && isTarget( (LivingEntity) aTarget ) ) {
 
-                // can i see it?
                 double lightLevel = aTarget.getLocation().getBlock().getLightLevel();
 
-                // sneaking cut light in half
                 if (    aTarget instanceof Player
                         && ((Player) aTarget).isSneaking() )
                     lightLevel /= 2;
 
-                // not too dark?
                 if ( lightLevel >= ( 16 - nightVision ) ) {
-
+                    
                     double dist = aTarget.getLocation().distance( myLoc );
 
-                    if ( hasLOS( aTarget ) ) {
+                    if (    dist > range 
+                            && !warningMsg.isEmpty()
+                            && checkSpeech( aTarget ) ) {
 
-                        if (    voiceRange > 0 
-                                && !warningMsg.isEmpty()
-                                && dist > range 
-                                && aTarget instanceof Player
-                                && !aTarget.hasMetadata( "NPC" ) ) {
-
-                            if (    !warningsGiven.containsKey( aTarget ) 
-                                    || System.currentTimeMillis() > warningsGiven.get( aTarget ) + 60000 ) {
-
-                                Player player = (Player) aTarget;
-
-                                player.sendMessage( Utils.format( warningMsg, npc, player, null, null ) );
-
-                                if ( !getNavigator().isNavigating() )
-                                    NMS.look( myEntity, aTarget );
-
-                                warningsGiven.put( player, System.currentTimeMillis() );
-                            }
-                        }
-                        else if ( dist < distanceToBeat ) {
-                            distanceToBeat = dist;
-                            theTarget = (LivingEntity) aTarget;
-                        }
+                        Player player = (Player) aTarget;
+                        player.sendMessage( Utils.format( warningMsg, npc, player, null, null ) );
+                        warningsGiven.put( player, System.currentTimeMillis() );
+                        if ( !getNavigator().isNavigating() ) Util.faceEntity( myEntity, aTarget );
+                    }
+                    else if ( dist < distanceToBeat ) {
+                        distanceToBeat = dist;
+                        theTarget = (LivingEntity) aTarget;
                     }
                 }
             }
-            else if ( voiceRange > 0 
-                    && !greetingMsg.isEmpty()
-                    && aTarget instanceof Player
-                    && !aTarget.hasMetadata( "NPC" ) ) {
+            else if (  !greetingMsg.isEmpty()
+                    && checkSpeech( aTarget ) ) {
 
-                if (    hasLOS( aTarget )
-                        && (    !warningsGiven.containsKey( aTarget )
-                                || System.currentTimeMillis() > warningsGiven.get( aTarget ) + 60000) ) {
-
-                    Player player = (Player) aTarget;
-
-                    player.sendMessage( Utils.format( greetingMsg, npc, player, null, null ) );
-                    NMS.look( myEntity, aTarget );
-
-                    warningsGiven.put( player, System.currentTimeMillis() );
-                }
+                Player player = (Player) aTarget;
+                player.sendMessage( Utils.format( greetingMsg, npc, player, null, null ) );
+                warningsGiven.put( player, System.currentTimeMillis() );
+                Util.faceEntity( myEntity, player );
             }
         }
         return theTarget;
     }
 
+    private boolean checkSpeech( Entity aTarget ) {
+        return voiceRange > 0 
+                && aTarget instanceof Player
+                && !aTarget.hasMetadata( "NPC" ) 
+                && (    !warningsGiven.containsKey( aTarget ) 
+                        || System.currentTimeMillis() > warningsGiven.get( aTarget ) + 60000 );
+    }
+    
     public double getHealth() {
         LivingEntity myEntity = getMyEntity();
         if ( myEntity == null ) return 0;
@@ -585,8 +544,9 @@ public class SentryTrait extends Trait {
     public boolean isWarlock1() { return myAttack == AttackType.WARLOCK1; }
     public boolean isWitchDoctor() { return myAttack == AttackType.WITCHDOCTOR; }
     public boolean isNotFlammable() { return notFlammable.contains( myAttack ); }
-    public boolean lightsFires() { return lightsFires.contains( myAttack ); }
-
+    public boolean lightsFires() { return lightsFires.contains( myAttack ); }   
+    boolean isMyChunkLoaded() { return Util.isLoaded( npc.getStoredLocation() ); }
+    
     /** 
      * Checks whether sufficient time has passed since the last healing, and if so restores
      * health according to the configured healrate.
@@ -605,17 +565,13 @@ public class SentryTrait extends Trait {
                 // idk what this effect looks like, so lets see if it looks ok in-game.
                 myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getLocation(), 5 );
 
-                if ( getHealth() >= maxHealth )
-                    _myDamamgers.clear();
+                if ( getHealth() >= maxHealth ) _myDamamgers.clear();
             }
             oktoheal = (long) ( System.currentTimeMillis() + ( healRate * 1000 ) );
         }
     }
-    
-    boolean isMyChunkLoaded() {
-        return Util.isLoaded( npc.getStoredLocation() );
-    }
 
+    /** Checks if the configured guardee is online (in the case of players), or spawned (in the case of NPC's). */
     public void checkForGuardee() {
         if ( guardeeID != null ) {
         
@@ -644,6 +600,8 @@ public class SentryTrait extends Trait {
             guardeeID = guardeeEntity.getUniqueId();
         }
     }
+    /** Checks whether the supplied player is the player that this sentry is configured to guard,
+     *  and stores its entity in guardeeEntity if so. */
     public void checkForGuardee( Player joined ) {
         if ( guardeeID != null ) {
             if ( guardeeID.equals( joined.getUniqueId() ) ) {
@@ -651,13 +609,15 @@ public class SentryTrait extends Trait {
                 guardeeName = joined.getName();
             }
         }
-        else if ( guardeeName != null ) {
+        else if ( guardeeName != null && !guardeeName.isEmpty() ) {
             if ( guardeeName.equalsIgnoreCase( joined.getName() ) ) {
                 guardeeEntity = joined;
                 guardeeID = joined.getUniqueId();
             }
         }
     }
+    /** Checks if the supplied NPC is the configured guardee for this sentry, and stores its 
+     *  entity in guardeeEntity if so. */
     public void checkForGuardee( NPC spawned ) {
         if ( guardeeID != null ) {
             if ( guardeeID.equals( spawned.getUniqueId() ) ) {
@@ -665,7 +625,7 @@ public class SentryTrait extends Trait {
                 guardeeName = spawned.getName();
             }
         }
-        else if ( guardeeName != null ) {
+        else if ( guardeeName != null && !guardeeName.isEmpty() ) {
             if ( guardeeName.equalsIgnoreCase( spawned.getName() ) ) {
                 guardeeEntity = (LivingEntity) spawned.getEntity();
                 guardeeID = spawned.getUniqueId();
@@ -674,19 +634,18 @@ public class SentryTrait extends Trait {
     }
     /**
      * Searches all online players for one with a name that matches the provided String, and
-     * if successful saves it in the field 'guardeeEntity' and the name in
-     * 'guardeeName'
+     * if successful saves it in the field 'guardeeEntity', their name in 'guardeeName', and
+     * their UUID in 'guardeeID'.
      * 
      * @param name - The name that you wish to search for.
-     * @return true if an Entity with the supplied name is found, otherwise
-     *         returns false.
+     * @return true if an Entity with the supplied name is found, otherwise returns false.
      */
     public boolean findPlayerGuardEntity( String name ) { 
         if ( npc == null || name == null ) return false;
 
         for ( Player player : Bukkit.getOnlinePlayers() ) {
 
-            if ( name.equals( player.getName() ) ) {
+            if ( name.equalsIgnoreCase( player.getName() ) ) {
 
                 guardeeID = player.getUniqueId();
                 guardeeEntity = player;
@@ -698,12 +657,11 @@ public class SentryTrait extends Trait {
     }
     /**
      * Searches all LivingEntities within range for one with a name that matches the provided String, and
-     * if successful saves it in the field 'guardeeEntity' and the name in
-     * 'guardeeName'
+     * if successful saves it in the field 'guardeeEntity' and the name in, their name in 'guardeeName', and
+     * their UUID in 'guardeeID'.
      * 
      * @param name - The name that you wish to search for. 
-     * @return true if an Entity with the supplied name is found, otherwise
-     *         returns false.
+     * @return true if an Entity with the supplied name is found, otherwise returns false.
      */
     public boolean findOtherGuardEntity( String name ) {
         if ( npc == null || name == null ) return false;
@@ -937,7 +895,7 @@ public class SentryTrait extends Trait {
 
             SentryTrait inst = Utils.getSentryTrait( npc );
             
-            if ( inst == null && navigator.getLocalParameters().attackStrategy() == mountedAttack ) 
+            if ( inst == null && navigator.getLocalParameters().attackStrategy() == mountedAttack )
                 inst = Utils.getSentryTrait( npc.getEntity().getPassenger() );
             
             if ( inst != null )
