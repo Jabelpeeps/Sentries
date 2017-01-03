@@ -13,6 +13,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
+import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
 
 import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.npc.NPC;
@@ -329,8 +331,13 @@ public abstract class Utils {
         
         if ( !Sentries.activePlugins.isEmpty() ) {
             StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-    
-            joiner.add( "These additional options are available:- " );    
+            joiner.add( "These additional options are available:- " ); 
+            
+            SentriesCommand command = CommandHandler.getCommand( S.EVENT );
+            if ( command != CommandHandler.nullCommand ) {
+                joiner.add( String.join( "", Col.GOLD, "/sentry ", S.EVENT, Col.WHITE, command.getShortHelp() ) );
+            }
+            
             Sentries.activePlugins.parallelStream()
                                   .filter( p -> p instanceof PluginTargetBridge )
                                   .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
@@ -340,7 +347,7 @@ public abstract class Utils {
         return "";
     }
     public static String prettifyLocation( Location loc ) {
-        return String.join( ", ", loc.getWorld().toString(), "at X:", String.valueOf( loc.getX() ), 
-                                  " Y:", String.valueOf( loc.getY() ), " Z:", String.valueOf( loc.getZ() ) );
+        return String.join( " ", "World:", loc.getWorld().getName(), "at X:", String.valueOf( loc.getX() ), 
+                           " Y:", String.valueOf( loc.getY() ), " Z:", String.valueOf( loc.getZ() ) );
     }
 }

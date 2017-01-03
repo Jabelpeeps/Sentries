@@ -64,7 +64,7 @@ public class SentryTrait extends Trait {
     static SentryStuckAction setStuckStatus = new SentryStuckAction();
     static AttackStrategy mountedAttack = new MountAttackStrategy();
 
-    @Persist public Location spawnLocation;
+    @Persist(S.PERSIST_SPAWN) public Location spawnLocation;
     public int strength, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
     public float speed;
 
@@ -75,7 +75,7 @@ public class SentryTrait extends Trait {
     @Persist(S.CON_WARNING) public String warningMsg = "";
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
-    Set<Player> _myDamamgers = new HashSet<>();
+    Set<Player> myDamagers = new HashSet<>();
 
     public LivingEntity guardeeEntity, attackTarget;
     @Persist public UUID guardeeID;
@@ -142,17 +142,17 @@ public class SentryTrait extends Trait {
         greetingMsg = key.getString( S.CON_GREETING, sentry.defaultGreeting );
         warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
-        if ( spawnLocation == null && key.keyExists( S.PERSIST_SPAWN ) ) {
-            spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
-                                         key.getDouble( "Spawn.x" ), 
-                                         key.getDouble( "Spawn.y" ),
-                                         key.getDouble( "Spawn.z" ),
-                                        (float) key.getDouble( "Spawn.yaw" ),
-                                        (float) key.getDouble( "Spawn.pitch" ) );
-
-            if ( spawnLocation.getWorld() == null )
-                spawnLocation = null;
-        }
+//        if ( spawnLocation == null && key.keyExists( S.PERSIST_SPAWN ) ) {
+//            spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
+//                                         key.getDouble( "Spawn.x" ), 
+//                                         key.getDouble( "Spawn.y" ),
+//                                         key.getDouble( "Spawn.z" ),
+//                                        (float) key.getDouble( "Spawn.yaw" ),
+//                                        (float) key.getDouble( "Spawn.pitch" ) );
+//
+//            if ( spawnLocation.getWorld() == null )
+//                spawnLocation = null;
+//        }
         
         Set<String> validTargets = new HashSet<>();
         
@@ -233,7 +233,7 @@ public class SentryTrait extends Trait {
         myEntity.getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( maxHealth );
         setHealth( maxHealth );
         
-        _myDamamgers.clear();
+        myDamagers.clear();
         NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
 
         npc.setProtected( false );
@@ -287,7 +287,7 @@ public class SentryTrait extends Trait {
             killer = ((NPCDamageByEntityEvent) event).getDamager();
         
         if ( runscripts && Sentries.denizenActive )
-            DenizenHook.sentryDeath( _myDamamgers, npc );
+            DenizenHook.sentryDeath( myDamagers, npc );
     }
 
     @Override
@@ -458,7 +458,8 @@ public class SentryTrait extends Trait {
      * @return the amount of the damage.
      */
     public double getFinalDamage( double finaldamage ) {
-        return Sentries.useNewArmourCalc ? Math.abs( finaldamage * armour ) : Math.min( finaldamage - armour, 0 );
+        return Sentries.useNewArmourCalc ? finaldamage - Math.abs( finaldamage * armour ) 
+                                         : Math.min( finaldamage - Math.abs( armour ), 0 );
     }
    
     /**
@@ -563,7 +564,7 @@ public class SentryTrait extends Trait {
                 // idk what this effect looks like, so lets see if it looks ok in-game.
                 myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getLocation(), 5 );
 
-                if ( getHealth() >= maxHealth ) _myDamamgers.clear();
+                if ( getHealth() >= maxHealth ) myDamagers.clear();
             }
             oktoheal = (long) ( System.currentTimeMillis() + ( healRate * 1000 ) );
         }

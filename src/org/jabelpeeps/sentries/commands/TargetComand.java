@@ -112,12 +112,12 @@ public class TargetComand implements SentriesComplexCommand {
                 if ( secondSubArg.equals( "player" ) ) { 
                     try {
                     target = new NamedPlayerTarget( 
-                            Arrays.stream( Bukkit.getOfflinePlayers() )
+                            Arrays.stream( Bukkit.getOfflinePlayers() ).parallel()
                                   .filter( p -> p.getName().equalsIgnoreCase( thirdSubArg ) )
+                                  .map( p -> p.getUniqueId() )
                                   .findAny()
                                   // the OrElse is used during target reloading, when the UUID is known but not the name
-                                  .orElse( Bukkit.getOfflinePlayer( UUID.fromString( thirdSubArg ) ) )
-                                  .getUniqueId() );
+                                  .orElse( UUID.fromString( thirdSubArg ) ) );
                     } catch (IllegalArgumentException e) {
                         Utils.sendMessage( sender, S.ERROR, "No player called:- ", thirdSubArg, " was found." );
                     }                  

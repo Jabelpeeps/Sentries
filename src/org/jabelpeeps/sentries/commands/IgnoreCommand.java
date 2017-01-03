@@ -102,11 +102,11 @@ public class IgnoreCommand implements SentriesComplexCommand {
                     if ( secondSubArg.equals( "player" ) ) { 
                         try {
                         target = new NamedPlayerTarget( 
-                                Arrays.stream( Bukkit.getOfflinePlayers() )
+                                Arrays.stream( Bukkit.getOfflinePlayers() ).parallel()
                                       .filter( p -> p.getName().equalsIgnoreCase( targetArgs[2] ) )
+                                      .map( p -> p.getUniqueId() )
                                       .findAny()
-                                      .orElse( Bukkit.getOfflinePlayer( UUID.fromString( targetArgs[2] ) ) )
-                                      .getUniqueId() );
+                                      .orElse( UUID.fromString( targetArgs[2] ) ) );
                         } catch (IllegalArgumentException e) {
                             Utils.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
                         }
@@ -153,11 +153,11 @@ public class IgnoreCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );
             joiner.add( String.join( "", Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
             joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
+            joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
+            joiner.add( String.join( "", Col.GOLD, "  Trait:<TraitName> ", Col.RESET, "to ignore NPC's with the named Trait" ) );
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to ignore all mobs (passive and hostile)") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
-            joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
-            joiner.add( String.join( "", Col.GOLD, "  Trait:<TraitName> ", Col.RESET, "to ignore NPC's with the named Trait" ) );
             joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Utils.getAdditionalTargets() );

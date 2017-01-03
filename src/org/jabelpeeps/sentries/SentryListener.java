@@ -58,25 +58,19 @@ public class SentryListener implements Listener {
         LivingEntity deceased = event.getEntity();
 
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + deceased.toString() );
-        
-        if ( deceased instanceof Player && !deceased.hasMetadata( "NPC" ) ) return;
 
         Entity killer = deceased.getKiller();
         
         if ( killer == null ) {
             // lets try another route to find the killer...
             EntityDamageEvent ev = deceased.getLastDamageCause();
-
             // test whether death caused by another entity & reallocate if so.
             if ( ev != null && ev instanceof EntityDamageByEntityEvent ) {
 
-                killer = ((EntityDamageByEntityEvent) ev).getDamager();
-
-                // TODO consider what to do if killer is not a living entity.
-                // (e.g. it is possible killer references a projectile shot by a dispenser.)
+                killer = Utils.getArcher( ((EntityDamageByEntityEvent) ev).getDamager() );
             }
         }
-        SentryTrait inst = Utils.getSentryTrait( Utils.getArcher( killer ) );
+        SentryTrait inst = Utils.getSentryTrait( killer );
 
         if ( inst != null && !inst.killsDrop ) {
             event.getDrops().clear();
@@ -144,9 +138,7 @@ public class SentryListener implements Listener {
             inst.epCount--;
             if ( inst.epCount < 0 ) inst.epCount = 0;
 
-            projectile.getWorld().playEffect(
-                    event.getEntity().getLocation(),
-                    Effect.ENDER_SIGNAL, 1, 100 );
+            projectile.getWorld().playEffect( projectile.getLocation(), Effect.ENDER_SIGNAL, 1, 100 );
             return;
         }
         // put out any fires caused by attacks. 
@@ -378,7 +370,7 @@ public class SentryListener implements Listener {
                 && !damager.hasMetadata("NPC") ) {
 
             Player player = (Player) damager;
-            instVictim._myDamamgers.add( player );
+            instVictim.myDamagers.add( player );
 
             String msg = hit.message;
 
