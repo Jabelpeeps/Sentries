@@ -3,6 +3,7 @@ package org.jabelpeeps.sentries;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -337,5 +338,9 @@ public abstract class Utils {
             return joiner.toString();
         }
         return "";
+    }
+    public static String prettifyLocation( Location loc ) {
+        return String.join( ", ", loc.getWorld().toString(), "at X:", String.valueOf( loc.getX() ), 
+                                  " Y:", String.valueOf( loc.getY() ), " Z:", String.valueOf( loc.getZ() ) );
     }
 }
