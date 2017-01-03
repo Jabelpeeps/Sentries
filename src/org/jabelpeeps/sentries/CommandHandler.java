@@ -22,6 +22,7 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.commands.ArmourCommand;
 import org.jabelpeeps.sentries.commands.AttackRateCommand;
 import org.jabelpeeps.sentries.commands.CriticalsCommand;
+import org.jabelpeeps.sentries.commands.DebugInfoCommand;
 import org.jabelpeeps.sentries.commands.DropsCommand;
 import org.jabelpeeps.sentries.commands.EquipCommand;
 import org.jabelpeeps.sentries.commands.EventCommand;
@@ -89,6 +90,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( S.RANGE,        new RangeCommand() );
         commandMap.put( S.VOICE_RANGE,  new VoiceRangeCommand() );
         commandMap.put( "setstatus",    new SetStatusCommand() );
+        commandMap.put( "debuginfo",    new DebugInfoCommand() );
         
         SentriesNumberCommand command = new ArmourCommand();
         commandMap.put( S.ARMOUR,       command );

@@ -32,14 +32,14 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.RED, " [FollowDistance]:", Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
 
         joiner.add( String.join( "", 
-                S.Col.GREEN, "Invincible: ", Col.WHITE, String.valueOf( inst.invincible ), 
-                S.Col.GREEN, "  Retaliate: ", Col.WHITE, String.valueOf( inst.iRetaliate ),
-                S.Col.GREEN, "  Drops Items: ", Col.WHITE, String.valueOf( inst.dropInventory ), 
-                S.Col.GREEN, "  Critical Hits: ", Col.WHITE, String.valueOf( inst.acceptsCriticals ),
-                S.Col.GREEN, "  Kills Drop Items: ", Col.WHITE, String.valueOf( inst.killsDrop ), 
-                S.Col.GREEN, "  Respawn Delay: ", Col.WHITE, String.valueOf( inst.respawnDelay ), "secs" ) );
+                Col.GREEN, "Invincible: ", Col.WHITE, String.valueOf( inst.invincible ), 
+                Col.GREEN, "  Retaliate: ", Col.WHITE, String.valueOf( inst.iRetaliate ),
+                Col.GREEN, "  Drops Items: ", Col.WHITE, String.valueOf( inst.dropInventory ), 
+                Col.GREEN, "  Critical Hits: ", Col.WHITE, String.valueOf( inst.acceptsCriticals ),
+                Col.GREEN, "  Kills Drop Items: ", Col.WHITE, String.valueOf( inst.killsDrop ), 
+                Col.GREEN, "  Respawn Delay: ", Col.WHITE, String.valueOf( inst.respawnDelay ), "secs" ) );
         
-        joiner.add( String.join( "", S.Col.BLUE, "Status: ", inst.myStatus.toString() ) );
+        joiner.add( String.join( "", Col.BLUE, "Status: ", inst.myStatus.toString() ) );
 
         if ( inst.attackTarget == null )
             joiner.add( Col.BLUE.concat( "Currently Targetting: nothing" ) );

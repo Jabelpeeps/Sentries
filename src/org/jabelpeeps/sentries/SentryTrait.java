@@ -189,10 +189,6 @@ public class SentryTrait extends Trait {
         
         eventTargets.parallelStream().forEach( e -> CommandHandler.getCommand( S.EVENT ).call( null, null, this, 0, "", "add", e ) );
         
-        updateArmour();
-        updateAttackType();
-        checkForGuardee();
-        
         loaded = true;      
     }
     
@@ -245,13 +241,15 @@ public class SentryTrait extends Trait {
         
         NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
 
-        navigatorParams.stationaryTicks( 60 ); // = 3 seconds
+//        navigatorParams.stationaryTicks( 60 ); // = 3 seconds
         navigatorParams.useNewPathfinder( true );
         navigatorParams.stuckAction( setStuckStatus );
         navigatorParams.baseSpeed( speed );
         navigatorParams.attackDelayTicks( (int) (attackRate * 20) );
 
+        updateArmour();
         updateAttackType();
+        checkForGuardee();
        
         if ( tickMe == null ) {
             tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
@@ -893,6 +891,7 @@ public class SentryTrait extends Trait {
         @Override
         public boolean run( NPC npc, Navigator navigator ) {
 
+            if ( !npc.isSpawned() ) return false;
             SentryTrait inst = Utils.getSentryTrait( npc );
             
             if ( inst == null && navigator.getLocalParameters().attackStrategy() == mountedAttack )
