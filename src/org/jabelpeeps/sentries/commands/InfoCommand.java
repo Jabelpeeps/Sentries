@@ -11,6 +11,8 @@ import org.jabelpeeps.sentries.SentryTrait;
 
 public class InfoCommand implements SentriesComplexCommand {
 
+    private static DecimalFormat df = new DecimalFormat( "0.0" );
+    
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
@@ -23,7 +25,7 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.RED, "[Health]:", Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.maxHealth ),
                 Col.RED, " [Armour]:", Col.WHITE, String.valueOf( inst.armour ),
                 Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ),
-                Col.RED, " [Speed]:", Col.WHITE, new DecimalFormat( "#.0" ).format( inst.getSpeed() ),
+                Col.RED, " [Speed]:", Col.WHITE, df.format( inst.getSpeed() ),
                 Col.RED, " [AttackRange]:", Col.WHITE, String.valueOf( inst.range ),
                 Col.RED, " [AttackRate]:", Col.WHITE, String.valueOf( inst.attackRate ),
                 Col.RED, " [NightVision]:", Col.WHITE, String.valueOf( inst.nightVision ),

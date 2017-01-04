@@ -1,5 +1,6 @@
 package org.jabelpeeps.sentries;
 
+import java.text.DecimalFormat;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
@@ -346,8 +347,11 @@ public abstract class Utils {
         }
         return "";
     }
+
+    private static DecimalFormat df = new DecimalFormat( "0.0#" );
+    
     public static String prettifyLocation( Location loc ) {
-        return String.join( " ", "World:", loc.getWorld().getName(), "at X:", String.valueOf( loc.getX() ), 
-                           " Y:", String.valueOf( loc.getY() ), " Z:", String.valueOf( loc.getZ() ) );
+        return String.join( " ", "World:", loc.getWorld().getName(), "at X:", df.format( loc.getX() ), 
+                           " Y:", df.format(  loc.getY() ), " Z:", df.format(  loc.getZ() ) );
     }
 }

@@ -582,7 +582,8 @@ public class SentryTrait extends Trait {
             if ( guardeeNPC != null && guardeeNPC.isSpawned() ) 
                 guardeeEntity = (LivingEntity) guardeeNPC.getEntity();
             
-            guardeeName = guardeeEntity.getName();
+            if ( guardeeEntity != null )
+                guardeeName = guardeeEntity.getName();
         }
         else if ( guardeeName != null && !guardeeName.isEmpty() ) {
             
@@ -596,7 +597,8 @@ public class SentryTrait extends Trait {
                     break;
                 }
             }
-            guardeeID = guardeeEntity.getUniqueId();
+            if ( guardeeEntity != null )
+                guardeeID = guardeeEntity.getUniqueId();
         }
     }
     /** Checks whether the supplied player is the player that this sentry is configured to guard,
