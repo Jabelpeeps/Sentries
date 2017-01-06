@@ -8,12 +8,16 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
+import lombok.Getter;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.TargetType;
 import net.citizensnpcs.api.npc.NPC;
 
 public class DebugInfoCommand implements SentriesComplexCommand {
-
+    @Getter final String shortHelp = "view debug information for a sentry";
+    @Getter final String longHelp = "Displays a page of internal information for a sentry.";
+    @Getter final String perm = S.PERM_CITS_ADMIN;
+    
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
@@ -24,11 +28,15 @@ public class DebugInfoCommand implements SentriesComplexCommand {
                                     String.valueOf( inst.getNPC().getId() ), ") ", "------" ) );
                
         joiner.add( String.join( "", Col.BLUE, "Status: ", Col.WHITE, inst.myStatus.toString() ) );
+        joiner.add( String.join( "", Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
+                                 inst.hasMount() ? ( " (mountID = " + inst.mountID + ")" ) : "" ) );
+        
         joiner.add( String.join( "", Col.BLUE, "StoredLocation: ", Col.WHITE, Utils.prettifyLocation( npc.getStoredLocation() ) ) );
+        
         joiner.add( String.join( "", Col.BLUE, "Spawn Point: ", Col.WHITE, Utils.prettifyLocation( inst.spawnLocation ), 
                 " (distance to:- ", inst.spawnLocation.getWorld() != npc.getStoredLocation().getWorld() 
-                        ? "not in current world)"
-                        : ( String.valueOf( inst.spawnLocation.distance( npc.getStoredLocation() ) ) + " )" ) ) );
+                                    ? "not in current world)"
+                                    : ( Utils.formatDbl( inst.spawnLocation.distance( npc.getStoredLocation() ) ) + " )" ) ) );
 
         Navigator navigator = inst.getNavigator();
         if ( navigator.isNavigating() ) {
@@ -41,12 +49,5 @@ public class DebugInfoCommand implements SentriesComplexCommand {
         }
         sender.sendMessage( joiner.toString() );
     }
-
-    @Override
-    public String getShortHelp() { return "view debug information for a sentry"; }
-    @Override
-    public String getLongHelp() { return "Displays a page of internal information for a sentry."; }
-    @Override
-    public String getPerm() { return S.PERM_CITS_ADMIN; }
 }
 

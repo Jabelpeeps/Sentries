@@ -347,6 +347,9 @@ public abstract class Utils {
     }
 
     private static DecimalFormat df = new DecimalFormat( "0.0#" );
+    public static String formatDbl( double d ) {
+        return df.format( d );
+    }
     
     public static String prettifyLocation( Location loc ) {
         return String.join( " ", "World:", loc.getWorld().getName(), "at X:", df.format( loc.getX() ), 

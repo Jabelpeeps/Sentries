@@ -64,7 +64,8 @@ public class SentryTrait extends Trait {
     static AttackStrategy mountedAttack = new MountAttackStrategy();
 
     @Persist( S.PERSIST_SPAWN ) public Location spawnLocation;
-    public int epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
+    @Persist( S.PERSIST_MOUNT ) public int mountID = -1;
+    public int epCount, nightVision, respawnDelay, range, followDistance, voiceRange;
     public float speed;
 
     public double strength, attackRate, healRate, armour, weight, maxHealth;
@@ -148,7 +149,7 @@ public class SentryTrait extends Trait {
         followDistance = key.getInt( S.CON_FOLLOW_DIST, sentry.defaultIntegers.get( S.CON_FOLLOW_DIST ) );
         voiceRange = key.getInt( S.CON_VOICE_RANGE, sentry.defaultIntegers.get( S.CON_VOICE_RANGE ) );
         nightVision = key.getInt( S.CON_NIGHT_VIS, sentry.defaultIntegers.get( S.CON_NIGHT_VIS ) );
-        mountID = key.getInt( S.PERSIST_MOUNT, -1 );
+//        mountID = key.getInt( S.PERSIST_MOUNT, -1 );
 
         armour = key.getDouble( S.CON_ARMOUR, sentry.defaultDoubles.get( S.CON_ARMOUR ) );
         speed = (float) key.getDouble( S.CON_SPEED, sentry.defaultDoubles.get( S.CON_SPEED ) );
@@ -317,7 +318,7 @@ public class SentryTrait extends Trait {
 //        key.setBoolean( S.CON_DROP_INV, dropInventory );
 //        key.setBoolean( S.CON_KILLS_DROP, killsDrop );
 //        key.setBoolean( S.CON_MOBS_ATTACK, targetable );
-        key.setInt( S.PERSIST_MOUNT, mountID );
+//        key.setInt( S.PERSIST_MOUNT, mountID );
 //        key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
 //        key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
 
