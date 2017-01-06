@@ -55,12 +55,10 @@ public class Sentries extends JavaPlugin {
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
     
     public static Set<EntityType> mobs = EnumSet.allOf( EntityType.class );
-    static {
-        mobs.removeIf( e -> !LivingEntity.class.isAssignableFrom( e.getEntityClass() ) );
-    }
 
     public static Map<String, Integer> equipmentSlots = new HashMap<>();
     static {
+        mobs.removeIf( e -> !LivingEntity.class.isInstance( e ) );
         equipmentSlots.put( "hand", 0 );
         equipmentSlots.put( "helmet", 1 );
         equipmentSlots.put( "chestplate", 2 );
