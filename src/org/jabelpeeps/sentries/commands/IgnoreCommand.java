@@ -23,6 +23,7 @@ import org.jabelpeeps.sentries.targets.OwnerTarget;
 import org.jabelpeeps.sentries.targets.TargetType;
 import org.jabelpeeps.sentries.targets.TraitTypeTarget;
 
+import lombok.Getter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
@@ -31,7 +32,9 @@ import net.citizensnpcs.api.trait.trait.Owner;
 
 public class IgnoreCommand implements SentriesComplexCommand {
 
-    String ignoreCommandHelp;
+    private String ignoreCommandHelp;
+    @Getter public String shortHelp = "set targets to ignore";
+    @Getter public String perm = S.PERM_IGNORE;
 
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -59,8 +62,6 @@ public class IgnoreCommand implements SentriesComplexCommand {
 
         if ( (S.ADD + S.REMOVE).contains( subCommand ) ) {
 
-            // TODO add more user feedback for success or failure conditions
-            
             if ( args.length <= nextArg + 2 ) {
                 Utils.sendMessage( sender, S.ERROR, "Missing arguments!", Col.RESET, " try '/sentry help ignore'" );
                 return;
@@ -134,9 +135,6 @@ public class IgnoreCommand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getShortHelp() { return "set targets to ignore"; }
-
-    @Override
     public String getLongHelp() {
 
         if ( ignoreCommandHelp == null ) {
@@ -158,7 +156,8 @@ public class IgnoreCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to ignore all mobs (passive and hostile)") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
-            joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
+            joiner.add( String.join( "", "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
+            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name>", Col.RESET, "to ignore the named player or npc only.") );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Utils.getAdditionalTargets() );
 
@@ -166,6 +165,4 @@ public class IgnoreCommand implements SentriesComplexCommand {
         }
         return ignoreCommandHelp;
     }
-    @Override
-    public String getPerm() { return S.PERM_IGNORE; }
 }

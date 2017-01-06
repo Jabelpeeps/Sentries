@@ -18,8 +18,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -54,7 +54,10 @@ public class Sentries extends JavaPlugin {
     public static Set<Material> leggings = EnumSet.of( Material.LEATHER_LEGGINGS, Material.CHAINMAIL_LEGGINGS, 
             Material.IRON_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.GOLD_LEGGINGS );
     
-    public static Set<EntityType> mobs = EnumSet.range( EntityType.CREEPER, EntityType.VILLAGER );
+    public static Set<EntityType> mobs = EnumSet.allOf( EntityType.class );
+    static {
+        mobs.removeIf( e -> !LivingEntity.class.isAssignableFrom( e.getEntityClass() ) );
+    }
 
     public static Map<String, Integer> equipmentSlots = new HashMap<>();
     static {
@@ -68,7 +71,7 @@ public class Sentries extends JavaPlugin {
     
     Map<Material, Double> armorValues = new EnumMap<>( Material.class );
     Map<Material, Double> speedBuffs = new EnumMap<>( Material.class );
-    Map<Material, Double> strengthBuffs = new EnumMap<>( Material.class );
+    Map<Material, Double> weaponStrengths = new EnumMap<>( Material.class );
     Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<>( Material.class );
 
     Map<String, Boolean> defaultBooleans = new HashMap<>();
@@ -85,7 +88,7 @@ public class Sentries extends JavaPlugin {
     public Queue<Projectile> arrows = new LinkedList<>();
 
     static Logger logger;
-    public static Plugin plugin;
+    public static Sentries plugin;
     static DenizenHook denizenHook;
     public static NPCRegistry registry;
 
@@ -120,7 +123,7 @@ public class Sentries extends JavaPlugin {
             CommandHandler.addCommand( "export", new ExportCommand() );
         
         registry = CitizensAPI.getNPCRegistry();     
-        reloadMyConfig();
+        reloadMyConfig();  // must happen before the trait is registered.
         
         if ( checkPlugin( S.DENIZEN ) ) {
 
@@ -156,7 +159,7 @@ public class Sentries extends JavaPlugin {
         FileConfiguration config = getConfig();
 
         loadIntoMaterialMap( config, "ArmorValues", armorValues );
-        loadIntoMaterialMap( config, "StrengthBuffs", strengthBuffs );
+        loadIntoMaterialMap( config, "WeaponStrengths", weaponStrengths );
         loadIntoMaterialMap( config, "SpeedBuffs", speedBuffs );
 
         loadWeaponEffects( config, "WeaponEffects", weaponEffects );
@@ -180,8 +183,8 @@ public class Sentries extends JavaPlugin {
         loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
         loadIntoStringMap( config, "DefaultStats", defaultIntegers );
         loadIntoStringMap( config, "DefaultValues", defaultDoubles );
-        if ( !defaultDoubles.containsKey( S.CON_ARMOUR ) )
-            defaultDoubles.put( S.CON_ARMOUR, 0.0 );
+        if ( !defaultDoubles.containsKey( S.CON_ARMOUR ) ) defaultDoubles.put( S.CON_ARMOUR, 0.0 );
+        if ( !defaultDoubles.containsKey(  S.CON_STRENGTH ) ) defaultDoubles.put( S.CON_STRENGTH, 1.0 );
         defaultTargets = config.getStringList( S.DEFAULT_TARGETS );
         defaultIgnores = config.getStringList( S.DEFAULT_IGNORES );
         defaultWarning = config.getString( "DefaultTexts.Warning" );

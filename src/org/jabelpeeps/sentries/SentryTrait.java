@@ -53,7 +53,6 @@ import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
-import net.citizensnpcs.api.util.MemoryDataKey;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.Util;
 
@@ -64,15 +63,32 @@ public class SentryTrait extends Trait {
     static SentryStuckAction setStuckStatus = new SentryStuckAction();
     static AttackStrategy mountedAttack = new MountAttackStrategy();
 
-    @Persist(S.PERSIST_SPAWN) public Location spawnLocation;
-    public int strength, epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
+    @Persist( S.PERSIST_SPAWN ) public Location spawnLocation;
+    public int epCount, nightVision, respawnDelay, range, followDistance, voiceRange, mountID;
     public float speed;
 
-    public double attackRate, healRate, armour, weight, maxHealth;
-    public boolean killsDrop, dropInventory, targetable, invincible, iRetaliate, acceptsCriticals, loaded, ignoreLOS;
+    public double strength, attackRate, healRate, armour, weight, maxHealth;
+    
+    @Persist( S.CON_USE_WEAPON_STRENGTH ) 
+    public boolean strengthFromWeapon = Sentries.plugin.defaultBooleans.get( S.CON_USE_WEAPON_STRENGTH );
+    @Persist( S.CON_KILLS_DROP )
+    public boolean killsDrop = Sentries.plugin.defaultBooleans.get( S.CON_KILLS_DROP );
+    @Persist( S.CON_DROP_INV )
+    public boolean dropInventory = Sentries.plugin.defaultBooleans.get( S.CON_DROP_INV );
+    @Persist( S.CON_MOBS_ATTACK )
+    public boolean targetable = Sentries.plugin.defaultBooleans.get( S.CON_MOBS_ATTACK );
+    @Persist( S.CON_INVINCIBLE )
+    public boolean invincible = Sentries.plugin.defaultBooleans.get( S.CON_INVINCIBLE );
+    @Persist( S.CON_RETALIATION )
+    public boolean iRetaliate = Sentries.plugin.defaultBooleans.get( S.CON_RETALIATION );
+    @Persist( S.CON_CRIT_HITS ) 
+    public boolean acceptsCriticals = Sentries.plugin.defaultBooleans.get( S.CON_CRIT_HITS );
+    @Persist( S.CON_IGNORE_LOS )
+    public boolean ignoreLOS =Sentries.plugin.defaultBooleans.get( S.CON_IGNORE_LOS );
+//    public boolean loaded;
 
-    @Persist(S.CON_GREETING) public String greetingMsg = "";
-    @Persist(S.CON_WARNING) public String warningMsg = "";
+    @Persist( S.CON_GREETING ) public String greetingMsg = "";
+    @Persist( S.CON_WARNING ) public String warningMsg = "";
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> myDamagers = new HashSet<>();
@@ -113,15 +129,20 @@ public class SentryTrait extends Trait {
   
         if ( key.keyExists( "traits" ) ) key = key.getRelative( "traits" );
 
-        iRetaliate = key.getBoolean( S.CON_RETALIATION, sentry.defaultBooleans.get( S.CON_RETALIATION ) );
-        invincible = key.getBoolean( S.CON_INVINCIBLE, sentry.defaultBooleans.get( S.CON_INVINCIBLE ) );
-        dropInventory = key.getBoolean( S.CON_DROP_INV, sentry.defaultBooleans.get( S.CON_DROP_INV ) );
-        acceptsCriticals = key.getBoolean( S.CON_CRIT_HITS, sentry.defaultBooleans.get( S.CON_CRIT_HITS ) );
-        killsDrop = key.getBoolean( S.CON_KILLS_DROP, sentry.defaultBooleans.get( S.CON_KILLS_DROP ) );
-        ignoreLOS = key.getBoolean( S.CON_IGNORE_LOS, sentry.defaultBooleans.get( S.CON_IGNORE_LOS ) );
-        targetable = key.getBoolean( S.CON_MOBS_ATTACK, sentry.defaultBooleans.get( S.CON_MOBS_ATTACK ) );
+//        iRetaliate = key.getBoolean( S.CON_RETALIATION, sentry.defaultBooleans.get( S.CON_RETALIATION ) );
+//        invincible = key.getBoolean( S.CON_INVINCIBLE, sentry.defaultBooleans.get( S.CON_INVINCIBLE ) );
+//        dropInventory = key.getBoolean( S.CON_DROP_INV, sentry.defaultBooleans.get( S.CON_DROP_INV ) );
+//        acceptsCriticals = key.getBoolean( S.CON_CRIT_HITS, sentry.defaultBooleans.get( S.CON_CRIT_HITS ) );
+//        killsDrop = key.getBoolean( S.CON_KILLS_DROP, sentry.defaultBooleans.get( S.CON_KILLS_DROP ) );
+//        ignoreLOS = key.getBoolean( S.CON_IGNORE_LOS, sentry.defaultBooleans.get( S.CON_IGNORE_LOS ) );
+//        targetable = key.getBoolean( S.CON_MOBS_ATTACK, sentry.defaultBooleans.get( S.CON_MOBS_ATTACK ) );
 
-        strength = key.getInt( S.CON_STRENGTH, sentry.defaultIntegers.get( S.CON_STRENGTH ) );
+        try {
+            strength = key.getInt( S.CON_STRENGTH, 1 );
+        }
+        catch ( Exception e ) {
+            strength = key.getDouble( S.CON_STRENGTH, sentry.defaultDoubles.get( S.CON_STRENGTH ) );
+        }
         range = key.getInt( S.CON_RANGE, sentry.defaultIntegers.get( S.CON_RANGE ) );
         respawnDelay = key.getInt( S.CON_RESPAWN_DELAY, sentry.defaultIntegers.get( S.CON_RESPAWN_DELAY ) );
         followDistance = key.getInt( S.CON_FOLLOW_DIST, sentry.defaultIntegers.get( S.CON_FOLLOW_DIST ) );
@@ -142,18 +163,6 @@ public class SentryTrait extends Trait {
         greetingMsg = key.getString( S.CON_GREETING, sentry.defaultGreeting );
         warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
-//        if ( spawnLocation == null && key.keyExists( S.PERSIST_SPAWN ) ) {
-//            spawnLocation = new Location( Bukkit.getWorld( key.getString( "Spawn.world" ) ),
-//                                         key.getDouble( "Spawn.x" ), 
-//                                         key.getDouble( "Spawn.y" ),
-//                                         key.getDouble( "Spawn.z" ),
-//                                        (float) key.getDouble( "Spawn.yaw" ),
-//                                        (float) key.getDouble( "Spawn.pitch" ) );
-//
-//            if ( spawnLocation.getWorld() == null )
-//                spawnLocation = null;
-//        }
-        
         Set<String> validTargets = new HashSet<>();
         
         if ( key.getRaw( S.TARGETS ) != null )
@@ -161,7 +170,7 @@ public class SentryTrait extends Trait {
         else
             validTargets.addAll( sentry.defaultTargets );
         
-        validTargets.parallelStream().forEach( t -> CommandHandler.getCommand( S.TARGET ).call( null, null, this, 0, "", "add", t ) );
+        validTargets.parallelStream().forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
         
         validTargets.parallelStream()
                     .filter( v -> targets.parallelStream()
@@ -175,7 +184,7 @@ public class SentryTrait extends Trait {
         else
             ignoreTargets.addAll( sentry.defaultIgnores );
         
-        ignoreTargets.parallelStream().forEach( i -> CommandHandler.getCommand( S.IGNORE ).call( null, null, this, 0, "", "add", i ) ); 
+        ignoreTargets.parallelStream().forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
         
         ignoreTargets.parallelStream()
                      .filter( v -> ignores.parallelStream()
@@ -187,9 +196,9 @@ public class SentryTrait extends Trait {
         if ( key.getRaw( S.EVENTS ) != null )
             eventTargets.addAll( (Set<String>) key.getRaw( S.EVENTS ) );
         
-        eventTargets.parallelStream().forEach( e -> CommandHandler.getCommand( S.EVENT ).call( null, null, this, 0, "", "add", e ) );
+        eventTargets.parallelStream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );
         
-        loaded = true;      
+//        loaded = true;      
     }
     
     private void checkBridges( String target ) {
@@ -206,11 +215,11 @@ public class SentryTrait extends Trait {
     public void onSpawn() {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
 
-        if ( !loaded ) {
-            try {
-                load( new MemoryDataKey() );
-            } catch ( NPCLoadException e ) { e.printStackTrace(); }
-        }      
+//        if ( !loaded ) {
+//            try {
+//                load( new MemoryDataKey() );
+//            } catch ( NPCLoadException e ) { e.printStackTrace(); }
+//        }      
         LivingEntity myEntity = getMyEntity();
 
         // check for illegal values
@@ -249,6 +258,7 @@ public class SentryTrait extends Trait {
 
         updateArmour();
         updateAttackType();
+        updateStrength();
         checkForGuardee();
        
         if ( tickMe == null ) {
@@ -302,14 +312,14 @@ public class SentryTrait extends Trait {
     public void save( DataKey key ) {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
         
-        key.setBoolean( S.CON_RETALIATION, iRetaliate );
-        key.setBoolean( S.CON_INVINCIBLE, invincible );
-        key.setBoolean( S.CON_DROP_INV, dropInventory );
-        key.setBoolean( S.CON_KILLS_DROP, killsDrop );
-        key.setBoolean( S.CON_MOBS_ATTACK, targetable );
+//        key.setBoolean( S.CON_RETALIATION, iRetaliate );
+//        key.setBoolean( S.CON_INVINCIBLE, invincible );
+//        key.setBoolean( S.CON_DROP_INV, dropInventory );
+//        key.setBoolean( S.CON_KILLS_DROP, killsDrop );
+//        key.setBoolean( S.CON_MOBS_ATTACK, targetable );
         key.setInt( S.PERSIST_MOUNT, mountID );
-        key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
-        key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
+//        key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
+//        key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
 
         Set<String> ignoreTargets = new HashSet<>();
         Set<String> validTargets = new HashSet<>();
@@ -323,14 +333,6 @@ public class SentryTrait extends Trait {
         key.setRaw( S.IGNORES, ignoreTargets );
         key.setRaw( S.EVENTS, eventTargets );
 
-//        if ( spawnLocation != null ) {
-//            key.setDouble( "Spawn.x", spawnLocation.getX() );
-//            key.setDouble( "Spawn.y", spawnLocation.getY() );
-//            key.setDouble( "Spawn.z", spawnLocation.getZ() );
-//            key.setString( "Spawn.world", spawnLocation.getWorld().getName() );
-//            key.setDouble( "Spawn.yaw", spawnLocation.getYaw() );
-//            key.setDouble( "Spawn.pitch", spawnLocation.getPitch() );
-//        }
         key.setDouble( S.CON_HEALTH, maxHealth );
         key.setInt( S.CON_RANGE, range );
         key.setInt( S.CON_RESPAWN_DELAY, respawnDelay );
@@ -338,7 +340,7 @@ public class SentryTrait extends Trait {
         key.setDouble( S.CON_WEIGHT, weight );
         key.setDouble( S.CON_HEAL_RATE, healRate );
         key.setDouble( S.CON_ARMOUR, armour );
-        key.setInt( S.CON_STRENGTH, strength );
+        key.setDouble( S.CON_STRENGTH, strength );
         key.setInt( S.CON_VOICE_RANGE, voiceRange );
         key.setDouble( S.CON_ARROW_RATE, attackRate );
         key.setInt( S.CON_NIGHT_VIS, nightVision );
@@ -468,7 +470,7 @@ public class SentryTrait extends Trait {
      */
     public boolean updateArmour() {
         if ( sentry.armorValues.isEmpty() ) {
-            Sentries.logger.log( Level.WARNING, "ERROR: no armour vales have been loaded from config." );
+            Sentries.logger.log( Level.WARNING, "ERROR: no armour values have been loaded from config." );
             return false;
         }
         if ( armour < 0 ) { // values less than 0 indicate a calculated value that needs refreshing
@@ -516,22 +518,27 @@ public class SentryTrait extends Trait {
         return (float) ( speed + mod ) * ( myEntity.isInsideVehicle() ? 2 : 1 );
     }
 
-//    public int getStrength() {
-//        if ( sentry.strengthBuffs.isEmpty() ) return strength;
-//
-//        double mod = 0;
-//        LivingEntity myEntity = getMyEntity();
-//
-//        if ( myEntity instanceof Player ) {
-//
-//            Material item = ((Player) myEntity).getInventory().getItemInMainHand().getType();
-//
-//            if ( sentry.strengthBuffs.containsKey( item ) ) {
-//                mod += sentry.strengthBuffs.get( item );
-//            }
-//        }
-//        return (int) (strength + mod);
-//    }
+    public boolean updateStrength() {
+        if ( sentry.weaponStrengths.isEmpty() ) {
+            Sentries.logger.log( Level.WARNING, "ERROR: no weapon strengths have been loaded from config." );
+            return false;
+        }
+        if ( strengthFromWeapon ) {            
+            LivingEntity myEntity = getMyEntity();
+            Material item = null;
+            
+            if ( myEntity instanceof Player )
+                item = ((Player) myEntity).getInventory().getItemInMainHand().getType();  
+            else 
+                item = myEntity.getEquipment().getItemInMainHand().getType();
+            
+            if ( item != null && sentry.weaponStrengths.containsKey( item ) ) {
+                strength = sentry.weaponStrengths.get( item );
+                return true;
+            }
+        }
+        return false;
+    }
 
     private static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
     private static Set<AttackType> stormCallers = EnumSet.range( AttackType.STORMCALLER1, AttackType.STORMCALLER3 );

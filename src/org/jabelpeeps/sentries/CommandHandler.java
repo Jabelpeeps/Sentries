@@ -117,7 +117,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Sentries.logger.info( "[Sentries] NPC:" + npcName + ". Target/Ignore could not be imported:- " + Utils.joinArgs( 0, args ) );
         }
     };
-    
+    static boolean callCommand( SentryTrait inst, String ... args ) {
+        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( args[0] );
+        if ( command == null ) return false;
+        
+        command.call( null, null, inst, 0, args );
+        return true;
+    }
     static SentriesComplexCommand getCommand ( String name ) {
         SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( name );
         return command != null ? command : nullCommand;

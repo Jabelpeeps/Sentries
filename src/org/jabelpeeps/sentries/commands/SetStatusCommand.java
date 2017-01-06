@@ -25,11 +25,11 @@ public class SetStatusCommand implements SentriesComplexCommand {
         if ( args.length < 1 + nextArg ) return;
         
         try {
-            SentryStatus status = SentryStatus.valueOf( args[nextArg + 1] );
+            SentryStatus status = SentryStatus.valueOf( args[nextArg + 1].toUpperCase() );
             if ( status == null ) throw new IllegalArgumentException();
             
             inst.myStatus = status;
-            Utils.sendMessage( sender, Col.GREEN, npcName, "'s stats has been set to:- ", status.name() );
+            Utils.sendMessage( sender, Col.GREEN, npcName, "'s status has been set to:- ", status.name() );
         }
         catch ( IllegalArgumentException e ) {
             Utils.sendMessage( sender, S.ERROR, args[nextArg + 1], " was not recogised as a valid SentryStatus" );

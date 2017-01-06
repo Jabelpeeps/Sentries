@@ -21,7 +21,6 @@ Server:
  
 # Default stats for new Sentries
 DefaultStats:
-  Strength: 1
   NightVision: 16
   Range: 10
   VoiceRange: 0
@@ -29,6 +28,7 @@ DefaultStats:
   FollowDistance: 4
 # More default stats...
 DefaultValues:
+  Strength: 1.0
   Speed: 1.0
   Health: 20.0
   Armour: 0.0     # set to -1.0 to calculate armour strength from armour worn.
@@ -46,6 +46,7 @@ DefaultOptions:
   FriendlyFire: false   # unused?
   MobsAttack: true
   IgnoreLOS: false
+  UseWeapon4Strength: false
  
 # Default texts for new Sentries. You can use <NPC> and <PLAYER> as placeholders.
 DefaultTexts:
@@ -58,7 +59,7 @@ DefaultTargets:
 
 # Default ignore list for new Sentries
 DefaultIgnores:
-  #- "owner"
+  - "owner"
 
 UseCustomMessages: false
 # Configurable messages used by all Sentries. You can use <NPC>, <PLAYER>, <ITEM>, and <AMOUNT> as 
@@ -154,10 +155,35 @@ ArmorValues:
   - DIAMOND_LEGGINGS 0.24
   - DIAMOND_BOOTS 0.12
  
-# The following items will ADD to the sentry's base strength. 
-StrengthBuffs:
-  #- IRON_SWORD 1
-  #- TORCH 5
+# The values below will be used as the strength values for an attack with each item, and will be used if when you use the 
+# '/sentry strength' command to set their strength to -1
+# The default values reflect the damage values in vanilla MC (with 1 = 0.5 hearts).
+WeaponStrengths:
+  - DIAMOND_SWORD 7
+  - IRON_SWORD 6
+  - STONE_SWORD 5
+  - GOLD_SWORD 4
+  - WOOD_SWORD 4
+  - DIAMOND_SHOVEL 5.5
+  - IRON_SHOVEL 4.5
+  - GOLD_SHOVEL 2.5
+  - STONE_SHOVEL 3.5
+  - WOOD_SHOVEL 2.5
+  - DIAMOND_PICKAXE 5
+  - IRON_PICKAXE 4
+  - GOLD_PICKAXE 2
+  - STONE_PICKAXE 3
+  - WOOD_PICKAXE 2
+  - DIAMOND_AXE 9
+  - IRON_AXE 9
+  - GOLD_AXE 7
+  - STONE_AXE 9
+  - WOOD_AXE 7
+  - DIAMOND_HOE 1
+  - IRON_HOE 1
+  - GOLD_HOE 1
+  - STONE_HOE 1
+  - WOOD_HOE 1
 
 # The following items will ADD to the sentry's base speed. 
 SpeedBuffs:

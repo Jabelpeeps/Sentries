@@ -112,7 +112,7 @@ public enum AttackType implements AttackStrategy {
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = victim.getLocation().add( 0, 1.33, 0 );       
+        Location targetLoc = victim.getEyeLocation();       
         NMS.look( myEntity, victim );
         
         switch ( this ) {
@@ -134,7 +134,7 @@ public enum AttackType implements AttackStrategy {
                             } 
                             else {
                                 world.createExplosion( 
-                                        myLoc.getX(), myLoc.getY(), myLoc.getZ(), inst.strength, false, false );
+                                        myLoc.getX(), myLoc.getY(), myLoc.getZ(), (float) inst.strength, false, false );
                                 inst.kill();
                                 inst.getNPC().despawn();
                             }
@@ -163,7 +163,7 @@ public enum AttackType implements AttackStrategy {
             case WITCHDOCTOR: // potions, ballistic
                 
                 double range = Utils.getRange( v, g, myLoc.getY() );
-                if ( Math.min( range * range, inst.range * inst.range ) < myLoc.distanceSquared( targetLoc ) ) {
+                if ( Math.min( Utils.sqr( range ), Utils.sqr( inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
                     // can't hit target
                     inst.cancelAttack();
                     inst.myStatus = SentryStatus.LOOKING;

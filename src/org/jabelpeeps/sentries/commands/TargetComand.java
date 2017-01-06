@@ -23,6 +23,7 @@ import org.jabelpeeps.sentries.targets.NamedPlayerTarget;
 import org.jabelpeeps.sentries.targets.TargetType;
 import org.jabelpeeps.sentries.targets.TraitTypeTarget;
 
+import lombok.Getter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
@@ -31,6 +32,8 @@ import net.citizensnpcs.api.trait.Trait;
 public class TargetComand implements SentriesComplexCommand {
 
     private String targetCommandHelp;
+    @Getter public String shortHelp = "set targets to attack";
+    @Getter public String perm = S.PERM_TARGET;
 
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -45,7 +48,6 @@ public class TargetComand implements SentriesComplexCommand {
         if ( S.LIST.equals( subCommand ) ) {
             StringJoiner joiner = new StringJoiner( ", " );
             inst.targets.forEach( t -> joiner.add( t.getPrettyString() ) );
-            inst.events.forEach( e -> joiner.add( e.getPrettyString() ) );
 
             Utils.sendMessage( sender, Col.GREEN, npcName, "'s Targets: ", joiner.toString() );
             return;
@@ -73,8 +75,6 @@ public class TargetComand implements SentriesComplexCommand {
             }
             String firstSubArg = targetArgs[0].toLowerCase();
             String secondSubArg = targetArgs[1].toLowerCase();
-            
-            // TODO add user feedback for success or failure conditions
             
             if ( firstSubArg.equals( "all" ) ) {
                 if ( secondSubArg.equals( "entities" ) ) 
@@ -143,9 +143,6 @@ public class TargetComand implements SentriesComplexCommand {
     }
 
     @Override
-    public String getShortHelp() { return "set targets to attack"; }
-
-    @Override
     public String getLongHelp() {
         
         if ( targetCommandHelp == null ) {
@@ -167,7 +164,8 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to target all hostile mobs.") );
             joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to target all mobs (passive and hostile)") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to target all mobs of <Type>.") );
-            joiner.add( String.join( "", "  use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob type names." ) );
+            joiner.add( String.join( "", "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
+            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name>", Col.RESET, "to target the named player or npc only.") );
 //          joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Utils.getAdditionalTargets() );
 
@@ -175,7 +173,4 @@ public class TargetComand implements SentriesComplexCommand {
         }       
         return targetCommandHelp;
     }
-
-    @Override
-    public String getPerm() { return S.PERM_TARGET; }
 }

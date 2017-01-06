@@ -18,7 +18,7 @@ public class SetSpawnCommand implements SentriesComplexCommand {
         LivingEntity entity = inst.getMyEntity();
         
         if ( entity == null ) 
-            sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is dead" ) );
+            sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is not spawned" ) );
         else {
             inst.spawnLocation = entity.getLocation();
             Utils.sendMessage( sender, Col.GREEN, npcName, " will respawn at its present location" );

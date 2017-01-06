@@ -330,22 +330,20 @@ public abstract class Utils {
      */
     public static String getAdditionalTargets() {
         
-        if ( !Sentries.activePlugins.isEmpty() ) {
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-            joiner.add( "These additional options are available:- " ); 
-            
-            SentriesCommand command = CommandHandler.getCommand( S.EVENT );
-            if ( command != CommandHandler.nullCommand ) {
-                joiner.add( String.join( "", Col.GOLD, "/sentry ", S.EVENT, Col.WHITE, command.getShortHelp() ) );
-            }
-            
+        StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+        joiner.add( "These additional options are available:- " ); 
+        
+        SentriesCommand command = CommandHandler.getCommand( S.EVENT );
+        if ( command != CommandHandler.nullCommand ) {
+            joiner.add( String.join( "", Col.GOLD, "/sentry ", S.EVENT, Col.WHITE, command.getShortHelp() ) );
+        }
+        
+        if ( !Sentries.activePlugins.isEmpty() ) {           
             Sentries.activePlugins.parallelStream()
                                   .filter( p -> p instanceof PluginTargetBridge )
                                   .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
-            
-            return joiner.toString();
-        }
-        return "";
+        }            
+        return joiner.toString();
     }
 
     private static DecimalFormat df = new DecimalFormat( "0.0#" );
