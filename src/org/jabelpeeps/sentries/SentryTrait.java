@@ -76,7 +76,7 @@ public class SentryTrait extends Trait {
     @Persist( S.CON_NIGHT_VIS )
     public int voiceRange = Sentries.plugin.defaultIntegers.get( S.CON_NIGHT_VIS );
     @Persist( S.CON_SPEED )
-    public float speed = (float) Sentries.plugin.defaultDoubles.get( S.CON_SPEED ).doubleValue();
+    public double speed = Sentries.plugin.defaultDoubles.get( S.CON_SPEED );
 
     public double strength;
     public double attackRate;
@@ -255,7 +255,7 @@ public class SentryTrait extends Trait {
 
         navigatorParams.useNewPathfinder( true );
         navigatorParams.stuckAction( setStuckStatus );
-        navigatorParams.speedModifier( speed );
+        navigatorParams.speedModifier( (float) speed );
         navigatorParams.attackDelayTicks( (int) (attackRate * 20) );
 
         updateArmour();
@@ -489,7 +489,7 @@ public class SentryTrait extends Trait {
 
         LivingEntity myEntity = getMyEntity();
         
-        if ( myEntity == null ) return speed;
+        if ( myEntity == null ) return (float) speed;
 
         double mod = 0;
         if ( !sentry.speedBuffs.isEmpty() ) {
@@ -524,6 +524,7 @@ public class SentryTrait extends Trait {
                 strength = sentry.weaponStrengths.get( item );
                 return true;
             }
+            strength = sentry.weaponStrengths.get( "HAND" );
         }
         return false;
     }

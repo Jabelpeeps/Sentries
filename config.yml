@@ -184,6 +184,8 @@ WeaponStrengths:
   - GOLD_HOE 1
   - STONE_HOE 1
   - WOOD_HOE 1
+  - HAND 1
+# The 'HAND' strength is used when you configure for calculated strength, but the NPC is not holding anything. 
 
 # The following items will ADD to the sentry's base speed. 
 SpeedBuffs:
