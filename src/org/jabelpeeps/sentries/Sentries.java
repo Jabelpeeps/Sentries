@@ -72,9 +72,9 @@ public class Sentries extends JavaPlugin {
     Map<Material, Double> weaponStrengths = new EnumMap<>( Material.class );
     Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<>( Material.class );
 
-    Map<String, Boolean> defaultBooleans = new HashMap<>();
-    Map<String, Integer> defaultIntegers = new HashMap<>();
-    Map<String, Double> defaultDoubles = new HashMap<>();
+    Map<String, Boolean> defBooleans = new HashMap<>();
+    Map<String, Integer> defIntegers = new HashMap<>();
+    Map<String, Double> defDoubles = new HashMap<>();
     List<String> defaultTargets;
     List<String> defaultIgnores;
     String defaultGreeting = "";
@@ -178,11 +178,11 @@ public class Sentries extends JavaPlugin {
         logicTicks = config.getInt( "Server.LogicTicks", 10 );
         sentryEXP = config.getInt( "Server.ExpValue", 5 );
 
-        loadIntoStringMap( config, "DefaultOptions", defaultBooleans );
-        loadIntoStringMap( config, "DefaultStats", defaultIntegers );
-        loadIntoStringMap( config, "DefaultValues", defaultDoubles );
-        if ( !defaultDoubles.containsKey( S.CON_ARMOUR ) ) defaultDoubles.put( S.CON_ARMOUR, 0.0 );
-        if ( !defaultDoubles.containsKey(  S.CON_STRENGTH ) ) defaultDoubles.put( S.CON_STRENGTH, 1.0 );
+        loadIntoStringMap( config, "DefaultOptions", defBooleans );
+        loadIntoStringMap( config, "DefaultStats", defIntegers );
+        loadIntoStringMap( config, "DefaultValues", defDoubles );
+        if ( !defDoubles.containsKey( S.CON_ARMOUR ) ) defDoubles.put( S.CON_ARMOUR, 0.0 );
+        if ( !defDoubles.containsKey(  S.CON_STRENGTH ) ) defDoubles.put( S.CON_STRENGTH, 1.0 );
         defaultTargets = config.getStringList( S.DEFAULT_TARGETS );
         defaultIgnores = config.getStringList( S.DEFAULT_IGNORES );
         defaultWarning = config.getString( "DefaultTexts.Warning" );

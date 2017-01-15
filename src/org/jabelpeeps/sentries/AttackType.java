@@ -32,34 +32,35 @@ import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
-    // Columns:-  weapon held                 projectile           v     g    Effect?           
-    ARCHER(       Material.BOW,               Arrow.class,         16,   20,  Effect.BOW_FIRE ), 
-    BOMBARDIER(   Material.EGG,               Egg.class,           17.5, 12 ), 
-    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      17.5, 12 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 16,   Effect.BLAZE_SHOOT ), 
-    PYRO2(        Material.TORCH,             SmallFireball.class, 16,   Effect.BLAZE_SHOOT ),
-    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      16,   Effect.BLAZE_SHOOT ), 
-    STORMCALLER1( Material.PAPER ),
-    STROMCALLER2( Material.BOOK ),
-    STORMCALLER3( Material.BOOK_AND_QUILL ), 
-    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 12 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   16,   Effect.WITHER_SHOOT ),
-    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  16,   12 ),
-    CREEPER(      Material.SULPHUR ),  
-    BRAWLER(      Material.AIR ); 
+    // Columns:-  weapon held                 projectile           v     g    Effect?             default damage
+    ARCHER(       Material.BOW,               Arrow.class,         16,   20,  Effect.BOW_FIRE,     1 ), 
+    BOMBARDIER(   Material.EGG,               Egg.class,           17.5, 12,                       0 ), 
+    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      17.5, 12,                       0 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 16,        Effect.BLAZE_SHOOT,  5 ), 
+    PYRO2(        Material.TORCH,             SmallFireball.class, 16,        Effect.BLAZE_SHOOT,  5 ),
+    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      16,        Effect.BLAZE_SHOOT,  6 ), 
+    STORMCALLER1( Material.PAPER,                                                                  5 ),
+    STROMCALLER2( Material.BOOK,                                                                   10 ),
+    STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    17.5, 12,                       0 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   16,        Effect.WITHER_SHOOT, 8 ),
+    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  16,   12,                       0 ),
+    CREEPER(      Material.SULPHUR,                                                                4 ),  
+    BRAWLER(      Material.AIR,                                                                    1 ); 
         
     @Getter private Material weapon;
     private final Class<? extends Projectile> projectile;
     private final double v;
     private final double g;
     private final Effect effect;
+    @Getter private int damage;
     
     static Map<Material, AttackType> reverseSearch = new EnumMap<>( Material.class );
     static { updateMap(); }
 
-    AttackType( Material w, Class<? extends Projectile> p, double V, double G ) { this( w, p, V, G, null ); }
-    AttackType( Material w, Class<? extends Projectile> p, double V, Effect e ) { this( w, p, V, 0, e ); }
-    AttackType( Material w ) { this( w, null, 0, 0, null ); }
+    AttackType( Material w, Class<? extends Projectile> p, double V, double G, int d ) { this( w, p, V, G, null, d ); }
+    AttackType( Material w, Class<? extends Projectile> p, double V, Effect e, int d ) { this( w, p, V, 0, e, d ); }
+    AttackType( Material w , int d ) { this( w, null, 0, 0, null, d ); }
 
     /**
      * Quickly returns the appropriate AttackType by searching an EnumMap that
@@ -101,13 +102,15 @@ public enum AttackType implements AttackStrategy {
      */
     private static void updateMap() {
         reverseSearch.clear();
-        for ( AttackType each : values() )
+        for ( AttackType each : values() ) {              
+            if ( each == BRAWLER ) continue;
             reverseSearch.put( each.weapon, each );
+        }
     }
 
     @Override
     public boolean handle( LivingEntity myEntity, LivingEntity victim ) {
-        SentryTrait inst = Utils.getSentryTrait( myEntity );
+        final SentryTrait inst = Utils.getSentryTrait( myEntity );
         if ( inst == null ) return false;
  
         Location myLoc = myEntity.getEyeLocation();

@@ -55,11 +55,11 @@ DefaultTexts:
  
 # Default target list for new Sentries. 
 DefaultTargets:
-  #- "all:monsters"
+  #- all:monsters
 
 # Default ignore list for new Sentries
 DefaultIgnores:
-  - "owner"
+  - owner
 
 UseCustomMessages: false
 # Configurable messages used by all Sentries. You can use <NPC>, <PLAYER>, <ITEM>, and <AMOUNT> as 

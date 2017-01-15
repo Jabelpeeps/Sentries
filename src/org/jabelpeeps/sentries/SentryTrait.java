@@ -65,49 +65,36 @@ public class SentryTrait extends Trait {
 
     @Persist( S.PERSIST_SPAWN ) public Location spawnLocation;
     @Persist( S.PERSIST_MOUNT ) public int mountID = -1;
-    @Persist( S.CON_VOICE_RANGE )
-    public int nightVision = Sentries.plugin.defaultIntegers.get( S.CON_VOICE_RANGE );
-    @Persist( S.CON_RESPAWN_DELAY ) 
-    public int respawnDelay = Sentries.plugin.defaultIntegers.get( S.CON_RESPAWN_DELAY );
-    @Persist( S.CON_RANGE ) 
-    public int range = Sentries.plugin.defaultIntegers.get( S.CON_RANGE );
-    @Persist( S.CON_FOLLOW_DIST )
-    public int followDistance = Sentries.plugin.defaultIntegers.get( S.CON_FOLLOW_DIST );
-    @Persist( S.CON_NIGHT_VIS )
-    public int voiceRange = Sentries.plugin.defaultIntegers.get( S.CON_NIGHT_VIS );
-    @Persist( S.CON_SPEED )
-    public double speed = Sentries.plugin.defaultDoubles.get( S.CON_SPEED );
-
-    public double strength;
-    public double attackRate;
-    public double healRate;
-    public double armour;
-    public double weight;
-    public double maxHealth;
+    @Persist( S.CON_NIGHT_VIS ) public int nightVision = Sentries.plugin.defIntegers.get( S.CON_NIGHT_VIS );
+    @Persist( S.CON_RESPAWN_DELAY ) public int respawnDelay = Sentries.plugin.defIntegers.get( S.CON_RESPAWN_DELAY );
+    @Persist( S.CON_RANGE ) public int range = Sentries.plugin.defIntegers.get( S.CON_RANGE );
+    @Persist( S.CON_FOLLOW_DIST ) public int followDistance = Sentries.plugin.defIntegers.get( S.CON_FOLLOW_DIST );
+    @Persist( S.CON_VOICE_RANGE ) public int voiceRange = Sentries.plugin.defIntegers.get( S.CON_VOICE_RANGE );
+    
+    @Persist( S.CON_SPEED ) public double speed = Sentries.plugin.defDoubles.get( S.CON_SPEED );
+    @Persist( S.CON_STRENGTH ) public double strength = Sentries.plugin.defDoubles.get( S.CON_STRENGTH );
+    @Persist( S.CON_ARROW_RATE ) public double attackRate = Sentries.plugin.defDoubles.get( S.CON_ARROW_RATE );
+    @Persist( S.CON_HEAL_RATE ) public double healRate = Sentries.plugin.defDoubles.get( S.CON_HEAL_RATE );
+    @Persist( S.CON_ARMOUR ) public double armour = Sentries.plugin.defDoubles.get( S.CON_ARMOUR );
+    @Persist( S.CON_WEIGHT ) public double weight = Sentries.plugin.defDoubles.get( S.CON_WEIGHT );
+    @Persist( S.CON_HEALTH ) public double maxHealth = Sentries.plugin.defDoubles.get( S.CON_HEALTH );
     
     @Persist( S.CON_USE_WEAPON_STRENGTH ) 
-    public boolean strengthFromWeapon = Sentries.plugin.defaultBooleans.get( S.CON_USE_WEAPON_STRENGTH );
-    @Persist( S.CON_KILLS_DROP )
-    public boolean killsDrop = Sentries.plugin.defaultBooleans.get( S.CON_KILLS_DROP );
-    @Persist( S.CON_DROP_INV )
-    public boolean dropInventory = Sentries.plugin.defaultBooleans.get( S.CON_DROP_INV );
-    @Persist( S.CON_MOBS_ATTACK )
-    public boolean targetable = Sentries.plugin.defaultBooleans.get( S.CON_MOBS_ATTACK );
-    @Persist( S.CON_INVINCIBLE )
-    public boolean invincible = Sentries.plugin.defaultBooleans.get( S.CON_INVINCIBLE );
-    @Persist( S.CON_RETALIATION )
-    public boolean iRetaliate = Sentries.plugin.defaultBooleans.get( S.CON_RETALIATION );
-    @Persist( S.CON_CRIT_HITS ) 
-    public boolean acceptsCriticals = Sentries.plugin.defaultBooleans.get( S.CON_CRIT_HITS );
-    @Persist( S.CON_IGNORE_LOS )
-    public boolean ignoreLOS = Sentries.plugin.defaultBooleans.get( S.CON_IGNORE_LOS );
+        public boolean strengthFromWeapon = Sentries.plugin.defBooleans.get( S.CON_USE_WEAPON_STRENGTH );
+    @Persist( S.CON_KILLS_DROP ) public boolean killsDrop = Sentries.plugin.defBooleans.get( S.CON_KILLS_DROP );
+    @Persist( S.CON_DROP_INV ) public boolean dropInventory = Sentries.plugin.defBooleans.get( S.CON_DROP_INV );
+    @Persist( S.CON_MOBS_ATTACK ) public boolean targetable = Sentries.plugin.defBooleans.get( S.CON_MOBS_ATTACK );
+    @Persist( S.CON_INVINCIBLE ) public boolean invincible = Sentries.plugin.defBooleans.get( S.CON_INVINCIBLE );
+    @Persist( S.CON_RETALIATION ) public boolean iRetaliate = Sentries.plugin.defBooleans.get( S.CON_RETALIATION );
+    @Persist( S.CON_CRIT_HITS ) public boolean acceptsCriticals = Sentries.plugin.defBooleans.get( S.CON_CRIT_HITS );
+    @Persist( S.CON_IGNORE_LOS ) public boolean ignoreLOS = Sentries.plugin.defBooleans.get( S.CON_IGNORE_LOS );
     
     @Persist public UUID guardeeID;
     @Persist public String guardeeName;
     @Persist ItemStack potionItem;
 
-    @Persist( S.CON_GREETING ) public String greetingMsg = "";
-    @Persist( S.CON_WARNING ) public String warningMsg = "";
+    @Persist( S.CON_GREETING ) public String greetingMsg = Sentries.plugin.defaultGreeting;
+    @Persist( S.CON_WARNING ) public String warningMsg = Sentries.plugin.defaultWarning;
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> myDamagers = new HashSet<>();
@@ -146,25 +133,8 @@ public class SentryTrait extends Trait {
   
         if ( key.keyExists( "traits" ) ) key = key.getRelative( "traits" );
 
-        try {
-            strength = key.getInt( S.CON_STRENGTH, 1 );
-        }
-        catch ( Exception e ) {
-            strength = key.getDouble( S.CON_STRENGTH, sentry.defaultDoubles.get( S.CON_STRENGTH ) );
-        }
-
-        armour = key.getDouble( S.CON_ARMOUR, sentry.defaultDoubles.get( S.CON_ARMOUR ) );
-        speed = (float) key.getDouble( S.CON_SPEED, sentry.defaultDoubles.get( S.CON_SPEED ) );
-        weight = key.getDouble( S.CON_WEIGHT, sentry.defaultDoubles.get( S.CON_WEIGHT ) );
-        maxHealth = key.getDouble( S.CON_HEALTH, sentry.defaultDoubles.get( S.CON_HEALTH ) );
-        attackRate = key.getDouble( S.CON_ARROW_RATE, sentry.defaultDoubles.get( S.CON_ARROW_RATE ) );
-        healRate = key.getDouble( S.CON_HEAL_RATE, sentry.defaultDoubles.get( S.CON_HEAL_RATE ) );
-
         String guardee = key.getString( S.PERSIST_GUARDEE, null );
         if ( guardee != null ) guardeeName = guardee;
-        
-        greetingMsg = key.getString( S.CON_GREETING, sentry.defaultGreeting );
-        warningMsg = key.getString( S.CON_WARNING, sentry.defaultWarning );
 
         Set<String> validTargets = new HashSet<>();
         
@@ -199,9 +169,7 @@ public class SentryTrait extends Trait {
         if ( key.getRaw( S.EVENTS ) != null )
             eventTargets.addAll( (Set<String>) key.getRaw( S.EVENTS ) );
         
-        eventTargets.parallelStream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );
-        
-//        loaded = true;      
+        eventTargets.parallelStream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
     }
     
     private void checkBridges( String target ) {
@@ -217,12 +185,7 @@ public class SentryTrait extends Trait {
     @Override
     public void onSpawn() {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
-
-//        if ( !loaded ) {
-//            try {
-//                load( new MemoryDataKey() );
-//            } catch ( NPCLoadException e ) { e.printStackTrace(); }
-//        }      
+     
         LivingEntity myEntity = getMyEntity();
 
         // check for illegal values
@@ -271,7 +234,7 @@ public class SentryTrait extends Trait {
                                     oldStatus = myStatus;
                                 }
                                 myStatus = myStatus.update( SentryTrait.this );                    
-                            }, 40, Sentries.logicTicks );
+                    }, 40, Sentries.logicTicks );
         }
     }
 
@@ -325,14 +288,6 @@ public class SentryTrait extends Trait {
         key.setRaw( S.TARGETS, validTargets );
         key.setRaw( S.IGNORES, ignoreTargets );
         key.setRaw( S.EVENTS, eventTargets );
-
-        key.setDouble( S.CON_HEALTH, maxHealth );
-        key.setDouble( S.CON_SPEED, speed );
-        key.setDouble( S.CON_WEIGHT, weight );
-        key.setDouble( S.CON_HEAL_RATE, healRate );
-        key.setDouble( S.CON_ARMOUR, armour );
-        key.setDouble( S.CON_STRENGTH, strength );
-        key.setDouble( S.CON_ARROW_RATE, attackRate );
     }
 
     @Override
@@ -436,11 +391,12 @@ public class SentryTrait extends Trait {
         return myEntity.getHealth();
     }
     
-    public void kill() {
+    /** Sets the Sentry's status to DEAD, and sets the respawnTime field according to the value of respawnDelay */
+     public void kill() {
         respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
         myStatus = SentryStatus.DEAD;
     }
-    
+     
     /**
      * Calculates the damage to inflict on a sentry in the light of the current Armour settings.
      * It does not actually inflict the damage on the NPC.
@@ -511,7 +467,11 @@ public class SentryTrait extends Trait {
             Sentries.logger.log( Level.WARNING, "ERROR: no weapon strengths have been loaded from config." );
             return false;
         }
-        if ( strengthFromWeapon ) {            
+        if ( strengthFromWeapon ) { 
+            if ( myAttack != AttackType.BRAWLER ) {
+                strength = myAttack.getDamage();
+                return true;
+            }
             LivingEntity myEntity = getMyEntity();
             Material item = null;
             

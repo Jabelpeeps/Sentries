@@ -6,10 +6,14 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
+import lombok.Getter;
+
 
 public class RespawnDelayCommand implements SentriesNumberCommand {
 
     private String helpTxt;
+    @Getter private String shortHelp = "set the delay before a sentry respawns";
+    @Getter private String perm = S.PERM_RESPAWN_DELAY;
     
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
@@ -26,6 +30,7 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
             if ( respawn > 2000000 ) respawn = 2000000;
             
             inst.respawnDelay = respawn;
+            Utils.sendMessage( sender, Col.GREEN, "Command Successfull!" );
             respawnCommandMessage( inst.respawnDelay, npcName, sender );
         }
     }
@@ -47,11 +52,8 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
         if ( value == 0 )
             Utils.sendMessage( player, Col.GOLD, npcName, " will not automatically respawn" );
         if ( value > 0 )
-            Utils.sendMessage( player, Col.GOLD, npcName, " respawns after ", String.valueOf( value ), S.SECONDS );
+            Utils.sendMessage( player, Col.GOLD, npcName, " currently respawns after ", String.valueOf( value ), " ", S.SECONDS );
     }
-    
-    @Override
-    public String getShortHelp() { return "set the delay before a sentry respawns"; }
 
     @Override
     public String getLongHelp() {
@@ -65,7 +67,4 @@ public class RespawnDelayCommand implements SentriesNumberCommand {
         }
         return helpTxt;
     }
-
-    @Override
-    public String getPerm() { return S.PERM_RESPAWN_DELAY; }
 }
