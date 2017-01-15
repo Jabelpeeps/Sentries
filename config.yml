@@ -29,7 +29,7 @@ DefaultStats:
 # More default stats...
 DefaultValues:
   Strength: 1.0
-  Speed: 1.0
+  Speed: 1.5
   Health: 20.0
   Armour: 0.0     # set to -1.0 to calculate armour strength from armour worn.
   ArrowRate: 2.0
@@ -43,7 +43,6 @@ DefaultOptions:
   CriticalHits: true
   Invincible: false
   Retaliation: true
-  FriendlyFire: false   # unused?
   MobsAttack: true
   IgnoreLOS: false
   UseWeapon4Strength: false

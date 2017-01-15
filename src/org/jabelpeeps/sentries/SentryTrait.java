@@ -37,6 +37,7 @@ import org.bukkit.potion.PotionEffect;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.targets.TargetType;
 
+import lombok.Getter;
 import net.aufdemrand.denizen.npc.traits.HealthTrait;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.api.ai.Navigator;
@@ -117,7 +118,7 @@ public class SentryTrait extends Trait {
 
     public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
-    AttackType myAttack;
+    @Getter private AttackType myAttack;
 
     private Integer tickMe;
     
@@ -150,6 +151,7 @@ public class SentryTrait extends Trait {
                                          .noneMatch( t -> t.getTargetString().equalsIgnoreCase( v ) ) )
                     .forEach( e -> checkBridges( e ) );
         
+        
         Set<String> ignoreTargets = new HashSet<>();
         
         if ( key.getRaw( S.IGNORES ) != null )
@@ -164,6 +166,7 @@ public class SentryTrait extends Trait {
                                           .noneMatch( i -> i.getTargetString().equalsIgnoreCase( v ) ) )
                      .forEach( e -> checkBridges( e ) );
 
+        
         Set<String> eventTargets = new HashSet<>();
         
         if ( key.getRaw( S.EVENTS ) != null )

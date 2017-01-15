@@ -203,23 +203,6 @@ public abstract class Utils {
     }
 
     /**
-     * method to convert String values to floats.
-     * <p>
-     * It catches any NumberFormatExceptions and returns Float.MIN_VALUE instead.
-     * 
-     * @param value
-     *            - the string to be converted
-     * @return the float value represented by the string.
-     */
-    public static float string2Float( String value ) {
-        try {
-            return Float.parseFloat( value );
-        } catch ( NumberFormatException e ) {
-            return Float.MIN_VALUE;
-        }
-    }
-
-    /**
      * method to convert String values to doubles.
      * <p>
      * It catches any NumberFormatExceptions and returns Double.MIN_VALUE instead.
@@ -308,6 +291,10 @@ public abstract class Utils {
     public static String joinArgs( int startFrom, String[] args ) {
         return joinArgs( startFrom, args, " " );
     }
+    /** Concatenates the args with no delimiter */
+    public static String join( String... args ) {
+        return String.join( "", args );
+    }
     
     /**
      * Convenience method to send messages. Before sending it performs a null-check
@@ -331,11 +318,11 @@ public abstract class Utils {
     public static String getAdditionalTargets() {
         
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-        joiner.add( "These additional options are available:- " ); 
+        joiner.add( "You can also use:- " ); 
         
         SentriesCommand command = CommandHandler.getCommand( S.EVENT );
         if ( command != CommandHandler.nullCommand ) {
-            joiner.add( String.join( "", Col.GOLD, "/sentry ", S.EVENT, Col.WHITE, command.getShortHelp() ) );
+            joiner.add( join( Col.GOLD, "/sentry ", S.EVENT, Col.WHITE, command.getShortHelp() ) );
         }
         
         if ( !Sentries.activePlugins.isEmpty() ) {           
@@ -352,7 +339,7 @@ public abstract class Utils {
     }
     
     public static String prettifyLocation( Location loc ) {
-        return String.join( " ", "World:", loc.getWorld().getName(), "at X:", df.format( loc.getX() ), 
+        return join( "World:", loc.getWorld().getName(), " at X:", df.format( loc.getX() ), 
                            " Y:", df.format(  loc.getY() ), " Z:", df.format(  loc.getZ() ) );
     }
 }

@@ -2,6 +2,7 @@ package org.jabelpeeps.sentries.commands;
 
 import java.util.StringJoiner;
 
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
@@ -24,30 +25,36 @@ public class DebugInfoCommand implements SentriesComplexCommand {
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         NPC npc = inst.getNPC();
 
-        joiner.add( String.join( "", Col.GOLD, "------- Debug Info for ", npcName, " (npcid - ",
+        joiner.add( Utils.join( Col.GOLD, "------- Debug Info for ", npcName, " (npcid - ",
                                     String.valueOf( inst.getNPC().getId() ), ") ", "------" ) );
                
-        joiner.add( String.join( "", Col.BLUE, "Status: ", Col.WHITE, inst.myStatus.toString() ) );
-        joiner.add( String.join( "", Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
+        joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.myStatus.toString() ) );
+        joiner.add( Utils.join( Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
                                  inst.hasMount() ? ( " (mountID = " + inst.mountID + ")" ) : "" ) );
+        joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, inst.getMyAttack().name() ) );
         
-        joiner.add( String.join( "", Col.BLUE, "StoredLocation: ", Col.WHITE, Utils.prettifyLocation( npc.getStoredLocation() ) ) );
+        Location stored = npc.getStoredLocation();
+        joiner.add( Utils.join( Col.BLUE, "StoredLocation: ", Col.WHITE, Utils.prettifyLocation( stored ) ) );
         
-        joiner.add( String.join( "", Col.BLUE, "Spawn Point: ", Col.WHITE, Utils.prettifyLocation( inst.spawnLocation ), 
-                " (distance to:- ", inst.spawnLocation.getWorld() != npc.getStoredLocation().getWorld() 
-                                    ? "not in current world)"
-                                    : ( Utils.formatDbl( inst.spawnLocation.distance( npc.getStoredLocation() ) ) + " )" ) ) );
+        joiner.add( Utils.join( Col.BLUE, "Spawn Point: ", Col.WHITE, Utils.prettifyLocation( inst.spawnLocation ), 
+                                                           distanceOf( stored, inst.spawnLocation ) ) );
 
         Navigator navigator = inst.getNavigator();
         if ( navigator.isNavigating() ) {
-            joiner.add( String.join( "", Col.BLUE, "PathFinding range: ", Col.WHITE, 
+            joiner.add( Utils.join( Col.BLUE, "PathFinding range: ", Col.WHITE, 
                                             String.valueOf( navigator.getDefaultParameters().range() ) ) );
             TargetType tt = navigator.getTargetType();
-            joiner.add( String.join( "", Col.BLUE, "Currently Navigating to: ", Col.WHITE, tt.toString(), 
-                             tt == TargetType.ENTITY ? navigator.getEntityTarget().getTarget().getName() : "", 
-                                            " at ", Utils.prettifyLocation( navigator.getTargetAsLocation() ) ) );
+            Location target = navigator.getTargetAsLocation();
+            joiner.add( Utils.join( Col.BLUE, "Currently Navigating to: ", Col.WHITE, tt.toString(), 
+                             ( tt == TargetType.ENTITY ? navigator.getEntityTarget().getTarget().getName() : "" ), 
+                             " at ", Utils.prettifyLocation( target ), distanceOf( stored, target ) ) );
         }
         sender.sendMessage( joiner.toString() );
+    }
+    private String distanceOf( Location from, Location to ) {
+        return from.getWorld() != to.getWorld() 
+                ? "(not in current world)"
+                : Utils.join( " (at distance of:- ", Utils.formatDbl( from.distance( to ) ), " )" );
     }
 }
 

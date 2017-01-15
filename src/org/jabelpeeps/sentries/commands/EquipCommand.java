@@ -13,6 +13,7 @@ import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
+import lombok.Getter;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
@@ -21,7 +22,9 @@ import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
 public class EquipCommand implements SentriesComplexCommand {
 
     private String equipCommandHelp; 
-    private String materialList;
+    @Getter private String shortHelp = "adjust the equipment a sentry is using";
+    @Getter private String perm = S.PERM_EQUIP;
+//    private String materialList;
     
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -30,44 +33,7 @@ public class EquipCommand implements SentriesComplexCommand {
             Utils.sendMessage( sender, "", S.ERROR, "More arguments needed.");
             sender.sendMessage( getLongHelp() );
             return;
-        }
-
-        if ( "listAll".equalsIgnoreCase( args[nextArg + 1] ) ) {
-            
-            if ( materialList == null ) {
-                StringJoiner joiner = new StringJoiner( ", " );
-                
-                for ( Material each : Material.values() ) {
-                    
-                    if ( each.isEdible() || each.isRecord() ) continue;
-                    
-                    switch ( each ) {
-                    case AIR: case LONG_GRASS: case REDSTONE_WIRE: case CROPS: case SNOW: case PORTAL: case PUMPKIN_STEM: case MELON_STEM:
-                    case ENDER_PORTAL: case DOUBLE_PLANT: case BARRIER: case END_GATEWAY: case STRUCTURE_BLOCK: case COMMAND_REPEATING:
-                    case COMMAND_CHAIN: case COMMAND: case WATER: case LAVA: case STATIONARY_WATER: case STATIONARY_LAVA: case BEDROCK:
-                    case BED_BLOCK: case DROPPER: case DISPENSER: case PISTON_STICKY_BASE: case PISTON_BASE: case PISTON_EXTENSION:
-                    case PISTON_MOVING_PIECE: case MOB_SPAWNER: case WOODEN_DOOR: case IRON_DOOR: case IRON_DOOR_BLOCK: case DIODE:
-                    case DIODE_BLOCK_OFF: case DIODE_BLOCK_ON: case DOUBLE_STEP: case WOOD_DOUBLE_STEP: case DOUBLE_STONE_SLAB2:
-                    case PURPUR_DOUBLE_SLAB: case REDSTONE_COMPARATOR: case REDSTONE_COMPARATOR_OFF: case REDSTONE_COMPARATOR_ON:
-                    case COMMAND_MINECART: case EMPTY_MAP: case ARMOR_STAND: case IRON_BARDING: case GOLD_BARDING: case DIAMOND_BARDING:
-                    case STANDING_BANNER: case WALL_BANNER: case POWERED_RAIL: case DETECTOR_RAIL: case TRAPPED_CHEST: case STONE_BUTTON:
-                    case THIN_GLASS: case STAINED_GLASS: case WOOD_BUTTON: case STAINED_CLAY: case STAINED_GLASS_PANE: case CARPET:
-                    case STRUCTURE_VOID: case REDSTONE: case EXPLOSIVE_MINECART: case HOPPER_MINECART: case SPRUCE_DOOR_ITEM: 
-                    case BIRCH_DOOR_ITEM: case JUNGLE_DOOR_ITEM: case ACACIA_DOOR_ITEM: case DARK_OAK_DOOR_ITEM: case SPRUCE_DOOR: 
-                    case BIRCH_DOOR: case JUNGLE_DOOR: case ACACIA_DOOR: case DARK_OAK_DOOR: case SPRUCE_FENCE_GATE: case BIRCH_FENCE_GATE: 
-                    case JUNGLE_FENCE_GATE: case DARK_OAK_FENCE_GATE: case ACACIA_FENCE_GATE: case SPRUCE_FENCE: case BIRCH_FENCE: 
-                    case JUNGLE_FENCE: case DARK_OAK_FENCE: case ACACIA_FENCE: case FENCE:case FENCE_GATE: case STORAGE_MINECART: 
-                    case POWERED_MINECART: case IRON_FENCE: case ACTIVATOR_RAIL:
-                        continue;
-                    default:                   
-                    }                    
-                    joiner.add( each.name() );
-                }
-                materialList = String.join( "", Col.GOLD, "Valid Item Names:- ", Col.RESET, joiner.toString() );
-            }            
-            sender.sendMessage( materialList );
-            return;
-        }       
+        }      
         NPC npc = inst.getNPC();
         
         if ( !npc.isSpawned() ) {
@@ -135,9 +101,6 @@ public class EquipCommand implements SentriesComplexCommand {
     private boolean checkSlot( EntityType ent, int slot ) {
         return  slot == 0 || ( slot >= 1 && slot <= 5 && ent != EntityType.ENDERMAN );
     }
-    
-    @Override
-    public String getShortHelp() { return "adjust the equipment a sentry is using"; }
 
     @Override
     public String getLongHelp() {
@@ -157,6 +120,4 @@ public class EquipCommand implements SentriesComplexCommand {
         }
         return equipCommandHelp;
     }
-    @Override
-    public String getPerm() { return S.PERM_EQUIP; }
 }
