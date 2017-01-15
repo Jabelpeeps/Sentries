@@ -13,6 +13,7 @@ public class NamedNPCTarget extends AbstractTargetType implements TargetType.Int
     public NamedNPCTarget( UUID NPCuuid ) { 
         super( 20 ); 
         uuid = NPCuuid;
+        targetString = String.join( ":", "Named", "NPC", uuid.toString() ); 
     }
     @Override
     public boolean includes( LivingEntity entity ) {
@@ -20,12 +21,8 @@ public class NamedNPCTarget extends AbstractTargetType implements TargetType.Int
                 && uuid.equals( entity.getUniqueId() );
     }
     @Override
-    public String getTargetString() { 
-        return String.join( ":", "Named", "NPC", uuid.toString() ); 
-    } 
-    @Override
     public String getPrettyString() { 
-        return String.join( ":", "Named", "NPC", Sentries.registry.getByUniqueId( uuid ).getName() ); 
+        return "The NPC named:- " + Sentries.registry.getByUniqueId( uuid ).getName(); 
     }   
     @Override
     public boolean equals( Object o ) {

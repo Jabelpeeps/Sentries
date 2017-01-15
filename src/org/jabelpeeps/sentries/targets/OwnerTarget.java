@@ -2,6 +2,7 @@ package org.jabelpeeps.sentries.targets;
 
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 
 
@@ -13,6 +14,7 @@ public class OwnerTarget extends AbstractTargetType implements TargetType.Intern
         super( 10 ); 
         owner = uuid;
         targetString = "Owner";
+        prettyString = "The Onwer of this NPC:- " + Bukkit.getPlayer( uuid ).getName();
     }
     @Override
     public boolean includes( LivingEntity entity ) {

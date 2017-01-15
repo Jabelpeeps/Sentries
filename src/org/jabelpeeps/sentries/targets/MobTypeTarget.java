@@ -12,7 +12,8 @@ public class MobTypeTarget extends AbstractTargetType implements TargetType.Inte
     public MobTypeTarget( EntityType target ) { 
         super( 15 );
         type = target;
-        targetString = "MobType:" + type.toString(); 
+        targetString = "MobType:" + type.toString();
+        prettyString = "All mobs of type:- " + type.toString().toLowerCase();
     }
     @Override
     public boolean includes( LivingEntity entity ) {

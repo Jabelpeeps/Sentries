@@ -65,10 +65,25 @@ public class SentryTrait extends Trait {
 
     @Persist( S.PERSIST_SPAWN ) public Location spawnLocation;
     @Persist( S.PERSIST_MOUNT ) public int mountID = -1;
-    public int epCount, nightVision, respawnDelay, range, followDistance, voiceRange;
-    public float speed;
+    @Persist( S.CON_VOICE_RANGE )
+    public int nightVision = Sentries.plugin.defaultIntegers.get( S.CON_VOICE_RANGE );
+    @Persist( S.CON_RESPAWN_DELAY ) 
+    public int respawnDelay = Sentries.plugin.defaultIntegers.get( S.CON_RESPAWN_DELAY );
+    @Persist( S.CON_RANGE ) 
+    public int range = Sentries.plugin.defaultIntegers.get( S.CON_RANGE );
+    @Persist( S.CON_FOLLOW_DIST )
+    public int followDistance = Sentries.plugin.defaultIntegers.get( S.CON_FOLLOW_DIST );
+    @Persist( S.CON_NIGHT_VIS )
+    public int voiceRange = Sentries.plugin.defaultIntegers.get( S.CON_NIGHT_VIS );
+    @Persist( S.CON_SPEED )
+    public float speed = (float) Sentries.plugin.defaultDoubles.get( S.CON_SPEED ).doubleValue();
 
-    public double strength, attackRate, healRate, armour, weight, maxHealth;
+    public double strength;
+    public double attackRate;
+    public double healRate;
+    public double armour;
+    public double weight;
+    public double maxHealth;
     
     @Persist( S.CON_USE_WEAPON_STRENGTH ) 
     public boolean strengthFromWeapon = Sentries.plugin.defaultBooleans.get( S.CON_USE_WEAPON_STRENGTH );
@@ -85,8 +100,11 @@ public class SentryTrait extends Trait {
     @Persist( S.CON_CRIT_HITS ) 
     public boolean acceptsCriticals = Sentries.plugin.defaultBooleans.get( S.CON_CRIT_HITS );
     @Persist( S.CON_IGNORE_LOS )
-    public boolean ignoreLOS =Sentries.plugin.defaultBooleans.get( S.CON_IGNORE_LOS );
-//    public boolean loaded;
+    public boolean ignoreLOS = Sentries.plugin.defaultBooleans.get( S.CON_IGNORE_LOS );
+    
+    @Persist public UUID guardeeID;
+    @Persist public String guardeeName;
+    @Persist ItemStack potionItem;
 
     @Persist( S.CON_GREETING ) public String greetingMsg = "";
     @Persist( S.CON_WARNING ) public String warningMsg = "";
@@ -95,8 +113,6 @@ public class SentryTrait extends Trait {
     Set<Player> myDamagers = new HashSet<>();
 
     public LivingEntity guardeeEntity, attackTarget;
-    @Persist public UUID guardeeID;
-    @Persist public String guardeeName;
     DamageCause causeOfDeath;
     Entity killer;
 
@@ -107,10 +123,10 @@ public class SentryTrait extends Trait {
     long respawnTime = System.currentTimeMillis();
     long oktoheal = System.currentTimeMillis();
     long reassesTime = System.currentTimeMillis();
-    public long okToTakedamage = 0;
+    long okToTakedamage = 0;
+    int epCount;
 
     List<PotionEffect> weaponSpecialEffects;
-    @Persist ItemStack potionItem;
 
     public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
@@ -130,26 +146,12 @@ public class SentryTrait extends Trait {
   
         if ( key.keyExists( "traits" ) ) key = key.getRelative( "traits" );
 
-//        iRetaliate = key.getBoolean( S.CON_RETALIATION, sentry.defaultBooleans.get( S.CON_RETALIATION ) );
-//        invincible = key.getBoolean( S.CON_INVINCIBLE, sentry.defaultBooleans.get( S.CON_INVINCIBLE ) );
-//        dropInventory = key.getBoolean( S.CON_DROP_INV, sentry.defaultBooleans.get( S.CON_DROP_INV ) );
-//        acceptsCriticals = key.getBoolean( S.CON_CRIT_HITS, sentry.defaultBooleans.get( S.CON_CRIT_HITS ) );
-//        killsDrop = key.getBoolean( S.CON_KILLS_DROP, sentry.defaultBooleans.get( S.CON_KILLS_DROP ) );
-//        ignoreLOS = key.getBoolean( S.CON_IGNORE_LOS, sentry.defaultBooleans.get( S.CON_IGNORE_LOS ) );
-//        targetable = key.getBoolean( S.CON_MOBS_ATTACK, sentry.defaultBooleans.get( S.CON_MOBS_ATTACK ) );
-
         try {
             strength = key.getInt( S.CON_STRENGTH, 1 );
         }
         catch ( Exception e ) {
             strength = key.getDouble( S.CON_STRENGTH, sentry.defaultDoubles.get( S.CON_STRENGTH ) );
         }
-        range = key.getInt( S.CON_RANGE, sentry.defaultIntegers.get( S.CON_RANGE ) );
-        respawnDelay = key.getInt( S.CON_RESPAWN_DELAY, sentry.defaultIntegers.get( S.CON_RESPAWN_DELAY ) );
-        followDistance = key.getInt( S.CON_FOLLOW_DIST, sentry.defaultIntegers.get( S.CON_FOLLOW_DIST ) );
-        voiceRange = key.getInt( S.CON_VOICE_RANGE, sentry.defaultIntegers.get( S.CON_VOICE_RANGE ) );
-        nightVision = key.getInt( S.CON_NIGHT_VIS, sentry.defaultIntegers.get( S.CON_NIGHT_VIS ) );
-//        mountID = key.getInt( S.PERSIST_MOUNT, -1 );
 
         armour = key.getDouble( S.CON_ARMOUR, sentry.defaultDoubles.get( S.CON_ARMOUR ) );
         speed = (float) key.getDouble( S.CON_SPEED, sentry.defaultDoubles.get( S.CON_SPEED ) );
@@ -251,10 +253,9 @@ public class SentryTrait extends Trait {
         
         NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
 
-//        navigatorParams.stationaryTicks( 60 ); // = 3 seconds
         navigatorParams.useNewPathfinder( true );
         navigatorParams.stuckAction( setStuckStatus );
-        navigatorParams.baseSpeed( speed );
+        navigatorParams.speedModifier( speed );
         navigatorParams.attackDelayTicks( (int) (attackRate * 20) );
 
         updateArmour();
@@ -312,15 +313,6 @@ public class SentryTrait extends Trait {
     @Override
     public void save( DataKey key ) {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
-        
-//        key.setBoolean( S.CON_RETALIATION, iRetaliate );
-//        key.setBoolean( S.CON_INVINCIBLE, invincible );
-//        key.setBoolean( S.CON_DROP_INV, dropInventory );
-//        key.setBoolean( S.CON_KILLS_DROP, killsDrop );
-//        key.setBoolean( S.CON_MOBS_ATTACK, targetable );
-//        key.setInt( S.PERSIST_MOUNT, mountID );
-//        key.setBoolean( S.CON_CRIT_HITS, acceptsCriticals );
-//        key.setBoolean( S.CON_IGNORE_LOS, ignoreLOS );
 
         Set<String> ignoreTargets = new HashSet<>();
         Set<String> validTargets = new HashSet<>();
@@ -335,17 +327,12 @@ public class SentryTrait extends Trait {
         key.setRaw( S.EVENTS, eventTargets );
 
         key.setDouble( S.CON_HEALTH, maxHealth );
-        key.setInt( S.CON_RANGE, range );
-        key.setInt( S.CON_RESPAWN_DELAY, respawnDelay );
         key.setDouble( S.CON_SPEED, speed );
         key.setDouble( S.CON_WEIGHT, weight );
         key.setDouble( S.CON_HEAL_RATE, healRate );
         key.setDouble( S.CON_ARMOUR, armour );
         key.setDouble( S.CON_STRENGTH, strength );
-        key.setInt( S.CON_VOICE_RANGE, voiceRange );
         key.setDouble( S.CON_ARROW_RATE, attackRate );
-        key.setInt( S.CON_NIGHT_VIS, nightVision );
-        key.setInt( S.CON_FOLLOW_DIST, followDistance );
     }
 
     @Override

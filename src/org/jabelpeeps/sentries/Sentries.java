@@ -261,7 +261,8 @@ public class Sentries extends JavaPlugin {
     @SuppressWarnings( "unchecked" )
     private <T> void loadIntoStringMap( FileConfiguration config, String node, Map<String, T> map ) {
         map.clear();
-        map.putAll( (Map<String, T>) config.getConfigurationSection( node ).getValues( false ) );
+        for ( Map.Entry<String, Object> each : config.getConfigurationSection( node ).getValues( false ).entrySet() )
+            map.put( each.getKey(), (T) each.getValue() );
     }
 
     private void loadWeaponEffects( FileConfiguration config, String path, Map<Material, List<PotionEffect>> map ) {

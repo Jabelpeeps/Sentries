@@ -14,6 +14,7 @@ public class NamedPlayerTarget extends AbstractTargetType implements TargetType.
     public NamedPlayerTarget( UUID player ) { 
         super( 10 ); 
         uuid = player;
+        targetString = String.join( ":", "Named", "Player", uuid.toString() ); 
     }
     @Override
     public boolean includes( LivingEntity entity ) {
@@ -22,12 +23,8 @@ public class NamedPlayerTarget extends AbstractTargetType implements TargetType.
                 && uuid.equals( entity.getUniqueId() );
     }  
     @Override
-    public String getTargetString() { 
-        return String.join( ":", "Named", "Player", uuid.toString() ); 
-    }
-    @Override
     public String getPrettyString() {
-        return String.join( ":", "Named", "Player", Bukkit.getPlayer( uuid ).getName() );
+        return "The Player named:- " + Bukkit.getPlayer( uuid ).getName();
     }
     @Override
     public boolean equals( Object o ) {
