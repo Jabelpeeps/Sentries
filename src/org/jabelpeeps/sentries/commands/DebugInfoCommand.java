@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.jabelpeeps.sentries.AttackType;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -15,8 +16,8 @@ import net.citizensnpcs.api.ai.TargetType;
 import net.citizensnpcs.api.npc.NPC;
 
 public class DebugInfoCommand implements SentriesComplexCommand {
-    @Getter final String shortHelp = "view debug information for a sentry";
-    @Getter final String longHelp = "Displays a page of internal information for a sentry.";
+    @Getter final String shortHelp = "view a sentry's debug information";
+    @Getter final String longHelp = "Displays a page of internal field values and other information for a sentry.";
     @Getter final String perm = S.PERM_CITS_ADMIN;
     
     @Override
@@ -31,7 +32,9 @@ public class DebugInfoCommand implements SentriesComplexCommand {
         joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.myStatus.toString() ) );
         joiner.add( Utils.join( Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
                                  inst.hasMount() ? ( " (mountID = " + inst.mountID + ")" ) : "" ) );
-        joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, inst.getMyAttack().name() ) );
+        AttackType attack = inst.getMyAttack();
+        if ( attack != null )
+            joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, attack.name() ) );
         
         Location stored = npc.getStoredLocation();
         joiner.add( Utils.join( Col.BLUE, "StoredLocation: ", Col.WHITE, Utils.prettifyLocation( stored ) ) );
