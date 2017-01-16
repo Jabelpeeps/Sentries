@@ -13,10 +13,14 @@ import org.jabelpeeps.sentries.targets.EventPVPTarget;
 import org.jabelpeeps.sentries.targets.EventPVSentryTarget;
 import org.jabelpeeps.sentries.targets.TargetType;
 
+import lombok.Getter;
 
-public class EventCommand implements SentriesComplexCommand {
+
+public class EventCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
 
     private String commandHelp;
+    @Getter private String shortHelp = "- set events a sentry should react to";
+    @Getter private String perm = S.PERM_EVENT;
 
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -68,35 +72,30 @@ public class EventCommand implements SentriesComplexCommand {
                 Utils.sendMessage( sender, "Event Removed" );  
         }
     }
-    @Override
-    public String getShortHelp() { return "define events for a sentry to react to"; }
 
     @Override
     public String getLongHelp() {
 
         if ( commandHelp == null ) {
 
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.EVENT, " <add|remove|list|clearall> <EventType>", 
+            joiner.add( Utils.join( "do ", Col.GOLD, "/sentry ", S.EVENT, " <add|remove|list|clearall> <EventType>", 
                                                 Col.RESET, " to configure events for a sentry to respond to."  ) );
-            joiner.add( String.join( "", Col.BOLD, "Events are overridden by ignores (if both are configured and apply).", Col.RESET ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to respond to <EventType>" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to stop responding to <EventType>" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of events" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current events" ) );
-            joiner.add( String.join( "", Col.GOLD, Col.BOLD, "<EventType> ", Col.RESET, "can be any of the following:-") );
-            joiner.add( String.join( "", Col.GOLD, "  PvP ", Col.RESET, "- a Player-vs-Player Event") );
-            joiner.add( String.join( "", Col.GOLD, "  PvE ", Col.RESET, "-  a Player-vs-Environment Event" ) );
-            joiner.add( String.join( "", Col.GOLD, "  PvNPC ", Col.RESET, "- a Player-vs-NPC Event") );
-            joiner.add( String.join( "", Col.GOLD, "  PvSentry", Col.RESET, "- a Player-vs-Sentry Event") );
-            joiner.add( String.join( "", "In all cases the sentry will respond by attacking ", Col.BOLD, "the Aggressor!", Col.RESET ) );
+            joiner.add( Utils.join( Col.BOLD, "Events are overridden by ignores (if both are configured and apply).", Col.RESET ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.ADD, Col.RESET, " to respond to <EventType>" ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to stop responding to <EventType>" ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of events" ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear the ALL the current events" ) );
+            joiner.add( Utils.join( Col.GOLD, Col.BOLD, "<EventType> ", Col.RESET, "can be any of the following:-") );
+            joiner.add( Utils.join( Col.GOLD, "  PvP ", Col.RESET, "- a Player-vs-Player Event") );
+            joiner.add( Utils.join( Col.GOLD, "  PvE ", Col.RESET, "- a Player-vs-Environment Event" ) );
+            joiner.add( Utils.join( Col.GOLD, "  PvNPC ", Col.RESET, "- a Player-vs-NPC Event") );
+            joiner.add( Utils.join( Col.GOLD, "  PvSentry ", Col.RESET, "- a Player-vs-Sentry Event") );
+            joiner.add( Utils.join( "In all cases the sentry will respond by attacking ", Col.WHITE, "the Aggressor!", Col.RESET ) );
 
             commandHelp = joiner.toString();
         }
         return commandHelp;
     }
-
-    @Override
-    public String getPerm() { return S.PERM_EVENT; }
 }

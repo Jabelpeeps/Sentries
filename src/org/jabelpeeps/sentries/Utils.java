@@ -322,7 +322,7 @@ public abstract class Utils {
         
         SentriesCommand command = CommandHandler.getCommand( S.EVENT );
         if ( command != CommandHandler.nullCommand ) {
-            joiner.add( join( Col.GOLD, "/sentry ", S.EVENT, Col.WHITE, command.getShortHelp() ) );
+            joiner.add( join( Col.GOLD, "  /sentry ", S.EVENT, Col.RESET, " ", command.getShortHelp() ) );
         }
         
         if ( !Sentries.activePlugins.isEmpty() ) {           

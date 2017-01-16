@@ -124,7 +124,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *              (i.e. the sub-command & the sub-command's args ) 
      * @return true if a sub-command with the name give as the first member of args was found */
     static boolean callCommand( SentryTrait inst, String ... args ) {
-        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( args[0] );
+        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( args[0].toLowerCase() );
         if ( command == null ) return false;
         
         command.call( null, null, inst, 0, args );
@@ -132,7 +132,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
     
     static SentriesComplexCommand getCommand ( String name ) {
-        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( name );
+        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( name.toLowerCase() );
         return command != null ? command : nullCommand;
     }
 

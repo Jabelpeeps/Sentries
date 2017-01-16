@@ -11,6 +11,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -25,7 +26,7 @@ public class WarBridge implements PluginTargetBridge {
     @Getter final String prefix = "WAR";
     @Getter final String activationMessage = "War is active, The WAR: target will function";
     @Getter private String commandHelp = 
-            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
+            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
     private SentriesComplexCommand command = new WarTeamCommand();
 
     @Override
@@ -33,12 +34,12 @@ public class WarBridge implements PluginTargetBridge {
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public void add( SentryTrait inst, String args ) {     
-        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-    }
+//    @Override
+//    public void add( SentryTrait inst, String args ) {     
+//        command.call( null, null, inst, 0, Utils.colon.split( args ) );
+//    }
 
-    public class WarTeamCommand implements SentriesComplexCommand {
+    public class WarTeamCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         
         @Getter final String shortHelp = "define targets according to War Team"; 
         @Getter final String perm = "sentry.warteam";

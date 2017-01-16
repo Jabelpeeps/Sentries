@@ -144,12 +144,14 @@ public class SentryTrait extends Trait {
         else
             validTargets.addAll( sentry.defaultTargets );
         
-        validTargets.parallelStream().forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
+        validTargets.parallelStream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
+        // the second callCommand() is only used if the first is unsuccessful.
+                                     .forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
         
-        validTargets.parallelStream()
-                    .filter( v -> targets.parallelStream()
-                                         .noneMatch( t -> t.getTargetString().equalsIgnoreCase( v ) ) )
-                    .forEach( e -> checkBridges( e ) );
+//        validTargets.parallelStream()
+//                    .filter( v -> targets.parallelStream()
+//                                         .noneMatch( t -> t.getTargetString().equalsIgnoreCase( v ) ) )
+//                    .forEach( e -> checkBridges( e ) );
         
         
         Set<String> ignoreTargets = new HashSet<>();
@@ -159,12 +161,13 @@ public class SentryTrait extends Trait {
         else
             ignoreTargets.addAll( sentry.defaultIgnores );
         
-        ignoreTargets.parallelStream().forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
+        ignoreTargets.parallelStream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
+                                      .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
         
-        ignoreTargets.parallelStream()
-                     .filter( v -> ignores.parallelStream()
-                                          .noneMatch( i -> i.getTargetString().equalsIgnoreCase( v ) ) )
-                     .forEach( e -> checkBridges( e ) );
+//        ignoreTargets.parallelStream()
+//                     .filter( v -> ignores.parallelStream()
+//                                          .noneMatch( i -> i.getTargetString().equalsIgnoreCase( v ) ) )
+//                     .forEach( e -> checkBridges( e ) );
 
         
         Set<String> eventTargets = new HashSet<>();
@@ -175,15 +178,15 @@ public class SentryTrait extends Trait {
         eventTargets.parallelStream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
     }
     
-    private void checkBridges( String target ) {
-        if ( Sentries.debug ) Sentries.debugLog( "checkBridges() called with: " + target );
-        
-        Sentries.activePlugins.parallelStream()
-                              .filter( p -> p instanceof PluginTargetBridge )
-                              .map( p -> (PluginTargetBridge) p )
-                              .filter( p -> target.contains( p.getPrefix() ) )
-                              .forEach( b -> b.add( this, target ) );
-    }
+//    private void checkBridges( String target ) {
+//        if ( Sentries.debug ) Sentries.debugLog( "checkBridges() called with: " + target );
+//        
+//        Sentries.activePlugins.parallelStream()
+//                              .filter( p -> p instanceof PluginTargetBridge )
+//                              .map( p -> (PluginTargetBridge) p )
+//                              .filter( p -> target.contains( p.getPrefix() ) )
+//                              .forEach( b -> b.add( this, target ) );
+//    }
     
     @Override
     public void onSpawn() {
@@ -231,12 +234,12 @@ public class SentryTrait extends Trait {
        
         if ( tickMe == null ) {
             tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
-                    () -> {                  
-                                if ( Sentries.debug && oldStatus != myStatus ) {
-                                    Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
-                                    oldStatus = myStatus;
-                                }
-                                myStatus = myStatus.update( SentryTrait.this );                    
+                    () -> {     
+                            myStatus = myStatus.update( SentryTrait.this );             
+                            if ( Sentries.debug && oldStatus != myStatus ) {
+                                Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
+                                oldStatus = myStatus;
+                            }                   
                     }, 40, Sentries.logicTicks );
         }
     }
@@ -295,7 +298,7 @@ public class SentryTrait extends Trait {
 
     @Override
     public void onCopy() {
-        Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getEntity().getLocation(), 10 );
+        Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getStoredLocation(), 10 );
     }
 
     public boolean isIgnoring( LivingEntity aTarget ) {

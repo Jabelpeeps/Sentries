@@ -10,7 +10,7 @@ package org.jabelpeeps.sentries.commands;
 public interface SentriesCommand {
 
     /**
-     * @return a short (<1 line) String of help text, for the command listing.
+     * @return a short (max 1 line) String of help text, for the command listing.
      */
     String getShortHelp();
     
@@ -26,4 +26,8 @@ public interface SentriesCommand {
      * keep things DRY.
      */
     String getPerm();
+    
+    /** Interface for tagging commands that add targets/ignores/events for sentries
+     *  (other than the default target & ignore commands) */
+    public interface Targetting {}
 }

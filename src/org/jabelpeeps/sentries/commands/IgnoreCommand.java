@@ -33,8 +33,8 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class IgnoreCommand implements SentriesComplexCommand {
 
     private String ignoreCommandHelp;
-    @Getter public String shortHelp = "set targets to ignore";
-    @Getter public String perm = S.PERM_IGNORE;
+    @Getter private String shortHelp = "set targets to ignore";
+    @Getter private String perm = S.PERM_IGNORE;
 
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -157,7 +157,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to ignore all mobs (passive and hostile)") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
             joiner.add( String.join( "", "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
-            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name>", Col.RESET, "to ignore the named player or npc only.") );
+            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name> ", Col.RESET, "to ignore the named player or npc only.") );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Utils.getAdditionalTargets() );
 

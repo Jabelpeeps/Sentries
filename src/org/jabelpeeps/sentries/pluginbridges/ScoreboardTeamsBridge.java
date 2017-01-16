@@ -13,6 +13,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -33,12 +34,12 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public void add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-    }
+//    @Override
+//    public void add( SentryTrait inst, String args ) {       
+//        command.call( null, null, inst, 0, Utils.colon.split( args ) );
+//    }
 
-    public class ScoreboardTeamsCommand implements SentriesComplexCommand {
+    public class ScoreboardTeamsCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         
         @Getter final String shortHelp = "manage scoreboard-defined targets";
         @Getter final String perm = "sentry.scoreboardteams";

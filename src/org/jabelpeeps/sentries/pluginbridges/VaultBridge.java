@@ -14,6 +14,7 @@ import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -25,9 +26,9 @@ public class VaultBridge implements PluginTargetBridge {
 
     @Getter final String prefix = "GROUP";
     @Getter private String commandHelp = 
-            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
+            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
     private SentriesComplexCommand command = new GroupCommand();
-    private String activationMsg;
+    @Getter private String activationMessage;
     protected static Permission perms;
 
     @Override
@@ -37,38 +38,30 @@ public class VaultBridge implements PluginTargetBridge {
                 Bukkit.getServicesManager().getRegistration( Permission.class );
 
         if ( permissionProvider == null ) {
-            activationMsg = "Vault integration: No Permissions Provider is registered.";
+            activationMessage = "Vault integration: No Permissions Provider is registered.";
             return false;
         }    
         perms = permissionProvider.getProvider();
 
         if ( !perms.hasGroupSupport() ) {
-            activationMsg = "Vault integration: Permissions Provider does not support groups.";
+            activationMessage = "Vault integration: Permissions Provider does not support groups.";
             return false;
         }
         String[] groups = perms.getGroups();
 
         if ( groups.length == 0 ) {
-            activationMsg = "Vault integration: No permission groups found.";
+            activationMessage = "Vault integration: No permission groups found.";
             perms = null;
             return false;
         }        
-        activationMsg = "Sucessfully interfaced with Vault: " + groups.length
+        activationMessage = "Sucessfully interfaced with Vault: " + groups.length
                             + " groups found. The GROUP: target will function.";
         
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true;
     }
 
-    @Override
-    public String getActivationMessage() { return activationMsg; }
-
-    @Override
-    public void add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-    }
-   
-    public class GroupCommand implements SentriesComplexCommand {
+    public class GroupCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         
         @Getter final String shortHelp = "define targets by permission groups"; 
         @Getter final String perm = "sentry.groups";

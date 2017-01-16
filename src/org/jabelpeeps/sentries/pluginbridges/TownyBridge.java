@@ -11,6 +11,7 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
+import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.targets.AbstractTargetType;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -38,7 +39,7 @@ public class TownyBridge implements PluginTargetBridge {
     @Getter final String prefix = "TOWNY";
     @Getter final String activationMessage = "Detected Towny, the TOWNY: target will function";
     private SentriesComplexCommand command = new TownyCommand();
-    @Getter private String commandHelp = String.join( "", "  using the ", Col.GOLD, "/sentry ", 
+    @Getter private String commandHelp = Utils.join( "  using the ", Col.GOLD, "/sentry ", 
                                                     prefix.toLowerCase(), " ... ", Col.RESET, "commands." );
     
     @Override
@@ -46,12 +47,12 @@ public class TownyBridge implements PluginTargetBridge {
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-    @Override
-    public void add( SentryTrait inst, String args ) {       
-        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-    }
+//    @Override
+//    public void add( SentryTrait inst, String args ) {       
+//        command.call( null, null, inst, 0, Utils.colon.split( args ) );
+//    }
     
-    public class TownyCommand implements SentriesComplexCommand {
+    public class TownyCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         
         @Getter final String shortHelp = "have a sentry join a town";
         @Getter final String perm = "sentry.towny";

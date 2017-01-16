@@ -32,8 +32,8 @@ import net.citizensnpcs.api.trait.Trait;
 public class TargetComand implements SentriesComplexCommand {
 
     private String targetCommandHelp;
-    @Getter public String shortHelp = "set targets to attack";
-    @Getter public String perm = S.PERM_TARGET;
+    @Getter private String shortHelp = "set targets to attack";
+    @Getter private String perm = S.PERM_TARGET;
 
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -165,7 +165,7 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to target all mobs (passive and hostile)") );
             joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to target all mobs of <Type>.") );
             joiner.add( String.join( "", "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
-            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name>", Col.RESET, "to target the named player or npc only.") );
+            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name> ", Col.RESET, "to target the named player or npc only.") );
 //          joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Utils.getAdditionalTargets() );
 
