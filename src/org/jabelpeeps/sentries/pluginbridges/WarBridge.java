@@ -34,11 +34,7 @@ public class WarBridge implements PluginTargetBridge {
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-//    @Override
-//    public void add( SentryTrait inst, String args ) {     
-//        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-//    }
-
+    
     public class WarTeamCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         
         @Getter final String shortHelp = "define targets according to War Team"; 

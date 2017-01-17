@@ -60,45 +60,43 @@ import net.citizensnpcs.util.Util;
 public class SentryTrait extends Trait {
 
     final Sentries sentry;
-    
-    static SentryStuckAction setStuckStatus = new SentryStuckAction();
-    static AttackStrategy mountedAttack = new MountAttackStrategy();
 
     @Persist( S.PERSIST_SPAWN ) public Location spawnLocation;
     @Persist( S.PERSIST_MOUNT ) public int mountID = -1;
-    @Persist( S.CON_NIGHT_VIS ) public int nightVision = Sentries.plugin.defIntegers.get( S.CON_NIGHT_VIS );
-    @Persist( S.CON_RESPAWN_DELAY ) public int respawnDelay = Sentries.plugin.defIntegers.get( S.CON_RESPAWN_DELAY );
-    @Persist( S.CON_RANGE ) public int range = Sentries.plugin.defIntegers.get( S.CON_RANGE );
-    @Persist( S.CON_FOLLOW_DIST ) public int followDistance = Sentries.plugin.defIntegers.get( S.CON_FOLLOW_DIST );
-    @Persist( S.CON_VOICE_RANGE ) public int voiceRange = Sentries.plugin.defIntegers.get( S.CON_VOICE_RANGE );
+    @Persist( S.CON_NIGHT_VIS ) public int nightVision = Sentries.defIntegers.get( S.CON_NIGHT_VIS );
+    @Persist( S.CON_RESPAWN_DELAY ) public int respawnDelay = Sentries.defIntegers.get( S.CON_RESPAWN_DELAY );
+    @Persist( S.CON_RANGE ) public int range = Sentries.defIntegers.get( S.CON_RANGE );
+    @Persist( S.CON_FOLLOW_DIST ) public int followDistance = Sentries.defIntegers.get( S.CON_FOLLOW_DIST );
+    @Persist( S.CON_VOICE_RANGE ) public int voiceRange = Sentries.defIntegers.get( S.CON_VOICE_RANGE );
     
-    @Persist( S.CON_SPEED ) public double speed = Sentries.plugin.defDoubles.get( S.CON_SPEED );
-    @Persist( S.CON_STRENGTH ) public double strength = Sentries.plugin.defDoubles.get( S.CON_STRENGTH );
-    @Persist( S.CON_ARROW_RATE ) public double attackRate = Sentries.plugin.defDoubles.get( S.CON_ARROW_RATE );
-    @Persist( S.CON_HEAL_RATE ) public double healRate = Sentries.plugin.defDoubles.get( S.CON_HEAL_RATE );
-    @Persist( S.CON_ARMOUR ) public double armour = Sentries.plugin.defDoubles.get( S.CON_ARMOUR );
-    @Persist( S.CON_WEIGHT ) public double weight = Sentries.plugin.defDoubles.get( S.CON_WEIGHT );
-    @Persist( S.CON_HEALTH ) public double maxHealth = Sentries.plugin.defDoubles.get( S.CON_HEALTH );
+    @Persist( S.CON_SPEED ) public double speed = Sentries.defDoubles.get( S.CON_SPEED );
+    @Persist( S.CON_STRENGTH ) public double strength = Sentries.defDoubles.get( S.CON_STRENGTH );
+    @Persist( S.CON_ARROW_RATE ) public double attackRate = Sentries.defDoubles.get( S.CON_ARROW_RATE );
+    @Persist( S.CON_HEAL_RATE ) public double healRate = Sentries.defDoubles.get( S.CON_HEAL_RATE );
+    @Persist( S.CON_ARMOUR ) public double armour = Sentries.defDoubles.get( S.CON_ARMOUR );
+    @Persist( S.CON_WEIGHT ) public double weight = Sentries.defDoubles.get( S.CON_WEIGHT );
+    @Persist( S.CON_HEALTH ) public double maxHealth = Sentries.defDoubles.get( S.CON_HEALTH );
     
     @Persist( S.CON_USE_WEAPON_STRENGTH ) 
-        public boolean strengthFromWeapon = Sentries.plugin.defBooleans.get( S.CON_USE_WEAPON_STRENGTH );
-    @Persist( S.CON_KILLS_DROP ) public boolean killsDrop = Sentries.plugin.defBooleans.get( S.CON_KILLS_DROP );
-    @Persist( S.CON_DROP_INV ) public boolean dropInventory = Sentries.plugin.defBooleans.get( S.CON_DROP_INV );
-    @Persist( S.CON_MOBS_ATTACK ) public boolean targetable = Sentries.plugin.defBooleans.get( S.CON_MOBS_ATTACK );
-    @Persist( S.CON_INVINCIBLE ) public boolean invincible = Sentries.plugin.defBooleans.get( S.CON_INVINCIBLE );
-    @Persist( S.CON_RETALIATION ) public boolean iRetaliate = Sentries.plugin.defBooleans.get( S.CON_RETALIATION );
-    @Persist( S.CON_CRIT_HITS ) public boolean acceptsCriticals = Sentries.plugin.defBooleans.get( S.CON_CRIT_HITS );
-    @Persist( S.CON_IGNORE_LOS ) public boolean ignoreLOS = Sentries.plugin.defBooleans.get( S.CON_IGNORE_LOS );
+        public boolean strengthFromWeapon = Sentries.defBooleans.get( S.CON_USE_WEAPON_STRENGTH );
+    @Persist( S.CON_KILLS_DROP ) public boolean killsDrop = Sentries.defBooleans.get( S.CON_KILLS_DROP );
+    @Persist( S.CON_DROP_INV ) public boolean dropInventory = Sentries.defBooleans.get( S.CON_DROP_INV );
+    @Persist( S.CON_MOBS_ATTACK ) public boolean targetable = Sentries.defBooleans.get( S.CON_MOBS_ATTACK );
+    @Persist( S.CON_INVINCIBLE ) public boolean invincible = Sentries.defBooleans.get( S.CON_INVINCIBLE );
+    @Persist( S.CON_RETALIATION ) public boolean iRetaliate = Sentries.defBooleans.get( S.CON_RETALIATION );
+    @Persist( S.CON_CRIT_HITS ) public boolean acceptsCriticals = Sentries.defBooleans.get( S.CON_CRIT_HITS );
+    @Persist( S.CON_IGNORE_LOS ) public boolean ignoreLOS = Sentries.defBooleans.get( S.CON_IGNORE_LOS );
     
     @Persist public UUID guardeeID;
     @Persist public String guardeeName;
     @Persist ItemStack potionItem;
 
-    @Persist( S.CON_GREETING ) public String greetingMsg = Sentries.plugin.defaultGreeting;
-    @Persist( S.CON_WARNING ) public String warningMsg = Sentries.plugin.defaultWarning;
+    @Persist( S.CON_GREETING ) public String greetingMsg = Sentries.defaultGreeting;
+    @Persist( S.CON_WARNING ) public String warningMsg = Sentries.defaultWarning;
 
     private Map<Player, Long> warningsGiven = new HashMap<>();
     Set<Player> myDamagers = new HashSet<>();
+    List<PotionEffect> weaponSpecialEffects;
 
     public LivingEntity guardeeEntity, attackTarget;
     DamageCause causeOfDeath;
@@ -114,13 +112,40 @@ public class SentryTrait extends Trait {
     long okToTakedamage = 0;
     int epCount;
 
-    List<PotionEffect> weaponSpecialEffects;
-
     public SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     SentryStatus oldStatus;
     @Getter private AttackType myAttack;
-
     private Integer tickMe;
+
+    final static AttackStrategy mountedAttack = ( attacker, bukkitTarget ) -> {
+
+        if ( attacker == bukkitTarget ) return true;
+
+        Entity passenger = attacker.getPassenger();
+
+        if ( passenger != null ) {
+            return Sentries.registry.getNPC( passenger )
+                                    .getNavigator()
+                                    .getLocalParameters()
+                                    .attackStrategy()
+                                    .handle( (LivingEntity) passenger, bukkitTarget );
+        }
+        return false;
+    };
+    
+    final static StuckAction setStuckStatus = ( npc, navigator ) -> {
+
+        if ( !npc.isSpawned() ) return false;
+        SentryTrait inst = Utils.getSentryTrait( npc );
+        
+        if ( inst == null && navigator.getLocalParameters().attackStrategy() == mountedAttack )
+            inst = Utils.getSentryTrait( npc.getEntity().getPassenger() );
+        
+        if ( inst != null )
+            inst.myStatus = SentryStatus.STUCK;
+        
+        return false;
+    };
     
     public SentryTrait() {
         super( "sentries" );
@@ -142,34 +167,22 @@ public class SentryTrait extends Trait {
         if ( key.getRaw( S.TARGETS ) != null )
             validTargets.addAll( (Set<String>) key.getRaw( S.TARGETS ) );
         else
-            validTargets.addAll( sentry.defaultTargets );
+            validTargets.addAll( Sentries.defaultTargets );
         
         validTargets.parallelStream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
         // the second callCommand() is only used if the first is unsuccessful.
                                      .forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
-        
-//        validTargets.parallelStream()
-//                    .filter( v -> targets.parallelStream()
-//                                         .noneMatch( t -> t.getTargetString().equalsIgnoreCase( v ) ) )
-//                    .forEach( e -> checkBridges( e ) );
-        
         
         Set<String> ignoreTargets = new HashSet<>();
         
         if ( key.getRaw( S.IGNORES ) != null )
             ignoreTargets.addAll( (Set<String>) key.getRaw( S.IGNORES ) );
         else
-            ignoreTargets.addAll( sentry.defaultIgnores );
+            ignoreTargets.addAll( Sentries.defaultIgnores );
         
         ignoreTargets.parallelStream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
                                       .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
-        
-//        ignoreTargets.parallelStream()
-//                     .filter( v -> ignores.parallelStream()
-//                                          .noneMatch( i -> i.getTargetString().equalsIgnoreCase( v ) ) )
-//                     .forEach( e -> checkBridges( e ) );
 
-        
         Set<String> eventTargets = new HashSet<>();
         
         if ( key.getRaw( S.EVENTS ) != null )
@@ -177,17 +190,7 @@ public class SentryTrait extends Trait {
         
         eventTargets.parallelStream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
     }
-    
-//    private void checkBridges( String target ) {
-//        if ( Sentries.debug ) Sentries.debugLog( "checkBridges() called with: " + target );
-//        
-//        Sentries.activePlugins.parallelStream()
-//                              .filter( p -> p instanceof PluginTargetBridge )
-//                              .map( p -> (PluginTargetBridge) p )
-//                              .filter( p -> target.contains( p.getPrefix() ) )
-//                              .forEach( b -> b.add( this, target ) );
-//    }
-    
+
     @Override
     public void onSpawn() {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
@@ -419,7 +422,7 @@ public class SentryTrait extends Trait {
      * @return true if the NPC is wearing armour, false if not (or no armour values are configured).
      */
     public boolean updateArmour() {
-        if ( sentry.armorValues.isEmpty() ) {
+        if ( Sentries.armorValues.isEmpty() ) {
             Sentries.logger.log( Level.WARNING, "ERROR: no armour values have been loaded from config." );
             return false;
         }
@@ -437,8 +440,8 @@ public class SentryTrait extends Trait {
             for ( ItemStack is : myArmour ) {
                 Material item = is.getType();
                 armourWorn = true;
-                if ( sentry.armorValues.containsKey( item ) )
-                    armour -= sentry.armorValues.get( item );
+                if ( Sentries.armorValues.containsKey( item ) )
+                    armour -= Sentries.armorValues.get( item );
             }
             if ( !Sentries.useNewArmourCalc ) armour *= 10;
             
@@ -454,14 +457,14 @@ public class SentryTrait extends Trait {
         if ( myEntity == null ) return (float) speed;
 
         double mod = 0;
-        if ( !sentry.speedBuffs.isEmpty() ) {
+        if ( !Sentries.speedBuffs.isEmpty() ) {
 
             if ( myEntity instanceof Player ) {
                 for ( ItemStack stack : ((Player) myEntity).getInventory().getArmorContents() ) {
                     Material item = stack.getType();
 
-                    if ( sentry.speedBuffs.containsKey( item ) )
-                        mod += sentry.speedBuffs.get( item );
+                    if ( Sentries.speedBuffs.containsKey( item ) )
+                        mod += Sentries.speedBuffs.get( item );
                 }
             }
         }
@@ -469,7 +472,7 @@ public class SentryTrait extends Trait {
     }
 
     public boolean updateStrength() {
-        if ( sentry.weaponStrengths.isEmpty() ) {
+        if ( Sentries.weaponStrengths.isEmpty() ) {
             Sentries.logger.log( Level.WARNING, "ERROR: no weapon strengths have been loaded from config." );
             return false;
         }
@@ -486,11 +489,11 @@ public class SentryTrait extends Trait {
             else 
                 item = myEntity.getEquipment().getItemInMainHand().getType();
             
-            if ( item != null && sentry.weaponStrengths.containsKey( item ) ) {
-                strength = sentry.weaponStrengths.get( item );
+            if ( item != null && Sentries.weaponStrengths.containsKey( item ) ) {
+                strength = Sentries.weaponStrengths.get( item );
                 return true;
             }
-            strength = sentry.weaponStrengths.get( "HAND" );
+            strength = Sentries.weaponStrengths.get( "HAND" );
         }
         return false;
     }
@@ -703,7 +706,7 @@ public class SentryTrait extends Trait {
         }
         else {
             potionItem = null;
-            weaponSpecialEffects = sentry.weaponEffects.get( weapon );
+            weaponSpecialEffects = Sentries.weaponEffects.get( weapon );
         }
         NavigatorParameters params = npc.getNavigator().getDefaultParameters();
         params.attackStrategy( myAttack );
@@ -800,7 +803,6 @@ public class SentryTrait extends Trait {
             ent.setCustomNameVisible( false );
             ent.setPassenger( null );
             ent.setPassenger( myEntity );
-            
         }
     }
 
@@ -851,41 +853,4 @@ public class SentryTrait extends Trait {
     public void onCitReload( CitizensReloadEvent event ) {
         cancelRunnable();
     }    
-    
-    static class SentryStuckAction implements StuckAction {
-        @Override
-        public boolean run( NPC npc, Navigator navigator ) {
-
-            if ( !npc.isSpawned() ) return false;
-            SentryTrait inst = Utils.getSentryTrait( npc );
-            
-            if ( inst == null && navigator.getLocalParameters().attackStrategy() == mountedAttack )
-                inst = Utils.getSentryTrait( npc.getEntity().getPassenger() );
-            
-            if ( inst != null )
-                inst.myStatus = SentryStatus.STUCK;
-            
-            return false;
-        }
-    }
-    
-    static class MountAttackStrategy implements AttackStrategy {
-        // make the rider attack when in range.
-        @Override
-        public boolean handle( LivingEntity attacker, LivingEntity bukkitTarget ) {
-
-            if ( attacker == bukkitTarget ) return true;
-
-            Entity passenger = attacker.getPassenger();
-
-            if ( passenger != null ) {
-                return Sentries.registry.getNPC( passenger )
-                                        .getNavigator()
-                                        .getLocalParameters()
-                                        .attackStrategy()
-                                        .handle( (LivingEntity) passenger, bukkitTarget );
-            }
-            return false;
-        }
-    }
 }

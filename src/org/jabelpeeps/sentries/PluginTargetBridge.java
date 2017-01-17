@@ -12,13 +12,6 @@ package org.jabelpeeps.sentries;
  */
 public interface PluginTargetBridge extends PluginBridge {
 
-//    /** 
-//     * Method for use when a sentry is reloaded. The String 'args' is the 'TargetString' 
-//     * retrieved from the TargetType instances when the sentry was saved, and should contain 
-//     * the information needed to recreate the TargetType instance.
-//     */
-//    public void add( SentryTrait inst, String args );
-
     /**
      * @return a string to be used as the first part of the command argument to
      *         refer to this PluginBridge.  The lowercase version of the same string 

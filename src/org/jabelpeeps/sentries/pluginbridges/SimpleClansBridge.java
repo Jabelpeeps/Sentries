@@ -34,11 +34,6 @@ public class SimpleClansBridge implements PluginTargetBridge {
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-//
-//    @Override
-//    public void add( SentryTrait inst, String args ) {
-//        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-//    }
 
     public class ClansCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
 

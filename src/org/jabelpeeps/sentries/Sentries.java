@@ -18,7 +18,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,7 +57,7 @@ public class Sentries extends JavaPlugin {
 
     public static Map<String, Integer> equipmentSlots = new HashMap<>();
     static {
-        mobs.removeIf( e -> !LivingEntity.class.isInstance( e ) );
+        mobs.removeIf( e -> !e.isAlive() );
         equipmentSlots.put( "hand", 0 );
         equipmentSlots.put( "helmet", 1 );
         equipmentSlots.put( "chestplate", 2 );
@@ -67,18 +66,18 @@ public class Sentries extends JavaPlugin {
         equipmentSlots.put( "offhand", 5 );
     }
     
-    Map<Material, Double> armorValues = new EnumMap<>( Material.class );
-    Map<Material, Double> speedBuffs = new EnumMap<>( Material.class );
-    Map<Material, Double> weaponStrengths = new EnumMap<>( Material.class );
-    Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<>( Material.class );
+    static Map<Material, Double> armorValues = new EnumMap<>( Material.class );
+    static Map<Material, Double> speedBuffs = new EnumMap<>( Material.class );
+    static Map<Material, Double> weaponStrengths = new EnumMap<>( Material.class );
+    static Map<Material, List<PotionEffect>> weaponEffects = new EnumMap<>( Material.class );
 
-    Map<String, Boolean> defBooleans = new HashMap<>();
-    Map<String, Integer> defIntegers = new HashMap<>();
-    Map<String, Double> defDoubles = new HashMap<>();
-    List<String> defaultTargets;
-    List<String> defaultIgnores;
-    String defaultGreeting = "";
-    String defaultWarning = "";
+    static Map<String, Boolean> defBooleans = new HashMap<>();
+    static Map<String, Integer> defIntegers = new HashMap<>();
+    static Map<String, Double> defDoubles = new HashMap<>();
+    static List<String> defaultTargets;
+    static List<String> defaultIgnores;
+    static String defaultGreeting = "";
+    static String defaultWarning = "";
 
     static int logicTicks = 10;
     static int sentryEXP = 5;

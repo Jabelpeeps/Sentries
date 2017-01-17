@@ -47,10 +47,6 @@ public class TownyBridge implements PluginTargetBridge {
         CommandHandler.addCommand( prefix.toLowerCase(), command );
         return true; 
     }
-//    @Override
-//    public void add( SentryTrait inst, String args ) {       
-//        command.call( null, null, inst, 0, Utils.colon.split( args ) );
-//    }
     
     public class TownyCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         

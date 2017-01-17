@@ -82,6 +82,11 @@ public enum SentryStatus {
             inst.tryToHeal();             
             NPC npc = inst.getNPC();
             
+            if ( npc.isSpawned() ) {
+                inst.reMountMount();
+                return SentryStatus.LOOKING;
+            }
+            
             if  (   inst.guardeeEntity == null 
                     && Util.isLoaded( inst.spawnLocation ) ) {
                 npc.spawn( inst.spawnLocation );
@@ -90,11 +95,7 @@ public enum SentryStatus {
                 Location loc = inst.guardeeEntity.getLocation().add( 1, 0, 1 );
                 if ( Utils.CanWarp( inst.guardeeEntity, loc.getWorld().getName() ) )
                     npc.spawn( loc );
-            }
-            if ( npc.isSpawned() ) {
-                inst.reMountMount();
-                return SentryStatus.LOOKING;
-            }
+            }            
             return this;
         }
     },    
