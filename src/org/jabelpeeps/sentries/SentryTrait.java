@@ -493,7 +493,7 @@ public class SentryTrait extends Trait {
                 strength = Sentries.weaponStrengths.get( item );
                 return true;
             }
-            strength = Sentries.weaponStrengths.get( "HAND" );
+            strength = 1;
         }
         return false;
     }

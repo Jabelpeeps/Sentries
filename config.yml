@@ -158,33 +158,31 @@ ArmorValues:
 # '/sentry strength' command to set their strength to -1
 # The default values reflect the damage values in vanilla MC (with 1 = 0.5 hearts).
 WeaponStrengths:
-  - DIAMOND_SWORD 7
-  - IRON_SWORD 6
-  - STONE_SWORD 5
-  - GOLD_SWORD 4
-  - WOOD_SWORD 4
+  - DIAMOND_SWORD 7.0
+  - IRON_SWORD 6.0
+  - STONE_SWORD 5.0
+  - GOLD_SWORD 4.0
+  - WOOD_SWORD 4.0
   - DIAMOND_SHOVEL 5.5
   - IRON_SHOVEL 4.5
   - GOLD_SHOVEL 2.5
   - STONE_SHOVEL 3.5
   - WOOD_SHOVEL 2.5
-  - DIAMOND_PICKAXE 5
-  - IRON_PICKAXE 4
-  - GOLD_PICKAXE 2
-  - STONE_PICKAXE 3
-  - WOOD_PICKAXE 2
-  - DIAMOND_AXE 9
-  - IRON_AXE 9
-  - GOLD_AXE 7
-  - STONE_AXE 9
-  - WOOD_AXE 7
-  - DIAMOND_HOE 1
-  - IRON_HOE 1
-  - GOLD_HOE 1
-  - STONE_HOE 1
-  - WOOD_HOE 1
-  - HAND 1
-# The 'HAND' strength is used when you configure for calculated strength, but the NPC is not holding anything. 
+  - DIAMOND_PICKAXE 5.0
+  - IRON_PICKAXE 4.0
+  - GOLD_PICKAXE 2.0
+  - STONE_PICKAXE 3.0
+  - WOOD_PICKAXE 2.0
+  - DIAMOND_AXE 9.0
+  - IRON_AXE 9.0
+  - GOLD_AXE 7.0
+  - STONE_AXE 9.0
+  - WOOD_AXE 7.0
+  - DIAMOND_HOE 1.0
+  - IRON_HOE 1.0
+  - GOLD_HOE 1.0
+  - STONE_HOE 1.0
+  - WOOD_HOE 1.0
 
 # The following items will ADD to the sentry's base speed. 
 SpeedBuffs:
