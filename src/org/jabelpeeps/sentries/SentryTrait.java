@@ -232,7 +232,6 @@ public class SentryTrait extends Trait {
 
         updateArmour();
         updateAttackType();
-        updateStrength();
         checkForGuardee();
        
         if ( tickMe == null ) {
@@ -519,18 +518,20 @@ public class SentryTrait extends Trait {
         
         if ( healRate > 0 && System.currentTimeMillis() > oktoheal ) {
 
+            LivingEntity myEntity = getMyEntity();
+            if ( myEntity == null ) return;
+            
             double health = getHealth();
-            if ( health < maxHealth ) {
-
-                LivingEntity myEntity = getMyEntity();
-                if ( myEntity == null ) return;
-                myEntity.setHealth( health + 1 );
-                
-                // idk what this effect looks like, so lets see if it looks ok in-game.
-                myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getLocation(), 5 );
-
-                if ( getHealth() >= maxHealth ) myDamagers.clear();
+            if ( health < maxHealth - 1 ) {
+                myEntity.setHealth( health + 1 );    
             }
+            else if ( health < maxHealth ) {
+                myEntity.setHealth( maxHealth );
+                myDamagers.clear();
+            }
+            else return;
+            
+            myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getEyeLocation().subtract( 0, 0.5, 0 ), 5 );           
             oktoheal = (long) ( System.currentTimeMillis() + ( healRate * 1000 ) );
         }
     }
@@ -715,6 +716,8 @@ public class SentryTrait extends Trait {
             params.attackRange( 1.75 );
         else
             params.attackRange( 100 );
+        
+        updateStrength();
     }
 
     /**
