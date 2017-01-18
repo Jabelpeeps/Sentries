@@ -532,7 +532,7 @@ public class SentryTrait extends Trait {
             }
             else return;
             
-            myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getEyeLocation().subtract( 0, 0.5, 0 ), 5 );           
+            myEntity.getWorld().spawnParticle( Particle.HEART, myEntity.getEyeLocation().subtract( 0, 0.2, 0 ), 5 );           
             oktoheal = (long) ( System.currentTimeMillis() + ( healRate * 1000 ) );
         }
     }
