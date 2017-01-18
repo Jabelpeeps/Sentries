@@ -33,20 +33,20 @@ import net.citizensnpcs.util.PlayerAnimation;
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
     // Columns:-  weapon held                 projectile           v     g    Effect?             default damage
-    ARCHER(       Material.BOW,               Arrow.class,         1,   20,  Effect.BOW_FIRE,     1 ), 
-    BOMBARDIER(   Material.EGG,               Egg.class,           1,   12,                       0 ), 
-    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      1,   12,                       0 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 1,        Effect.BLAZE_SHOOT,  5 ), 
-    PYRO2(        Material.TORCH,             SmallFireball.class, 2,        Effect.BLAZE_SHOOT,  5 ),
-    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      2,        Effect.BLAZE_SHOOT,  6 ), 
-    STORMCALLER1( Material.PAPER,                                                                 5 ),
-    STROMCALLER2( Material.BOOK,                                                                  10 ),
-    STORMCALLER3( Material.BOOK_AND_QUILL,                                                        1 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    1,   12,                       0 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   2,        Effect.WITHER_SHOOT, 8 ),
-    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  1,   12,                       0 ),
-    CREEPER(      Material.SULPHUR,                                                               4 ),  
-    BRAWLER(      Material.AIR,                                                                   1 ); 
+    ARCHER(       Material.BOW,               Arrow.class,         10,   20,  Effect.BOW_FIRE,     1 ), 
+    BOMBARDIER(   Material.EGG,               Egg.class,           10,   12,                       0 ), 
+    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      10,   12,                       0 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 2,         Effect.BLAZE_SHOOT,  5 ), 
+    PYRO2(        Material.TORCH,             SmallFireball.class, 2,         Effect.BLAZE_SHOOT,  5 ),
+    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      2,         Effect.BLAZE_SHOOT,  6 ), 
+    STORMCALLER1( Material.PAPER,                                                                  5 ),
+    STROMCALLER2( Material.BOOK,                                                                   10 ),
+    STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    10,   12,                       0 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   2,         Effect.WITHER_SHOOT, 8 ),
+    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  10,   12,                       0 ),
+    CREEPER(      Material.SULPHUR,                                                                4 ),  
+    BRAWLER(      Material.AIR,                                                                    1 ); 
         
     @Getter private Material weapon;
     private final Class<? extends Projectile> projectile;
