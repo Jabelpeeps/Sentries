@@ -413,7 +413,7 @@ public class SentryTrait extends Trait {
      */
     public double getFinalDamage( double finaldamage ) {
         return Sentries.useNewArmourCalc ? finaldamage - Math.abs( finaldamage * armour ) 
-                                         : Math.min( finaldamage - Math.abs( armour ), 0 );
+                                         : Math.max( finaldamage - Math.abs( armour ), 0 );
     }
    
     /**
@@ -437,6 +437,7 @@ public class SentryTrait extends Trait {
             
             boolean armourWorn = false;
             for ( ItemStack is : myArmour ) {
+                if ( is == null ) continue;
                 Material item = is.getType();
                 armourWorn = true;
                 if ( Sentries.armorValues.containsKey( item ) )
