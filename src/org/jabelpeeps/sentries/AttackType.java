@@ -23,6 +23,7 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.util.Vector;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -171,7 +172,10 @@ public enum AttackType implements AttackStrategy {
                     inst.cancelAttack();
                     inst.myStatus = SentryStatus.LOOKING;
                     return true;
-                }               
+                } 
+                Vector vector = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
+                if ( vector == null ) return true;
+                
                 Projectile proj = world.spawn( myLoc, projectile );
                 
                 if  (   this == WITCHDOCTOR 
@@ -181,7 +185,7 @@ public enum AttackType implements AttackStrategy {
                 else if ( this == AttackType.WARLOCK1 ) inst.epCount++;
                 
                 proj.setShooter( myEntity );
-                proj.setVelocity( Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g ) );
+                proj.setVelocity( vector );
                 break;
 
             case PYRO1: // smallfireball, non-incendiary

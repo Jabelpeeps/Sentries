@@ -24,7 +24,6 @@ public class EquipCommand implements SentriesComplexCommand {
     private String equipCommandHelp; 
     @Getter private String shortHelp = "adjust the equipment a sentry is using";
     @Getter private String perm = S.PERM_EQUIP;
-//    private String materialList;
     
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -76,8 +75,8 @@ public class EquipCommand implements SentriesComplexCommand {
             Material mat = Material.matchMaterial( Utils.joinArgs( nextArg + 1, args ) );
 
             if ( mat == null ) {
-                Utils.sendMessage( sender, S.ERROR, "Item name not recognised.  "
-                                        + "Do '/sentry help listequips' for a list of accepted item names" );
+                Utils.sendMessage( sender, S.ERROR, "Item name not recognised.  ", Col.RESET, "do ", Col.GOLD, 
+                                "/sentry help listequips ", Col.RESET, "for a list of accepted item names" );
                 return;
             }            
             if ( equip != null ) {
@@ -91,7 +90,7 @@ public class EquipCommand implements SentriesComplexCommand {
                     if ( slot == 0 ) inst.updateAttackType();
                     else inst.updateArmour();
                     
-                    Utils.sendMessage( sender, " ", Col.GREEN, "equipped", mat.toString(), "on", npcName );
+                    Utils.sendMessage( sender, Col.GREEN, "Equipped ", mat.toString(), " on ", npcName );
                 }
             }
             else Utils.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
