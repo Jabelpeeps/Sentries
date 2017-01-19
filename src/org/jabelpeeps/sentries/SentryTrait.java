@@ -679,7 +679,6 @@ public class SentryTrait extends Trait {
         ItemStack item = null;
         LivingEntity myEntity = getMyEntity();
 
-        myEntity.getEquipment();
         if ( myEntity instanceof HumanEntity ) {
             item = ((HumanEntity) myEntity).getInventory().getItemInMainHand();
             weapon = item.getType();
@@ -711,16 +710,20 @@ public class SentryTrait extends Trait {
             weaponSpecialEffects = Sentries.weaponEffects.get( weapon );
         }
         NavigatorParameters params = npc.getNavigator().getDefaultParameters();
-        params.attackStrategy( myAttack );
-        
-        if ( myAttack == AttackType.BRAWLER || myAttack == AttackType.CREEPER )
-            params.attackRange( 1.75 );
-        else
-            params.attackRange( 100 );
-        
+        params.attackStrategy( myAttack );       
+        setRange( params );
         updateStrength();
     }
 
+    public void setRange() {
+        setRange( npc.getNavigator().getDefaultParameters() );
+    }
+    private void setRange( NavigatorParameters params ) {
+        if ( myAttack.isMelee() )
+            params.attackRange( 1.5 );
+        else
+            params.attackRange( Utils.sqr( range ) );
+    }
     /**
      *  Cancels the current navigation (including targetted attacks) and 
      *  clears the held reference for the target. <p>

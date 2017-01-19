@@ -44,6 +44,7 @@ import org.jabelpeeps.sentries.commands.RetaliateCommand;
 import org.jabelpeeps.sentries.commands.SentriesCommand;
 import org.jabelpeeps.sentries.commands.SentriesComplexCommand;
 import org.jabelpeeps.sentries.commands.SentriesNumberCommand;
+import org.jabelpeeps.sentries.commands.SentriesSimpleCommand;
 import org.jabelpeeps.sentries.commands.SentriesToggleCommand;
 import org.jabelpeeps.sentries.commands.SetSpawnCommand;
 import org.jabelpeeps.sentries.commands.SetStatusCommand;
@@ -352,7 +353,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( command != null ) {            
             if ( checkCommandPerm( command.getPerm(), sender ) ) {
                 
-                if ( command instanceof SentriesComplexCommand )
+                if ( command instanceof SentriesSimpleCommand )
+                    ((SentriesSimpleCommand) command).call( sender, npcName, inst );
+                else if ( command instanceof SentriesComplexCommand )
                     ((SentriesComplexCommand) command).call( sender, npcName, inst, nextArg, inargs ); 
                 
                 else if ( command instanceof SentriesToggleCommand ) {

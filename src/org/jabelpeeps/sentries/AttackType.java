@@ -206,4 +206,14 @@ public enum AttackType implements AttackStrategy {
         
         return true;
     }
+    
+    public boolean isMelee() {
+        switch ( this ) {
+            case BRAWLER:
+            case CREEPER:
+                return true;
+            default:
+                return false;           
+        }
+    }
 }

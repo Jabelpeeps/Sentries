@@ -7,13 +7,17 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
+import lombok.Getter;
 
-public class SetSpawnCommand implements SentriesComplexCommand {
+
+public class SetSpawnCommand implements SentriesSimpleCommand {
 
     private String helpTxt;
+    @Getter private String shortHelp = "set the sentry's spawn point";
+    @Getter private String perm = S.PERM_SET_SPAWN;
     
     @Override
-    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst ) {
         
         LivingEntity entity = inst.getMyEntity();
         
@@ -24,19 +28,11 @@ public class SetSpawnCommand implements SentriesComplexCommand {
             Utils.sendMessage( sender, Col.GREEN, npcName, " will respawn at its present location" );
         }
     }
-    
-    @Override
-    public String getShortHelp() { return "set the sentry's spawn point"; }
-    
     @Override
     public String getLongHelp() {
-
         if ( helpTxt == null ) {
-            helpTxt = String.join( "", "do ", Col.GOLD, "/sentry spawn", Col.RESET, " to set the sentry's spawn point to its current location" );
+            helpTxt = Utils.join( "do ", Col.GOLD, "/sentry spawn", Col.RESET, " to set the sentry's spawn point to its current location" );
         }
         return helpTxt;
     }
-
-    @Override
-    public String getPerm() { return S.PERM_SET_SPAWN; }
 }

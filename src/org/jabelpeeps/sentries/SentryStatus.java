@@ -237,6 +237,7 @@ public enum SentryStatus {
             case ATTACKING:
                 if  (   inst.attackTarget == null 
                         || inst.attackTarget.isDead()
+                        || inst.attackTarget.getWorld() != myLocation.getWorld()
                         || myLocation.distanceSquared( inst.attackTarget.getLocation() ) > Utils.sqr( inst.range ) + 10 ) {
                     inst.cancelAttack();
                     return SentryStatus.LOOKING;                   
