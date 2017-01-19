@@ -52,10 +52,10 @@ public class EquipCommand implements SentriesComplexCommand {
         
         else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
 
-            for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() ) {
-
-                String slotName = args[nextArg + 2];
+            String slotName = args[nextArg + 2];
             
+            for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() ) {
+                
                 if ( each.getKey().equalsIgnoreCase( slotName ) ) {
                     
                     if ( checkSlot( npc.getEntity().getType(), each.getValue() ) ) {
@@ -64,12 +64,14 @@ public class EquipCommand implements SentriesComplexCommand {
                         if ( "hand".equalsIgnoreCase( slotName ) ) slotName = "held item";
                         
                         Utils.sendMessage( sender, Col.GREEN, "removed ", npcName, "'s ", slotName );
-                        break;
+                        return;
                     }
                     Utils.sendMessage( sender, S.ERROR, "Unable to set equipment, does the sentry's type support the specified slot?" );
+                    return;
                 }
-                Utils.sendMessage( sender, S.ERROR, slotName, " was not recognised." );
             }
+            Utils.sendMessage( sender, S.ERROR, slotName, " was not recognised." );
+            return;
         }
         else {
             Material mat = Material.matchMaterial( Utils.joinArgs( nextArg + 1, args ) );
