@@ -1,7 +1,7 @@
 package org.jabelpeeps.sentries.commands;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -19,7 +19,7 @@ public class SetSpawnCommand implements SentriesSimpleCommand {
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst ) {
         
-        LivingEntity entity = inst.getMyEntity();
+        Entity entity = inst.getNPC().getEntity();
         
         if ( entity == null ) 
             sender.sendMessage( Col.RED.concat( "You cannot set a spawn point while a sentry is not spawned" ) );

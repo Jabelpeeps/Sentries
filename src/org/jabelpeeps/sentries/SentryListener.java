@@ -35,12 +35,10 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.ai.Navigator;
-import net.citizensnpcs.api.ai.event.NavigationCompleteEvent;
-import net.citizensnpcs.api.event.DespawnReason;
+import net.citizensnpcs.api.event.CitizensReloadEvent;
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.event.NPCDeathEvent;
-import net.citizensnpcs.api.event.NPCDespawnEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.event.NPCSpawnEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -78,25 +76,26 @@ public class SentryListener implements Listener {
         }
     }
 
-    @EventHandler( priority = EventPriority.HIGHEST, ignoreCancelled = true )
-    public void despawn( NPCDespawnEvent event ) {
-        // don't despawn active bodyguards on chunk unload
-        
-        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
-
-        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
-
-        if (    inst != null 
-                && event.getReason() == DespawnReason.CHUNK_UNLOAD ) {
-
-            if ( inst.guardeeEntity != null ) {
-                event.setCancelled( true );
-                inst.myStatus = SentryStatus.FOLLOWING;
-            }
-            else 
-                inst.myStatus = SentryStatus.NOT_SPAWNED;
-        }
-    }
+    // this is now handled by the NOT_SPAWNED status.
+//    @EventHandler( priority = EventPriority.HIGHEST, ignoreCancelled = true )
+//    public void despawn( NPCDespawnEvent event ) {
+//        // don't despawn active bodyguards on chunk unload
+//        
+//        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
+//
+//        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
+//
+//        if (    inst != null 
+//                && event.getReason() == DespawnReason.CHUNK_UNLOAD ) {
+//
+//            if ( inst.guardeeEntity != null ) {
+//                event.setCancelled( true );
+//                inst.myStatus = SentryStatus.FOLLOWING;
+//            }
+//            else 
+//                inst.myStatus = SentryStatus.NOT_SPAWNED;
+//        }
+//    }
 
     @EventHandler( priority = EventPriority.HIGHEST )
     public void entteleportevent( EntityTeleportEvent event ) {
@@ -171,7 +170,7 @@ public class SentryListener implements Listener {
         event.setCancelled( true );
         
         if ( inst.guardeeName != null && inst.guardeeEntity == null ) return;         
-        if ( inst.myStatus.isDeadOrDieing() ) return;
+        if ( inst.getMyStatus().isDeadOrDieing() ) return;
         if ( System.currentTimeMillis() < inst.okToTakedamage ) return;
 
         switch ( event.getCause() ) {    
@@ -195,7 +194,7 @@ public class SentryListener implements Listener {
 
         inst.okToTakedamage = System.currentTimeMillis() + 500;
 
-        LivingEntity myEntity = inst.getMyEntity();
+        LivingEntity myEntity = (LivingEntity) inst.getNPC().getEntity();
         double finaldamage = event.getDamage();
         DamageCause cause = event.getCause();
 
@@ -451,7 +450,7 @@ public class SentryListener implements Listener {
                     continue;
                 }
                 // respond to configured event targetTypes
-                if (    inst.myStatus == SentryStatus.LOOKING
+                if (    inst.getMyStatus() == SentryStatus.LOOKING
                         && damager instanceof Player
                         && !damager.hasMetadata( "NPC" )
                         && inst.events.parallelStream().anyMatch( e -> e.includes( victim ) ) ) {
@@ -582,24 +581,23 @@ public class SentryListener implements Listener {
 
             event.setCancelled( true );
         }
-        
         // updates Armour and attackType if a sentry's equipment is being edited with the citizens editor.
         if ( Editor.hasEditor( player ) ) {
             inst.updateArmour();
             inst.updateAttackType();
         }
     }
-    
-    @EventHandler
-    public void onFinishedNavigating( NavigationCompleteEvent event ) {
-
-        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
-        
-        if ( inst == null ) return;
-        
-        if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
-            inst.myStatus = SentryStatus.LOOKING;
-    }
+    // Pretty sure this isn't needed with SntryStatus.checkposition() now working effectively.
+//    @EventHandler
+//    public void onFinishedNavigating( NavigationCompleteEvent event ) {
+//
+//        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
+//        
+//        if ( inst == null ) return;
+//        
+//        if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
+//            inst.myStatus = SentryStatus.LOOKING;
+//    }
     
     @EventHandler( priority = EventPriority.MONITOR )
     public void onNPCSpawning( NPCSpawnEvent event ) {
@@ -620,4 +618,13 @@ public class SentryListener implements Listener {
                 inst.checkForGuardee( player );
         }
     }
+
+    @EventHandler
+    public void onCitReload( CitizensReloadEvent event ) {
+        for ( NPC each : Sentries.registry ) {
+            SentryTrait inst = Utils.getSentryTrait( each );
+            if ( inst != null )
+                inst.cancelRunnable();
+        }
+    } 
 }

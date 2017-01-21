@@ -47,7 +47,6 @@ import org.jabelpeeps.sentries.commands.SentriesNumberCommand;
 import org.jabelpeeps.sentries.commands.SentriesSimpleCommand;
 import org.jabelpeeps.sentries.commands.SentriesToggleCommand;
 import org.jabelpeeps.sentries.commands.SetSpawnCommand;
-import org.jabelpeeps.sentries.commands.SetStatusCommand;
 import org.jabelpeeps.sentries.commands.SpeedCommand;
 import org.jabelpeeps.sentries.commands.StrengthCommand;
 import org.jabelpeeps.sentries.commands.TargetComand;
@@ -91,7 +90,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( S.HEALRATE,     new HealRateCommand() );
         commandMap.put( S.RANGE,        new RangeCommand() );
         commandMap.put( S.VOICE_RANGE,  new VoiceRangeCommand() );
-        commandMap.put( "setstatus",    new SetStatusCommand() );
+//        commandMap.put( "setstatus",    new SetStatusCommand() );
         commandMap.put( "debuginfo",    new DebugInfoCommand() );
         
         SentriesNumberCommand command = new ArmourCommand();

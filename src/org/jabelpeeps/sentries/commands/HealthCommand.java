@@ -2,15 +2,20 @@ package org.jabelpeeps.sentries.commands;
 
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
+import lombok.Getter;
+
 
 public class HealthCommand implements SentriesNumberCommand {
 
     private String helpTxt;
+    @Getter private String shortHelp = "directly adjust a sentry's max health";
+    @Getter private String perm = S.PERM_HEALTH;
     
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, String number ) {
@@ -27,14 +32,11 @@ public class HealthCommand implements SentriesNumberCommand {
             if ( HPs > 2000000 ) HPs = 2000000;
             
             inst.maxHealth = HPs;
-            inst.getMyEntity().getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( HPs );
+            ((LivingEntity) inst.getNPC().getEntity()).getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( HPs );
             inst.setHealth( HPs );
             Utils.sendMessage( sender, Col.GREEN, npcName, "'s health set to:- ", String.valueOf( HPs ) );
         }
     }
-
-    @Override
-    public String getShortHelp() { return "directly adjust a sentry's health"; }
 
     @Override
     public String getLongHelp() {
@@ -46,7 +48,4 @@ public class HealthCommand implements SentriesNumberCommand {
         }
         return helpTxt;
     }
-
-    @Override
-    public String getPerm() { return S.PERM_HEALTH; }
 }

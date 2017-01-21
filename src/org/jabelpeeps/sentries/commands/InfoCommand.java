@@ -25,7 +25,7 @@ public class InfoCommand implements SentriesComplexCommand {
                                     String.valueOf( inst.getNPC().getId() ), ") ", "------" ) );
         
         joiner.add( String.join( "", 
-                Col.RED, "[Health]:", Col.WHITE, String.valueOf( inst.getHealth() ), "/", String.valueOf( inst.maxHealth ),
+                Col.RED, "[Health]:", Col.WHITE, Utils.formatDbl( inst.getHealth() ), "/", String.valueOf( inst.maxHealth ),
                 Col.RED, " [Armour]:", Col.WHITE, String.valueOf( inst.armour ),
                 Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ),
                 Col.RED, " [Speed]:", Col.WHITE, Utils.formatDbl( inst.getSpeed() ),
@@ -44,19 +44,19 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.GREEN, "  Kills Drop Items: ", Col.WHITE, String.valueOf( inst.killsDrop ), 
                 Col.GREEN, "  Respawn Delay: ", Col.WHITE, String.valueOf( inst.respawnDelay ), " secs" ) );
         
-        joiner.add( String.join( "", Col.BLUE, "Status: ", Col.WHITE, inst.myStatus.toString() ) );
+        joiner.add( String.join( "", Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString() ) );
 
         if ( inst.attackTarget == null )
-            joiner.add( Col.BLUE.concat( "Currently Targetting: nothing" ) );
+            joiner.add( Utils.join( Col.BLUE, "Currently Targetting: ", Col.WHITE, "nothing" ) );
         else
-            joiner.add( String.join( "", Col.BLUE, "Currently Targetting: ", Col.WHITE, inst.attackTarget.getName() ) );
+            joiner.add( Utils.join( Col.BLUE, "Currently Targetting: ", Col.WHITE, inst.attackTarget.getName() ) );
 
         if ( inst.guardeeEntity != null )
-            joiner.add( String.join( "", Col.BLUE, "Guarding: ", Col.WHITE, inst.guardeeEntity.getName() ) );          
+            joiner.add( Utils.join( Col.BLUE, "Guarding: ", Col.WHITE, inst.guardeeEntity.getName() ) );          
         else if ( inst.guardeeName != null && !inst.guardeeName.isEmpty() )
-            joiner.add( String.join( "", Col.BLUE, npcName, " is configured to guard ", Col.WHITE, inst.guardeeName, 
+            joiner.add( Utils.join( Col.BLUE, npcName, " is configured to guard ", Col.WHITE, inst.guardeeName, 
                                                                   Col.BLUE, " but cannot find them at the moment." ) );
-        else joiner.add( String.join( "", Col.BLUE, "Guarding: ", Col.WHITE, "my spawnpoint" ) );
+        else joiner.add( Utils.join( Col.BLUE, "Guarding: ", Col.WHITE, "my spawnpoint" ) );
 
         sender.sendMessage( joiner.toString() );
     }

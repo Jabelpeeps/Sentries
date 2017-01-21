@@ -116,7 +116,7 @@ public enum AttackType implements AttackStrategy {
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = victim.getEyeLocation();       
+        Location targetLoc = victim.getEyeLocation();   
         NMS.look( myEntity, victim );
         
         switch ( this ) {
@@ -129,7 +129,7 @@ public enum AttackType implements AttackStrategy {
                         int runcount = 0;
                         boolean outOfRange = false;
                         @Override public void run() {
-                            if ( outOfRange || myLoc.distanceSquared( targetLoc ) > 50 ) {
+                            if ( outOfRange || myLoc.distanceSquared( targetLoc ) > 50 || victim.isDead() ) {
                                 outOfRange = true;
                             }
                             else if ( ++runcount <= 3 ) {
@@ -170,7 +170,6 @@ public enum AttackType implements AttackStrategy {
                 if ( Math.min( Utils.sqr( range ), Utils.sqr( inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
                     // can't hit target
                     inst.cancelAttack();
-                    inst.myStatus = SentryStatus.LOOKING;
                     return true;
                 } 
                 Vector vector = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
@@ -197,20 +196,30 @@ public enum AttackType implements AttackStrategy {
                 fireball.setIsIncendiary( this == PYRO2 );
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector()
-                                                .subtract( myLoc.toVector() )
-                                                .normalize()
-                                                .multiply( v ) );       
+                                                .subtract( myLoc.toVector() ) );  
+//                                                .normalize()
+//                                                .multiply( v )      
                 break;       
         } 
         if ( effect != null )
             world.playEffect( myLoc, effect, null );
         
-        if ( myEntity instanceof Player ) 
-            PlayerAnimation.ARM_SWING.play( (Player) myEntity ); 
-        
+        if ( myEntity instanceof Player ) {
+            final Player player = (Player) myEntity;
+            
+            if ( this != ARCHER ) 
+                PlayerAnimation.ARM_SWING.play( player ); 
+            else {
+                PlayerAnimation.START_USE_MAINHAND_ITEM.play( player );
+                
+                Bukkit.getScheduler()
+                      .runTaskLater( Sentries.plugin, () -> PlayerAnimation.STOP_USE_ITEM.play( player ), 10 );
+            }
+        }
         return true;
     }
     
+    /** method returns true for AttackTypes that need the sentry to get close to the victim */
     public boolean isMelee() {
         switch ( this ) {
             case BRAWLER:

@@ -131,7 +131,8 @@ public class DenizenHook {
                         inst.cancelAttack();
                     }
                     dB.log( db );
-                    inst.myStatus = SentryStatus.NOT_SPAWNED;
+                    NPC npc = inst.getNPC();
+                    npc.spawn( npc.getStoredLocation() );
                 }
             }
             else {

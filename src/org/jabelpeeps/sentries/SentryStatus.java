@@ -106,7 +106,7 @@ public enum SentryStatus {
         @Override SentryStatus update( SentryTrait inst ) {
             if ( inst.guardeeEntity == null ) return checkPosition( inst );
             
-            LivingEntity myEntity = inst.getMyEntity(); 
+            Entity myEntity = inst.getNPC().getEntity(); 
             if ( myEntity == null ) return SentryStatus.NOT_SPAWNED;
             
             Navigator navigator = inst.getNavigator();
@@ -148,7 +148,7 @@ public enum SentryStatus {
         @Override SentryStatus update( SentryTrait inst ) {
             inst.tryToHeal();
             
-            LivingEntity myEntity = inst.getMyEntity(); 
+            Entity myEntity = inst.getNPC().getEntity(); 
             if ( myEntity == null ) return SentryStatus.NOT_SPAWNED;
             
             Navigator navigator = inst.getNavigator();
@@ -192,7 +192,7 @@ public enum SentryStatus {
     ATTACKING {
         @Override SentryStatus update( SentryTrait inst ) {
                
-            LivingEntity myEntity = inst.getMyEntity();
+            Entity myEntity = inst.getNPC().getEntity();
 
             if (    myEntity != null
                     && inst.attackTarget != null 
@@ -258,7 +258,7 @@ public enum SentryStatus {
      *  too far - this method will teleport the npc. */
     protected boolean navigateOrTP( SentryTrait inst, Location loc ) {
         
-        LivingEntity myEntity = inst.getMyEntity(); 
+        Entity myEntity = inst.getNPC().getEntity(); 
         double distanceSqrd = Double.MAX_VALUE;
         
         if ( myEntity.getWorld() == loc.getWorld() )
