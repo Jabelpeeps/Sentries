@@ -500,11 +500,12 @@ public class SentryTrait extends Trait {
     private static Set<AttackType> stormCallers = EnumSet.range( AttackType.STORMCALLER1, AttackType.STORMCALLER3 );
     private static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.STORMCALLER3 );
     private static Set<AttackType> lightsFires = EnumSet.of( AttackType.PYRO1, AttackType.STROMCALLER2 );
+    private static Set<AttackType> witchDoctors = EnumSet.of( AttackType.WITCHDOCTOR1, AttackType.WITCHDOCTOR2 );
 
     public boolean isPyromancer() { return pyros.contains( myAttack ); }
     public boolean isStormcaller() { return stormCallers.contains( myAttack ); }
     public boolean isWarlock1() { return myAttack == AttackType.WARLOCK1; }
-    public boolean isWitchDoctor() { return myAttack == AttackType.WITCHDOCTOR; }
+    public boolean isWitchDoctor() { return witchDoctors.contains( myAttack ); }
     public boolean isNotFlammable() { return notFlammable.contains( myAttack ); }
     public boolean lightsFires() { return lightsFires.contains( myAttack ); }   
     boolean isMyChunkLoaded() { return Util.isLoaded( npc.getStoredLocation() ); }
@@ -674,21 +675,21 @@ public class SentryTrait extends Trait {
     public void updateAttackType() {
 
         Material weapon = Material.AIR;
-        ItemStack item = null;
+        ItemStack heldItem = null;
         Entity myEntity = npc.getEntity();
         myAttack = null;
 
         if ( myEntity instanceof HumanEntity )
-            item = ((HumanEntity) myEntity).getInventory().getItemInMainHand(); 
+            heldItem = ((HumanEntity) myEntity).getInventory().getItemInMainHand(); 
         else 
-            item = ((LivingEntity) myEntity).getEquipment().getItemInMainHand();
+            heldItem = ((LivingEntity) myEntity).getEquipment().getItemInMainHand();
         
-        if ( item != null ) {
-            weapon = item.getType();
+        if ( heldItem != null ) {
+            weapon = heldItem.getType();
             myAttack = AttackType.find( weapon );
 
-            if ( myAttack != AttackType.WITCHDOCTOR )
-                item.setDurability( (short) 0 );  
+            if ( !isWitchDoctor() )
+                heldItem.setDurability( (short) 0 );  
         }
         
         if ( myAttack == null ) {
@@ -696,18 +697,18 @@ public class SentryTrait extends Trait {
             else if ( myEntity instanceof Ghast ) myAttack = AttackType.PYRO3;
             else if ( myEntity instanceof Snowman ) myAttack = AttackType.ICEMAGI;
             else if ( myEntity instanceof Wither ) myAttack = AttackType.WARLOCK2;
-            else if ( myEntity instanceof Witch ) myAttack = AttackType.WITCHDOCTOR;
+            else if ( myEntity instanceof Witch ) myAttack = AttackType.WITCHDOCTOR1;
             else if ( myEntity instanceof Creeper ) myAttack = AttackType.CREEPER;
             else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttack = AttackType.PYRO2;
             else myAttack = AttackType.BRAWLER;
         }
         
-        if ( myAttack == AttackType.WITCHDOCTOR ) {
-            if ( item == null ) {
-                item = new ItemStack( Material.SPLASH_POTION, 1, (short) 16396 );
+        if ( isWitchDoctor() ) {
+            if ( heldItem == null ) {
+                heldItem = new ItemStack( Material.SPLASH_POTION, 1, (short) 16396 );
                 // TODO send message to owner about equipping a proper potion.
             }
-            potionItem = item;
+            potionItem = heldItem;
             weaponSpecialEffects = null;
         }
         else {

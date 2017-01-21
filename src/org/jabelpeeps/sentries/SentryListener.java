@@ -374,11 +374,9 @@ public class SentryListener implements Listener {
             String msg = hit.message;
 
             if ( msg != null && !msg.isEmpty() ) {
-                String formatted = Utils.format( msg,
-                                                npc,
-                                                damager, 
-                                                player.getInventory().getItemInMainHand().getType(),
-                                                String.valueOf( damage ) );
+                String formatted = Utils.format( msg, npc, damager, 
+                                                 player.getInventory().getItemInMainHand(),
+                                                 String.valueOf( damage ) );
                 player.sendMessage( formatted );
                 
                 if ( Sentries.debug ) Sentries.debugLog( formatted );                               
@@ -457,12 +455,12 @@ public class SentryListener implements Listener {
                     
                     Location npcLoc = npc.getEntity().getLocation();
                     // is the event within range of the sentry?
-                    if (    (   npcLoc.distance( victim.getLocation() ) <= inst.range
-                            ||  npcLoc.distance( damager.getLocation() ) <= inst.range )
+                    if (    (   npcLoc.distanceSquared( victim.getLocation() ) <= Utils.sqr( inst.range )
+                            ||  npcLoc.distanceSquared( damager.getLocation() ) <= Utils.sqr( inst.range ) )
 
-                        // is it too dark for the sentry to see?
-                        &&  (   inst.nightVision >= damager.getLocation().getBlock().getLightLevel()
-                            ||  inst.nightVision >= victim.getLocation().getBlock().getLightLevel())
+                        // is it light enough for the sentry to see (with night-vision)?
+                        &&  (   damager.getLocation().getBlock().getLightLevel() + inst.nightVision > 15
+                            ||  victim.getLocation().getBlock().getLightLevel() + inst.nightVision > 15 )
     
                         // does the sentry have line-of-sight?
                         &&  (   inst.hasLOS( damager ) || inst.hasLOS( victim ) ) ) {

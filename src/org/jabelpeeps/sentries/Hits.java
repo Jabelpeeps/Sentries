@@ -25,6 +25,7 @@ enum Hits {
     private static Set<Hits> randomisedHits = EnumSet.range( Hits.Crit3, Hits.Miss );
     static {
         if ( Sentries.useNewArmourCalc ) randomisedHits.add( Block );
+        makeChanceMap();
     }
 
     Hits( double mod, int chance, String msg ) {
@@ -33,6 +34,7 @@ enum Hits {
         message = msg;
     }
 
+    /** If useCriticals is configured, returns a randomised Hits instance */
     static Hits getHit() {
         if ( useCriticalHits ) {
 
@@ -46,7 +48,7 @@ enum Hits {
         return Hits.Hit;
     }
 
-    static void makeChanceMap() {
+    private static void makeChanceMap() {
         int total = 0;
 
         for ( Hits each : randomisedHits ) {
@@ -73,7 +75,6 @@ enum Hits {
         if ( Sentries.useNewArmourCalc ) {
             Hits.Block.percentChance = config.getInt( "HitChances.Block" );
         }
-
         makeChanceMap();
     }
 }

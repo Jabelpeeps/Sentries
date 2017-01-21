@@ -12,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.S.Col;
@@ -135,7 +136,7 @@ public abstract class Utils {
      * The method will return immediately if 'input' is null, and will remove
      * the tags related to any other arguments that are null objects.
      */
-    public static String format( String input, NPC npc, CommandSender player, Material item, String amount ) {
+    public static String format( String input, NPC npc, CommandSender player, ItemStack item, String amount ) {
 
         if ( input == null ) return "";
 
@@ -177,8 +178,9 @@ public abstract class Utils {
      * @param int
      *            MatID the ID to be named.
      */
-    static String getLocalItemName( Material mat ) {
-
+    static String getLocalItemName( ItemStack item ) {
+        Material mat = item.getType();
+        
         if ( mat == null || mat == Material.AIR )
             return "Hand";
 

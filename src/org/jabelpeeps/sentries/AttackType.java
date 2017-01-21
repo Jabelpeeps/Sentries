@@ -1,5 +1,16 @@
 package org.jabelpeeps.sentries;
 
+import static org.bukkit.entity.EntityType.ARROW;
+import static org.bukkit.entity.EntityType.EGG;
+import static org.bukkit.entity.EntityType.ENDER_PEARL;
+import static org.bukkit.entity.EntityType.FIREBALL;
+import static org.bukkit.entity.EntityType.LINGERING_POTION;
+import static org.bukkit.entity.EntityType.PRIMED_TNT;
+import static org.bukkit.entity.EntityType.SMALL_FIREBALL;
+import static org.bukkit.entity.EntityType.SNOWBALL;
+import static org.bukkit.entity.EntityType.SPLASH_POTION;
+import static org.bukkit.entity.EntityType.WITHER_SKULL;
+
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -11,17 +22,12 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Egg;
-import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.SmallFireball;
-import org.bukkit.entity.Snowball;
 import org.bukkit.entity.ThrownPotion;
-import org.bukkit.entity.WitherSkull;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
@@ -33,24 +39,26 @@ import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
-    // Columns:-  weapon held                 projectile           v     g    Effect?             default damage
-    ARCHER(       Material.BOW,               Arrow.class,         10,   20,  Effect.BOW_FIRE,     1 ), 
-    BOMBARDIER(   Material.EGG,               Egg.class,           10,   12,                       0 ), 
-    ICEMAGI(      Material.SNOW_BALL,         Snowball.class,      10,   12,                       0 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SmallFireball.class, 2,         Effect.BLAZE_SHOOT,  5 ), 
-    PYRO2(        Material.TORCH,             SmallFireball.class, 2,         Effect.BLAZE_SHOOT,  5 ),
-    PYRO3(        Material.BLAZE_ROD,         Fireball.class,      2,         Effect.BLAZE_SHOOT,  6 ), 
-    STORMCALLER1( Material.PAPER,                                                                  5 ),
-    STROMCALLER2( Material.BOOK,                                                                   10 ),
-    STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       EnderPearl.class,    10,   12,                       0 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WitherSkull.class,   2,         Effect.WITHER_SHOOT, 8 ),
-    WITCHDOCTOR(  Material.SPLASH_POTION,     ThrownPotion.class,  10,   12,                       0 ),
-    CREEPER(      Material.SULPHUR,                                                                4 ),  
-    BRAWLER(      Material.AIR,                                                                    1 ); 
+    // Columns:-  weapon held                 projectile        v     g    Effect?                   default damage
+    ARCHER(       Material.BOW,               ARROW,            10,   20,  Effect.BOW_FIRE,          1 ), 
+    GRENADIER(    Material.TNT,               PRIMED_TNT,       10,   12,  Effect.MOBSPAWNER_FLAMES, 4 ),
+    BOMBARDIER(   Material.EGG,               EGG,              10,   12 ), 
+    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         10,   12 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   2,         Effect.BLAZE_SHOOT,       5 ), 
+    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   2,         Effect.BLAZE_SHOOT,       5 ),
+    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         2,         Effect.BLAZE_SHOOT,       6 ), 
+    STORMCALLER1( Material.PAPER,                                                                    5 ),
+    STROMCALLER2( Material.BOOK,                                                                     10 ),
+    STORMCALLER3( Material.BOOK_AND_QUILL,                                                           1 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      10,   12 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     2,         Effect.WITHER_SHOOT,      8 ),
+    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    10,   12 ),
+    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 10,   12 ),
+    CREEPER(      Material.SULPHUR,                                                                  4 ),  
+    BRAWLER(      Material.AIR,                                                                      1 ); 
         
     @Getter private Material weapon;
-    private final Class<? extends Projectile> projectile;
+    private final EntityType projectile;
     private final double v;
     private final double g;
     private final Effect effect;
@@ -59,8 +67,8 @@ public enum AttackType implements AttackStrategy {
     static Map<Material, AttackType> reverseSearch = new EnumMap<>( Material.class );
     static { updateMap(); }
 
-    AttackType( Material w, Class<? extends Projectile> p, double V, double G, int d ) { this( w, p, V, G, null, d ); }
-    AttackType( Material w, Class<? extends Projectile> p, double V, Effect e, int d ) { this( w, p, V, 0, e, d ); }
+    AttackType( Material w, EntityType p, double V, double G ) { this( w, p, V, G, null, 0 ); }
+    AttackType( Material w, EntityType p, double V, Effect e, int d ) { this( w, p, V, 0, e, d ); }
     AttackType( Material w , int d ) { this( w, null, 0, 0, null, d ); }
 
     /**
@@ -91,7 +99,11 @@ public enum AttackType implements AttackStrategy {
 
             for ( AttackType attack : values() ) {                
                 if ( attack == BRAWLER ) continue;
-                attack.weapon = Material.getMaterial( config.getString( "AttackTypes." + attack.name() ) );
+                try {
+                    attack.weapon = Material.getMaterial( config.getString( "AttackTypes." + attack.name() ) );
+                } catch ( NullPointerException e ) {
+                    if ( Sentries.debug ) Sentries.debugLog( e.getMessage() );
+                }
             }
             updateMap();
         }
@@ -147,57 +159,64 @@ public enum AttackType implements AttackStrategy {
                 return true;
                 
             case STORMCALLER1: 
+            case STROMCALLER2: 
                 world.strikeLightningEffect( targetLoc );
                 victim.damage( inst.strength, myEntity );               
-                break;
-                
-            case STROMCALLER2: 
-                world.strikeLightning( targetLoc );                
                 break;
                 
             case STORMCALLER3: 
                 world.strikeLightningEffect( targetLoc );
                 victim.setHealth( 0 );
                 break;
+
+            case GRENADIER: // TNT, ballistic, non-projectile EntityType
+
+                if ( cantHit( inst, myLoc, targetLoc ) ) return true;
                 
-            case ARCHER: // arrows, ballistics   
-            case BOMBARDIER: // eggs, ballistic
-            case ICEMAGI: // snowballs, ballistic
-            case WARLOCK1: // enderpearl, ballistic
-            case WITCHDOCTOR: // potions, ballistic
+                Vector victor = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
+                if ( victor == null ) return true;
                 
-                double range = Utils.getRange( v, g, myLoc.getY() );
-                if ( Math.min( Utils.sqr( range ), Utils.sqr( inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
-                    // can't hit target
-                    inst.cancelAttack();
-                    return true;
-                } 
+                ThrownTNT tnt = new ThrownTNT( world.spawn( myLoc, projectile.getEntityClass() ) );
+                
+                tnt.setShooter( myEntity );
+                tnt.setVelocity( victor );
+                break;
+                
+            case ARCHER:       // arrows, ballistics   
+            case BOMBARDIER:   // eggs, ballistic
+            case ICEMAGI:      // snowballs, ballistic
+            case WARLOCK1:     // enderpearl, ballistic
+            case WITCHDOCTOR1: // splash potions, ballistic
+            case WITCHDOCTOR2: // lingering potions, ballistic
+                
+                if ( cantHit( inst, myLoc, targetLoc ) ) return true;
+                
                 Vector vector = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
                 if ( vector == null ) return true;
                 
-                Projectile proj = world.spawn( myLoc, projectile );
+                Projectile proj = (Projectile) world.spawn( myLoc, projectile.getEntityClass() );
                 
-                if  (   this == WITCHDOCTOR 
+                if  (   inst.isWitchDoctor()  
                         && inst.potionItem != null ) {
                     ((ThrownPotion) proj).setItem( inst.potionItem.clone() );
-                }
-                else if ( this == AttackType.WARLOCK1 ) inst.epCount++;
-                
+                }     
                 proj.setShooter( myEntity );
                 proj.setVelocity( vector );
+                
+                if ( this == AttackType.WARLOCK1 ) inst.epCount++;
                 break;
 
-            case PYRO1: // smallfireball, non-incendiary
-            case PYRO2: // smallfireball, incendiary
-            case PYRO3: // fireball   
+            case PYRO1:    // smallfireball, non-incendiary
+            case PYRO2:    // smallfireball, incendiary
+            case PYRO3:    // fireball   
             case WARLOCK2: // witherskull (also a sub-class of fireball)
                 
-                Fireball fireball = (Fireball) world.spawn( myLoc, projectile );
+                Fireball fireball = (Fireball) world.spawn( myLoc, projectile.getEntityClass() );
                 fireball.setIsIncendiary( this == PYRO2 );
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector()
-                                                .subtract( myLoc.toVector() ) );  
-//                                                .normalize()
+                                                .subtract( myLoc.toVector() )
+                                                .normalize() ); 
 //                                                .multiply( v )      
                 break;       
         } 
@@ -217,6 +236,17 @@ public enum AttackType implements AttackStrategy {
             }
         }
         return true;
+    }
+    
+    private boolean cantHit( SentryTrait inst, Location myLoc, Location targetLoc ) {
+        
+        double range = Utils.getRange( v, g, myLoc.getY() - targetLoc.getY() );
+        if ( Utils.sqr( Math.min( range, inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
+            // can't hit target
+            inst.cancelAttack();
+            return true;
+        } 
+        return false;
     }
     
     /** method returns true for AttackTypes that need the sentry to get close to the victim */
