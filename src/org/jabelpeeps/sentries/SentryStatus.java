@@ -86,16 +86,16 @@ public enum SentryStatus {
                 inst.reMountMount();
                 return SentryStatus.LOOKING;
             }
+            if ( inst.isBodyguardOnLeave() ) return this;
             
-            if  (   inst.guardeeEntity == null 
-                    && Util.isLoaded( inst.spawnLocation ) ) {
-                npc.spawn( inst.spawnLocation );
-            }
-            else if ( inst.guardeeEntity != null ) {
-                Location loc = inst.guardeeEntity.getLocation().add( 1, 0, 1 );
+            if ( inst.guardeeEntity != null ) {
+                Location loc = inst.guardeeEntity.getLocation();
                 if ( Utils.CanWarp( inst.guardeeEntity, loc.getWorld().getName() ) )
-                    npc.spawn( loc );
-            }            
+                    npc.spawn( loc.add( 1, 0, 1 ) );
+            }  
+            else if  ( Util.isLoaded( inst.spawnLocation ) ) {
+                npc.spawn( inst.spawnLocation );
+            }          
             return this;
         }
     },    
@@ -175,6 +175,7 @@ public enum SentryStatus {
             inst.tryToHeal();
 
             if  (   !inst.targets.isEmpty() 
+                    && !inst.isBodyguardOnLeave()
                     && System.currentTimeMillis() > inst.reassesTime ) {
 
                 LivingEntity target = inst.findTarget();

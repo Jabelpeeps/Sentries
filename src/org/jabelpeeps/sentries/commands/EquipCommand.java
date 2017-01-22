@@ -66,7 +66,7 @@ public class EquipCommand implements SentriesComplexCommand {
                         Utils.sendMessage( sender, Col.GREEN, "removed ", npcName, "'s ", slotName );
                         return;
                     }
-                    Utils.sendMessage( sender, S.ERROR, "Unable to set equipment, does the sentry's type support the specified slot?" );
+                    Utils.sendMessage( sender, S.ERROR, "Unable to clear equipment, does the sentry's type support the specified slot?" );
                     return;
                 }
             }

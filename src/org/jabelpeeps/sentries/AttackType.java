@@ -45,14 +45,14 @@ public enum AttackType implements AttackStrategy {
     GRENADIER(    Material.TNT,               PRIMED_TNT,       10,   16,  Effect.MOBSPAWNER_FLAMES, 4 ),
     BOMBARDIER(   Material.EGG,               EGG,              10,   12 ), 
     ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         10,   12 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   10,         Effect.BLAZE_SHOOT,      5 ), 
-    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   10,         Effect.BLAZE_SHOOT,      5 ),
-    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         10,         Effect.BLAZE_SHOOT,      6 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   10,        Effect.BLAZE_SHOOT,       5 ), 
+    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   10,        Effect.BLAZE_SHOOT,       5 ),
+    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         10,        Effect.BLAZE_SHOOT,       6 ), 
     STORMCALLER1( Material.PAPER,                                                                    5 ),
     STROMCALLER2( Material.BOOK,                                                                     10 ),
     STORMCALLER3( Material.BOOK_AND_QUILL,                                                           1 ), 
     WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      10,   12 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     10,         Effect.WITHER_SHOOT,     8 ),
+    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     10,        Effect.WITHER_SHOOT,      8 ),
     WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    10,   12 ),
     WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 10,   12 ),
     CREEPER(      Material.SULPHUR,                                                                  4 ),  
@@ -196,6 +196,8 @@ public enum AttackType implements AttackStrategy {
                 
                 Vector vector = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
                 if ( vector == null ) return true;
+                if ( Sentries.debug ) 
+                    Sentries.debugLog( "Firing Vector for " + myEntity.getName() + " is " + vector.toString() );
                 
                 Projectile proj = (Projectile) world.spawn( myLoc, projectile.getEntityClass() );
                 
@@ -244,6 +246,8 @@ public enum AttackType implements AttackStrategy {
     private boolean cantHit( SentryTrait inst, Location myLoc, Location targetLoc ) {
         
         double range = Utils.getRange( v, g, myLoc.getY() - targetLoc.getY() );
+        if ( Sentries.debug ) 
+            Sentries.debugLog( "Projectile Max range for " + inst.getNPC().getName() + " is " + Utils.formatDbl( range ) );
         if ( Utils.sqr( Math.min( range, inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
             // can't hit target
             inst.cancelAttack();

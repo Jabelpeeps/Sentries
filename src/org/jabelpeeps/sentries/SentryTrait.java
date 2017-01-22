@@ -23,7 +23,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
@@ -49,6 +48,8 @@ import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
+import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
 import net.citizensnpcs.api.trait.trait.MobType;
 import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
@@ -328,7 +329,7 @@ public class SentryTrait extends Trait {
     }
 
     public LivingEntity findTarget() {
-
+        
         Entity myEntity = npc.getEntity();
         int combinedRange = range + voiceRange;
         Location myLoc = myEntity.getLocation();
@@ -423,29 +424,23 @@ public class SentryTrait extends Trait {
             Sentries.logger.log( Level.WARNING, "ERROR: no armour values have been loaded from config." );
             return false;
         }
+        boolean armourWorn = false;
+        
         if ( armour < 0 ) { // values less than 0 indicate a calculated value that needs refreshing
             armour = 0;
-            Entity myEntity = npc.getEntity();
-            ItemStack[] myArmour;  
+            ItemStack[] myArmour = npc.getTrait( Equipment.class ).getEquipment();
             
-            if ( myEntity instanceof Player )
-                myArmour = ((Player) myEntity).getInventory().getArmorContents();
-            else
-                myArmour = ((LivingEntity) myEntity).getEquipment().getArmorContents();
-            
-            boolean armourWorn = false;
             for ( ItemStack is : myArmour ) {
                 if ( is == null ) continue;
                 Material item = is.getType();
-                armourWorn = true;
-                if ( Sentries.armorValues.containsKey( item ) )
+                if ( Sentries.armorValues.containsKey( item ) ) {
                     armour -= Sentries.armorValues.get( item );
+                    armourWorn = true;
+                }
             }
             if ( !Sentries.useNewArmourCalc ) armour *= 10;
-            
-            return armourWorn;
         }
-        return false;
+        return armourWorn;
     }
     
     public float getSpeed() {
@@ -475,20 +470,14 @@ public class SentryTrait extends Trait {
             return false;
         }
         if ( strengthFromWeapon ) { 
-            if ( myAttack != AttackType.BRAWLER ) {
-                strength = myAttack.getDamage();
+            ItemStack item = npc.getTrait( Equipment.class ).get( EquipmentSlot.HAND );
+            
+            if ( item != null && Sentries.weaponStrengths.containsKey( item.getType() ) ) {
+                strength = Sentries.weaponStrengths.get( item.getType() );
                 return true;
             }
-            Entity myEntity = npc.getEntity();
-            Material item = null;
-            
-            if ( myEntity instanceof Player )
-                item = ((Player) myEntity).getInventory().getItemInMainHand().getType();  
-            else 
-                item = ((LivingEntity) myEntity).getEquipment().getItemInMainHand().getType();
-            
-            if ( item != null && Sentries.weaponStrengths.containsKey( item ) ) {
-                strength = Sentries.weaponStrengths.get( item );
+            if ( myAttack != AttackType.BRAWLER ) {
+                strength = myAttack.getDamage();
                 return true;
             }
             strength = 1;
@@ -676,14 +665,8 @@ public class SentryTrait extends Trait {
     public void updateAttackType() {
 
         Material weapon = Material.AIR;
-        ItemStack heldItem = null;
-        Entity myEntity = npc.getEntity();
+        ItemStack heldItem = npc.getTrait( Equipment.class ).get( EquipmentSlot.HAND );
         myAttack = null;
-
-        if ( myEntity instanceof HumanEntity )
-            heldItem = ((HumanEntity) myEntity).getInventory().getItemInMainHand(); 
-        else 
-            heldItem = ((LivingEntity) myEntity).getEquipment().getItemInMainHand();
         
         if ( heldItem != null ) {
             weapon = heldItem.getType();
@@ -694,6 +677,8 @@ public class SentryTrait extends Trait {
         }
         
         if ( myAttack == null ) {
+            Entity myEntity = npc.getEntity();
+            
             if ( myEntity instanceof Skeleton ) myAttack = AttackType.ARCHER;
             else if ( myEntity instanceof Ghast ) myAttack = AttackType.PYRO3;
             else if ( myEntity instanceof Snowman ) myAttack = AttackType.ICEMAGI;
@@ -727,7 +712,7 @@ public class SentryTrait extends Trait {
     }
     private void setRange( NavigatorParameters params ) {
         if ( myAttack.isMelee() )
-            params.attackRange( 1.5 );
+            params.attackRange( 1.75 );
         else
             params.attackRange( Utils.sqr( range ) );
     }
@@ -746,12 +731,13 @@ public class SentryTrait extends Trait {
         if ( targets.isEmpty() && events.isEmpty() )
             Utils.sendMessage( sender, Col.YELLOW, npc.getName(), " now has no defined targets." );
     }
+    boolean isBodyguardOnLeave( ) {
+        return ( guardeeName != null || guardeeID != null ) && guardeeEntity == null;
+    }
     
     boolean setAttackTarget( LivingEntity theEntity ) {
         Entity myEntity = npc.getEntity();
         if ( myEntity == null || theEntity == myEntity || theEntity == guardeeEntity ) return false;
-        // don't attack when bodyguard target isn't around.
-        if ( guardeeName != null && guardeeEntity == null ) return false;
 
         attackTarget = theEntity;
         myStatus = SentryStatus.ATTACKING;

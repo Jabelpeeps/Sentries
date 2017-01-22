@@ -26,22 +26,22 @@ import net.citizensnpcs.api.npc.NPC;
  */
 public abstract class Utils {
     final static double angle = Math.toRadians( 45 ); 
-    final static double cos = Math.cos( angle );   
-    final static double sin = Math.sin( angle );
+    final static double cos45 = Math.cos( angle );   
+    final static double sin45 = Math.sin( angle );
     
     public static double sqr( double d ) { return d * d; }
     
     /** 
      * Calculate the maximum range that a ballistic projectile can be fired on given speed and gravity.
      *
-     * @param speed: projectile velocity
-     * @param gravity: force of gravity, positive is down
-     * @param initial_height: distance above flat terrain
+     * @param v: projectile velocity
+     * @param g: force of gravity, positive is down
+     * @param d: distance above flat terrain
      *
      * @return the maximum range
      */
      public static double getRange( double v, double g, double d ) {
-         return ( v * cos / g ) * ( v * sin + Math.sqrt( sqr( v ) * sqr( sin ) + 2 * g * d ) );
+         return ( v * cos45 / g ) * ( v * sin45 + Math.sqrt( sqr( v ) * sqr( sin45 ) + 2 * g * d ) );
      }
 
      /** 

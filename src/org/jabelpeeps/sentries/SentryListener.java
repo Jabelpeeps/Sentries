@@ -434,7 +434,7 @@ public class SentryListener implements Listener {
                 }
                 SentryTrait inst = Utils.getSentryTrait( npc );
 
-                if ( inst == null || inst == victimInst || inst.isIgnoring( damager ) ) {
+                if ( inst == null || inst == victimInst || inst.isIgnoring( damager ) || inst.isBodyguardOnLeave() ) {
                     continue; 
                 }
                 // is the sentry guarding the victim?
@@ -604,7 +604,7 @@ public class SentryListener implements Listener {
         NPC npc = event.getNPC();
         for ( NPC each : Sentries.registry ) {
             SentryTrait inst = Utils.getSentryTrait( each );
-            if ( inst != null )
+            if ( inst != null && inst.isBodyguardOnLeave() )
                 inst.checkForGuardee( npc );
         }
     }
@@ -614,7 +614,7 @@ public class SentryListener implements Listener {
         Player player = event.getPlayer();
         for ( NPC each : Sentries.registry ) {
             SentryTrait inst = Utils.getSentryTrait( each );
-            if ( inst != null )
+            if ( inst != null && inst.isBodyguardOnLeave() )
                 inst.checkForGuardee( player );
         }
     }
