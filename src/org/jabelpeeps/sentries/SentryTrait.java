@@ -236,7 +236,10 @@ public class SentryTrait extends Trait {
         if ( tickMe == null ) {
             tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
                     () -> {     
-                            myStatus = myStatus.update( SentryTrait.this );             
+                            myStatus = myStatus.update( SentryTrait.this ); 
+                            if ( guardeeEntity != null && !guardeeEntity.isValid() ) {
+                                guardeeEntity = null;
+                            }
                             if ( Sentries.debug && oldStatus != myStatus ) {
                                 Sentries.debugLog( npc.getName() + " is now:- " + myStatus.name() );
                                 oldStatus = myStatus;

@@ -72,7 +72,7 @@ public abstract class Utils {
     
          double lowAng = Math.atan2( speed2 - Math.sqrt( root ), g * groundDist );
     
-         return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
+         return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v * -1 );
      }
 
      public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {

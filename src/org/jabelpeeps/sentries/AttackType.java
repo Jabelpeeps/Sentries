@@ -177,6 +177,8 @@ public enum AttackType implements AttackStrategy {
                 
                 Vector victor = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
                 if ( victor == null ) return true;
+                if ( Sentries.debug ) 
+                    Sentries.debugLog( "Firing Vector for " + myEntity.getName() + " is " + victor.toString() );
                 
                 TNTPrimed tnt = (TNTPrimed) world.spawn( myLoc, projectile.getEntityClass() );
                 
@@ -204,7 +206,7 @@ public enum AttackType implements AttackStrategy {
                 if  (   inst.isWitchDoctor()  
                         && inst.potionItem != null ) {
                     ((ThrownPotion) proj).setItem( inst.potionItem.clone() );
-                }     
+                } 
                 proj.setShooter( myEntity );
                 proj.setVelocity( vector );
                 
@@ -222,7 +224,9 @@ public enum AttackType implements AttackStrategy {
                 fireball.setDirection( targetLoc.toVector()
                                                 .subtract( myLoc.toVector() )
                                                 .normalize() ); 
-//                                                .multiply( v )      
+//              .multiply( v )      
+                if ( Sentries.debug ) 
+                    Sentries.debugLog( "Fireball launched on vector:- " + fireball.getDirection().toString() );
                 break;       
         } 
         if ( effect != null )

@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
+import org.jabelpeeps.sentries.Sentries;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
@@ -21,13 +22,15 @@ public class InfoCommand implements SentriesComplexCommand {
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 
-        joiner.add( String.join( "", Col.GOLD, "------- Sentries Info for ", npcName, " (npcid - ",
-                                    String.valueOf( inst.getNPC().getId() ), ") ", "------" ) );
+        joiner.add( Utils.join( Col.GOLD, "------- Sentries Info for ", npcName, " (npcid - ",
+                                    String.valueOf( inst.getNPC().getId() ), ") ------" ) );
         
         joiner.add( String.join( "", 
                 Col.RED, "[Health]:", Col.WHITE, Utils.formatDbl( inst.getHealth() ), "/", String.valueOf( inst.maxHealth ),
-                Col.RED, " [Armour]:", Col.WHITE, String.valueOf( inst.armour ),
-                Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ),
+                Col.RED, " [Armour]:", Col.WHITE, 
+                Sentries.useNewArmourCalc ? String.valueOf( Math.abs( inst.armour ) ) + "%"
+                                          : String.valueOf( Math.abs( inst.armour ) ), inst.armour < 0 ? "(C)" : "",
+                Col.RED, " [Strength]:", Col.WHITE, String.valueOf( inst.strength ), inst.strengthFromWeapon ? "(C)" : "",
                 Col.RED, " [Speed]:", Col.WHITE, Utils.formatDbl( inst.getSpeed() ),
                 Col.RED, " [AttackRange]:", Col.WHITE, String.valueOf( inst.range ),
                 Col.RED, " [AttackRate]:", Col.WHITE, String.valueOf( inst.attackRate ),
@@ -44,7 +47,7 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.GREEN, "  Kills Drop Items: ", Col.WHITE, String.valueOf( inst.killsDrop ), 
                 Col.GREEN, "  Respawn Delay: ", Col.WHITE, String.valueOf( inst.respawnDelay ), " secs" ) );
         
-        joiner.add( String.join( "", Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString() ) );
+        joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString() ) );
 
         if ( inst.attackTarget == null )
             joiner.add( Utils.join( Col.BLUE, "Currently Targetting: ", Col.WHITE, "nothing" ) );
