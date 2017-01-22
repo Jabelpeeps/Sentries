@@ -129,7 +129,7 @@ public class SentryListener implements Listener {
         // event to handle thrown enderpearls & put out fires from small fireballs
 
         Projectile projectile = event.getEntity();
-        SentryTrait inst = Utils.getSentryTrait( (Entity) projectile.getShooter() );
+        SentryTrait inst = Utils.getSentryTrait( Utils.getArcher( projectile ) );
         if ( inst == null ) return;
 
         if ( inst.isWarlock1() || projectile instanceof EnderPearl ) {
@@ -184,9 +184,11 @@ public class SentryListener implements Listener {
                 break;
             case POISON: case MAGIC:
                 if ( inst.isWitchDoctor() ) return;
+            case BLOCK_EXPLOSION: case ENTITY_EXPLOSION:
+                if ( inst.isGrenadier() ) return;
                 
             case CONTACT: case DROWNING: case VOID: case SUICIDE:
-            case CUSTOM: case BLOCK_EXPLOSION: case SUFFOCATION: 
+            case CUSTOM: case SUFFOCATION: 
         }
         NPC npc = inst.getNPC();
         

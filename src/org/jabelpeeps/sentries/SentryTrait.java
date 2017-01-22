@@ -507,7 +507,8 @@ public class SentryTrait extends Trait {
     public boolean isWarlock1() { return myAttack == AttackType.WARLOCK1; }
     public boolean isWitchDoctor() { return witchDoctors.contains( myAttack ); }
     public boolean isNotFlammable() { return notFlammable.contains( myAttack ); }
-    public boolean lightsFires() { return lightsFires.contains( myAttack ); }   
+    public boolean lightsFires() { return lightsFires.contains( myAttack ); } 
+    public boolean isGrenadier() { return myAttack == AttackType.GRENADIER; }
     boolean isMyChunkLoaded() { return Util.isLoaded( npc.getStoredLocation() ); }
     
     /** 

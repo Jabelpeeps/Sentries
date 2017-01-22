@@ -253,9 +253,10 @@ public abstract class Utils {
 
             if ( source instanceof Entity ) return (Entity) source;
         }  
-        else if ( damager instanceof TNTPrimed ) 
-            return ((TNTPrimed) damager).getSource();
-        
+        else if ( damager instanceof TNTPrimed ) {
+            Entity thrower = ThrownTNT.getThrower( (TNTPrimed) damager );
+            return thrower != null ? thrower : ((TNTPrimed) damager).getSource();
+        }
         return null;
     }
     

@@ -27,6 +27,7 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
@@ -40,18 +41,18 @@ import net.citizensnpcs.util.PlayerAnimation;
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
     // Columns:-  weapon held                 projectile        v     g    Effect?                   default damage
-    ARCHER(       Material.BOW,               ARROW,            10,   20,  Effect.BOW_FIRE,          1 ), 
-    GRENADIER(    Material.TNT,               PRIMED_TNT,       10,   12,  Effect.MOBSPAWNER_FLAMES, 4 ),
+    ARCHER(       Material.BOW,               ARROW,            40,   20,  Effect.BOW_FIRE,          6 ), 
+    GRENADIER(    Material.TNT,               PRIMED_TNT,       10,   16,  Effect.MOBSPAWNER_FLAMES, 4 ),
     BOMBARDIER(   Material.EGG,               EGG,              10,   12 ), 
     ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         10,   12 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   2,         Effect.BLAZE_SHOOT,       5 ), 
-    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   2,         Effect.BLAZE_SHOOT,       5 ),
-    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         2,         Effect.BLAZE_SHOOT,       6 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   10,         Effect.BLAZE_SHOOT,      5 ), 
+    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   10,         Effect.BLAZE_SHOOT,      5 ),
+    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         10,         Effect.BLAZE_SHOOT,      6 ), 
     STORMCALLER1( Material.PAPER,                                                                    5 ),
     STROMCALLER2( Material.BOOK,                                                                     10 ),
     STORMCALLER3( Material.BOOK_AND_QUILL,                                                           1 ), 
     WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      10,   12 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     2,         Effect.WITHER_SHOOT,      8 ),
+    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     10,         Effect.WITHER_SHOOT,     8 ),
     WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    10,   12 ),
     WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 10,   12 ),
     CREEPER(      Material.SULPHUR,                                                                  4 ),  
@@ -154,7 +155,8 @@ public enum AttackType implements AttackStrategy {
                                 inst.kill();
                                 inst.getNPC().despawn();
                             }
-                        }}, 0, 10 );
+                        }
+                    }, 0, 10 );
                 sch.scheduleSyncDelayedTask( Sentries.plugin, () -> sch.cancelTask( task ), 35 );
                 return true;
                 
@@ -176,10 +178,11 @@ public enum AttackType implements AttackStrategy {
                 Vector victor = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
                 if ( victor == null ) return true;
                 
-                ThrownTNT tnt = new ThrownTNT( world.spawn( myLoc, projectile.getEntityClass() ) );
+                TNTPrimed tnt = (TNTPrimed) world.spawn( myLoc, projectile.getEntityClass() );
                 
-                tnt.setShooter( myEntity );
                 tnt.setVelocity( victor );
+                tnt.setFuseTicks( 40 );
+                ThrownTNT.addTNT( tnt, myEntity );
                 break;
                 
             case ARCHER:       // arrows, ballistics   
