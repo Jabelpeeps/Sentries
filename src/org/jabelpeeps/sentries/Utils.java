@@ -41,7 +41,7 @@ public abstract class Utils {
      * @return the maximum range
      */
      public static double getRange( double v, double g, double d ) {
-         return ( v * cos45 / g ) * ( v * sin45 + Math.sqrt( sqr( v ) * sqr( sin45 ) + 2 * g * d ) );
+         return ( v * cos45 / g ) * ( v * sin45 + Math.sqrt( sqr( v * sin45 ) + 2 * g * d ) );
      }
 
      /** 
@@ -58,21 +58,17 @@ public abstract class Utils {
      public static Vector getFiringVector( Vector myLoc, double v, Vector targetLoc, double g ) {
     
          Vector diff = targetLoc.subtract( myLoc );
-         Vector diffXZ = new Vector( diff.getX(), 0.0, diff.getZ() );
-         double groundDist = diffXZ.length();
-         diffXZ.normalize();
-    
-         double speed2 = sqr( v );
-         double y = diff.getY();
-    
-         double root = sqr( speed2 ) - g * ( g * sqr( groundDist ) + 2 * y * speed2 );
+         double y = diff.getY() * -1;
+         double groundDistSqrd = diff.setY( 0 ).lengthSquared(); 
+         double v2 = sqr( v );
+         double root = sqr( v2 ) - g * ( g * groundDistSqrd + 2 * y * v2 );
     
          // No solution
          if ( root < 0 ) return null;
     
-         double lowAng = Math.atan2( speed2 - Math.sqrt( root ), g * groundDist );
+         double lowAng = Math.atan2( v2 - Math.sqrt( root ), g * Math.sqrt( groundDistSqrd ) );
     
-         return diffXZ.multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v * -1 );
+         return diff.normalize().multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
      }
 
      public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
@@ -244,7 +240,7 @@ public abstract class Utils {
      *         The shooter or source - if damager is a projectile or primed TNT.
      *         otherwise - null.
      */
-    static Entity getArcher( Entity damager ) {
+    static Entity getSource( Entity damager ) {
         
         if ( damager instanceof LivingEntity ) return damager;
         

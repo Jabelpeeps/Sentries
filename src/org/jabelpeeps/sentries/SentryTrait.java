@@ -705,20 +705,10 @@ public class SentryTrait extends Trait {
             weaponSpecialEffects = Sentries.weaponEffects.get( weapon );
         }
         NavigatorParameters params = npc.getNavigator().getDefaultParameters();
-        params.attackStrategy( myAttack );       
-        setRange( params );
+        params.attackStrategy( myAttack );      
         updateStrength();
     }
 
-    public void setRange() {
-        setRange( npc.getNavigator().getDefaultParameters() );
-    }
-    private void setRange( NavigatorParameters params ) {
-        if ( myAttack.isMelee() )
-            params.attackRange( 1.75 );
-        else
-            params.attackRange( Utils.sqr( range ) );
-    }
     /**
      *  Cancels the current navigation (including targetted attacks) and 
      *  clears the held reference for the target. <p>

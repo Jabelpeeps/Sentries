@@ -30,7 +30,6 @@ public class RangeCommand implements SentriesNumberCommand {
             if ( range > 64 ) range = 64;
             
             inst.range = range;
-            inst.setRange();
             Utils.sendMessage( sender, Col.GREEN, npcName, "'s attack range set to:- ", String.valueOf( range ) );
         }
     }

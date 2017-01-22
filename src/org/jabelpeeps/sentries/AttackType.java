@@ -42,19 +42,19 @@ import net.citizensnpcs.util.PlayerAnimation;
 public enum AttackType implements AttackStrategy {
     // Columns:-  weapon held                 projectile        v     g    Effect?                   default damage
     ARCHER(       Material.BOW,               ARROW,            40,   20,  Effect.BOW_FIRE,          6 ), 
-    GRENADIER(    Material.TNT,               PRIMED_TNT,       10,   16,  Effect.MOBSPAWNER_FLAMES, 4 ),
-    BOMBARDIER(   Material.EGG,               EGG,              10,   12 ), 
-    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         10,   12 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   10,        Effect.BLAZE_SHOOT,       5 ), 
-    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   10,        Effect.BLAZE_SHOOT,       5 ),
-    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         10,        Effect.BLAZE_SHOOT,       6 ), 
+    GRENADIER(    Material.TNT,               PRIMED_TNT,       20,   16,  Effect.MOBSPAWNER_FLAMES, 4 ),
+    BOMBARDIER(   Material.EGG,               EGG,              20,   12 ), 
+    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         20,   12 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,              Effect.BLAZE_SHOOT,       5 ), 
+    PYRO2(        Material.TORCH,             SMALL_FIREBALL,              Effect.BLAZE_SHOOT,       5 ),
+    PYRO3(        Material.BLAZE_ROD,         FIREBALL,                    Effect.BLAZE_SHOOT,       6 ), 
     STORMCALLER1( Material.PAPER,                                                                    5 ),
     STROMCALLER2( Material.BOOK,                                                                     10 ),
     STORMCALLER3( Material.BOOK_AND_QUILL,                                                           1 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      10,   12 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     10,        Effect.WITHER_SHOOT,      8 ),
-    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    10,   12 ),
-    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 10,   12 ),
+    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      20,   12 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,                Effect.WITHER_SHOOT,      8 ),
+    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    20,   12 ),
+    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 20,   12 ),
     CREEPER(      Material.SULPHUR,                                                                  4 ),  
     BRAWLER(      Material.AIR,                                                                      1 ); 
         
@@ -69,7 +69,7 @@ public enum AttackType implements AttackStrategy {
     static { updateMap(); }
 
     AttackType( Material w, EntityType p, double V, double G ) { this( w, p, V, G, null, 0 ); }
-    AttackType( Material w, EntityType p, double V, Effect e, int d ) { this( w, p, V, 0, e, d ); }
+    AttackType( Material w, EntityType p, Effect e, int d ) { this( w, p, 0, 0, e, d ); }
     AttackType( Material w , int d ) { this( w, null, 0, 0, null, d ); }
 
     /**
@@ -138,25 +138,28 @@ public enum AttackType implements AttackStrategy {
             case CREEPER: 
                 final BukkitScheduler sch = Bukkit.getScheduler();
                 final int task = sch.scheduleSyncRepeatingTask( Sentries.plugin, 
-                    new Runnable() { 
-                        int runcount = 0;
-                        boolean outOfRange = false;
-                        @Override public void run() {
-                            if ( outOfRange || myLoc.distanceSquared( targetLoc ) > 50 || victim.isDead() ) {
-                                outOfRange = true;
-                            }
-                            else if ( ++runcount <= 3 ) {
-                                world.playSound( myLoc, Sound.ENTITY_CREEPER_PRIMED, 5, 1 );
-                                myEntity.playEffect( EntityEffect.HURT );
-                            } 
-                            else {
-                                world.createExplosion( 
-                                        myLoc.getX(), myLoc.getY(), myLoc.getZ(), (float) inst.strength, false, false );
-                                inst.kill();
-                                inst.getNPC().despawn();
-                            }
-                        }
-                    }, 0, 10 );
+                        
+                    new Runnable() { int runcount = 0;
+                                     boolean outOfRange = false;
+                                     @Override public void run() {
+                                         if  (   outOfRange 
+                                                 || myLoc.distanceSquared( targetLoc ) > 50 
+                                                 || !inst.getNPC().isSpawned() ) {
+                                             outOfRange = true;
+                                         }
+                                         else if ( ++runcount <= 3 ) {
+                                             world.playSound( myLoc, Sound.ENTITY_CREEPER_PRIMED, 5, 1 );
+                                             myEntity.playEffect( EntityEffect.HURT );
+                                         } 
+                                         else {
+                                             world.createExplosion( myLoc.getX(), myLoc.getY(), myLoc.getZ(),
+                                                                      (float) inst.strength, false, false );
+                                             inst.kill();
+                                             inst.getNPC().despawn();
+                                         }
+                                    }
+                     }, 0, 10 );
+                
                 sch.scheduleSyncDelayedTask( Sentries.plugin, () -> sch.cancelTask( task ), 35 );
                 return true;
                 
@@ -181,9 +184,11 @@ public enum AttackType implements AttackStrategy {
                     Sentries.debugLog( "Firing Vector for " + myEntity.getName() + " is " + victor.toString() );
                 
                 TNTPrimed tnt = (TNTPrimed) world.spawn( myLoc, projectile.getEntityClass() );
-                
+                tnt.setGravity( true );
                 tnt.setVelocity( victor );
                 tnt.setFuseTicks( 40 );
+                tnt.setIsIncendiary( false );
+                tnt.setYield( (float) inst.strength );
                 ThrownTNT.addTNT( tnt, myEntity );
                 break;
                 
@@ -224,9 +229,9 @@ public enum AttackType implements AttackStrategy {
                 fireball.setDirection( targetLoc.toVector()
                                                 .subtract( myLoc.toVector() )
                                                 .normalize() ); 
-//              .multiply( v )      
                 if ( Sentries.debug ) 
-                    Sentries.debugLog( "Fireball launched on vector:- " + fireball.getDirection().toString() );
+                    Sentries.debugLog( "Fireball launched on vector:- " + fireball.getDirection() + 
+                            " with velocity of " + fireball.getVelocity() );
                 break;       
         } 
         if ( effect != null )
@@ -245,6 +250,9 @@ public enum AttackType implements AttackStrategy {
             }
         }
         return true;
+    }
+    public double getApproxRange() {
+        return isMelee() ? 1.3 : v * v / g;
     }
     
     private boolean cantHit( SentryTrait inst, Location myLoc, Location targetLoc ) {

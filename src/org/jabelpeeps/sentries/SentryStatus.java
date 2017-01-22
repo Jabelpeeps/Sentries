@@ -38,7 +38,7 @@ public enum SentryStatus {
 
                 if ( inst.killer != null ) {
                     
-                    Entity killer = Utils.getArcher( inst.killer );
+                    Entity killer = Utils.getSource( inst.killer );
 
                     if ( Sentries.debug )
                         Sentries.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
@@ -132,6 +132,7 @@ public enum SentryStatus {
                 }        
                 if ( navigateOrTP( inst, guardEntLoc.add( 1, 0, 1 ) ) ) {
                     navigator.setTarget( inst.guardeeEntity, false );
+                    navigator.getLocalParameters().distanceMargin( inst.followDistance );
                     return this;
                 }
             }
@@ -204,7 +205,7 @@ public enum SentryStatus {
                 if  (   navigator.getEntityTarget() == null 
                         || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
                     navigator.setTarget( inst.attackTarget, true );
-                    navigator.getLocalParameters().distanceMargin( Utils.sqr( inst.range - 1 ) );
+                    navigator.getLocalParameters().attackRange( Utils.sqr( inst.getMyAttack().getApproxRange() ) - 2 );                   
                 }
             } 
             // somehow we failed to attack the chosen target, so lets clear it.           
@@ -222,6 +223,7 @@ public enum SentryStatus {
     /** Checks whether the sentry is too far away from their spawn point, or the entity they are guarding. 
      *  @return a new status for the Sentry if one is needed, otherwise the current status. */
     protected SentryStatus checkPosition( SentryTrait inst ) {
+        if ( !inst.getNavigator().isNavigating() ) return SentryStatus.LOOKING;
         
         Location myLocation = inst.getNPC().getStoredLocation();
         

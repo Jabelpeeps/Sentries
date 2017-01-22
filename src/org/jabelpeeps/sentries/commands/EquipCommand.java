@@ -29,7 +29,7 @@ public class EquipCommand implements SentriesComplexCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
         
         if ( args.length <= 1 + nextArg ) {
-            Utils.sendMessage( sender, "", S.ERROR, "More arguments needed.");
+            Utils.sendMessage( sender, S.ERROR, "More arguments needed.");
             sender.sendMessage( getLongHelp() );
             return;
         }      
@@ -110,12 +110,12 @@ public class EquipCommand implements SentriesComplexCommand {
 
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip <ItemName>", Col.RESET, " to give the named item to the sentry." ) );
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry help listequips", Col.RESET, " for a list of accepted item names" ) );
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clearall", Col.RESET, " to clear all equipment slots." ) );
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry equip clear <slot>", Col.RESET, 
+            joiner.add( Utils.join( "do ", Col.GOLD, "/sentry equip <ItemName>", Col.RESET, " to give the named item to the sentry." ) );
+            joiner.add( Utils.join( "do ", Col.GOLD, "/sentry help listequips", Col.RESET, " for a list of accepted item names" ) );
+            joiner.add( Utils.join( "do ", Col.GOLD, "/sentry equip clearall", Col.RESET, " to clear all equipment slots." ) );
+            joiner.add( Utils.join( "do ", Col.GOLD, "/sentry equip clear <slot>", Col.RESET, 
                     " to clear the specified slot, where <slot> can be one of: hand, offhand, helmet, chestplate, leggings or boots." ) );
-            joiner.add( String.join( "", Col.RED, Col.BOLD, "NOTE: ", Col.RESET, "equiped armour is currently only cosmetic. Use ",
+            joiner.add( Utils.join( Col.RED, Col.BOLD, "NOTE: ", Col.RESET, "equiped armour is currently only cosmetic. Use ",
                                                 Col.GOLD, "/sentry armour ", Col.RESET, "to add protection from attacks." ) );
             equipCommandHelp = joiner.toString();
         }

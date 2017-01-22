@@ -13,12 +13,14 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -26,6 +28,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -65,7 +68,7 @@ public class SentryListener implements Listener {
             // test whether death caused by another entity & reallocate if so.
             if ( ev != null && ev instanceof EntityDamageByEntityEvent ) {
 
-                killer = Utils.getArcher( ((EntityDamageByEntityEvent) ev).getDamager() );
+                killer = Utils.getSource( ((EntityDamageByEntityEvent) ev).getDamager() );
             }
         }
         SentryTrait inst = Utils.getSentryTrait( killer );
@@ -75,27 +78,6 @@ public class SentryListener implements Listener {
             event.setDroppedExp( 0 );
         }
     }
-
-    // this is now handled by the NOT_SPAWNED status.
-//    @EventHandler( priority = EventPriority.HIGHEST, ignoreCancelled = true )
-//    public void despawn( NPCDespawnEvent event ) {
-//        // don't despawn active bodyguards on chunk unload
-//        
-//        if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + event.getNPC().getFullName() );
-//
-//        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
-//
-//        if (    inst != null 
-//                && event.getReason() == DespawnReason.CHUNK_UNLOAD ) {
-//
-//            if ( inst.guardeeEntity != null ) {
-//                event.setCancelled( true );
-//                inst.myStatus = SentryStatus.FOLLOWING;
-//            }
-//            else 
-//                inst.myStatus = SentryStatus.NOT_SPAWNED;
-//        }
-//    }
 
     @EventHandler( priority = EventPriority.HIGHEST )
     public void entteleportevent( EntityTeleportEvent event ) {
@@ -129,7 +111,7 @@ public class SentryListener implements Listener {
         // event to handle thrown enderpearls & put out fires from small fireballs
 
         Projectile projectile = event.getEntity();
-        SentryTrait inst = Utils.getSentryTrait( Utils.getArcher( projectile ) );
+        SentryTrait inst = Utils.getSentryTrait( Utils.getSource( projectile ) );
         if ( inst == null ) return;
 
         if ( inst.isWarlock1() || projectile instanceof EnderPearl ) {
@@ -233,7 +215,7 @@ public class SentryListener implements Listener {
         LivingEntity victim = (LivingEntity) entity;
         
         Entity damagerEnt = event.getDamager();        
-        LivingEntity shooter = (LivingEntity) Utils.getArcher( damagerEnt );
+        LivingEntity shooter = (LivingEntity) Utils.getSource( damagerEnt );
                
         SentryTrait instDamager = Utils.getSentryTrait( shooter );
 
@@ -320,7 +302,7 @@ public class SentryListener implements Listener {
         // Damage to a sentry cannot be handled by the server.
         event.setCancelled( true );
 
-        LivingEntity damager = (LivingEntity) Utils.getArcher( event.getDamager() );
+        LivingEntity damager = (LivingEntity) Utils.getSource( event.getDamager() );
         
         // don't take damage from the entity the sentry is guarding.
         if ( damager == null || damager == instVictim.guardeeEntity ) return;  
@@ -403,7 +385,7 @@ public class SentryListener implements Listener {
     public void processEventForTargets( EntityDamageByEntityEvent event ) {
         // event to check each sentry for events that need a response.
         
-        LivingEntity damager = (LivingEntity) Utils.getArcher( event.getDamager() );
+        LivingEntity damager = (LivingEntity) Utils.getSource( event.getDamager() );
         if ( damager == null ) return;
         
         Entity victim = event.getEntity();        
@@ -549,7 +531,7 @@ public class SentryListener implements Listener {
                         if (    ev != null
                                 && ev instanceof EntityDamageByEntityEvent ) {
     
-                            killer = Utils.getArcher( ((EntityDamageByEntityEvent) ev).getDamager() );
+                            killer = Utils.getSource( ((EntityDamageByEntityEvent) ev).getDamager() );
                         }
                     }
     
@@ -587,6 +569,7 @@ public class SentryListener implements Listener {
             inst.updateAttackType();
         }
     }
+    
     // Pretty sure this isn't needed with SntryStatus.checkposition() now working effectively.
 //    @EventHandler
 //    public void onFinishedNavigating( NavigationCompleteEvent event ) {
@@ -627,4 +610,11 @@ public class SentryListener implements Listener {
                 inst.cancelRunnable();
         }
     } 
+    
+    @EventHandler
+    public void onTNTExplode( EntityExplodeEvent event ) {
+        if  (   event.getEntityType() == EntityType.PRIMED_TNT 
+                && ThrownTNT.getThrower( (TNTPrimed) event.getEntity() ) != null ) 
+            event.blockList().clear();
+    }
 }
