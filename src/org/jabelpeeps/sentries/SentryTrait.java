@@ -720,7 +720,7 @@ public class SentryTrait extends Trait {
             Utils.sendMessage( sender, Col.YELLOW, npc.getName(), " now has no defined targets." );
     }
     boolean isBodyguardOnLeave( ) {
-        return ( guardeeName != null || guardeeID != null ) && guardeeEntity == null;
+        return guardeeName != null && !guardeeName.isEmpty() && guardeeEntity == null;
     }
     
     boolean setAttackTarget( LivingEntity theEntity ) {

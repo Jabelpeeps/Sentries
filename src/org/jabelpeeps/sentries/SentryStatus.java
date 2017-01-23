@@ -223,7 +223,6 @@ public enum SentryStatus {
     /** Checks whether the sentry is too far away from their spawn point, or the entity they are guarding. 
      *  @return a new status for the Sentry if one is needed, otherwise the current status. */
     protected SentryStatus checkPosition( SentryTrait inst ) {
-        if ( !inst.getNavigator().isNavigating() ) return SentryStatus.LOOKING;
         
         Location myLocation = inst.getNPC().getStoredLocation();
         
