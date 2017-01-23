@@ -204,8 +204,10 @@ public class FactionsBridge implements PluginTargetBridge {
     
     public static class FactionTarget extends AbstractFactionTarget {
 
-        FactionTarget( Faction f ) { super( 57, f ); }
-        
+        FactionTarget( Faction f ) { 
+            super( 57, f ); 
+            prettyString = "Members of faction:- " + f.getName();
+        }
         @Override
         public boolean includes( LivingEntity entity ) {            
             if ( !(entity instanceof Player) ) return false;
@@ -224,8 +226,10 @@ public class FactionsBridge implements PluginTargetBridge {
     
     public static class FactionRivalsTarget extends AbstractFactionTarget {
                
-        FactionRivalsTarget(  Faction f ) { super( 56, f ); }
-        
+        FactionRivalsTarget( Faction f ) { 
+            super( 56, f ); 
+            prettyString = "Rivals of faction:- " + f.getName();
+        }
         @Override
         public boolean includes( LivingEntity entity ) {          
             if ( !(entity instanceof Player) ) return false;
@@ -246,8 +250,10 @@ public class FactionsBridge implements PluginTargetBridge {
     
    public static class FactionAlliesTarget extends AbstractFactionTarget {
         
-        FactionAlliesTarget(  Faction f ) { super( 55, f ); }
-        
+        FactionAlliesTarget( Faction f ) { 
+            super( 55, f ); 
+            prettyString = "Allies of faction:- " + f.getName();
+        }
         @Override
         public boolean includes( LivingEntity entity ) {           
             if ( !(entity instanceof Player) ) return false;

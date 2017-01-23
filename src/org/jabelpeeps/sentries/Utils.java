@@ -25,7 +25,7 @@ import net.citizensnpcs.api.npc.NPC;
  * An abstract collection of useful static methods.
  */
 public abstract class Utils {
-    final static double angle = Math.toRadians( 45 ); 
+    final static double angle = Math.PI / 4 ; 
     final static double cos45 = Math.cos( angle );   
     final static double sin45 = Math.sin( angle );
     
@@ -58,7 +58,7 @@ public abstract class Utils {
      public static Vector getFiringVector( Vector myLoc, double v, Vector targetLoc, double g ) {
     
          Vector diff = targetLoc.subtract( myLoc );
-         double y = diff.getY() * -1;
+         double y = diff.getY();
          double groundDistSqrd = diff.setY( 0 ).lengthSquared(); 
          double v2 = sqr( v );
          double root = sqr( v2 ) - g * ( g * groundDistSqrd + 2 * y * v2 );
@@ -68,7 +68,9 @@ public abstract class Utils {
     
          double lowAng = Math.atan2( v2 - Math.sqrt( root ), g * Math.sqrt( groundDistSqrd ) );
     
-         return diff.normalize().multiply( Math.cos( lowAng ) ).multiply( v ).setY( Math.sin( lowAng ) * v );
+         return diff.normalize().multiply( Math.cos( lowAng ) )
+                                .multiply( v )
+                                .setY( Math.sin( lowAng ) * v );
      }
 
      public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
@@ -107,19 +109,12 @@ public abstract class Utils {
             String worldPerm = S.PERM_BODYGUARD + worldname;
             
             if ( player.hasPermission( S.PERM_BODYGUARD + "*" ) ) {
-                // all players have "*" perm by default.
-               
-                if (    player.isPermissionSet( worldPerm )
-                        && !player.hasPermission( worldPerm ) ) {
-                    // denied in this world.
-                    return false;
-                }
-                return true;
+                // all players have "*" perm by default.             
+                return !player.isPermissionSet( worldPerm ) || player.hasPermission( worldPerm );
+                // returns false if denied in this world.
             }
-            if ( player.hasPermission( worldPerm ) ) {
-                // no "*"" but specifically allowed this world.
-                return true;
-            }
+            return player.hasPermission( worldPerm );
+            // no "*"" but specifically allowed this world.
         }
         return false;
     }

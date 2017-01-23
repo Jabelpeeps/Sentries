@@ -184,6 +184,7 @@ public class VaultBridge implements PluginTargetBridge {
         GroupTarget( String grp ) { 
             super( 50 );
             group = grp;
+            prettyString = "Members of permission group:- " + grp;
         }
         @Override
         public boolean includes( LivingEntity entity ) { 

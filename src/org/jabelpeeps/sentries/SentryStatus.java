@@ -205,7 +205,7 @@ public enum SentryStatus {
                 if  (   navigator.getEntityTarget() == null 
                         || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
                     navigator.setTarget( inst.attackTarget, true );
-                    navigator.getLocalParameters().attackRange( Utils.sqr( inst.getMyAttack().getApproxRange() ) - 2 );                   
+                    navigator.getLocalParameters().attackRange( Utils.sqr( inst.getMyAttack().getApproxRange() ) );                   
                 }
             } 
             // somehow we failed to attack the chosen target, so lets clear it.           

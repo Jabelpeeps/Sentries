@@ -13,7 +13,7 @@ public class MobTypeTarget extends AbstractTargetType implements TargetType.Inte
         super( 15 );
         type = target;
         targetString = "MobType:" + type.toString();
-        prettyString = "All mobs of type:- " + type.toString().toLowerCase();
+        prettyString = "All " + type.toString().toLowerCase() + "s";
     }
     @Override
     public boolean includes( LivingEntity entity ) {

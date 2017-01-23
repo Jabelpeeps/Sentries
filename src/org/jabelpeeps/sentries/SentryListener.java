@@ -570,18 +570,6 @@ public class SentryListener implements Listener {
         }
     }
     
-    // Pretty sure this isn't needed with SntryStatus.checkposition() now working effectively.
-//    @EventHandler
-//    public void onFinishedNavigating( NavigationCompleteEvent event ) {
-//
-//        SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
-//        
-//        if ( inst == null ) return;
-//        
-//        if ( inst.myStatus == SentryStatus.RETURNING_TO_SPAWNPOINT )
-//            inst.myStatus = SentryStatus.LOOKING;
-//    }
-    
     @EventHandler( priority = EventPriority.MONITOR )
     public void onNPCSpawning( NPCSpawnEvent event ) {
         NPC npc = event.getNPC();

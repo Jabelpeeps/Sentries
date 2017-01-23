@@ -40,23 +40,23 @@ import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
-    // Columns:-  weapon held                 projectile        v     g    Effect?                   default damage
-    ARCHER(       Material.BOW,               ARROW,            40,   20,  Effect.BOW_FIRE,          6 ), 
-    GRENADIER(    Material.TNT,               PRIMED_TNT,       20,   16,  Effect.MOBSPAWNER_FLAMES, 4 ),
-    BOMBARDIER(   Material.EGG,               EGG,              20,   12 ), 
-    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         20,   12 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,              Effect.BLAZE_SHOOT,       5 ), 
-    PYRO2(        Material.TORCH,             SMALL_FIREBALL,              Effect.BLAZE_SHOOT,       5 ),
-    PYRO3(        Material.BLAZE_ROD,         FIREBALL,                    Effect.BLAZE_SHOOT,       6 ), 
-    STORMCALLER1( Material.PAPER,                                                                    5 ),
-    STROMCALLER2( Material.BOOK,                                                                     10 ),
-    STORMCALLER3( Material.BOOK_AND_QUILL,                                                           1 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      20,   12 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,                Effect.WITHER_SHOOT,      8 ),
-    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    20,   12 ),
-    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 20,   12 ),
-    CREEPER(      Material.SULPHUR,                                                                  4 ),  
-    BRAWLER(      Material.AIR,                                                                      1 ); 
+    // Columns:-  weapon held                 projectile        v   g     Effect?                   default damage
+    ARCHER(       Material.BOW,               ARROW,            2, 0.05, Effect.BOW_FIRE,          6 ), 
+    GRENADIER(    Material.TNT,               PRIMED_TNT,       2, 0.04, Effect.MOBSPAWNER_FLAMES, 4 ),
+    BOMBARDIER(   Material.EGG,               EGG,              2, 0.03 ), 
+    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         2, 0.03 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,            Effect.BLAZE_SHOOT,       5 ), 
+    PYRO2(        Material.TORCH,             SMALL_FIREBALL,            Effect.BLAZE_SHOOT,       5 ),
+    PYRO3(        Material.BLAZE_ROD,         FIREBALL,                  Effect.BLAZE_SHOOT,       6 ), 
+    STORMCALLER1( Material.PAPER,                                                                  5 ),
+    STROMCALLER2( Material.BOOK,                                                                   10 ),
+    STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      2, 0.03 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,              Effect.WITHER_SHOOT,      8 ),
+    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    2, 0.03 ),
+    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 2, 0.03 ),
+    CREEPER(      Material.SULPHUR,                                                                4 ),  
+    BRAWLER(      Material.AIR,                                                                    1 ); 
         
     @Getter private Material weapon;
     private final EntityType projectile;
@@ -181,7 +181,7 @@ public enum AttackType implements AttackStrategy {
                 Vector victor = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
                 if ( victor == null ) return true;
                 if ( Sentries.debug ) 
-                    Sentries.debugLog( "Firing Vector for " + myEntity.getName() + " is " + victor.toString() );
+                    Sentries.debugLog( "TNT Vector for " + myEntity.getName() + " is " + victor.toString() );
                 
                 TNTPrimed tnt = (TNTPrimed) world.spawn( myLoc, projectile.getEntityClass() );
                 tnt.setGravity( true );

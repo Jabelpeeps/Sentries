@@ -154,7 +154,8 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
         
         ScoreboardTeamsTarget( Team target ) { 
             super( 40 );
-            team = target; 
+            team = target;
+            prettyString = "The Scoreboard Team:- " + team.getDisplayName();
         }    
         @Override
         public boolean includes( LivingEntity entity ) {
