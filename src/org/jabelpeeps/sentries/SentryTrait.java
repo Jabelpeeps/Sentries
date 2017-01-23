@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -168,9 +169,11 @@ public class SentryTrait extends Trait {
         else
             validTargets.addAll( Sentries.defaultTargets );
         
-        validTargets.parallelStream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
+        if ( Sentries.debug ) Sentries.debugLog( "Loading Targets:- " + validTargets );
+        
+        validTargets.stream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
         // the second callCommand() is only used if the first is unsuccessful.
-                                     .forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
+                             .forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
         
         Set<String> ignoreTargets = new HashSet<>();
         
@@ -179,15 +182,15 @@ public class SentryTrait extends Trait {
         else
             ignoreTargets.addAll( Sentries.defaultIgnores );
         
-        ignoreTargets.parallelStream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
-                                      .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
+        ignoreTargets.stream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
+                              .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
 
         Set<String> eventTargets = new HashSet<>();
         
         if ( key.getRaw( S.EVENTS ) != null )
             eventTargets.addAll( (Set<String>) key.getRaw( S.EVENTS ) );
         
-        eventTargets.parallelStream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
+        eventTargets.stream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
     }
 
     @Override
@@ -286,18 +289,10 @@ public class SentryTrait extends Trait {
     @Override
     public void save( DataKey key ) {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
-
-        Set<String> ignoreTargets = new HashSet<>();
-        Set<String> validTargets = new HashSet<>();
-        Set<String> eventTargets = new HashSet<>();
         
-        targets.forEach( s -> validTargets.add( s.getTargetString() ) );
-        ignores.forEach( s -> ignoreTargets.add( s.getTargetString() ) ); 
-        events.forEach( e -> eventTargets.add( e.getTargetString() ) );
-        
-        key.setRaw( S.TARGETS, validTargets );
-        key.setRaw( S.IGNORES, ignoreTargets );
-        key.setRaw( S.EVENTS, eventTargets );
+        key.setRaw( S.TARGETS, targets.stream().map( t -> t.getTargetString() ).collect( Collectors.toSet() ) );
+        key.setRaw( S.IGNORES, ignores.stream().map( i -> i.getTargetString() ).collect( Collectors.toSet() ) );
+        key.setRaw( S.EVENTS, events.stream().map( e -> e.getTargetString() ).collect( Collectors.toSet() ) );
     }
 
     @Override
