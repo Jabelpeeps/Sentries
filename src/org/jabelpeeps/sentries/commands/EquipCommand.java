@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries.commands;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 
@@ -7,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.jabelpeeps.sentries.AttackType;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
@@ -24,6 +27,17 @@ public class EquipCommand implements SentriesComplexCommand {
     private String equipCommandHelp; 
     @Getter private String shortHelp = "adjust the equipment a sentry is using";
     @Getter private String perm = S.PERM_EQUIP;
+    
+    public static Map<String, Integer> equipmentSlots = new HashMap<>();
+    
+    static {
+        equipmentSlots.put( "hand", 0 );
+        equipmentSlots.put( "helmet", 1 );
+        equipmentSlots.put( "chestplate", 2 );
+        equipmentSlots.put( "leggings", 3 );
+        equipmentSlots.put( "boots", 4 );
+        equipmentSlots.put( "offhand", 5 );
+    }
     
     @Override
     public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
@@ -54,7 +68,7 @@ public class EquipCommand implements SentriesComplexCommand {
 
             String slotName = args[nextArg + 2];
             
-            for ( Entry<String, Integer> each : Sentries.equipmentSlots.entrySet() ) {
+            for ( Entry<String, Integer> each : equipmentSlots.entrySet() ) {
                 
                 if ( each.getKey().equalsIgnoreCase( slotName ) ) {
                     
@@ -74,8 +88,14 @@ public class EquipCommand implements SentriesComplexCommand {
             return;
         }
         else {
-            Material mat = Material.matchMaterial( Utils.joinArgs( nextArg + 1, args ) );
-
+            Material mat;
+            try {
+                AttackType attack = AttackType.valueOf( args[nextArg + 1] );
+                mat = attack.getWeapon();
+            } catch ( IllegalArgumentException e ) {
+                mat = Material.matchMaterial( Utils.joinArgs( nextArg + 1, args ) );
+            }
+            
             if ( mat == null ) {
                 Utils.sendMessage( sender, S.ERROR, "Item name not recognised.  ", Col.RESET, "do ", Col.GOLD, 
                                 "/sentry help listequips ", Col.RESET, "for a list of accepted item names" );

@@ -40,23 +40,23 @@ import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
 public enum AttackType implements AttackStrategy {
-    // Columns:-  weapon held                 projectile        v   g     Effect?                   default damage
+    // Columns:-  weapon held                 projectile        v  g     Effect?              damage  range
     ARCHER(       Material.BOW,               ARROW,            2, 0.05, Effect.BOW_FIRE,          6 ), 
-    GRENADIER(    Material.TNT,               PRIMED_TNT,       2, 0.04, Effect.MOBSPAWNER_FLAMES, 4 ),
-    BOMBARDIER(   Material.EGG,               EGG,              2, 0.03 ), 
-    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         2, 0.03 ), 
-    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,            Effect.BLAZE_SHOOT,       5 ), 
-    PYRO2(        Material.TORCH,             SMALL_FIREBALL,            Effect.BLAZE_SHOOT,       5 ),
-    PYRO3(        Material.BLAZE_ROD,         FIREBALL,                  Effect.BLAZE_SHOOT,       6 ), 
-    STORMCALLER1( Material.PAPER,                                                                  5 ),
-    STROMCALLER2( Material.BOOK,                                                                   10 ),
-    STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      2, 0.03 ), 
-    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,              Effect.WITHER_SHOOT,      8 ),
-    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    2, 0.03 ),
-    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 2, 0.03 ),
-    CREEPER(      Material.SULPHUR,                                                                4 ),  
-    BRAWLER(      Material.AIR,                                                                    1 ); 
+    GRENADIER(    Material.TNT,               PRIMED_TNT,       1, 0.04, Effect.MOBSPAWNER_FLAMES, 4 ),
+    BOMBARDIER(   Material.EGG,               EGG,              1, 0.03 ), 
+    ICEMAGI(      Material.SNOW_BALL,         SNOWBALL,         1, 0.03 ), 
+    PYRO1(        Material.REDSTONE_TORCH_ON, SMALL_FIREBALL,   2,       Effect.BLAZE_SHOOT,       5 ), 
+    PYRO2(        Material.TORCH,             SMALL_FIREBALL,   2,       Effect.BLAZE_SHOOT,       5 ),
+    PYRO3(        Material.BLAZE_ROD,         FIREBALL,         2,       Effect.BLAZE_SHOOT,       6 ), 
+    STORMCALLER1( Material.PAPER,                                                                  5, 20 ),
+    STROMCALLER2( Material.BOOK,                                                                  10, 20 ),
+    STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1, 20 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      1, 0.03 ), 
+    WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     2,       Effect.WITHER_SHOOT,      8 ),
+    WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    1, 0.03 ),
+    WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 1, 0.03 ),
+    CREEPER(      Material.SULPHUR,                                                                4, 1.3 ),  
+    BRAWLER(      Material.AIR,                                                                    1, 1.3 ); 
         
     @Getter private Material weapon;
     private final EntityType projectile;
@@ -64,13 +64,19 @@ public enum AttackType implements AttackStrategy {
     private final double g;
     private final Effect effect;
     @Getter private int damage;
+    @Getter private final double approxRange;
     
     static Map<Material, AttackType> reverseSearch = new EnumMap<>( Material.class );
     static { updateMap(); }
 
-    AttackType( Material w, EntityType p, double V, double G ) { this( w, p, V, G, null, 0 ); }
-    AttackType( Material w, EntityType p, Effect e, int d ) { this( w, p, 0, 0, e, d ); }
-    AttackType( Material w , int d ) { this( w, null, 0, 0, null, d ); }
+    /** Constructor for all values - including a calculated approximate range */
+    AttackType( Material w, EntityType p, double V, double G, Effect e, int d ) { this( w, p, V, G, e, d, V * V / G ); }
+    /** Constructor used by attacks which by default do no damage */
+    AttackType( Material w, EntityType p, double V, double G ) { this( w, p, V, G, null, 0, V * V / G ); }
+    /** Constructor used by fireballs - which aren't affected by gravity, and so can't have a calculated range */
+    AttackType( Material w, EntityType p, double V, Effect e, int d ) { this( w, p, V, 0, e, d, 32 ); }
+    /** Constructor for attacks which need a range to be specified */
+    AttackType( Material w , int d, double r ) { this( w, null, 0, 0, null, d, r ); }
 
     /**
      * Quickly returns the appropriate AttackType by searching an EnumMap that
@@ -129,7 +135,7 @@ public enum AttackType implements AttackStrategy {
  
         Location myLoc = myEntity.getEyeLocation();
         World world = myEntity.getWorld();
-        Location targetLoc = victim.getEyeLocation();   
+        Location targetLoc = this == GRENADIER ? victim.getLocation() : victim.getEyeLocation();   
         NMS.look( myEntity, victim );
         
         switch ( this ) {
@@ -228,10 +234,10 @@ public enum AttackType implements AttackStrategy {
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector()
                                                 .subtract( myLoc.toVector() )
-                                                .normalize() ); 
+                                                .normalize().multiply( v ) ); 
                 if ( Sentries.debug ) 
                     Sentries.debugLog( "Fireball launched on vector:- " + fireball.getDirection() + 
-                            " with velocity of " + fireball.getVelocity() );
+                                        " with velocity of " + fireball.getVelocity() );
                 break;       
         } 
         if ( effect != null )
@@ -251,16 +257,14 @@ public enum AttackType implements AttackStrategy {
         }
         return true;
     }
-    public double getApproxRange() {
-        return isMelee() ? 1.3 : v * v / g;
-    }
     
     private boolean cantHit( SentryTrait inst, Location myLoc, Location targetLoc ) {
         
-        double range = Utils.getRange( v, g, myLoc.getY() - targetLoc.getY() );
+//        double range = Utils.getRange( v, g, myLoc.getY() - targetLoc.getY() );
         if ( Sentries.debug ) 
-            Sentries.debugLog( "Projectile Max range for " + inst.getNPC().getName() + " is " + Utils.formatDbl( range ) );
-        if ( Utils.sqr( Math.min( range, inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
+            Sentries.debugLog( this.toString() + ": Max range for " + inst.getNPC().getName() + 
+                                    " is " + Utils.formatDbl( approxRange ) );
+        if ( Utils.sqr( Math.min( approxRange, inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
             // can't hit target
             inst.cancelAttack();
             return true;
