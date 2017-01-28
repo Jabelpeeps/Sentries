@@ -1,5 +1,6 @@
 package org.jabelpeeps.sentries;
 
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -20,7 +21,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -31,6 +31,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
@@ -599,10 +600,18 @@ public class SentryListener implements Listener {
         }
     } 
     
+    static EnumSet<EntityType> exploders = EnumSet.of( EntityType.PRIMED_TNT, EntityType.WITHER_SKULL );
     @EventHandler
     public void onTNTExplode( EntityExplodeEvent event ) {
-        if  (   event.getEntityType() == EntityType.PRIMED_TNT 
-                && ThrownTNT.getThrower( (TNTPrimed) event.getEntity() ) != null ) 
+        if  (   exploders.contains( event.getEntityType() )
+                && ThrownEntities.getThrower( event.getEntity() ) != null ) 
             event.blockList().clear();
+    }
+    
+    @EventHandler
+    public void onEggBreaks( PlayerEggThrowEvent event ) {
+        if ( ThrownEntities.getThrower( event.getEgg() ) != null ) {
+            event.setHatching( false );
+        }
     }
 }

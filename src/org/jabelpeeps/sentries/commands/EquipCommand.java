@@ -90,7 +90,7 @@ public class EquipCommand implements SentriesComplexCommand {
         else {
             Material mat;
             try {
-                AttackType attack = AttackType.valueOf( args[nextArg + 1] );
+                AttackType attack = AttackType.valueOf( args[nextArg + 1].toUpperCase() );
                 mat = attack.getWeapon();
             } catch ( IllegalArgumentException e ) {
                 mat = Material.matchMaterial( Utils.joinArgs( nextArg + 1, args ) );

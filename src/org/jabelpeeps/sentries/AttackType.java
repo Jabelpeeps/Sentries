@@ -22,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Egg;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
@@ -29,6 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
@@ -184,7 +186,7 @@ public enum AttackType implements AttackStrategy {
 
                 if ( cantHit( inst, myLoc, targetLoc ) ) return true;
                 
-                Vector victor = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
+                Vector victor = getFiringVector( myLoc.toVector(), targetLoc.toVector() );
                 if ( victor == null ) return true;
                 if ( Sentries.debug ) 
                     Sentries.debugLog( "TNT Vector for " + myEntity.getName() + " is " + victor.toString() );
@@ -195,7 +197,7 @@ public enum AttackType implements AttackStrategy {
                 tnt.setFuseTicks( 40 );
                 tnt.setIsIncendiary( false );
                 tnt.setYield( (float) inst.strength );
-                ThrownTNT.addTNT( tnt, myEntity );
+                ThrownEntities.addTNT( tnt, myEntity );
                 break;
                 
             case ARCHER:       // arrows, ballistics   
@@ -207,17 +209,19 @@ public enum AttackType implements AttackStrategy {
                 
                 if ( cantHit( inst, myLoc, targetLoc ) ) return true;
                 
-                Vector vector = Utils.getFiringVector( myLoc.toVector(), v, targetLoc.toVector(), g );
+                Vector vector = getFiringVector( myLoc.toVector(), targetLoc.toVector() );
                 if ( vector == null ) return true;
                 if ( Sentries.debug ) 
                     Sentries.debugLog( "Firing Vector for " + myEntity.getName() + " is " + vector.toString() );
                 
                 Projectile proj = (Projectile) world.spawn( myLoc, projectile.getEntityClass() );
-                
+              
                 if  (   inst.isWitchDoctor()  
                         && inst.potionItem != null ) {
                     ((ThrownPotion) proj).setItem( inst.potionItem.clone() );
                 } 
+                if ( proj instanceof Egg ) ThrownEntities.addEgg( (Egg) proj, myEntity );
+                
                 proj.setShooter( myEntity );
                 proj.setVelocity( vector );
                 
@@ -235,6 +239,9 @@ public enum AttackType implements AttackStrategy {
                 fireball.setDirection( targetLoc.toVector()
                                                 .subtract( myLoc.toVector() )
                                                 .normalize().multiply( v ) ); 
+                
+                if ( fireball instanceof WitherSkull ) ThrownEntities.addFireball( fireball, myEntity );
+                
                 if ( Sentries.debug ) 
                     Sentries.debugLog( "Fireball launched on vector:- " + fireball.getDirection() + 
                                         " with velocity of " + fireball.getVelocity() );
@@ -260,7 +267,6 @@ public enum AttackType implements AttackStrategy {
     
     private boolean cantHit( SentryTrait inst, Location myLoc, Location targetLoc ) {
         
-//        double range = Utils.getRange( v, g, myLoc.getY() - targetLoc.getY() );
         if ( Sentries.debug ) 
             Sentries.debugLog( this.toString() + ": Max range for " + inst.getNPC().getName() + 
                                     " is " + Utils.formatDbl( approxRange ) );
@@ -282,4 +288,32 @@ public enum AttackType implements AttackStrategy {
                 return false;           
         }
     }
+    /** 
+      * Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
+     *
+     * @param myLoc - point projectile will fire from
+     * @param v - scalar speed of projectile
+     * @param targetLoc - point projectile is trying to hit
+     * @param g - force of gravity, positive down
+    
+     *
+     * @return the low-angle Vector to hit the target.
+     */
+     private Vector getFiringVector( Vector myLoc, Vector targetLoc ) {
+    
+         Vector diff = targetLoc.subtract( myLoc );
+         double y = diff.getY() * -1;
+         double groundDistSqrd = diff.setY( 0 ).lengthSquared(); 
+         double v2 = Utils.sqr( v );
+         double root = Utils.sqr( v2 ) - g * ( g * groundDistSqrd + 2 * y * v2 );
+    
+         // No solution
+         if ( root < 0 ) return null;
+    
+         double lowAng = Math.atan2( v2 - Math.sqrt( root ), g * Math.sqrt( groundDistSqrd ) );
+    
+         return diff.normalize().multiply( Math.cos( lowAng ) )
+                                .multiply( v )
+                                .setY( Math.sin( lowAng ) * v * -1 );
+     }
 }

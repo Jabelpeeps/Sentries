@@ -14,7 +14,6 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.util.Vector;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.commands.SentriesCommand;
 
@@ -25,58 +24,13 @@ import net.citizensnpcs.api.npc.NPC;
  * An abstract collection of useful static methods.
  */
 public abstract class Utils {
-    final static double angle = Math.PI / 4 ; 
-    final static double cos45 = Math.cos( angle );   
-    final static double sin45 = Math.sin( angle );
     
     public static double sqr( double d ) { return d * d; }
     
-    /** 
-     * Calculate the maximum range that a ballistic projectile can be fired on given speed and gravity.
-     *
-     * @param v: projectile velocity
-     * @param g: force of gravity, positive is down
-     * @param d: distance above flat terrain
-     *
-     * @return the maximum range
-     */
-     public static double getRange( double v, double g, double d ) {
-         return ( v * cos45 / g ) * ( v * sin45 + Math.sqrt( sqr( v * sin45 ) + 2 * g * d ) );
-     }
-
-     /** 
-      * Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
-     *
-     * @param myLoc - point projectile will fire from
-     * @param v - scalar speed of projectile
-     * @param targetLoc - point projectile is trying to hit
-     * @param g - force of gravity, positive down
-    
-     *
-     * @return the low-angle Vector to hit the target.
-     */
-     public static Vector getFiringVector( Vector myLoc, double v, Vector targetLoc, double g ) {
-    
-         Vector diff = targetLoc.subtract( myLoc );
-         double y = diff.getY();
-         double groundDistSqrd = diff.setY( 0 ).lengthSquared(); 
-         double v2 = sqr( v );
-         double root = sqr( v2 ) - g * ( g * groundDistSqrd + 2 * y * v2 );
-    
-         // No solution
-         if ( root < 0 ) return null;
-    
-         double lowAng = Math.atan2( v2 - Math.sqrt( root ), g * Math.sqrt( groundDistSqrd ) );
-    
-         return diff.normalize().multiply( Math.cos( lowAng ) )
-                                .multiply( v )
-                                .setY( Math.sin( lowAng ) * v );
-     }
-
-     public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
-         to.attackRange( from.attackRange() );
-         to.attackDelayTicks( from.attackDelayTicks() );
-     }
+    public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
+        to.attackRange( from.attackRange() );
+        to.attackDelayTicks( from.attackDelayTicks() );
+    }
      
     public static void removeMount( int npcid ) {
 
@@ -245,7 +199,7 @@ public abstract class Utils {
             if ( source instanceof Entity ) return (Entity) source;
         }  
         else if ( damager instanceof TNTPrimed ) {
-            Entity thrower = ThrownTNT.getThrower( (TNTPrimed) damager );
+            Entity thrower = ThrownEntities.getThrower( damager );
             return thrower != null ? thrower : ((TNTPrimed) damager).getSource();
         }
         return null;

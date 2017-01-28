@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
@@ -129,7 +130,8 @@ public enum SentryStatus {
                         inst.reassesTime = System.currentTimeMillis() + 3000;
                     }
                     return this;
-                }        
+                }
+                if ( myEntity.getType() == EntityType.ENDER_DRAGON ) guardEntLoc.setY( guardEntLoc.getY() + 10 );
                 if ( navigateOrTP( inst, guardEntLoc.add( 1, 0, 1 ) ) ) {
                     navigator.setTarget( inst.guardeeEntity, false );
                     navigator.getLocalParameters().distanceMargin( inst.followDistance );
@@ -205,7 +207,10 @@ public enum SentryStatus {
                 if  (   navigator.getEntityTarget() == null 
                         || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
                     navigator.setTarget( inst.attackTarget, true );
-                    navigator.getLocalParameters().attackRange( Utils.sqr( inst.getMyAttack().getApproxRange() ) );                   
+                    
+                    double rangeSqrd = Utils.sqr( inst.getMyAttack().getApproxRange() );
+                    navigator.getLocalParameters().attackRange( rangeSqrd - 1 );  
+                    navigator.getLocalParameters().distanceMargin( rangeSqrd - 1 );                 
                 }
             } 
             // somehow we failed to attack the chosen target, so lets clear it.           
