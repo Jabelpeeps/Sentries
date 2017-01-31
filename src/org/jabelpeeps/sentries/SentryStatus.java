@@ -131,10 +131,16 @@ public enum SentryStatus {
                     }
                     return this;
                 }
-                if ( myEntity.getType() == EntityType.ENDER_DRAGON ) guardEntLoc.setY( guardEntLoc.getY() + 10 );
+                
+                boolean isFlying = isFlying( myEntity.getType() );
+                if ( isFlying ) guardEntLoc.add( 0, 5, 0 );
+                
                 if ( navigateOrTP( inst, guardEntLoc.add( 1, 0, 1 ) ) ) {
-                    navigator.setTarget( inst.guardeeEntity, false );
-                    navigator.getLocalParameters().distanceMargin( inst.followDistance );
+                    if ( isFlying ) navigator.setTarget( guardEntLoc );
+                    else {
+                        navigator.setTarget( inst.guardeeEntity, false );
+                        navigator.getLocalParameters().distanceMargin( inst.followDistance );
+                    }
                     return this;
                 }
             }
@@ -282,7 +288,8 @@ public enum SentryStatus {
         
         return true;
     }
-    
+    private static EnumSet<EntityType> flying = EnumSet.of( EntityType.ENDER_DRAGON, EntityType.BLAZE );
+    boolean isFlying( EntityType type ) { return flying.contains( type ); }
     private static EnumSet<SentryStatus> deadOrDieing = EnumSet.of( DEAD, DIEING );
     boolean isDeadOrDieing() { return deadOrDieing.contains( this ); }
 }
