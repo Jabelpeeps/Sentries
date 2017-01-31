@@ -10,6 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import net.citizensnpcs.api.ai.Navigator;
+import net.citizensnpcs.api.ai.NavigatorParameters;
 //import net.citizensnpcs.api.ai.GoalController;
 //import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.npc.NPC;
@@ -214,9 +215,12 @@ public enum SentryStatus {
                         || navigator.getEntityTarget().getTarget() != inst.attackTarget ) {
                     navigator.setTarget( inst.attackTarget, true );
                     
+                    NavigatorParameters params = navigator.getLocalParameters();
+                    params.attackStrategy( inst.getMyAttack() );
+
                     double rangeSqrd = Utils.sqr( inst.getMyAttack().getApproxRange() );
-                    navigator.getLocalParameters().attackRange( rangeSqrd - 1 );  
-                    navigator.getLocalParameters().distanceMargin( rangeSqrd - 1 );                 
+                    params.attackRange( rangeSqrd - 1 );  
+                    params.distanceMargin( rangeSqrd - 1 );
                 }
             } 
             // somehow we failed to attack the chosen target, so lets clear it.           
@@ -288,7 +292,7 @@ public enum SentryStatus {
         
         return true;
     }
-    private static EnumSet<EntityType> flying = EnumSet.of( EntityType.ENDER_DRAGON, EntityType.BLAZE );
+    private static EnumSet<EntityType> flying = EnumSet.of( EntityType.ENDER_DRAGON, EntityType.BLAZE, EntityType.GHAST );
     boolean isFlying( EntityType type ) { return flying.contains( type ); }
     private static EnumSet<SentryStatus> deadOrDieing = EnumSet.of( DEAD, DIEING );
     boolean isDeadOrDieing() { return deadOrDieing.contains( this ); }

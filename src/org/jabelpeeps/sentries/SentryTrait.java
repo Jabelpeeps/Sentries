@@ -699,8 +699,8 @@ public class SentryTrait extends Trait {
             potionItem = null;
             weaponSpecialEffects = Sentries.weaponEffects.get( weapon );
         }
-        NavigatorParameters params = npc.getNavigator().getDefaultParameters();
-        params.attackStrategy( myAttack );      
+//        NavigatorParameters params = npc.getNavigator().getDefaultParameters();
+//        params.attackStrategy( myAttack );      
         updateStrength();
     }
 
