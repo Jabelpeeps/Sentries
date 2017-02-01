@@ -47,7 +47,7 @@ public class InfoCommand implements SentriesComplexCommand {
                 Col.GREEN, "  Kills Drop Items: ", Col.WHITE, String.valueOf( inst.killsDrop ), 
                 Col.GREEN, "  Respawn Delay: ", Col.WHITE, String.valueOf( inst.respawnDelay ), " secs" ) );
         
-        joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString() ) );
+        joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString().toLowerCase() ) );
 
         if ( inst.attackTarget == null )
             joiner.add( Utils.join( Col.BLUE, "Currently Targetting: ", Col.WHITE, "nothing" ) );

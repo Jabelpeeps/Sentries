@@ -662,7 +662,7 @@ public class SentryTrait extends Trait {
 
         Material weapon = Material.AIR;
         ItemStack heldItem = npc.getTrait( Equipment.class ).get( EquipmentSlot.HAND );
-        myAttack = null;
+        myAttack = AttackType.BRAWLER;
         
         if ( heldItem != null ) {
             weapon = heldItem.getType();

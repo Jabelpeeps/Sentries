@@ -30,12 +30,13 @@ public class DebugInfoCommand implements SentriesComplexCommand {
         joiner.add( Utils.join( Col.GOLD, "------- Debug Info for ", npcName, " (npcid - ",
                                     String.valueOf( inst.getNPC().getId() ), ") ", "------" ) );
                
-        joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString() ) );
+        joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString().toLowerCase() ) );
         joiner.add( Utils.join( Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
                                  inst.hasMount() ? ( " (mountID = " + inst.mountID + ")" ) : "" ) );
         AttackType attack = inst.getMyAttack();
         if ( attack != null )
             joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, attack.name() ) );
+        else joiner.add( S.ERROR + "getMyAttack() returned null!" );
         
         Location stored = npc.getStoredLocation();
         joiner.add( Utils.join( Col.BLUE, "StoredLocation: ", Col.WHITE, Utils.prettifyLocation( stored ) ) );
