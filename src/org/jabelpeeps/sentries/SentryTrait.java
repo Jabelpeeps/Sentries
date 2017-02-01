@@ -37,7 +37,6 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.targets.TargetType;
 
 import lombok.Getter;
-import net.aufdemrand.denizen.npc.traits.HealthTrait;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
@@ -77,8 +76,7 @@ public class SentryTrait extends Trait {
     @Persist( S.CON_WEIGHT ) public double weight = Sentries.defDoubles.get( S.CON_WEIGHT );
     @Persist( S.CON_HEALTH ) public double maxHealth = Sentries.defDoubles.get( S.CON_HEALTH );
     
-    @Persist( S.CON_USE_WEAPON_STRENGTH ) 
-        public boolean strengthFromWeapon = Sentries.defBooleans.get( S.CON_USE_WEAPON_STRENGTH );
+    @Persist( S.CON_WEAPON4STRGTH ) public boolean strengthFromWeapon = Sentries.defBooleans.get( S.CON_WEAPON4STRGTH );
     @Persist( S.CON_KILLS_DROP ) public boolean killsDrop = Sentries.defBooleans.get( S.CON_KILLS_DROP );
     @Persist( S.CON_DROP_INV ) public boolean dropInventory = Sentries.defBooleans.get( S.CON_DROP_INV );
     @Persist( S.CON_MOBS_ATTACK ) public boolean targetable = Sentries.defBooleans.get( S.CON_MOBS_ATTACK );
@@ -117,9 +115,9 @@ public class SentryTrait extends Trait {
     @Getter private AttackType myAttack;
     private Integer tickMe;
 
-    final static AttackStrategy mountedAttack = ( attacker, bukkitTarget ) -> {
+    final static AttackStrategy mountedAttack = ( attacker, target ) -> {
 
-        if ( attacker == bukkitTarget ) return true;
+        if ( attacker == target ) return true;
 
         Entity passenger = attacker.getPassenger();
 
@@ -128,7 +126,7 @@ public class SentryTrait extends Trait {
                                     .getNavigator()
                                     .getLocalParameters()
                                     .attackStrategy()
-                                    .handle( (LivingEntity) passenger, bukkitTarget );
+                                    .handle( (LivingEntity) passenger, target );
         }
         return false;
     };
@@ -208,10 +206,10 @@ public class SentryTrait extends Trait {
         if ( respawnDelay < -1 ) respawnDelay = -1;
         if ( spawnLocation == null ) onCopy();
 
-        // Allow Denizen to handle the sentry's health if it is active.
-        if (    DenizenHook.sentryHealthByDenizen 
-                && npc.hasTrait( HealthTrait.class ) )
-            npc.removeTrait( HealthTrait.class );
+//        // Allow Denizen to handle the sentry's health if it is active.
+//        if (    DenizenHook.sentryHealthByDenizen 
+//                && npc.hasTrait( HealthTrait.class ) )
+//            npc.removeTrait( HealthTrait.class );
 
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
@@ -674,7 +672,7 @@ public class SentryTrait extends Trait {
                 heldItem.setDurability( (short) 0 );  
         }
         
-        if ( myAttack == null ) {
+        if ( myAttack == AttackType.BRAWLER ) {
             Entity myEntity = npc.getEntity();
             
             if ( myEntity instanceof Skeleton ) myAttack = AttackType.ARCHER;
@@ -684,7 +682,6 @@ public class SentryTrait extends Trait {
             else if ( myEntity instanceof Witch ) myAttack = AttackType.WITCHDOCTOR1;
             else if ( myEntity instanceof Creeper ) myAttack = AttackType.CREEPER;
             else if ( myEntity instanceof Blaze || myEntity instanceof EnderDragon ) myAttack = AttackType.PYRO2;
-            else myAttack = AttackType.BRAWLER;
         }
         
         if ( isWitchDoctor() ) {
@@ -774,7 +771,7 @@ public class SentryTrait extends Trait {
                 mountID = mount.getId();
                 mount.setProtected( false );
             }
-            else if ( !mount.isSpawned() ) {
+            else if ( mount.isSpawned() ) {
                 mount.despawn( DespawnReason.PENDING_RESPAWN );
             }
             mount.spawn( npc.getEntity().getLocation() );

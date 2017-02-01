@@ -46,6 +46,7 @@ import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.event.NPCSpawnEvent;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.editor.Editor;
 
 public class SentryListener implements Listener {
@@ -586,8 +587,13 @@ public class SentryListener implements Listener {
         Player player = event.getPlayer();
         for ( NPC each : Sentries.registry ) {
             SentryTrait inst = Utils.getSentryTrait( each );
-            if ( inst != null && inst.isBodyguardOnLeave() )
-                inst.checkForGuardee( player );
+            
+            if ( inst != null ) {
+                // this line adds the UUID to the owner trait if it is missing.
+                each.getTrait( Owner.class ).isOwnedBy( player );
+                if ( inst.isBodyguardOnLeave() )
+                    inst.checkForGuardee( player );
+            }
         }
     }
 
@@ -604,13 +610,13 @@ public class SentryListener implements Listener {
     @EventHandler
     public void onTNTExplode( EntityExplodeEvent event ) {
         if  (   exploders.contains( event.getEntityType() )
-                && ThrownEntities.getThrower( event.getEntity() ) != null ) 
+                && ThrownEntities.hasThrower( event.getEntity() ) ) 
             event.blockList().clear();
     }
     
     @EventHandler
     public void onEggBreaks( PlayerEggThrowEvent event ) {
-        if ( ThrownEntities.getThrower( event.getEgg() ) != null ) {
+        if ( ThrownEntities.hasThrower( event.getEgg() ) ) {
             event.setHatching( false );
         }
     }

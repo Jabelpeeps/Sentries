@@ -278,16 +278,16 @@ public enum AttackType implements AttackStrategy {
         return false;
     }
     
-    /** method returns true for AttackTypes that need the sentry to get close to the victim */
-    public boolean isMelee() {
-        switch ( this ) {
-            case BRAWLER:
-            case CREEPER:
-                return true;
-            default:
-                return false;           
-        }
-    }
+//    /** method returns true for AttackTypes that need the sentry to get close to the victim */
+//    public boolean isMelee() {
+//        switch ( this ) {
+//            case BRAWLER:
+//            case CREEPER:
+//                return true;
+//            default:
+//                return false;           
+//        }
+//    }
     /** 
       * Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
      *

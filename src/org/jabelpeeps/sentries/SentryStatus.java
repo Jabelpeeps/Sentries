@@ -11,10 +11,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
-//import net.citizensnpcs.api.ai.GoalController;
-//import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.npc.NPC;
-//import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.Util;
 
@@ -34,22 +31,23 @@ public enum SentryStatus {
             inst.cancelAttack();
 
             if ( Sentries.denizenActive ) {
+                NPC npc = inst.getNPC();
 
-                DenizenHook.denizenAction( inst.getNPC(), "death", null );
-                DenizenHook.denizenAction( inst.getNPC(), "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
+                DenizenHook.denizenAction( npc, "death", null );
+                DenizenHook.denizenAction( npc, "death by" + inst.causeOfDeath.toString().replace( " ", "_" ), null );
 
                 if ( inst.killer != null ) {
                     
                     Entity killer = Utils.getSource( inst.killer );
 
                     if ( Sentries.debug )
-                        Sentries.debugLog( "Running Denizen actions for " + inst.getNPC().getName() + " with killer: " + killer.toString() );
+                        Sentries.debugLog( "Running Denizen actions for " + npc.getName() + " with killer: " + killer.toString() );
 
                     if ( killer instanceof OfflinePlayer )
-                        DenizenHook.denizenAction( inst.getNPC(), "death by player", (OfflinePlayer) killer );
+                        DenizenHook.denizenAction( npc, "death by player", (OfflinePlayer) killer );
                     else {
-                        DenizenHook.denizenAction( inst.getNPC(), "death by entity", null );
-                        DenizenHook.denizenAction( inst.getNPC(), "death by " + killer.getType().toString(), null );
+                        DenizenHook.denizenAction( npc, "death by entity", null );
+                        DenizenHook.denizenAction( npc, "death by " + killer.getType().toString(), null );
                     }
                 }
             }
@@ -134,7 +132,7 @@ public enum SentryStatus {
                 }
                 
                 boolean isFlying = isFlying( myEntity.getType() );
-                if ( isFlying ) guardEntLoc.add( 0, 5, 0 );
+                if ( isFlying ) guardEntLoc = guardEntLoc.add( 0, 5, 0 );
                 
                 if ( navigateOrTP( inst, guardEntLoc.add( 1, 0, 1 ) ) ) {
                     if ( isFlying ) navigator.setTarget( guardEntLoc );
@@ -219,7 +217,7 @@ public enum SentryStatus {
                     params.attackStrategy( inst.getMyAttack() );
 
                     double rangeSqrd = Utils.sqr( inst.getMyAttack().getApproxRange() );
-                    params.attackRange( rangeSqrd - 1 );  
+                    params.attackRange( rangeSqrd );  
                     params.distanceMargin( rangeSqrd - 1 );
                 }
             } 
@@ -235,7 +233,8 @@ public enum SentryStatus {
      *  @return a new state when a change is needed. */
     abstract SentryStatus update( SentryTrait inst );
     
-    /** Checks whether the sentry is too far away from their spawn point, or the entity they are guarding. 
+    /** Checks whether the sentry is too far away from their spawn point, the entity they are guarding, or the
+     *  entity they are attacking.
      *  @return a new status for the Sentry if one is needed, otherwise the current status. */
     protected SentryStatus checkPosition( SentryTrait inst ) {
         
@@ -261,9 +260,10 @@ public enum SentryStatus {
                     return SentryStatus.LOOKING;                   
                 }
                 break;
+            case RETURNING_TO_SPAWNPOINT:
+                if ( myLocation.distanceSquared( inst.spawnLocation ) > 1 ) break;
             case FOLLOWING: 
             case STUCK:
-            case RETURNING_TO_SPAWNPOINT:
                 inst.getNavigator().cancelNavigation();
                 return SentryStatus.LOOKING;
             default:           
@@ -292,6 +292,7 @@ public enum SentryStatus {
         
         return true;
     }
+    
     private static EnumSet<EntityType> flying = EnumSet.of( EntityType.ENDER_DRAGON, EntityType.BLAZE, EntityType.GHAST );
     boolean isFlying( EntityType type ) { return flying.contains( type ); }
     private static EnumSet<SentryStatus> deadOrDieing = EnumSet.of( DEAD, DIEING );

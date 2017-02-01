@@ -14,8 +14,11 @@ abstract class ThrownEntities {
     
     static Map<Entity, LivingEntity> thrown = new HashMap<>();
     
-    static LivingEntity getThrower( Entity tnt ) {        
-        return thrown.get( tnt ); 
+    static boolean hasThrower( Entity ent ) {
+        return thrown.containsKey( ent );
+    }
+    static LivingEntity getThrower( Entity ent ) {        
+        return thrown.get( ent ); 
     }
     
     static void addTNT( TNTPrimed tnt, LivingEntity thrower ) {

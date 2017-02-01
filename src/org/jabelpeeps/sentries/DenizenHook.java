@@ -27,7 +27,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class DenizenHook {
 
     static Denizen denizenPlugin;
-    static boolean sentryHealthByDenizen = false;
+//    static boolean sentryHealthByDenizen = false;
     static boolean npcDeathTriggerActive = false;
     static boolean npcDeathTriggerOwnerActive = false;
     static boolean dieCommandActive = false;
@@ -51,10 +51,10 @@ public class DenizenHook {
 
         ConfigurationSection config = Sentries.plugin.getConfig().getConfigurationSection( "DenizenIntegration" );
         
-        if ( config.getBoolean( "SentryHealthByDenizen", true ) ) {
-            sentryHealthByDenizen = true;
-            Sentries.logger.log( Level.INFO, "SentryHealthByDenizen configured to be enabled." );
-        }
+//        if ( config.getBoolean( "SentryHealthByDenizen", true ) ) {
+//            sentryHealthByDenizen = true;
+//            Sentries.logger.log( Level.INFO, "SentryHealthByDenizen configured to be enabled." );
+//        }
         if ( config.getBoolean( "NpcDeathTrigger", true ) ) {
             hook.new NpcdeathTrigger().activate().as( "Npcdeath" );
             Sentries.logger.log( Level.INFO, "NPCDeathTrigger registered sucessfully with Denizen" );

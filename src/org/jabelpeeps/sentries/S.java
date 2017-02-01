@@ -114,7 +114,7 @@ public abstract class S {
     public final static String CON_RETALIATION = "Retaliation";
     public final static String CON_MOBS_ATTACK = "MobsAttack";
     public final static String CON_IGNORE_LOS = "IgnoreLOS";
-    public final static String CON_USE_WEAPON_STRENGTH = "UseWeapon4Strength";
+    public final static String CON_WEAPON4STRGTH = "UseWeapon4Strength";
     public final static String CON_NEW_ARMOUR_CALC = "UseNewArmourCalc";
     public final static String DEFAULT_TARGETS = "DefaultTargets";
     public final static String DEFAULT_IGNORES = "DefaultIgnores";
