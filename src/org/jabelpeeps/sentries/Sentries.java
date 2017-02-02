@@ -34,7 +34,6 @@ import net.citizensnpcs.api.trait.TraitInfo;
 public class Sentries extends JavaPlugin {
 
     public static boolean debug = false;
-
     public static boolean dieLikePlayers, bodyguardsObeyProtection, ignoreListIsInvincible, useNewArmourCalc;
 
     static boolean denizenActive = false;

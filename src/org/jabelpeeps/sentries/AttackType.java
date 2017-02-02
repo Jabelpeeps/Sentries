@@ -53,7 +53,7 @@ public enum AttackType implements AttackStrategy {
     STORMCALLER1( Material.PAPER,                                                                  5, 20 ),
     STROMCALLER2( Material.BOOK,                                                                  10, 20 ),
     STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1, 20 ), 
-    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      1, 0.03 ), 
+    WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      1, 0.03, Effect.ENDER_SIGNAL,     10 ), 
     WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     2,       Effect.WITHER_SHOOT,      8 ),
     WITCHDOCTOR1( Material.SPLASH_POTION,     SPLASH_POTION,    1, 0.03 ),
     WITCHDOCTOR2( Material.LINGERING_POTION,  LINGERING_POTION, 1, 0.03 ),
@@ -162,8 +162,8 @@ public enum AttackType implements AttackStrategy {
                                          else {
                                              world.createExplosion( myLoc.getX(), myLoc.getY(), myLoc.getZ(),
                                                                       (float) inst.strength, false, false );
-                                             inst.kill();
                                              inst.getNPC().despawn();
+                                             inst.kill();
                                          }
                                     }
                      }, 0, 10 );

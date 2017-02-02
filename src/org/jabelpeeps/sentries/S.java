@@ -140,7 +140,6 @@ public abstract class S {
     public final static String PERM_INFO = "sentry.info";
     public final static String PERM_EQUIP = "sentry.equip";
     public final static String PERM_RELOAD = "sentry.reload";
-    public final static String PERM_DEBUG = "sentry.debug";
     public final static String PERM_SET_SPAWN = "sentry.setspawn";
     public final static String PERM_GUARD = "sentry.guard";
     public final static String PERM_WARNING = "sentry.warning";
@@ -165,4 +164,5 @@ public abstract class S {
     public final static String PERM_INVINCIBLE = "sentry.options.invincible";
     public final static String PERM_BODYGUARD = "sentry.bodyguard."; // be sure to leave the last '.'
     public final static String PERM_CITS_ADMIN = "citizens.admin";
+    public final static String SENTRIES_META = "SentriesNPC";
 }

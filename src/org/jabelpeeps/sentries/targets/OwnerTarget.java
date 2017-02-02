@@ -8,14 +8,23 @@ import org.bukkit.entity.LivingEntity;
 
 public class OwnerTarget extends AbstractTargetType implements TargetType.Internal {
 
-    private final UUID owner;
+    private UUID owner;
     
-    public OwnerTarget( UUID uuid ) { 
-        super( 10 ); 
-        owner = uuid;
+    private OwnerTarget() {
+        super( 10 );
         targetString = "Owner";
-        prettyString = "The Onwer of this NPC:- " + Bukkit.getPlayer( uuid ).getName();
     }
+    public OwnerTarget( String name ) {
+        this();
+        owner = null;
+        prettyString = "The Owner of this NPC:- " + name;
+    }   
+    public OwnerTarget( UUID uuid ) { 
+        this(); 
+        owner = uuid;
+        prettyString = "The Owner of this NPC:- " + Bukkit.getPlayer( uuid ).getName();
+    }
+    
     @Override
     public boolean includes( LivingEntity entity ) {
         UUID uuid = entity.getUniqueId();

@@ -75,7 +75,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
                 if ( ownerTrait.getOwnerId() != null )
                     target = new OwnerTarget( ownerTrait.getOwnerId() );
                 else
-                    Utils.sendMessage( sender, S.ERROR, "Unable to set owner ignore without UUID." );
+                    target = new OwnerTarget( ownerTrait.getOwner() );
             }
             else if ( targetArgs.length > 1 ) {
                 String secondSubArg = targetArgs[1].toLowerCase();

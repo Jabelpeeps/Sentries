@@ -15,14 +15,14 @@ import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.TargetType;
 import net.citizensnpcs.api.npc.NPC;
 
-public class DebugInfoCommand implements SentriesComplexCommand {
+public class DebugInfoCommand implements SentriesSimpleCommand {
     
     @Getter final String shortHelp = "view a sentry's debug information";
     @Getter final String longHelp = "Displays a page of internal field values and other information for a sentry.";
     @Getter final String perm = S.PERM_CITS_ADMIN;
     
     @Override
-    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst ) {
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         NPC npc = inst.getNPC();
@@ -60,6 +60,7 @@ public class DebugInfoCommand implements SentriesComplexCommand {
         
         sender.sendMessage( joiner.toString() );
     }
+    
     private String distanceOf( Location from, Location to ) {
         return from.getWorld() != to.getWorld() 
                 ? "(not in current world)"

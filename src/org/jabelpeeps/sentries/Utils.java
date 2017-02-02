@@ -168,7 +168,7 @@ public abstract class Utils {
 
     public static SentryTrait getSentryTrait( Entity ent ) {
     
-        if ( ent != null && ent instanceof LivingEntity ) {
+        if ( ent != null && ent instanceof LivingEntity && ent.hasMetadata( S.SENTRIES_META ) ) {
             return getSentryTrait( Sentries.registry.getNPC( ent ) );
         }
         return null;

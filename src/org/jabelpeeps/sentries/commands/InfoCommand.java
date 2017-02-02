@@ -12,13 +12,13 @@ import org.jabelpeeps.sentries.Utils;
 import lombok.Getter;
 
 
-public class InfoCommand implements SentriesComplexCommand {
+public class InfoCommand implements SentriesSimpleCommand {
     @Getter final String shortHelp = "view the attributes of a sentry";
     @Getter final String longHelp = "Displays a summary of all the configurable settings for a sentry.";
     @Getter final String perm = S.PERM_INFO;
     
     @Override
-    public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
+    public void call( CommandSender sender, String npcName, SentryTrait inst ) {
 
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
 

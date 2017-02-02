@@ -32,6 +32,7 @@ import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.targets.TargetType;
@@ -196,6 +197,7 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
      
         LivingEntity myEntity = (LivingEntity) npc.getEntity();
+        myEntity.setMetadata( S.SENTRIES_META, new FixedMetadataValue( sentry, true ) );
 
         // check for illegal values
         if ( weight <= 0 ) weight = 1.0;
@@ -712,9 +714,16 @@ public class SentryTrait extends Trait {
         myStatus = SentryStatus.LOOKING;
     }
 
-    public void checkIfEmpty ( CommandSender sender ) {
-        if ( targets.isEmpty() && events.isEmpty() )
-            Utils.sendMessage( sender, Col.YELLOW, npc.getName(), " now has no defined targets." );
+    /** Sends a message to the sender if the sentry has no defined targets or events 
+     *  @return true - if ignores is also empty */
+    public boolean checkIfEmpty ( CommandSender sender ) {
+        if ( targets.isEmpty() && events.isEmpty() ) {
+            Utils.sendMessage( sender, Col.YELLOW, npc.getName(), " has no defined targets ", 
+                                    ignores.isEmpty() ? ", events or ignores." : "or events." );
+            
+            return ignores.isEmpty();
+        }
+        return false;
     }
     boolean isBodyguardOnLeave( ) {
         return guardeeName != null && !guardeeName.isEmpty() && guardeeEntity == null;

@@ -37,6 +37,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
+import org.jabelpeeps.sentries.targets.OwnerTarget;
 
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.event.CitizensReloadEvent;
@@ -248,32 +249,29 @@ public class SentryListener implements Listener {
                     || !Sentries.bodyguardsObeyProtection )
                 event.setCancelled( false );
 
-            SentryTrait instVictim = Utils.getSentryTrait( victim );
-            
-            // cancel if invulnerable, non-sentry npc
-            if ( instVictim == null ) {
-
+            if ( victim.hasMetadata( "NPC" ) ) {
                 NPC npc = Sentries.registry.getNPC( victim );
-
-                if ( npc != null ) {
-                    event.setCancelled( npc.isProtected() );
-                }
+                event.setCancelled( npc.isProtected() );
+                return;
             }
+            
             // don't hurt guard target.
             if ( victim == instDamager.guardeeEntity ) event.setCancelled( true );
+            
+            if ( Sentries.debug )
+                Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " isCancelled:[" 
+                                + event.isCancelled() + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
+            
+            if ( event.isCancelled() ) return;
 
-            // apply potion effects
-            if (    instDamager.weaponSpecialEffects != null
-                    && !event.isCancelled() ) {
+            if ( instDamager.weaponSpecialEffects != null )
                 victim.addPotionEffects( instDamager.weaponSpecialEffects );
-            }
 
-            // warlock 1 should do no direct damage, except to sentries who take fall damage.
-            if ( instDamager.isWarlock1() && !event.isCancelled() ) {
+            if ( instDamager.isWarlock1() ) {
+                // warlock1 should do no direct damage, except to entities who take fall damage.
+                event.setCancelled( true );
 
-                if ( instVictim == null ) event.setCancelled( true );
-
-                double h = instDamager.strength + 3;
+                double h = instDamager.strength;
                 double v = 7.7 * Math.sqrt( h ) + 0.2;
 
                 if ( h <= 3 ) v -= 2;
@@ -281,10 +279,6 @@ public class SentryListener implements Listener {
 
                 victim.setVelocity( new Vector( 0, v / 20, 0 ) );
             }
-            
-            if ( Sentries.debug )
-                Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " cancelled:[" + event.isCancelled() 
-                                    + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
         }
     }
     
@@ -589,8 +583,12 @@ public class SentryListener implements Listener {
             SentryTrait inst = Utils.getSentryTrait( each );
             
             if ( inst != null ) {
-                // this line adds the UUID to the owner trait if it is missing.
-                each.getTrait( Owner.class ).isOwnedBy( player );
+                // the isOwnedBy() method adds a UUID to the owner trait if it is missing.
+                if  (   each.getTrait( Owner.class ).isOwnedBy( player ) 
+                        && inst.ignores.removeIf( i -> ( i instanceof OwnerTarget ) ) ) {
+                    CommandHandler.callCommand( inst, "ignore", "add", "owner" );
+                }
+                
                 if ( inst.isBodyguardOnLeave() )
                     inst.checkForGuardee( player );
             }
