@@ -143,25 +143,25 @@ public class IgnoreCommand implements SentriesComplexCommand {
 
         if ( ignoreCommandHelp == null ) {
 
-            StringJoiner joiner = new StringJoiner( System.lineSeparator() ) .add( "" );
+            StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
-            joiner.add( String.join( "", "do ", Col.GOLD, "/sentry ", S.IGNORE, " <add|remove|list|clearall> <TargetType>", 
+            joiner.add( Utils.join( "do ", Col.GOLD, "/sentry ", S.IGNORE, " <add|remove|list|clearall> <TargetType>", 
                                                 Col.RESET, " to add a target for a sentry to ignore."  ) );
-            joiner.add( String.join( "", Col.BOLD, "Ignores override targets and/or events (if both apply to an entity).", Col.RESET ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of ignores" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear all ignores added via ", Col.GOLD, S.ADD, Col.RESET ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.ADD, Col.RESET, " to add ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
-            joiner.add( String.join( "", "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
-            joiner.add( String.join( "", Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );
-            joiner.add( String.join( "", Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
-            joiner.add( String.join( "", Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
-            joiner.add( String.join( "", Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
-            joiner.add( String.join( "", Col.GOLD, "  Trait:<TraitName> ", Col.RESET, "to ignore NPC's with the named Trait" ) );
-            joiner.add( String.join( "", Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
-            joiner.add( String.join( "", Col.GOLD, "  All:Mobs ", Col.RESET, "to ignore all mobs (passive and hostile)") );
-            joiner.add( String.join( "", Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
-            joiner.add( String.join( "", "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
-            joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name> ", Col.RESET, "to ignore the named player or npc only.") );
+            joiner.add( Utils.join( Col.BOLD, "Ignores override targets and/or events (if both apply to an entity).", Col.RESET ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.LIST, Col.RESET, " to display current list of ignores" ) );
+            joiner.add( Utils.join(  "  use ", Col.GOLD, S.CLEARALL, Col.RESET, " to clear all ignores added via ", Col.GOLD, S.ADD, Col.RESET ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.ADD, Col.RESET, " to add ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
+            joiner.add( Utils.join( "  use ", Col.GOLD, S.REMOVE, Col.RESET, " to remove ", Col.GOLD, "<TargetType> ", Col.RESET, "as an ignore" ) );
+            joiner.add( Utils.join( Col.BOLD, Col.GOLD, "<TargetType> ", Col.RESET, S.HELP_ADD_REMOVE_TYPES ) );
+            joiner.add( Utils.join( Col.GOLD, "  Owner ", Col.RESET, "to ignore the owner of the sentry") );
+            joiner.add( Utils.join( Col.GOLD, "  All:Players ", Col.RESET, "to ignore all (human) Players.") );
+            joiner.add( Utils.join( Col.GOLD, "  All:NPCs ", Col.RESET, "to ignore all Citizens NPC's.") );
+            joiner.add( Utils.join( Col.GOLD, "  Trait:<TraitName> ", Col.RESET, "to ignore NPC's with the named Trait" ) );
+            joiner.add( Utils.join( Col.GOLD, "  All:Monsters ", Col.RESET, "to ignore all hostile mobs.") );
+            joiner.add( Utils.join( Col.GOLD, "  All:Mobs ", Col.RESET, "to ignore all mobs (passive and hostile)") );
+            joiner.add( Utils.join(  Col.GOLD, "  Mobtype:<Type> ", Col.RESET, "to ignore mobs of <Type>.") );
+            joiner.add( Utils.join( "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
+            joiner.add( Utils.join( Col.GOLD, "  Named:<player|npc>:<name> ", Col.RESET, "to ignore the named player or npc only.") );
 //            joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
             joiner.add( Utils.getAdditionalTargets() );
 
