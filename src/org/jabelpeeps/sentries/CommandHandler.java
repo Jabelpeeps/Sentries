@@ -35,6 +35,7 @@ import org.jabelpeeps.sentries.commands.IgnoreCommand;
 import org.jabelpeeps.sentries.commands.InfoCommand;
 import org.jabelpeeps.sentries.commands.InvincibleCommand;
 import org.jabelpeeps.sentries.commands.KillsDropCommand;
+import org.jabelpeeps.sentries.commands.ListAllCommand;
 import org.jabelpeeps.sentries.commands.MobsAttackCommand;
 import org.jabelpeeps.sentries.commands.MountCommand;
 import org.jabelpeeps.sentries.commands.NightVisionCommand;
@@ -90,6 +91,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( S.HEALRATE,     new HealRateCommand() );
         commandMap.put( S.RANGE,        new RangeCommand() );
         commandMap.put( S.VOICE_RANGE,  new VoiceRangeCommand() );
+        commandMap.put( "listall",      new ListAllCommand() );
 //        commandMap.put( "setstatus",    new SetStatusCommand() );
         commandMap.put( "debuginfo",    new DebugInfoCommand() );
         
