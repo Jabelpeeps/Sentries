@@ -33,10 +33,12 @@ public class DebugInfoCommand implements SentriesSimpleCommand {
         joiner.add( Utils.join( Col.BLUE, "Status: ", Col.WHITE, inst.getMyStatus().toString().toLowerCase() ) );
         joiner.add( Utils.join( Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
                                  inst.hasMount() ? ( " (mountID = " + inst.mountID + ")" ) : "" ) );
+        
         AttackType attack = inst.getMyAttack();
         if ( attack != null )
             joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, attack.name() ) );
-        else joiner.add( S.ERROR + "getMyAttack() returned null!" );
+        else joiner.add( Utils.join( S.ERROR, "getMyAttack() returned null! ", 
+                                       Col.RESET, "(may be null if the npc has not been spawned yet)" ) );
         
         Location stored = npc.getStoredLocation();
         joiner.add( Utils.join( Col.BLUE, "StoredLocation: ", Col.WHITE, Utils.prettifyLocation( stored ) ) );

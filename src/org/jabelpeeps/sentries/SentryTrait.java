@@ -155,7 +155,7 @@ public class SentryTrait extends Trait {
     @Override
     public void load( DataKey key ) throws NPCLoadException {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] load() start" );
-  
+
         if ( key.keyExists( "traits" ) ) key = key.getRelative( "traits" );
 
         String guardee = key.getString( S.PERSIST_GUARDEE, null );
@@ -181,6 +181,8 @@ public class SentryTrait extends Trait {
         else
             ignoreTargets.addAll( Sentries.defaultIgnores );
         
+        if ( Sentries.debug ) Sentries.debugLog( "Loading Ignores:- " + ignoreTargets );
+        
         ignoreTargets.stream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
                               .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
 
@@ -188,6 +190,8 @@ public class SentryTrait extends Trait {
         
         if ( key.getRaw( S.EVENTS ) != null )
             eventTargets.addAll( (Set<String>) key.getRaw( S.EVENTS ) );
+        
+        if ( Sentries.debug ) Sentries.debugLog( "Loading Events:- " + eventTargets );
         
         eventTargets.stream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
     }

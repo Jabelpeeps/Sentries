@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
@@ -111,7 +112,7 @@ public enum SentryStatus {
             
             Navigator navigator = inst.getNavigator();
             Location guardEntLoc = inst.guardeeEntity.getLocation();
-            boolean isFlying = inst.getNPC().isFlyable();
+            boolean isFlying = isFlying( myEntity.getType() );
             
             if  (   isFlying
                     || !navigator.isNavigating()
@@ -291,8 +292,8 @@ public enum SentryStatus {
         return true;
     }
     
-//    private static EnumSet<EntityType> flying = EnumSet.of( EntityType.ENDER_DRAGON, EntityType.BLAZE, EntityType.GHAST );
-//    boolean isFlying( EntityType type ) { return flying.contains( type ); }
+    private static EnumSet<EntityType> flying = EnumSet.of( EntityType.ENDER_DRAGON, EntityType.BLAZE, EntityType.GHAST );
+    boolean isFlying( EntityType type ) { return flying.contains( type ); }
     private static EnumSet<SentryStatus> deadOrDieing = EnumSet.of( DEAD, DIEING );
     boolean isDeadOrDieing() { return deadOrDieing.contains( this ); }
 }
