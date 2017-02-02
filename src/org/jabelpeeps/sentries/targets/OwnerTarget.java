@@ -2,28 +2,21 @@ package org.jabelpeeps.sentries.targets;
 
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
+
+import net.citizensnpcs.api.trait.trait.Owner;
 
 
 public class OwnerTarget extends AbstractTargetType implements TargetType.Internal {
 
-    private UUID owner;
+    private final UUID owner;
     
-    private OwnerTarget() {
+    public OwnerTarget( Owner ownerTrait ) {
         super( 10 );
         targetString = "Owner";
-    }
-    public OwnerTarget( String name ) {
-        this();
-        owner = null;
-        prettyString = "The Owner of this NPC:- " + name;
-    }   
-    public OwnerTarget( UUID uuid ) { 
-        this(); 
-        owner = uuid;
-        prettyString = "The Owner of this NPC:- " + Bukkit.getPlayer( uuid ).getName();
-    }
+        prettyString = "The Owner of this NPC:- " + ownerTrait.getOwner();
+        owner = ownerTrait.getOwnerId();
+    } 
     
     @Override
     public boolean includes( LivingEntity entity ) {

@@ -72,10 +72,10 @@ public class IgnoreCommand implements SentriesComplexCommand {
             
             if ( targetArgs.length == 1 && firstSubArg.equals( "owner" ) ) {
                 Owner ownerTrait = inst.getNPC().getTrait( Owner.class );
-                if ( ownerTrait.getOwnerId() != null )
-                    target = new OwnerTarget( ownerTrait.getOwnerId() );
+                if ( !ownerTrait.isOwnedBy( Owner.SERVER ) )
+                    target = new OwnerTarget( ownerTrait );
                 else
-                    target = new OwnerTarget( ownerTrait.getOwner() );
+                    Utils.sendMessage( sender, S.ERROR, "You cannot add an owner ignore for a server owned sentry" );
             }
             else if ( targetArgs.length > 1 ) {
                 String secondSubArg = targetArgs[1].toLowerCase();
@@ -113,7 +113,7 @@ public class IgnoreCommand implements SentriesComplexCommand {
                                       .findAny()
                                       .orElse( UUID.fromString( targetArgs[2] ) ) );
                         } catch (IllegalArgumentException e) {
-                            Utils.sendMessage( sender, S.ERROR, "No player called:- ",targetArgs[2], " was found." );
+                            Utils.sendMessage( sender, S.ERROR, "No player called:- ", targetArgs[2], " was found." );
                         }
                     }
                     else if ( secondSubArg.equals( "npc" ) ) {

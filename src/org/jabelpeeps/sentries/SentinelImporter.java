@@ -3,7 +3,6 @@ package org.jabelpeeps.sentries;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -131,9 +130,7 @@ public class SentinelImporter {
                 case NPCS:
                     sentry.ignores.add( new AllNPCsTarget() ); break;
                 case OWNER:
-                    UUID uuid = npc.getTrait( Owner.class ).getOwnerId();
-                    if ( uuid != null )
-                        sentry.ignores.add( new OwnerTarget( uuid ) ); break;
+                    sentry.ignores.add( new OwnerTarget( npc.getTrait( Owner.class ) ) ); break;
                 default:
                     EntityType type = targetMap.get( each );
                     if ( type != null )
