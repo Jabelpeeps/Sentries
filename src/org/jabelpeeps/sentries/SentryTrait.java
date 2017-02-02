@@ -200,6 +200,7 @@ public class SentryTrait extends Trait {
         myEntity.setMetadata( S.SENTRIES_META, new FixedMetadataValue( sentry, true ) );
 
         // check for illegal values
+        if ( followDistance < 1 ) followDistance = 1;
         if ( weight <= 0 ) weight = 1.0;
         if ( attackRate > 30 ) attackRate = 30.0;
         if ( maxHealth < 1 ) maxHealth = 1;

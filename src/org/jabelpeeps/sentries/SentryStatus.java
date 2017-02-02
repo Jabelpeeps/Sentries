@@ -111,13 +111,13 @@ public enum SentryStatus {
             
             Navigator navigator = inst.getNavigator();
             Location guardEntLoc = inst.guardeeEntity.getLocation();
+            boolean isFlying = inst.getNPC().isFlyable();
             
-            if  (   !navigator.isNavigating() 
+            if  (   isFlying
+                    || !navigator.isNavigating()
                     || navigator.getEntityTarget() == null
                     || !navigator.getEntityTarget().getTarget().equals( inst.guardeeEntity ) ) {
-             
-                boolean isFlying = inst.getNPC().isFlyable(); //isFlying( myEntity.getType() );
-                
+                             
                 if ( isFlying ) guardEntLoc = guardEntLoc.add( 0, 5, 0 ); 
                 
                 if ( navigateOrTP( inst, myEntity, guardEntLoc.add( 1, 0, 1 ) ) ) {
@@ -127,7 +127,7 @@ public enum SentryStatus {
                     else 
                         navigator.setTarget( inst.guardeeEntity, false );
                     
-                    navigator.getLocalParameters().distanceMargin( inst.followDistance );             
+                    navigator.getLocalParameters().distanceMargin( inst.followDistance - 1 );             
                     return this;
                 }
             }
@@ -206,7 +206,7 @@ public enum SentryStatus {
 
                     double rangeSqrd = Utils.sqr( inst.getMyAttack().getApproxRange() );
                     params.attackRange( rangeSqrd );  
-                    params.distanceMargin( rangeSqrd - 1 );
+                    params.distanceMargin( rangeSqrd );
                 }
             } 
             // somehow we failed to attack the chosen target, so lets clear it.           
@@ -243,7 +243,7 @@ public enum SentryStatus {
                 if  (   inst.attackTarget == null 
                         || inst.attackTarget.isDead()
                         || inst.attackTarget.getWorld() != myLocation.getWorld()
-                        || myLocation.distanceSquared( inst.attackTarget.getLocation() ) > Utils.sqr( inst.range ) + 10 ) {
+                        || myLocation.distanceSquared( inst.attackTarget.getLocation() ) > Utils.sqr( inst.range ) ) {
                     inst.cancelAttack();
                     return SentryStatus.LOOKING;                   
                 }

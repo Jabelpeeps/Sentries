@@ -6,9 +6,13 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
+import lombok.Getter;
+
 
 public class FollowDistanceCommand implements SentriesNumberCommand {
 
+    @Getter private String shortHelp = "set how close the sentry follows when guarding";
+    @Getter private String perm = S.PERM_FOLLOW_DIST;
     private String helpTxt;
     
     @Override
@@ -20,7 +24,7 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
         }
         else {
             int dist = Utils.string2Int( number );
-            if ( dist < 0 ) {
+            if ( dist < 1 ) {
                 Utils.sendMessage( sender, S.ERROR, number, S.ERROR_NOT_NUMBER );
                 return;
             }
@@ -32,19 +36,13 @@ public class FollowDistanceCommand implements SentriesNumberCommand {
     }
 
     @Override
-    public String getShortHelp() { return "set how close the sentry follows when guarding"; }
-
-    @Override
     public String getLongHelp() {
 
         if ( helpTxt == null ) {
             helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", S.FOLLOW, " (#)", Col.RESET, 
-                    ", where # is the number (0-32) of blocks that a sentry configured to guard will follow behind their guardees.",
+                    ", where # is the number (1-32) of blocks that a sentry configured to guard will follow behind their guardees.",
                     System.lineSeparator(), "  If no number is given the current value is shown. (Default = 2)");
         }
         return helpTxt;
     }
-
-    @Override
-    public String getPerm() { return S.PERM_FOLLOW_DIST; }
 }
