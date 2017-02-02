@@ -41,5 +41,7 @@ public class ListAllCommand implements SentriesSimpleCommand {
             joiner.add( Utils.join( "No Events set. Add some with the ", Col.GOLD, "/sentry event ", Col.RESET, "command" ) );
         else
             inst.events.stream().forEach( e -> joiner.add( e.getPrettyString() ) );
+        
+        sender.sendMessage( joiner.toString() );
     }
 }
