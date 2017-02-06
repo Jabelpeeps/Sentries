@@ -36,12 +36,11 @@ import org.bukkit.util.Vector;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
-public enum AttackType implements AttackStrategy {
+public enum AttackType implements SentryAttack {
     // Columns:-  weapon held                 projectile        v  g     Effect?              damage  range
     ARCHER(       Material.BOW,               ARROW,            2, 0.05, Effect.BOW_FIRE,          6 ), 
     GRENADIER(    Material.TNT,               PRIMED_TNT,       1, 0.04, Effect.MOBSPAWNER_FLAMES, 4 ),

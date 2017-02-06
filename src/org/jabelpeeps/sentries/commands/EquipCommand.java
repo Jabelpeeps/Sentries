@@ -109,9 +109,16 @@ public class EquipCommand implements SentriesComplexCommand {
                 Utils.sendMessage( sender, S.ERROR, "Item name not recognised.  ", Col.RESET, "do ", Col.GOLD, 
                                 "/sentry help listequips ", Col.RESET, "for a list of accepted item names" );
                 return;
-            }            
+            }
+            int slot = Sentries.getSlot( mat );
+            
+            if ( slot == 0 && !(inst.getMyAttack() instanceof AttackType) ) {
+                Utils.sendMessage( sender, Col.RED, "Warning! ", 
+                                           Col.RESET, "Equiping this item will override the current custom weapon.",
+                                           System.lineSeparator(), "Remove the custom weapon, and then try again." );
+                return;
+            }
             ItemStack item = new ItemStack( mat );
-            int slot = Sentries.getSlot( item.getType() );
             
             if ( checkSlot( npc.getEntity().getType(), slot ) ) {
                 equip.set( slot, item );
