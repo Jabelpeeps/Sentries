@@ -56,6 +56,11 @@ public class EquipCommand implements SentriesComplexCommand {
 
         Equipment equip = npc.getTrait( Equipment.class );
         
+        if ( equip == null ) {
+            Utils.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
+            return;
+        }
+        
         if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] ) ) {
            
             for ( EquipmentSlot each : EquipmentSlot.values() ) {
@@ -100,22 +105,26 @@ public class EquipCommand implements SentriesComplexCommand {
                 Utils.sendMessage( sender, S.ERROR, "Item name not recognised.  ", Col.RESET, "do ", Col.GOLD, 
                                 "/sentry help listequips ", Col.RESET, "for a list of accepted item names" );
                 return;
-            }            
-            if ( equip != null ) {
-
-                ItemStack item = new ItemStack( mat );
-                int slot = Sentries.getSlot( item.getType() );
-                
-                if ( checkSlot( npc.getEntity().getType(), slot ) ) {
-                    equip.set( slot, item );
-    
-                    if ( slot == 0 ) inst.updateAttackType();
-                    else inst.updateArmour();
-                    
-                    Utils.sendMessage( sender, Col.GREEN, "Equipped ", mat.toString(), " on ", npcName );
-                }
+            }        
+            int slot = Sentries.getSlot( mat );
+            
+            if ( slot == 0 && !(inst.getMyAttack() instanceof AttackType) ) {
+                Utils.sendMessage( sender, Col.RED, "Warning! ", 
+                                           Col.RESET, "Equiping this item will override the current custom weapon.",
+                                           System.lineSeparator(), "Remove the custom weapon, and then try again." );
+                return;
             }
-            else Utils.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
+            
+            ItemStack item = new ItemStack( mat );
+            
+            if ( checkSlot( npc.getEntity().getType(), slot ) ) {
+                equip.set( slot, item );
+
+                if ( slot == 0 ) inst.updateAttackType();
+                else inst.updateArmour();
+                
+                Utils.sendMessage( sender, Col.GREEN, "Equipped ", mat.toString(), " on ", npcName );
+            }
         }
     }
 
