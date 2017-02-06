@@ -231,11 +231,13 @@ public enum SentryStatus {
         
         if ( inst.guardeeEntity != null ) {
             // Note to self:- inst.followDistance holds the square of the intended distance.
-            if ( myLocation.distanceSquared( inst.guardeeEntity.getLocation() ) >= inst.followDistance ) {
+            if  (   myLocation.getWorld() != inst.guardeeEntity.getWorld()
+                    || myLocation.distanceSquared( inst.guardeeEntity.getLocation() ) >= inst.followDistance ) {
                 return SentryStatus.FOLLOWING;
             }           
         }
-        else if ( myLocation.distanceSquared( inst.spawnLocation ) > Utils.sqr( inst.range ) ) {
+        else if (  myLocation.getWorld() != inst.spawnLocation.getWorld()
+                || myLocation.distanceSquared( inst.spawnLocation ) > Utils.sqr( inst.range ) ) {
             return SentryStatus.RETURNING_TO_SPAWNPOINT;
         } 
         
