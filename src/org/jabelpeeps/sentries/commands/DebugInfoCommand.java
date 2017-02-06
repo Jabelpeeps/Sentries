@@ -4,9 +4,9 @@ import java.util.StringJoiner;
 
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.jabelpeeps.sentries.AttackType;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.SentryAttack;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
@@ -34,9 +34,9 @@ public class DebugInfoCommand implements SentriesSimpleCommand {
         joiner.add( Utils.join( Col.BLUE, "Mounted: ", Col.WHITE, String.valueOf( inst.hasMount() ), 
                                  inst.hasMount() ? ( " (mountID = " + inst.mountID + ")" ) : "" ) );
         
-        SentryAttack attack = inst.getMyAttack();
+        AttackType attack = inst.getMyAttack();
         if ( attack != null )
-            joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, attack.getName() ) );
+            joiner.add( Utils.join( Col.BLUE, "AttackType: ", Col.WHITE, attack.name() ) );
         else joiner.add( Utils.join( S.ERROR, "getMyAttack() returned null! ", 
                                        Col.RESET, "(may be null if the npc has not been spawned yet)" ) );
         

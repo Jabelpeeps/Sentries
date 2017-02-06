@@ -38,7 +38,6 @@ import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.targets.TargetType;
 
 import lombok.Getter;
-import lombok.Setter;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
@@ -114,7 +113,7 @@ public class SentryTrait extends Trait {
 
     @Getter private SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     private SentryStatus oldStatus;
-    @Getter @Setter private SentryAttack myAttack;
+    @Getter private AttackType myAttack;
     private Integer tickMe;
 
     final static AttackStrategy mountedAttack = ( attacker, target ) -> {

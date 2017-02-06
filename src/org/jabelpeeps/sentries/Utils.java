@@ -189,7 +189,7 @@ public abstract class Utils {
      *         The shooter or source - if damager is a projectile or primed TNT.
      *         otherwise - null.
      */
-    public static Entity getSource( Entity damager ) {
+    static Entity getSource( Entity damager ) {
         
         if ( damager instanceof LivingEntity ) return damager;
         

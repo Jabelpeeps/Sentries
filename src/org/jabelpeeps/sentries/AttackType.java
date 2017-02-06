@@ -36,11 +36,12 @@ import org.bukkit.util.Vector;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
 
 @AllArgsConstructor
-public enum AttackType implements SentryAttack {
+public enum AttackType implements AttackStrategy {
     // Columns:-  weapon held                 projectile        v  g     Effect?              damage  range
     ARCHER(       Material.BOW,               ARROW,            2, 0.05, Effect.BOW_FIRE,          6 ), 
     GRENADIER(    Material.TNT,               PRIMED_TNT,       1, 0.04, Effect.MOBSPAWNER_FLAMES, 4 ),
@@ -276,7 +277,17 @@ public enum AttackType implements SentryAttack {
         } 
         return false;
     }
-
+    
+//    /** method returns true for AttackTypes that need the sentry to get close to the victim */
+//    public boolean isMelee() {
+//        switch ( this ) {
+//            case BRAWLER:
+//            case CREEPER:
+//                return true;
+//            default:
+//                return false;           
+//        }
+//    }
     /** 
       * Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
      *
