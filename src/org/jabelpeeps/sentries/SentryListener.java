@@ -3,6 +3,7 @@ package org.jabelpeeps.sentries;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -12,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -36,7 +38,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.Vector;
+import org.bukkit.projectiles.ProjectileSource;
 import org.jabelpeeps.sentries.targets.OwnerTarget;
 
 import net.citizensnpcs.api.ai.Navigator;
@@ -158,22 +160,14 @@ public class SentryListener implements Listener {
         if ( inst.getMyStatus().isDeadOrDieing() ) return;
         if ( System.currentTimeMillis() < inst.okToTakedamage ) return;
 
-        switch ( event.getCause() ) {    
-            case FALL: default:
+        if ( isNotVulnerable( inst, event.getCause() ) ) return;
+        
+        switch ( event.getCause() ) { 
+            case DRAGON_BREATH: case ENTITY_ATTACK: case FALL: case FALLING_BLOCK: case FLY_INTO_WALL:
+            case MELTING: case PROJECTILE: case STARVATION: case THORNS: case WITHER: case CRAMMING:
                 return;               
-            case LIGHTNING:
-                if ( inst.isStormcaller() ) return;
-                break;
-            case FIRE: case FIRE_TICK: case LAVA: 
-                if ( inst.isNotFlammable() ) return;
-                break;
-            case POISON: case MAGIC:
-                if ( inst.isWitchDoctor() ) return;
-            case BLOCK_EXPLOSION: case ENTITY_EXPLOSION:
-                if ( inst.isGrenadier() ) return;
                 
-            case CONTACT: case DROWNING: case VOID: case SUICIDE:
-            case CUSTOM: case SUFFOCATION: 
+            default:
         }
         NPC npc = inst.getNPC();
         
@@ -207,6 +201,25 @@ public class SentryListener implements Listener {
                 myEntity.damage( finaldamage );
         }
     }
+    
+    private boolean isNotVulnerable( SentryTrait inst, DamageCause cause ) {
+        switch ( cause ) {
+            case LIGHTNING:
+                if ( inst.isStormcaller() ) return true;
+                break;
+            case FIRE: case FIRE_TICK: case LAVA: case HOT_FLOOR:
+                if ( inst.isNotFlammable() ) return true;
+                break;
+            case POISON: case MAGIC:
+                if ( inst.isWitchDoctor() ) return true;
+                break;
+            case BLOCK_EXPLOSION: case ENTITY_EXPLOSION:
+                if ( inst.isGrenadier() ) return true;
+                break;
+            default:
+        }
+        return false;
+    }
 
     @EventHandler( priority = EventPriority.HIGHEST )
     public void onDamage( EntityDamageByEntityEvent event ) {
@@ -218,69 +231,94 @@ public class SentryListener implements Listener {
         LivingEntity victim = (LivingEntity) entity;
         
         Entity damagerEnt = event.getDamager();        
-        LivingEntity shooter = (LivingEntity) Utils.getSource( damagerEnt );
+        Entity shooter = Utils.getSource( damagerEnt );
                
         SentryTrait instDamager = Utils.getSentryTrait( shooter );
 
-        if ( instDamager != null ) {
-            // projectiles go through ignore targets.
-            // TODO consider whether this is wanted behaviour? or maybe cancelling the event is enough?
-            if (    damagerEnt instanceof Projectile
-                    && instDamager.isIgnoring( victim ) ) {
+        if ( instDamager == null ) return;
+        
+        // projectiles go through ignore targets.
+        // TODO consider whether this is wanted behaviour? or maybe cancelling the event is enough?
+        if (    damagerEnt instanceof Projectile
+                && instDamager.isIgnoring( victim ) ) {
 
-                event.setCancelled( true );
-                damagerEnt.remove();
+            event.setCancelled( true );
+            damagerEnt.remove();
 
-                Projectile newProjectile = (Projectile) damagerEnt.getWorld().spawnEntity(
-                                                    damagerEnt.getLocation().add( damagerEnt.getVelocity() ),
-                                                    damagerEnt.getType() );
+            Projectile newProjectile = 
+                    (Projectile) damagerEnt.getWorld()
+                                           .spawnEntity( damagerEnt.getLocation().add( damagerEnt.getVelocity() ),
+                                                         damagerEnt.getType() );
+            if  (   shooter != null 
+                    && shooter instanceof ProjectileSource ) 
+                newProjectile.setShooter( (ProjectileSource) shooter );
 
-                newProjectile.setVelocity( damagerEnt.getVelocity() );
-                if ( shooter != null ) newProjectile.setShooter( shooter );
-                newProjectile.setTicksLived( damagerEnt.getTicksLived() );
-                return;
-            }
-
-            // set damage dealt by a sentry
-            event.setDamage( instDamager.strength );
-
-            // uncancel if not bodyguard.
-            if (    instDamager.guardeeName == null
-                    || !Sentries.bodyguardsObeyProtection )
-                event.setCancelled( false );
-
-            if ( victim.hasMetadata( "NPC" ) ) {
-                NPC npc = Sentries.registry.getNPC( victim );
-                event.setCancelled( npc.isProtected() );
-                return;
-            }
+            newProjectile.setVelocity( damagerEnt.getVelocity() );
+            newProjectile.setTicksLived( damagerEnt.getTicksLived() );
+            return;
+        }
+        // set damage dealt by a sentry
+        double damage = instDamager.strength;
+        
+        if ( instDamager.myEnchants != null ) {
             
-            // don't hurt guard target.
-            if ( victim == instDamager.guardeeEntity ) event.setCancelled( true );
-            
-            if ( Sentries.debug )
-                Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " isCancelled:[" 
-                                + event.isCancelled() + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
-            
-            if ( event.isCancelled() ) return;
-
-            if ( instDamager.weaponSpecialEffects != null )
-                victim.addPotionEffects( instDamager.weaponSpecialEffects );
-
-            if ( instDamager.isWarlock1() ) {
-                // warlock1 should do no direct damage, except to entities who take fall damage.
-                event.setCancelled( true );
-
-                double h = instDamager.strength;
-                double v = 7.7 * Math.sqrt( h ) + 0.2;
-
-                if ( h <= 3 ) v -= 2;
-                if ( v > 150 ) v = 150;
-
-                victim.setVelocity( new Vector( 0, v / 20, 0 ) );
+            for ( Entry<Enchantment, Integer> each : instDamager.myEnchants.entrySet() ) {
+                if ( each.getKey() == Enchantment.DAMAGE_ALL ) {
+                    damage += 0.5 + 0.5 * each.getValue();
+                }
+                else if ( each.getKey() == Enchantment.DAMAGE_UNDEAD ) {
+                    if ( undead.contains( victim.getType() ) )
+                        damage += 2.5 * each.getValue();
+                }
+                else if ( each.getKey() == Enchantment.DAMAGE_ARTHROPODS ) {
+                    if ( arthropods.contains( victim.getType() ) )
+                        damage += 2.5 * each.getValue();
+                }
+                else if ( each.getKey() == Enchantment.ARROW_DAMAGE ) {
+                    switch ( each.getValue() ) {
+                        case 1: damage += 3; break;
+                        case 2: damage += 5; break;
+                        case 3: damage += 6; break;
+                        case 4: damage += 8; break;
+                        case 5: damage += 9; break;
+                    }
+                }
             }
         }
+        event.setDamage( damage );
+
+        // uncancel if not bodyguard.
+        if ( instDamager.guardeeName == null || !Sentries.bodyguardsObeyProtection )
+            event.setCancelled( false );
+
+        // don't hurt guard target.
+        if ( victim == instDamager.guardeeEntity ) event.setCancelled( true );
+        
+        if ( victim.hasMetadata( "NPC" ) )
+            event.setCancelled( Sentries.registry.getNPC( victim ).isProtected() );
+        
+        if ( Sentries.debug )
+            Sentries.debugLog( "Damage: from:" + shooter.getName() + " to:" + victim.getName() + " isCancelled:[" 
+                            + event.isCancelled() + "] damage:["  + event.getDamage() + "] cause:" + event.getCause() );   
+        
+        if ( event.isCancelled() ) return;
+
+        if ( instDamager.weaponSpecialEffects != null )
+            victim.addPotionEffects( instDamager.weaponSpecialEffects );
+
+        if ( instDamager.isWarlock1() ) {
+            // Warlock1 sentries should do no direct damage, except to entities who take fall damage.
+            // Their strength value is used as the number of blocks vertically the victim will be thrown.
+            event.setCancelled( true );
+            victim.getVelocity().setY( Math.sqrt( instDamager.strength * 0.16 ) );
+        }
     }
+    
+    private EnumSet<EntityType> undead = EnumSet.of( EntityType.SKELETON, EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER, 
+                                                     EntityType.PIG_ZOMBIE, EntityType.WITHER, EntityType.WITHER_SKELETON,
+                                                     EntityType.STRAY, EntityType.HUSK );
+    private EnumSet<EntityType> arthropods = EnumSet.of( EntityType.SPIDER, EntityType.CAVE_SPIDER, EntityType.SILVERFISH, 
+                                                         EntityType.ENDERMITE );
     
     @EventHandler( priority = EventPriority.HIGHEST )
     public void processNPCdamage( NPCDamageByEntityEvent event ) {
@@ -303,14 +341,7 @@ public class SentryListener implements Listener {
         // don't take damage from the entity the sentry is guarding.
         if ( damager == null || damager == instVictim.guardeeEntity ) return;  
         
-        // handle class protections
-        switch ( event.getCause() ) {
-            case LIGHTNING:
-                if ( instVictim.isStormcaller() ) return;
-            case FIRE: case FIRE_TICK:
-                if ( instVictim.isNotFlammable() ) return;
-            default:
-        }
+        if ( isNotVulnerable( instVictim, event.getCause() ) ) return;
         SentryTrait instDamager = Utils.getSentryTrait( damager );
         
         // don't take damage from co-guards.

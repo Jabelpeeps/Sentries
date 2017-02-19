@@ -14,15 +14,14 @@ import org.jabelpeeps.sentries.Utils;
 
 import com.google.common.io.Files;
 
+import lombok.Getter;
+
 
 public class ImportCommand implements SentriesComplexCommand {
     
     private String helpText;
-
-    @Override
-    public String getShortHelp() { return "import NPC settings from Sentry & Sentinel"; }
-    @Override
-    public String getPerm() { return "sentries.import"; }
+    @Getter private String shortHelp = "import NPC settings from Sentry & Sentinel";
+    @Getter private String perm = "sentries.import";
 
     @Override
     public String getLongHelp() {

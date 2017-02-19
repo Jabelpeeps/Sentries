@@ -17,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderDragon;
@@ -58,9 +59,7 @@ import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.Util;
 
 public class SentryTrait extends Trait {
-
-    final Sentries sentry;
-
+    
     @Persist( S.PERSIST_SPAWN ) public Location spawnLocation;
     @Persist( S.PERSIST_MOUNT ) public int mountID = -1;
     @Persist( S.CON_NIGHT_VIS ) public int nightVision = Sentries.defIntegers.get( S.CON_NIGHT_VIS );
@@ -114,6 +113,7 @@ public class SentryTrait extends Trait {
     @Getter private SentryStatus myStatus = SentryStatus.NOT_SPAWNED;
     private SentryStatus oldStatus;
     @Getter private AttackType myAttack;
+    Map<Enchantment, Integer> myEnchants;
     private Integer tickMe;
 
     final static AttackStrategy mountedAttack = ( attacker, target ) -> {
@@ -148,7 +148,6 @@ public class SentryTrait extends Trait {
     
     public SentryTrait() {
         super( "sentries" );
-        sentry = (Sentries) Bukkit.getPluginManager().getPlugin( "Sentries" );
     }
     
     @SuppressWarnings( "unchecked" )
@@ -201,7 +200,7 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onSpawn()" );
      
         LivingEntity myEntity = (LivingEntity) npc.getEntity();
-        myEntity.setMetadata( S.SENTRIES_META, new FixedMetadataValue( sentry, true ) );
+        myEntity.setMetadata( S.SENTRIES_META, new FixedMetadataValue( Sentries.plugin, true ) );
 
         // check for illegal values
         if ( followDistance < 1 ) followDistance = 1;
@@ -242,7 +241,7 @@ public class SentryTrait extends Trait {
         checkForGuardee();
        
         if ( tickMe == null ) {
-            tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( sentry, 
+            tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( Sentries.plugin, 
                     () -> {     
                             myStatus = myStatus.update( SentryTrait.this ); 
                             if ( guardeeEntity != null && !guardeeEntity.isValid() ) {
@@ -302,7 +301,7 @@ public class SentryTrait extends Trait {
 
     @Override
     public void onCopy() {
-        Bukkit.getScheduler().runTaskLater( sentry, () -> spawnLocation = npc.getStoredLocation(), 10 );
+        Bukkit.getScheduler().runTaskLater( Sentries.plugin, () -> spawnLocation = npc.getStoredLocation(), 10 );
     }
 
     public boolean isIgnoring( LivingEntity aTarget ) {
@@ -477,6 +476,9 @@ public class SentryTrait extends Trait {
             
             if ( item != null && Sentries.weaponStrengths.containsKey( item.getType() ) ) {
                 strength = Sentries.weaponStrengths.get( item.getType() );
+                
+                myEnchants = item.getEnchantments();
+                if ( myEnchants != null && myEnchants.isEmpty() ) myEnchants = null;
                 return true;
             }
             if ( myAttack != AttackType.BRAWLER ) {
@@ -485,7 +487,7 @@ public class SentryTrait extends Trait {
             }
             strength = 1;
         }
-        return false;
+        return true;
     }
 
     private static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
@@ -660,7 +662,7 @@ public class SentryTrait extends Trait {
     }
 
     /**
-     * Updates the Attacktype reference in myAttack field, according to the
+     * Updates the SentryAttack reference in myAttack field, according to the
      * item being held by the NPC.
      * <p>
      * Also sets potion effects, and potion types if appropriate.

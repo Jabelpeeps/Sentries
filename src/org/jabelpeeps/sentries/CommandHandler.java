@@ -302,8 +302,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( !enoughArgs( 1 + nextArg, inargs, sender ) ) return true;
         
         if  (   inargs[nextArg].toLowerCase().equals( "import" )
+                && inargs.length > nextArg + 1
                 && commandMap.containsKey( "import" )
-                && inargs[nextArg + 1].toLowerCase().equals( "all" ) ) {
+                && inargs[nextArg + 1].toLowerCase().equals( "all" ) 
+                && checkCommandPerm( commandMap.get( "import" ).getPerm(), sender ) ) {
             ((SentriesComplexCommand) commandMap.get( "import" )).call( sender, null, null, nextArg, inargs );
             return true;
         }

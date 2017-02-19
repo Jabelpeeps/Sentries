@@ -147,25 +147,26 @@ public enum AttackType implements AttackStrategy {
                 final BukkitScheduler sch = Bukkit.getScheduler();
                 final int task = sch.scheduleSyncRepeatingTask( Sentries.plugin, 
                         
-                    new Runnable() { int runcount = 0;
-                                     boolean outOfRange = false;
-                                     @Override public void run() {
-                                         if  (   outOfRange 
-                                                 || myLoc.distanceSquared( targetLoc ) > 50 
-                                                 || !inst.getNPC().isSpawned() ) {
-                                             outOfRange = true;
-                                         }
-                                         else if ( ++runcount <= 3 ) {
-                                             world.playSound( myLoc, Sound.ENTITY_CREEPER_PRIMED, 5, 1 );
-                                             myEntity.playEffect( EntityEffect.HURT );
-                                         } 
-                                         else {
-                                             world.createExplosion( myLoc.getX(), myLoc.getY(), myLoc.getZ(),
-                                                                      (float) inst.strength, false, false );
-                                             inst.getNPC().despawn();
-                                             inst.kill();
-                                         }
-                                    }
+                    new Runnable() { 
+                         int runcount = 0;
+                         boolean outOfRange = false;
+                         @Override public void run() {
+                             if  (   outOfRange 
+                                     || myLoc.distanceSquared( targetLoc ) > 50 
+                                     || !inst.getNPC().isSpawned() ) {
+                                 outOfRange = true;
+                             }
+                             else if ( ++runcount <= 3 ) {
+                                 world.playSound( myLoc, Sound.ENTITY_CREEPER_PRIMED, 5, 1 );
+                                 myEntity.playEffect( EntityEffect.HURT );
+                             } 
+                             else {
+                                 world.createExplosion( myLoc.getX(), myLoc.getY(), myLoc.getZ(),
+                                                          (float) inst.strength, false, false );
+                                 inst.getNPC().despawn();
+                                 inst.kill();
+                             }
+                         }
                      }, 0, 10 );
                 
                 sch.scheduleSyncDelayedTask( Sentries.plugin, () -> sch.cancelTask( task ), 35 );
@@ -277,17 +278,7 @@ public enum AttackType implements AttackStrategy {
         } 
         return false;
     }
-    
-//    /** method returns true for AttackTypes that need the sentry to get close to the victim */
-//    public boolean isMelee() {
-//        switch ( this ) {
-//            case BRAWLER:
-//            case CREEPER:
-//                return true;
-//            default:
-//                return false;           
-//        }
-//    }
+
     /** 
       * Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
      *
