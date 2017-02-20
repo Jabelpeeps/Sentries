@@ -2,7 +2,9 @@ package org.jabelpeeps.sentries;
 
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -27,9 +29,12 @@ public class SentinelImporter {
     static {
         EnumSet<SentinelTarget> ignored = EnumSet.of( SentinelTarget.MOBS, SentinelTarget.MONSTERS, SentinelTarget.PASSIVE_MOB );
         
+        Set<SentinelTarget> targets = new HashSet<>();               
         for ( EntityType each : EntityType.values() ) {
-            EnumSet<SentinelTarget> targets = EnumSet.copyOf( SentinelTarget.forEntityType( each ) );
+            targets.clear();
+            targets.addAll( SentinelTarget.forEntityType( each ) );
             targets.removeAll( ignored );
+            
             if ( targets.isEmpty() || targets.size() > 1 ) continue;
             
             targetMap.put( targets.iterator().next(), each );
