@@ -13,7 +13,6 @@ import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.util.NMS;
-import net.citizensnpcs.util.Util;
 
 /** 
  * An Enum of states that a Sentry can be in.
@@ -93,7 +92,7 @@ public enum SentryStatus {
                 if ( Utils.CanWarp( inst.guardeeEntity, loc.getWorld().getName() ) )
                     npc.spawn( loc.add( 1, 0, 1 ) );
             }  
-            else if  ( Util.isLoaded( inst.spawnLocation ) ) {
+            else if  ( Utils.isLoaded( inst.spawnLocation ) ) {
                 npc.spawn( inst.spawnLocation );
             }          
             return this;

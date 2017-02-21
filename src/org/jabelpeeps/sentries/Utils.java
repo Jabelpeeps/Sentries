@@ -25,6 +25,12 @@ import net.citizensnpcs.api.npc.NPC;
  */
 public abstract class Utils {
     
+    public static boolean isLoaded( Location location ) {
+        if ( location.getWorld() == null ) return false;
+        
+        return location.getWorld().isChunkLoaded( location.getBlockX() >> 4, location.getBlockZ() >> 4 );
+    }
+    
     public static double sqr( double d ) { return d * d; }
     
     public static void copyNavParams( NavigatorParameters from, NavigatorParameters to ) {
