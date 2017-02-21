@@ -160,25 +160,16 @@ public class SentryTrait extends Trait {
         String guardee = key.getString( S.PERSIST_GUARDEE, null );
         if ( guardee != null ) guardeeName = guardee;
 
-        Set<String> validTargets = new HashSet<>();
-        
-        if ( key.getRaw( S.TARGETS ) != null )
-            validTargets.addAll( (Set<String>) key.getRaw( S.TARGETS ) );
-        else
-            validTargets.addAll( Sentries.defaultTargets );
+        Object rawTargets = key.getRaw( S.TARGETS );
+        Set<String> validTargets = new HashSet<>( rawTargets != null ? (Set<String>) rawTargets : Sentries.defaultTargets );
         
         if ( Sentries.debug ) Sentries.debugLog( "Loading Targets:- " + validTargets );
         
         validTargets.stream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
-        // the second callCommand() is only used if the first is unsuccessful.
                              .forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
         
-        Set<String> ignoreTargets = new HashSet<>();
-        
-        if ( key.getRaw( S.IGNORES ) != null )
-            ignoreTargets.addAll( (Set<String>) key.getRaw( S.IGNORES ) );
-        else
-            ignoreTargets.addAll( Sentries.defaultIgnores );
+        Object rawIgnores = key.getRaw( S.IGNORES );
+        Set<String> ignoreTargets = new HashSet<>( rawIgnores != null ? (Set<String>) rawIgnores : Sentries.defaultIgnores );
         
         if ( Sentries.debug ) Sentries.debugLog( "Loading Ignores:- " + ignoreTargets );
         
@@ -281,7 +272,14 @@ public class SentryTrait extends Trait {
         if ( runscripts && Sentries.denizenActive )
             DenizenHook.sentryDeath( myDamagers, npc );
     }
-
+    
+    /** Sets the Sentry's status directly to DEAD, and sets the respawnTime field according to the value of respawnDelay */
+    public void kill() {
+        if ( myStatus.isDeadOrDieing() ) return;
+        respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
+        myStatus = SentryStatus.DEAD;
+    }
+     
     @Override
     public void onDespawn() {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] onDespawn()" );
@@ -399,13 +397,7 @@ public class SentryTrait extends Trait {
 
         return myEntity.getHealth();
     }
-    
-    /** Sets the Sentry's status to DEAD, and sets the respawnTime field according to the value of respawnDelay */
-     public void kill() {
-        respawnTime = System.currentTimeMillis() + respawnDelay * 1000;
-        myStatus = SentryStatus.DEAD;
-    }
-     
+
     /**
      * Calculates the damage to inflict on a sentry in the light of the current Armour settings.
      * It does not actually inflict the damage on the NPC.
@@ -704,9 +696,7 @@ public class SentryTrait extends Trait {
         else {
             potionItem = null;
             weaponSpecialEffects = Sentries.weaponEffects.get( weapon );
-        }
-//        NavigatorParameters params = npc.getNavigator().getDefaultParameters();
-//        params.attackStrategy( myAttack );      
+        }    
         updateStrength();
     }
 

@@ -26,7 +26,7 @@ import net.citizensnpcs.api.npc.NPC;
 public abstract class Utils {
     
     public static boolean isLoaded( Location location ) {
-        if ( location.getWorld() == null ) return false;
+        if ( location == null || location.getWorld() == null ) return false;
         
         return location.getWorld().isChunkLoaded( location.getBlockX() >> 4, location.getBlockZ() >> 4 );
     }
