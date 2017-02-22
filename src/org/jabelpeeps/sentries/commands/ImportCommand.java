@@ -27,15 +27,15 @@ public class ImportCommand implements SentriesComplexCommand {
     public String getLongHelp() {
 
         if ( helpText == null ) {
-            helpText = String.join( "",
-                    "do  ", Col.GOLD, "/sentry import (all) <sentry|sentinel>", Col.RESET, 
-                    " to import settings and targets for Combat NPC's using the named traits into Sentries",
-                    " During the import, the original trait will be removed.", System.lineSeparator(),
-                    "  use the optional argument ", Col.GOLD, "all ", Col.RESET, "to import all NPC's with the named trait.",
-                    System.lineSeparator(), "  or import a single NPC, by having it selected, ",
-                    " or putting its NPC id number as the first argument. ", System.lineSeparator(),
-                    Col.RED, "IMPORTANT:  As imports are irreversible, an attempt will be made to backup the Citizens saves.yml "
-                            + " before importing, and the import will not proceed if the attempt fails." );
+            helpText = Utils.join(
+                    "do  ", Col.GOLD, "/sentry (#) import (all) <sentry|sentinel>", Col.RESET, 
+                    "  to import settings and targets for Combat NPC's using the named traits into Sentries",
+                    "  During the import, the original trait will be removed.", System.lineSeparator(), 
+                    "import a single NPC, by having it selected, or by putting its NPC id number as the first argument (#). ", 
+                    System.lineSeparator(), "(optional) use ", Col.GOLD, "all ", Col.RESET, 
+                    "to import all NPC's with the named trait.", System.lineSeparator(),
+                    Col.RED, "IMPORTANT:  As imports are irreversible, an attempt will be made to backup the Citizens saves.yml ",
+                             " before importing; the import will not proceed if the attempt fails." );
         }
         return helpText;
     }

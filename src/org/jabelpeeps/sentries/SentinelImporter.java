@@ -69,7 +69,8 @@ public class SentinelImporter {
         sentry.respawnDelay = (int) ( sentinel.respawnTime / 20 );
         sentry.spawnLocation = sentinel.spawnPoint;
         sentry.guardeeEntity = Bukkit.getPlayer( sentinel.getGuarding() );
-        sentry.guardeeName = sentry.guardeeEntity.getName();
+        if ( sentry.guardeeEntity != null ) 
+            sentry.guardeeName = sentry.guardeeEntity.getName();
         
         // Import targets
         if  (   sentinel.targets.contains( SentinelTarget.MOBS ) 

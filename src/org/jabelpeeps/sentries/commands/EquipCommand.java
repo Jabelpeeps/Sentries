@@ -55,6 +55,11 @@ public class EquipCommand implements SentriesComplexCommand {
         }
 
         Equipment equip = npc.getTrait( Equipment.class );
+
+        if ( equip == null ) { 
+            Utils.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
+            return;
+        }
         
         if ( S.CLEARALL.equalsIgnoreCase( args[nextArg + 1] ) ) {
            
@@ -101,21 +106,17 @@ public class EquipCommand implements SentriesComplexCommand {
                                 "/sentry help listequips ", Col.RESET, "for a list of accepted item names" );
                 return;
             }            
-            if ( equip != null ) {
+            ItemStack item = new ItemStack( mat );
+            int slot = Sentries.getSlot( item.getType() );
+            
+            if ( checkSlot( npc.getEntity().getType(), slot ) ) {
+                equip.set( slot, item );
 
-                ItemStack item = new ItemStack( mat );
-                int slot = Sentries.getSlot( item.getType() );
+                if ( slot == 0 ) inst.updateAttackType();
+                else inst.updateArmour();
                 
-                if ( checkSlot( npc.getEntity().getType(), slot ) ) {
-                    equip.set( slot, item );
-    
-                    if ( slot == 0 ) inst.updateAttackType();
-                    else inst.updateArmour();
-                    
-                    Utils.sendMessage( sender, Col.GREEN, "Equipped ", mat.toString(), " on ", npcName );
-                }
+                Utils.sendMessage( sender, Col.GREEN, "Equipped ", mat.toString(), " on ", npcName );
             }
-            else Utils.sendMessage( sender, S.ERROR, "Could not equip: invalid mob type?" );
         }
     }
 
