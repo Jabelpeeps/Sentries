@@ -54,7 +54,6 @@ import org.jabelpeeps.sentries.commands.TargetComand;
 import org.jabelpeeps.sentries.commands.VoiceRangeCommand;
 import org.jabelpeeps.sentries.commands.WarningCommand;
 
-import lombok.Getter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Owner;
@@ -112,13 +111,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( name, command );
     }
     
-    static SentriesComplexCommand nullCommand = new SentriesComplexCommand() {
-        @Getter String shortHelp = "", longHelp = "", perm = "";
-        @Override public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
-            Sentries.logger.info( "[Sentries] NPC:" + npcName + ". Target/Ignore could not be imported:- " + Utils.joinArgs( 0, args ) );
-        }
-    };
-    
+    static SentriesComplexCommand getCommand ( String name ) {
+        return (SentriesComplexCommand) commandMap.get( name.toLowerCase() );
+    }
+
     /** Static method to call a registered Sentries sub-command with arguments, only works for 
      *  'complex' commands - ones that have multiple possible arguments.
      * @param inst - the instance of SentryTrait on which to call the command 
@@ -126,16 +122,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *              (i.e. the sub-command & the sub-command's args ) 
      * @return true if a sub-command with the name give as the first member of args was found */
     static boolean callCommand( SentryTrait inst, String ... args ) {
-        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( args[0].toLowerCase() );
+        SentriesComplexCommand command = getCommand( args[0] );
         if ( command == null ) return false;
         
         command.call( null, null, inst, 0, args );
         return true;
-    }
-    
-    static SentriesComplexCommand getCommand ( String name ) {
-        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( name.toLowerCase() );
-        return command != null ? command : nullCommand;
     }
 
     /**

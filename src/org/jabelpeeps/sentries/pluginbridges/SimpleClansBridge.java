@@ -25,13 +25,12 @@ public class SimpleClansBridge implements PluginTargetBridge {
     @Getter final String prefix = "CLAN";
     @Getter final String activationMessage = "SimpleClans is active, The CLAN: target will function";
     @Getter private String commandHelp = 
-            String.join( "", "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
+            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
     protected static ClanManager clanManager = SimpleClans.getInstance().getClanManager();
-    private SentriesComplexCommand command = new ClansCommand();
 
     @Override
     public boolean activate() { 
-        CommandHandler.addCommand( prefix.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), new ClansCommand() );
         return true; 
     }
 
@@ -46,15 +45,15 @@ public class SimpleClansBridge implements PluginTargetBridge {
             if ( helpTxt == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
                 
-                joiner.add( String.join( "", "do ", Col.GOLD, "/sentry clan <target|ignore|list|remove|join|leave|clearall> <ClanName> ", Col.RESET, 
+                joiner.add( Utils.join( "do ", Col.GOLD, "/sentry clan <target|ignore|list|remove|join|leave|clearall> <ClanName> ", Col.RESET, 
                                                     "where <ClanName> is a valid current clan name, or tag." ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "target ", Col.RESET, "to have a sentry attack members of <ClanName>" ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "ignore ", Col.RESET, "to have a sentry ignore members of <ClanName>" ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "list ", Col.RESET, "to display the current clan target information." ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "remove ", Col.RESET, "to remove target or ignore for <ClanName>" ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "join ", Col.RESET, "to attack members of rival clans (and ignore allies)" ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "leave ", Col.RESET, "to reverse a 'join' command." ) );
-                joiner.add( String.join( "", "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all Clan targets from a sentry." ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "target ", Col.RESET, "to have a sentry attack members of <ClanName>" ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "ignore ", Col.RESET, "to have a sentry ignore members of <ClanName>" ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "list ", Col.RESET, "to display the current clan target information." ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "remove ", Col.RESET, "to remove target or ignore for <ClanName>" ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "join ", Col.RESET, "to attack members of rival clans (and ignore allies)" ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "leave ", Col.RESET, "to reverse a 'join' command." ) );
+                joiner.add( Utils.join( "  use ", Col.GOLD, "clearall ", Col.RESET, "to remove all Clan targets from a sentry." ) );
                 
                 helpTxt = joiner.toString();
             }                        
@@ -76,15 +75,15 @@ public class SimpleClansBridge implements PluginTargetBridge {
                 
                 inst.targets.stream().filter( t -> t instanceof ClanTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
+                                             Utils.join( Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof ClanTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
+                                             Utils.join( Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.targets.stream().filter( t -> t instanceof ClanRivalsTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.BLUE, "Member of: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
+                                             Utils.join( Col.BLUE, "Member of: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Utils.sendMessage( sender, Col.YELLOW, npcName, " has no Clan targets or ignores" );
@@ -141,7 +140,7 @@ public class SimpleClansBridge implements PluginTargetBridge {
                     else 
                         Utils.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
 
-                    call( sender, npcName, inst, 0, "", S.LIST );
+                    if ( sender != null ) call( sender, npcName, inst, 0, "", S.LIST );
                     return;                
                 }
                 
@@ -152,7 +151,7 @@ public class SimpleClansBridge implements PluginTargetBridge {
                     else 
                         Utils.sendMessage( sender, Col.RED, clan.getName(), S.ALREADY_LISTED, npcName );
 
-                    call( sender, npcName, inst, 0, "", S.LIST );
+                    if ( sender != null ) call( sender, npcName, inst, 0, "", S.LIST );
                     return;              
                 }   
             }

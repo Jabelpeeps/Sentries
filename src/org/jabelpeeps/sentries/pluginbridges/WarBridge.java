@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries.pluginbridges;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import org.bukkit.command.CommandSender;
@@ -26,12 +28,11 @@ public class WarBridge implements PluginTargetBridge {
     @Getter final String prefix = "WAR";
     @Getter final String activationMessage = "War is active, The WAR: target will function";
     @Getter private String commandHelp = 
-            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
-    private SentriesComplexCommand command = new WarTeamCommand();
+            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ); 
 
     @Override
     public boolean activate() { 
-        CommandHandler.addCommand( prefix.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), new WarTeamCommand() );
         return true; 
     }
     
@@ -44,7 +45,7 @@ public class WarBridge implements PluginTargetBridge {
         @Override
         public String getLongHelp() { 
             if ( helpTxt == null ) {
-                helpTxt = String.join( "", "do ", Col.GOLD, "/sentry ", prefix.toLowerCase(), " <target|ignore|remove|list|clearall> <WarTeam> ",
+                helpTxt = Utils.join( "do ", Col.GOLD, "/sentry ", prefix.toLowerCase(), " <target|ignore|remove|list|clearall> <WarTeam> ",
                         Col.RESET, "to have a sentry consider War Team membership when selecting targets.", System.lineSeparator(),
                         "  use ", Col.GOLD, "target ", Col.RESET, "to target players from <WarTeam>", System.lineSeparator(),
                         "  use ", Col.GOLD, "ignore ", Col.RESET, "to ignore players from <WarTeam>", System.lineSeparator(),
@@ -71,11 +72,11 @@ public class WarBridge implements PluginTargetBridge {
                 
                 inst.targets.stream().filter( t -> t instanceof WarTeamTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString())[2] ) ) );
+                                             Utils.join( Col.RED, "Target: ", Utils.colon.split( t.getTargetString())[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof WarTeamTarget )
                                      .forEach( t -> joiner.add( 
-                                             String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
+                                             Utils.join( Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 if ( joiner.length() < 1 ) 
                     Utils.sendMessage( sender, Col.YELLOW, npcName, " has no War Team targets or ignores" );
@@ -100,17 +101,11 @@ public class WarBridge implements PluginTargetBridge {
             String teamName = args[nextArg + 2];
             
             Team team = War.war.getEnabledWarzones()
-                               .parallelStream()
-                               .filter( z -> z.getTeams()
-                                              .parallelStream()
-                                              .anyMatch( t -> t.getName()
-                                                               .equalsIgnoreCase( teamName ) ) )
-                               .findAny()
-                               .get()
-                               .getTeams()
-                               .parallelStream()
-                               .filter( t -> t.getName()
-                                              .equalsIgnoreCase( teamName ) )
+                               .stream()
+                               .map( z -> z.getTeams() )
+                               .collect( HashSet<Team>::new, Set::addAll, Set::addAll )
+                               .stream()
+                               .filter( t -> t.getName().equalsIgnoreCase( teamName ) )
                                .findAny()
                                .get();
             
@@ -144,7 +139,7 @@ public class WarBridge implements PluginTargetBridge {
                 else 
                     Utils.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
                 
-                call( sender, npcName, inst, 0, "", S.LIST );
+                if ( sender != null ) call( sender, npcName, inst, 0, "", S.LIST );
                 return;
             }
             
@@ -155,7 +150,7 @@ public class WarBridge implements PluginTargetBridge {
                 else 
                     Utils.sendMessage( sender, Col.RED, team.getName(), S.ALREADY_LISTED, npcName );
 
-                call( sender, npcName, inst, 0, "", S.LIST );
+                if ( sender != null ) call( sender, npcName, inst, 0, "", S.LIST );
                 return;            
             } 
             Utils.sendMessage( sender, S.ERROR, " Sub-command not recognised!", Col.RESET, " please check ",

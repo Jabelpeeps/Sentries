@@ -38,13 +38,12 @@ public class TownyBridge implements PluginTargetBridge {
 
     @Getter final String prefix = "TOWNY";
     @Getter final String activationMessage = "Detected Towny, the TOWNY: target will function";
-    private SentriesComplexCommand command = new TownyCommand();
     @Getter private String commandHelp = Utils.join( "  using the ", Col.GOLD, "/sentry ", 
                                                     prefix.toLowerCase(), " ... ", Col.RESET, "commands." );
     
     @Override
     public boolean activate() {
-        CommandHandler.addCommand( prefix.toLowerCase(), command );
+        CommandHandler.addCommand( prefix.toLowerCase(), new TownyCommand() );
         return true; 
     }
     
@@ -57,7 +56,7 @@ public class TownyBridge implements PluginTargetBridge {
         @Override
         public String getLongHelp() {
             if ( helpTxt == null ) {
-                helpTxt = String.join( "", 
+                helpTxt = Utils.join(  
                         "do ", Col.GOLD, "/sentry towny <join|leave|info|clearall> <TownName> ", Col.RESET, 
                         System.lineSeparator(), "  where ", Col.GOLD, "<TownName> ", Col.RESET, "must be a valid Towny Town name.",
                         System.lineSeparator(), "  use ", Col.GOLD, "join ", Col.RESET, "to join <TownName>", 
@@ -86,7 +85,7 @@ public class TownyBridge implements PluginTargetBridge {
                 
                 StringJoiner joiner = new StringJoiner( ", " );
                 
-                inst.targets.parallelStream().filter( t -> t instanceof TownyEnemyTarget )
+                inst.targets.stream().filter( t -> t instanceof TownyEnemyTarget )
                                              .forEach( t -> joiner.add( Utils.colon.split( t.getTargetString() )[2] ) );
                 
                 if ( joiner.length() < 3 )
@@ -99,11 +98,11 @@ public class TownyBridge implements PluginTargetBridge {
                 
                 inst.targets.stream().filter( t -> t instanceof TownyTarget )
                                      .forEach( t -> joiner2.add( 
-                                             String.join( "", Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
+                                             Utils.join( Col.RED, "Target: ", Utils.colon.split( t.getTargetString() )[2] ) ) );
                 
                 inst.ignores.stream().filter( t -> t instanceof TownyTarget )
                                      .forEach( t -> joiner2.add( 
-                                             String.join( "", Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2]) ) );
+                                             Utils.join( Col.GREEN, "Ignore: ", Utils.colon.split( t.getTargetString() )[2]) ) );
 
                 if ( joiner2.length() > 3 ) 
                     Utils.sendMessage( sender, Col.YELLOW, "These legacy Towny targets are also active:- ", System.lineSeparator(),
@@ -149,7 +148,7 @@ public class TownyBridge implements PluginTargetBridge {
                         Utils.sendMessage( sender, Col.GREEN, npcName, " is no-longer a resident of ", town.getName() );
                     else {
                         Utils.sendMessage( sender, Col.YELLOW, npcName, " is unknown in ", town.getName() );
-                        call( sender, npcName, inst, 0, "", S.INFO );
+                        if ( sender != null ) call( sender, npcName, inst, 0, "", S.INFO );
                     }
                     return;
                 }
@@ -179,7 +178,7 @@ public class TownyBridge implements PluginTargetBridge {
                     }
                     else {
                         Utils.sendMessage( sender, Col.RED, npcName, " was neither targeting nor ignoring ", town.getName() );
-                        call( sender, npcName, inst, 0, "", S.INFO );
+                        if ( sender != null ) call( sender, npcName, inst, 0, "", S.INFO );
                     }
                     return;
                 }
@@ -193,7 +192,7 @@ public class TownyBridge implements PluginTargetBridge {
                     else 
                         Utils.sendMessage( sender, Col.RED, town.getName(), S.ALREADY_LISTED, npcName );
 
-                    call( sender, npcName, inst, 0, "", S.LIST );
+                    if ( sender != null ) call( sender, npcName, inst, 0, "", S.LIST );
                     return;  
                 }
                 
@@ -204,7 +203,7 @@ public class TownyBridge implements PluginTargetBridge {
                     else 
                         Utils.sendMessage( sender, Col.RED, town.getName(), S.ALREADY_LISTED, npcName );
 
-                    call( sender, npcName, inst, 0, "", S.LIST );
+                    if ( sender != null ) call( sender, npcName, inst, 0, "", S.LIST );
                     return; 
                 }
             }        

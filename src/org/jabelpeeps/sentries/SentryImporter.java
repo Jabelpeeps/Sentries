@@ -1,17 +1,9 @@
 package org.jabelpeeps.sentries;
 
-import java.util.Arrays;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.EntityType;
 import org.jabelpeeps.sentries.targets.AllEntitiesTarget;
 import org.jabelpeeps.sentries.targets.AllMonstersTarget;
 import org.jabelpeeps.sentries.targets.AllNPCsTarget;
 import org.jabelpeeps.sentries.targets.AllPlayersTarget;
-import org.jabelpeeps.sentries.targets.MobTypeTarget;
-import org.jabelpeeps.sentries.targets.NamedNPCTarget;
-import org.jabelpeeps.sentries.targets.NamedPlayerTarget;
 import org.jabelpeeps.sentries.targets.OwnerTarget;
 
 import net.aufdemrand.sentry.SentryInstance;
@@ -87,55 +79,31 @@ public class SentryImporter {
                     
                 sections[0] = sections[0].trim();
                 sections[1] = sections[1].trim();
-                
-                if ( sections[0].equals( "NPC" ) ) {
-                    for ( NPC each : CitizensAPI.getNPCRegistry() ) {
-                        if ( each.getName() == sections[1] )
-                            newSentry.targets.add( new NamedNPCTarget( each.getUniqueId() ) );
-                    }
-                }  
-                
-                else if ( sections[0].equals( "PLAYER" ) ) {
-                    UUID uuid = Arrays.stream( Bukkit.getOfflinePlayers() )
-                                      .parallel()
-                                      .filter( p -> p.getName().equalsIgnoreCase( sections[1] ) )
-                                      .map( p -> p.getUniqueId() )
-                                      .findAny().get();
-                    if ( uuid != null )
-                        newSentry.targets.add( new NamedPlayerTarget( uuid ) );
-                }
-                
-                else if ( sections[0].equals( "ENTITY" ) ) {
-                    EntityType target = EntityType.valueOf( sections[1].toUpperCase() );
-                    if ( target != null )
-                        newSentry.targets.add( new MobTypeTarget( target ) );
-                }
-                
-                else if ( sections[0].equals( "GROUP" ) ) {
-                    CommandHandler.getCommand( "group" ).call( null, npc.getName(), newSentry, 0, "group", "target", sections[1]  ); 
-                }
-                else if ( sections[0].equals( "EVENT" ) ) {
-                    CommandHandler.getCommand( "event" ).call( null, npc.getName(), newSentry, 0, "event", "add", sections[1] );
-                }                   
-                else if ( sections[0].equals( "FACTION" ) ) {
-                    CommandHandler.getCommand( "faction" ).call( null, npc.getName(), newSentry, 0, "faction", "target", sections[1] );
-                }
-                else if ( sections[0].equals( "FACTIONENEMIES" ) ) {
-                    CommandHandler.getCommand( "faction" ).call( null, npc.getName(), newSentry, 0, "faction", "join", sections[1] );
-                }
-                else if ( sections[0].equals( "TOWN" ) ) {
-                    CommandHandler.getCommand( "towny" ).call( null, npc.getName(), newSentry, 0, "towny", "target", sections[1] );
-                }
-                else if ( sections[0].equals( "WARTEAM" ) ) {
-                    CommandHandler.getCommand( "war" ).call( null, npc.getName(), newSentry, 0, "war", "target", sections[1] );             
-                }
-                else if ( sections[0].equals( "TEAM" ) ) {
-                    CommandHandler.getCommand( "scoreboard" ).call( null, npc.getName(), newSentry, 0, "scoreboard", "target", sections[1] );
-                }
-                else if ( sections[0].equals( "CLAN" ) ) {
-                    CommandHandler.getCommand( "clan" ).call( null, npc.getName(), newSentry, 0, "clan", "target", sections[1] );
-                }
-                else Sentries.logger.info( "[Sentries] NPC:" + npc.getName() + ". Target could not be imported:- " + t );
+               
+                if ( sections[0].equals( "NPC" ) )
+                    CommandHandler.callCommand( newSentry, "target", "add", "named:npc:" + sections[1] );
+                else if ( sections[0].equals( "PLAYER" ) ) 
+                    CommandHandler.callCommand( newSentry, "target", "add", "named:player:" + sections[1] );
+                else if ( sections[0].equals( "ENTITY" ) ) 
+                    CommandHandler.callCommand( newSentry, "target", "add", "mobtype:" + sections[1] );
+                else if ( sections[0].equals( "GROUP" ) ) 
+                    CommandHandler.callCommand( newSentry, "group", "target", sections[1]  ); 
+                else if ( sections[0].equals( "EVENT" ) ) 
+                    CommandHandler.callCommand( newSentry, "event", "add", sections[1] );
+                else if ( sections[0].equals( "FACTION" ) ) 
+                    CommandHandler.callCommand( newSentry, "faction", "target", sections[1] );
+                else if ( sections[0].equals( "FACTIONENEMIES" ) )
+                    CommandHandler.callCommand( newSentry, "faction", "join", sections[1] );
+                else if ( sections[0].equals( "TOWN" ) ) 
+                    CommandHandler.callCommand( newSentry, "towny", "target", sections[1] );
+                else if ( sections[0].equals( "WARTEAM" ) )
+                    CommandHandler.callCommand( newSentry, "war", "target", sections[1] ); 
+                else if ( sections[0].equals( "TEAM" ) ) 
+                    CommandHandler.callCommand( newSentry, "scoreboard", "target", sections[1] );
+                else if ( sections[0].equals( "CLAN" ) ) 
+                    CommandHandler.callCommand( newSentry, "clan", "target", sections[1] );
+                else 
+                    Sentries.logger.info( "[Sentries] NPC:" + npc.getName() + ". Target could not be imported:- " + t );
             }
         }        
         // import ignores
@@ -157,48 +125,26 @@ public class SentryImporter {
                 sections[0] = sections[0].trim();
                 sections[1] = sections[1].trim();
                 
-                if ( sections[0].equals( "NPC" ) ) {
-                    for ( NPC each : CitizensAPI.getNPCRegistry() ) {
-                        if ( each.getName() == sections[1] )
-                            newSentry.ignores.add( new NamedNPCTarget( each.getUniqueId() ) );
-                    }
-                }
-                
-                else if ( sections[0].equals( "PLAYER" ) ) {
-                    UUID uuid = Arrays.stream( Bukkit.getOfflinePlayers() )
-                                      .parallel()
-                                      .filter( p -> p.getName().equalsIgnoreCase( sections[1] ) )
-                                      .map( p -> p.getUniqueId() )
-                                      .findAny().get();
-                    if ( uuid != null )
-                        newSentry.ignores.add( new NamedPlayerTarget( uuid ) );
-                }
-                
-                else if ( sections[0].equals( "ENTITY" ) ) {
-                    EntityType target = EntityType.valueOf( sections[1].toUpperCase() );
-                    if ( target != null ) {
-                        newSentry.ignores.add( new MobTypeTarget( target ) );
-                    }
-                }               
-                else if ( sections[0].equals( "GROUP" ) ) {
-                    CommandHandler.getCommand( "group" ).call( null, npc.getName(), newSentry, 0, "group", "ignore", sections[1] ); 
-                }
-                else if ( sections[0].equals( "FACTION" ) ) {
-                    CommandHandler.getCommand( "faction" ).call( null, npc.getName(), newSentry, 0, "faction", "ignore", sections[1] );
-                }
-                else if ( sections[0].equals( "TOWN" ) ) {
-                    CommandHandler.getCommand( "towny" ).call( null, npc.getName(), newSentry, 0, "towny", "ignore", sections[1] );
-                }
-                else if ( sections[0].equals( "WARTEAM" ) ) {
-                    CommandHandler.getCommand( "war" ).call( null, npc.getName(), newSentry, 0, "war", "ignore", sections[1] );
-                }
-                else if ( sections[0].equals( "TEAM" ) ) {
-                    CommandHandler.getCommand( "scoreboard" ).call( null, npc.getName(), newSentry, 0, "scoreboard", "ignore", sections[1] );
-                }
-                else if ( sections[0].equals( "CLAN" ) ) {
-                    CommandHandler.getCommand( "clan" ).call( null, npc.getName(), newSentry, 0, "clan", "ignore", sections[1] );
-                }
-                else Sentries.logger.info( "[Sentries] NPC:" + npc.getName() + ". Ignore could not be imported:- " + t );
+                if ( sections[0].equals( "NPC" ) )
+                    CommandHandler.callCommand( newSentry, "ignore", "add", "named:npc:" + sections[1] );
+                else if ( sections[0].equals( "PLAYER" ) )
+                    CommandHandler.callCommand( newSentry, "ignore", "add", "named:player:" + sections[1] );
+                else if ( sections[0].equals( "ENTITY" ) )
+                    CommandHandler.callCommand( newSentry, "ignore", "add", "mobtype:" + sections[1] );
+                else if ( sections[0].equals( "GROUP" ) )
+                    CommandHandler.callCommand( newSentry, "group", "ignore", sections[1] ); 
+                else if ( sections[0].equals( "FACTION" ) )
+                    CommandHandler.callCommand( newSentry, "faction", "ignore", sections[1] );
+                else if ( sections[0].equals( "TOWN" ) )
+                    CommandHandler.callCommand( newSentry, "towny", "ignore", sections[1] );
+                else if ( sections[0].equals( "WARTEAM" ) )
+                    CommandHandler.callCommand( newSentry, "war", "ignore", sections[1] );
+                else if ( sections[0].equals( "TEAM" ) )
+                    CommandHandler.callCommand( newSentry, "scoreboard", "ignore", sections[1] );
+                else if ( sections[0].equals( "CLAN" ) )
+                    CommandHandler.callCommand( newSentry, "clan", "ignore", sections[1] );
+                else
+                    Sentries.logger.info( "[Sentries] NPC:" + npc.getName() + ". Ignore could not be imported:- " + t );
             }
         }
         npc.removeTrait( net.aufdemrand.sentry.SentryTrait.class );

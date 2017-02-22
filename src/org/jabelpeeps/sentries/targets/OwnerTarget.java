@@ -32,6 +32,6 @@ public class OwnerTarget extends AbstractTargetType implements TargetType.Intern
     }
     @Override
     public int hashCode() {
-        return owner.hashCode();
+        return owner != null ? owner.hashCode() : 0;
     }
 }

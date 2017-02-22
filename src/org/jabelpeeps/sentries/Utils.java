@@ -275,12 +275,12 @@ public abstract class Utils {
         joiner.add( "You can also use:- " ); 
         
         SentriesCommand command = CommandHandler.getCommand( S.EVENT );
-        if ( command != CommandHandler.nullCommand ) {
+        if ( command != null ) {
             joiner.add( join( Col.GOLD, "  /sentry ", S.EVENT, Col.RESET, " ", command.getShortHelp() ) );
         }
         
         if ( !Sentries.activePlugins.isEmpty() ) {           
-            Sentries.activePlugins.parallelStream()
+            Sentries.activePlugins.stream()
                                   .filter( p -> p instanceof PluginTargetBridge )
                                   .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
         }            

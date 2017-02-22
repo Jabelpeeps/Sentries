@@ -166,7 +166,7 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug ) Sentries.debugLog( "Loading Targets:- " + validTargets );
         
         validTargets.stream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
-                             .forEach( t -> CommandHandler.callCommand( this, S.TARGET, "add", t ) );
+                             .forEach( t -> CommandHandler.callCommand( this, S.TARGET, S.ADD, t ) );
         
         Object rawIgnores = key.getRaw( S.IGNORES );
         Set<String> ignoreTargets = new HashSet<>( rawIgnores != null ? (Set<String>) rawIgnores : Sentries.defaultIgnores );
@@ -174,7 +174,7 @@ public class SentryTrait extends Trait {
         if ( Sentries.debug ) Sentries.debugLog( "Loading Ignores:- " + ignoreTargets );
         
         ignoreTargets.stream().filter( s -> !CommandHandler.callCommand( this, Utils.colon.split( s ) ) )
-                              .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, "add", i ) ); 
+                              .forEach( i -> CommandHandler.callCommand( this, S.IGNORE, S.ADD, i ) ); 
 
         Set<String> eventTargets = new HashSet<>();
         
@@ -183,7 +183,7 @@ public class SentryTrait extends Trait {
         
         if ( Sentries.debug ) Sentries.debugLog( "Loading Events:- " + eventTargets );
         
-        eventTargets.stream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, "add", e ) );     
+        eventTargets.stream().forEach( e -> CommandHandler.callCommand( this, S.EVENT, S.ADD, e ) );     
     }
 
     @Override
@@ -292,9 +292,9 @@ public class SentryTrait extends Trait {
     public void save( DataKey key ) {
         if ( Sentries.debug ) Sentries.debugLog( npc.getName() + ":[" + npc.getId() + "] save()" );
         
-        key.setRaw( S.TARGETS, targets.stream().map( t -> t.getTargetString() ).collect( Collectors.toSet() ) );
-        key.setRaw( S.IGNORES, ignores.stream().map( i -> i.getTargetString() ).collect( Collectors.toSet() ) );
-        key.setRaw( S.EVENTS, events.stream().map( e -> e.getTargetString() ).collect( Collectors.toSet() ) );
+        key.setRaw( S.TARGETS, targets.stream().collect( Collectors.mapping( TargetType::getTargetString, Collectors.toSet() ) ) );
+        key.setRaw( S.IGNORES, ignores.stream().collect( Collectors.mapping( TargetType::getTargetString, Collectors.toSet() ) ) );
+        key.setRaw( S.EVENTS, events.stream().collect( Collectors.mapping( TargetType::getTargetString, Collectors.toSet() ) ) );
     }
 
     @Override
