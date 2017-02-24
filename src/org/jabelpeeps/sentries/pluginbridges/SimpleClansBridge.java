@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginTargetBridge;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -20,12 +20,10 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 
-public class SimpleClansBridge implements PluginTargetBridge {
+public class SimpleClansBridge implements PluginBridge {
 
-    @Getter final String prefix = "CLAN";
+    final String prefix = "Clan";
     @Getter final String activationMessage = "SimpleClans is active, The CLAN: target will function";
-    @Getter private String commandHelp = 
-            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
     protected static ClanManager clanManager = SimpleClans.getInstance().getClanManager();
 
     @Override

@@ -37,7 +37,7 @@ public class InfoCommand implements SentriesSimpleCommand {
                 Col.RED, " [NightVision]:", Col.WHITE, String.valueOf( inst.nightVision ),
                 Col.RED, " [HealRate]:", Col.WHITE, String.valueOf( inst.healRate ),
                 Col.RED, " [VoiceRange]:", Col.WHITE, String.valueOf( inst.voiceRange ),
-                Col.RED, " [FollowDistance]:", Col.WHITE, String.valueOf( Math.sqrt( inst.followDistance ) ) ) );
+                Col.RED, " [FollowDistance]:", Col.WHITE, Utils.formatDbl( Math.sqrt( inst.followDistance ) ) ) );
 
         joiner.add( String.join( "", 
                 Col.GREEN, "Invincible: ", Col.WHITE, String.valueOf( inst.invincible ), 

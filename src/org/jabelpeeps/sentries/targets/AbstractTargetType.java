@@ -1,11 +1,12 @@
 package org.jabelpeeps.sentries.targets;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public abstract class AbstractTargetType implements TargetType {
 
     protected int order;
-    @Getter protected String targetString;
+    @Getter @Setter  protected String targetString;
     protected String prettyString;
     
     protected AbstractTargetType( int i ) {
@@ -15,17 +16,7 @@ public abstract class AbstractTargetType implements TargetType {
     public final int compareTo( TargetType o ) {
         int same = order - ((AbstractTargetType) o).order;
         return ( same != 0 ) ? same : hashCode() - o.hashCode();
-    }   
-    @Override
-    public TargetType setTargetString( String type ) {
-        targetString = type;
-        return this;
-    }
-    @Override
-    public TargetType setPrettyString( String pretty ) {
-        prettyString = pretty;
-        return this;
-    }
+    }  
     @Override
     public String getPrettyString() {
         return prettyString == null ? targetString : prettyString;

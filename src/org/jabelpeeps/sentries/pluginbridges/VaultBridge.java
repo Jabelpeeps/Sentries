@@ -9,7 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginTargetBridge;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -22,11 +22,9 @@ import org.jabelpeeps.sentries.targets.TargetType;
 import lombok.Getter;
 import net.milkbowl.vault.permission.Permission;
 
-public class VaultBridge implements PluginTargetBridge {
+public class VaultBridge implements PluginBridge {
 
-    @Getter final String prefix = "GROUP";
-    @Getter private String commandHelp = 
-            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase(), " ... ", Col.RESET, "commands." );
+    final String prefix = "Group";
     @Getter private String activationMessage;
     protected static Permission perms;
 
@@ -62,7 +60,7 @@ public class VaultBridge implements PluginTargetBridge {
 
     public class GroupCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
         
-        @Getter final String shortHelp = "define targets by permission groups"; 
+        @Getter final String shortHelp = "to set permission group targets"; 
         @Getter final String perm = "sentry.groups";
         private String helpTxt;
         

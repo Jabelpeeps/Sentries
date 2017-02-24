@@ -35,7 +35,7 @@ public interface TargetType extends Comparable<TargetType> {
      * 
      * @param type - a string that can be parsed to provide a definition of the desired targets.
      */
-    public TargetType setTargetString( String type );
+    public void setTargetString( String type );
     
     /**
      *  Method to get a representation of the parameters of this TargetType.
@@ -43,13 +43,7 @@ public interface TargetType extends Comparable<TargetType> {
      *  @return the String supplied to {@link #setTargetString(String)}
      */
     public String getTargetString();
-
-    /**
-     * 
-     * @param pretty - a human readable string describing the target.
-     */
-    public TargetType setPrettyString( String pretty );
-    
+ 
     /**
      * This method is called when a user lists a sentry's targets.
      * @return a human-friendly string that describes the TargetType

@@ -19,7 +19,7 @@ import lombok.Getter;
 public class EventCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
 
     private String commandHelp;
-    @Getter private String shortHelp = "- set events a sentry should react to";
+    @Getter private String shortHelp = "set events a sentry should react to";
     @Getter private String perm = S.PERM_EVENT;
 
     @Override

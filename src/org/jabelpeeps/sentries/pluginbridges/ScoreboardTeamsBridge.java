@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginTargetBridge;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -20,13 +20,11 @@ import org.jabelpeeps.sentries.targets.TargetType;
 
 import lombok.Getter;
 
-public class ScoreboardTeamsBridge implements PluginTargetBridge {
+public class ScoreboardTeamsBridge implements PluginBridge {
 
-    @Getter final String prefix = "SCOREBOARD";
+    final String prefix = "Scoreboard";
     @Getter final String activationMessage = "MC Scoreboard Teams active, the SCOREBOARD: target will function";
     protected static Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-    @Getter private String commandHelp = 
-            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ) ; 
 
     @Override
     public boolean activate() {
@@ -39,6 +37,7 @@ public class ScoreboardTeamsBridge implements PluginTargetBridge {
         @Getter final String shortHelp = "manage scoreboard-defined targets";
         @Getter final String perm = "sentry.scoreboardteams";
         private String helpTxt; 
+        
         @Override
         public String getLongHelp() { 
             if ( helpTxt == null ) {

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginTargetBridge;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -23,12 +23,10 @@ import com.massivecraft.factions.entity.MPlayer;
 
 import lombok.Getter;
 
-public class FactionsBridge implements PluginTargetBridge {
+public class FactionsBridge implements PluginBridge {
 
-    @Getter final String prefix = "FACTIONS";
+    final String prefix = "Factions";
     @Getter private String activationMessage = "Factions is active, the FACTION: target will function";
-    @Getter private String commandHelp = 
-            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." );
 
     @Override
     public boolean activate() { 

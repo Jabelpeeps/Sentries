@@ -29,7 +29,7 @@ public class ImportCommand implements SentriesComplexCommand {
         if ( helpText == null ) {
             helpText = Utils.join(
                     "do  ", Col.GOLD, "/sentry (#) import (all) <sentry|sentinel>", Col.RESET, 
-                    "  to import settings and targets for Combat NPC's using the named traits into Sentries",
+                    "  to import settings and targets for Combat NPC's using the named traits into Sentries.", System.lineSeparator(),
                     "  During the import, the original trait will be removed.", System.lineSeparator(), 
                     "import a single NPC, by having it selected, or by putting its NPC id number as the first argument (#). ", 
                     System.lineSeparator(), "(optional) use ", Col.GOLD, "all ", Col.RESET, 

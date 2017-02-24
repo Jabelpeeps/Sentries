@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
+import org.jabelpeeps.sentries.CommandHandler;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
@@ -167,7 +168,7 @@ public class TargetComand implements SentriesComplexCommand {
             joiner.add( String.join( "", "    (use ", Col.GOLD, "/sentry help ", S.LIST_MOBS, Col.RESET, " to list valid mob types)" ) );
             joiner.add( String.join( "", Col.GOLD, "  Named:<player|npc>:<name> ", Col.RESET, "to target the named player or npc only.") );
 //          joiner.add( String.join( "", Col.GOLD, "", Col.RESET, "") );
-            joiner.add( Utils.getAdditionalTargets() );
+            joiner.add( CommandHandler.getAdditionalTargets() );
 
             targetCommandHelp = joiner.toString();
         }       

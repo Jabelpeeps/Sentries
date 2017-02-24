@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginTargetBridge;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
@@ -23,12 +23,10 @@ import com.tommytony.war.War;
 
 import lombok.Getter;
 
-public class WarBridge implements PluginTargetBridge {
+public class WarBridge implements PluginBridge {
 
-    @Getter final String prefix = "WAR";
+    final String prefix = "War";
     @Getter final String activationMessage = "War is active, The WAR: target will function";
-    @Getter private String commandHelp = 
-            Utils.join( "  using the ", Col.GOLD, "/sentry ", prefix.toLowerCase()," ... ", Col.RESET, "commands." ); 
 
     @Override
     public boolean activate() { 

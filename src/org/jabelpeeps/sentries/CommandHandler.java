@@ -111,10 +111,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( name, command );
     }
     
-    static SentriesComplexCommand getCommand ( String name ) {
-        return (SentriesComplexCommand) commandMap.get( name.toLowerCase() );
-    }
-
     /** Static method to call a registered Sentries sub-command with arguments, only works for 
      *  'complex' commands - ones that have multiple possible arguments.
      * @param inst - the instance of SentryTrait on which to call the command 
@@ -122,7 +118,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *              (i.e. the sub-command & the sub-command's args ) 
      * @return true if a sub-command with the name give as the first member of args was found */
     static boolean callCommand( SentryTrait inst, String ... args ) {
-        SentriesComplexCommand command = getCommand( args[0] );
+        SentriesComplexCommand command = (SentriesComplexCommand) commandMap.get( args[0].toLowerCase() );
         if ( command == null ) return false;
         
         command.call( null, null, inst, 0, args );
@@ -166,16 +162,54 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         player.sendMessage( Col.RED.concat( S.GET_COMMAND_HELP ) );
         return false;
     }
-
+    
+    /**
+     * Static method to iterate over the activated PluginBridges, polling each one for command
+     * help text.
+     * 
+     * @return - the concatenated help Strings
+     */
+    public static String getAdditionalTargets() {
+        
+        StringJoiner joiner = new StringJoiner( System.lineSeparator() );
+        joiner.add( "You can also use:- " ); 
+        
+        commandMap.entrySet().stream()
+                  .filter( e -> e.getValue() instanceof SentriesCommand.Targetting )
+                  .forEach( e -> joiner.add( 
+                          Utils.join( Col.GOLD, "  /sentry", e.getKey(), "...", Col.RESET, e.getValue().getShortHelp() ) ) );
+       
+//        SentriesCommand command = commandMap.get( S.EVENT );
+//        if ( command != null ) {
+//            joiner.add( Utils.join( Col.GOLD, "  /sentry ", S.EVENT, Col.RESET, " ", command.getShortHelp() ) );
+//        }
+//        
+//        if ( !Sentries.activePlugins.isEmpty() ) {           
+//            Sentries.activePlugins.stream()
+//                                  .filter( p -> p instanceof PluginTargetBridge )
+//                                  .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
+//        }            
+        return joiner.toString();
+    }
+    
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {       
+        List<String> tabs = null;
         
-        List<String> tabs = new ArrayList<>( commandMap.keySet() );
-        
-        tabs.removeIf( t -> !t.startsWith( args[args.length - 1] ) 
-                         || !sender.hasPermission( commandMap.get( t ).getPerm() ) );
-                  
+        if ( args.length == 1 ) {
+            tabs = getCommandList( sender, args[0] );
+        }  
+        else if ( args.length == 2 && Utils.string2Int( args[0] ) > 0 ) {
+            tabs = getCommandList( sender, args[1] );
+        }
         return tabs;       
+    }
+    
+    private List<String> getCommandList( CommandSender sender, String arg ) {
+        List<String> tabs = new ArrayList<>( commandMap.keySet() );
+        tabs.removeIf( t -> !t.startsWith( arg ) 
+                            || !sender.hasPermission( commandMap.get( t ).getPerm() ) );
+        return tabs;   
     }
     
     @Override

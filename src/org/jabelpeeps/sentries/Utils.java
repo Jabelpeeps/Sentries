@@ -14,8 +14,6 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
-import org.jabelpeeps.sentries.S.Col;
-import org.jabelpeeps.sentries.commands.SentriesCommand;
 
 import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.npc.NPC;
@@ -263,30 +261,6 @@ public abstract class Utils {
 
     public static Pattern colon = Pattern.compile( ":" );
     
-    /**
-     * Static method to iterate over the activated PluginBridges, polling each one for command
-     * help text.
-     * 
-     * @return - the concatenated help Strings
-     */
-    public static String getAdditionalTargets() {
-        
-        StringJoiner joiner = new StringJoiner( System.lineSeparator() );
-        joiner.add( "You can also use:- " ); 
-        
-        SentriesCommand command = CommandHandler.getCommand( S.EVENT );
-        if ( command != null ) {
-            joiner.add( join( Col.GOLD, "  /sentry ", S.EVENT, Col.RESET, " ", command.getShortHelp() ) );
-        }
-        
-        if ( !Sentries.activePlugins.isEmpty() ) {           
-            Sentries.activePlugins.stream()
-                                  .filter( p -> p instanceof PluginTargetBridge )
-                                  .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
-        }            
-        return joiner.toString();
-    }
-
     private static DecimalFormat df = new DecimalFormat( "0.0#" );
     public static String formatDbl( double d ) {
         return df.format( d );

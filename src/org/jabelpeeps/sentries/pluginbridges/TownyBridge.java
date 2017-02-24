@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.LivingEntity;
 import org.jabelpeeps.sentries.CommandHandler;
-import org.jabelpeeps.sentries.PluginTargetBridge;
+import org.jabelpeeps.sentries.PluginBridge;
 import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.Sentries;
@@ -24,7 +24,7 @@ import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import lombok.Getter;
 
-public class TownyBridge implements PluginTargetBridge {
+public class TownyBridge implements PluginBridge {
     
     /*
      * Notes for self:
@@ -36,10 +36,8 @@ public class TownyBridge implements PluginTargetBridge {
      * (taken from http://towny.palmergames.com/towny/757-2/#How_Towny_Controls_PVP_Combat )
      */
 
-    @Getter final String prefix = "TOWNY";
+    final String prefix = "Towny";
     @Getter final String activationMessage = "Detected Towny, the TOWNY: target will function";
-    @Getter private String commandHelp = Utils.join( "  using the ", Col.GOLD, "/sentry ", 
-                                                    prefix.toLowerCase(), " ... ", Col.RESET, "commands." );
     
     @Override
     public boolean activate() {
