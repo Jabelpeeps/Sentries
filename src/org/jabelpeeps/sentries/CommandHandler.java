@@ -177,18 +177,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.entrySet().stream()
                   .filter( e -> e.getValue() instanceof SentriesCommand.Targetting )
                   .forEach( e -> joiner.add( 
-                          Utils.join( Col.GOLD, "  /sentry", e.getKey(), "...", Col.RESET, e.getValue().getShortHelp() ) ) );
-       
-//        SentriesCommand command = commandMap.get( S.EVENT );
-//        if ( command != null ) {
-//            joiner.add( Utils.join( Col.GOLD, "  /sentry ", S.EVENT, Col.RESET, " ", command.getShortHelp() ) );
-//        }
-//        
-//        if ( !Sentries.activePlugins.isEmpty() ) {           
-//            Sentries.activePlugins.stream()
-//                                  .filter( p -> p instanceof PluginTargetBridge )
-//                                  .forEach( p -> joiner.add( ((PluginTargetBridge) p).getCommandHelp() ) );
-//        }            
+                          String.join( " ", Col.GOLD, " /sentry", e.getKey(), "...", Col.RESET, e.getValue().getShortHelp() ) ) );
+        
         return joiner.toString();
     }
     
@@ -199,7 +189,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( args.length == 1 ) {
             tabs = getCommandList( sender, args[0] );
         }  
-        else if ( args.length == 2 && Utils.string2Int( args[0] ) > 0 ) {
+        else if (   args.length == 2 
+                    && (    Utils.string2Int( args[0] ) > 0 
+                            || S.HELP.equalsIgnoreCase( args[0] ) ) ) {
             tabs = getCommandList( sender, args[1] );
         }
         return tabs;       
