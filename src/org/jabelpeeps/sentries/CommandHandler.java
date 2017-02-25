@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -61,7 +60,7 @@ import net.citizensnpcs.api.trait.trait.Owner;
 public class CommandHandler implements CommandExecutor, TabCompleter {
     
     private static Map<String, SentriesCommand> commandMap = new TreeMap<>();
-    private static String mainHelpIntro, mainHelpOutro, shortEquipList;
+    private static String mainHelpIntro, mainHelpOutro, shortEquipList, mobsList;
 
     static {
         commandMap.put( S.TARGET,       new TargetComand() );
@@ -91,7 +90,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( S.RANGE,        new RangeCommand() );
         commandMap.put( S.VOICE_RANGE,  new VoiceRangeCommand() );
         commandMap.put( "listall",      new ListAllCommand() );
-//        commandMap.put( "setstatus",    new SetStatusCommand() );
         commandMap.put( "debuginfo",    new DebugInfoCommand() );
         
         SentriesNumberCommand command = new ArmourCommand();
@@ -163,19 +161,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return false;
     }
     
-    /**
-     * Static method to iterate over the activated PluginBridges, polling each one for command
-     * help text.
-     * 
-     * @return - the concatenated help Strings
-     */
-    public static String getAdditionalTargets() {
+    public static String getAdditionalTargets( CommandSender sender ) {
         
         StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         joiner.add( "You can also use:- " ); 
         
         commandMap.entrySet().stream()
-                  .filter( e -> e.getValue() instanceof SentriesCommand.Targetting )
+                  .filter( e -> e.getValue() instanceof SentriesCommand.Targetting 
+                                && sender.hasPermission( e.getValue().getPerm() ) )
                   .forEach( e -> joiner.add( 
                           String.join( " ", Col.GOLD, " /sentry", e.getKey(), "...", Col.RESET, e.getValue().getShortHelp() ) ) );
         
@@ -183,18 +176,26 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {       
-        List<String> tabs = null;
+    public List<String> onTabComplete( CommandSender sender, Command command, String alias, String[] args ) {       
         
-        if ( args.length == 1 ) {
-            tabs = getCommandList( sender, args[0] );
+        int nextArg = ( Utils.string2Int( args[0] ) > 0 ) ? 1 : 0;
+        
+        if ( args.length == 1 + nextArg ) {
+            return getCommandList( sender, args[nextArg] );
         }  
         else if (   args.length == 2 
-                    && (    Utils.string2Int( args[0] ) > 0 
-                            || S.HELP.equalsIgnoreCase( args[0] ) ) ) {
-            tabs = getCommandList( sender, args[1] );
+                    && S.HELP.equalsIgnoreCase( args[0] ) ) {
+            return getCommandList( sender, args[1] );
         }
-        return tabs;       
+        else if (   args.length >= 2 + nextArg
+                    && commandMap.containsKey( args[nextArg] ) ) {
+            SentriesCommand subcommand = commandMap.get( args[nextArg] );
+            
+            if (    subcommand instanceof SentriesCommand.Tabable
+                    && sender.hasPermission( subcommand.getPerm() ) )
+                return ((SentriesCommand.Tabable) subcommand).onTab( nextArg, args );
+        }
+        return null;       
     }
     
     private List<String> getCommandList( CommandSender sender, String arg ) {
@@ -217,13 +218,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 
                 SentriesCommand command = commandMap.get( subcommand );
                 
-                if ( command != null && sender.hasPermission( command.getPerm() ) )               
+                if ( command != null && sender.hasPermission( command.getPerm() ) ) {
                     sender.sendMessage( command.getLongHelp() );
-                
-                else if ( S.LIST_MOBS.equals( subcommand ) ) 
-                    sender.sendMessage( String.join( ", ", Sentries.mobs.stream()
-                                                                         .map( m -> m.toString() )
-                                                                         .toArray( String[]::new ) ) );             
+                    
+                    if ( (S.TARGET + S.IGNORE).contains( subcommand ) )
+                        sender.sendMessage( getAdditionalTargets( sender ) );
+                }
+                else if ( S.LIST_MOBS.equals( subcommand ) ) {
+                    if ( mobsList == null ) {
+                        mobsList = String.join( ", ", Sentries.mobs.stream()
+                                                                   .map( m -> m.toString() )
+                                                                   .toArray( String[]::new ) );
+                    }
+                    sender.sendMessage( mobsList ); 
+                }
                 else if ( "listequips".equalsIgnoreCase( subcommand ) ) {
                     if ( shortEquipList == null ) {
                         Set<Material> allowed = EnumSet.copyOf( Sentries.helmets );
@@ -244,18 +252,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     }
                     sender.sendMessage( shortEquipList );
                 }                
-                else 
-                    sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
+                else sender.sendMessage( S.ERROR_UNKNOWN_COMMAND );
+                
                 return true;
             }
             // if no arguments are added after '/sentry help'
             if ( mainHelpIntro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
                 
-                joiner.add( String.join( "", Col.GOLD, "---------- Sentries Commands ----------", Col.RESET ) );
-                joiner.add( String.join( "", "Select NPC's with ", Col.GOLD, "'/npc sel'", Col.RESET, " before running commands, or" ) );
-                joiner.add( String.join( "", " use ", Col.GOLD, "/sentry #npcid <command> ", Col.RESET, "to run a command on the sentry with the given npcid." ) );
-                joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
+                joiner.add( Utils.join( Col.GOLD, "---------- Sentries Commands ----------", Col.RESET ) );
+                joiner.add( Utils.join( "Select NPC's with ", Col.GOLD, "'/npc sel'", Col.RESET, " before running commands, or" ) );
+                joiner.add( Utils.join( " use ", Col.GOLD, "/sentry #npcid <command> ", Col.RESET, "to run a command on the sentry with the given npcid." ) );
+                joiner.add( Utils.join( Col.GOLD, "-------------------------------", Col.RESET ) );
                 
                 mainHelpIntro = joiner.toString();
             }
@@ -281,9 +289,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if ( mainHelpOutro == null ) {
                 StringJoiner joiner = new StringJoiner( System.lineSeparator() );
         
-                joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
-                joiner.add( String.join( "", "do ", Col.GOLD, "/sentry help <command>", Col.RESET, " for further help on each command" ) );
-                joiner.add( String.join( "", Col.GOLD, "-------------------------------", Col.RESET ) );
+                joiner.add( Utils.join( Col.GOLD, "-------------------------------", Col.RESET ) );
+                joiner.add( Utils.join( "do ", Col.GOLD, "/sentry help <command>", Col.RESET, " for further help on each command" ) );
+                joiner.add( Utils.join( Col.GOLD, "-------------------------------", Col.RESET ) );
         
                 mainHelpOutro = joiner.toString();
             }           
@@ -303,7 +311,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if ( checkCommandPerm( S.PERM_RELOAD, sender ) ) {
 
-                ((Sentries) Bukkit.getPluginManager().getPlugin( "Sentries" )).reloadMyConfig();
+                Sentries.plugin.reloadMyConfig();
                 sender.sendMessage( Col.GREEN + "reloaded Sentries's config.yml file" );
             }
             return true;
@@ -375,6 +383,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 
                 if ( command instanceof SentriesSimpleCommand )
                     ((SentriesSimpleCommand) command).call( sender, npcName, inst );
+                
                 else if ( command instanceof SentriesComplexCommand )
                     ((SentriesComplexCommand) command).call( sender, npcName, inst, nextArg, inargs ); 
                 

@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries.commands;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.bukkit.command.CommandSender;
@@ -16,7 +18,7 @@ import org.jabelpeeps.sentries.targets.TargetType;
 import lombok.Getter;
 
 
-public class EventCommand implements SentriesComplexCommand, SentriesCommand.Targetting {
+public class EventCommand implements SentriesComplexCommand, SentriesCommand.Targetting, SentriesCommand.Tabable {
 
     private String commandHelp;
     @Getter private String shortHelp = "set events a sentry should react to";
@@ -74,10 +76,18 @@ public class EventCommand implements SentriesComplexCommand, SentriesCommand.Tar
     }
 
     @Override
+    public List<String> onTab( int nextArg, String[] args ) {
+        if ( args.length == nextArg + 2 ) {
+            List<String> tabs = Arrays.asList( S.ADD, S.REMOVE, S.LIST, S.CLEARALL );
+            tabs.removeIf( t -> !t.startsWith( args[1 + nextArg].toLowerCase() ) );
+            return tabs;
+        }
+        return null;
+    }
+    
+    @Override
     public String getLongHelp() {
-
         if ( commandHelp == null ) {
-
             StringJoiner joiner = new StringJoiner( System.lineSeparator() ).add( "" );
 
             joiner.add( Utils.join( "do ", Col.GOLD, "/sentry ", S.EVENT, " <add|remove|list|clearall> <EventType>", 

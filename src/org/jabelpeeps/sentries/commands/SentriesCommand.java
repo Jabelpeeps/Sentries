@@ -1,5 +1,7 @@
 package org.jabelpeeps.sentries.commands;
 
+import java.util.List;
+
 /**
  *  Base interface for Sentries Plugin commands.
  *  <p>
@@ -30,4 +32,9 @@ public interface SentriesCommand {
     /** Interface for tagging commands that add targets/ignores/events for sentries
      *  (other than the default target & ignore commands) */
     public interface Targetting {}
+    
+    /** sub-interface for adding tab-complete actions to a command */
+    public interface Tabable {
+        List<String> onTab( int nextArg, String[] args );
+    }
 }

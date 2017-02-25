@@ -3,7 +3,8 @@ package org.jabelpeeps.sentries.targets;
 import java.util.UUID;
 
 import org.bukkit.entity.LivingEntity;
-import org.jabelpeeps.sentries.Sentries;
+
+import net.citizensnpcs.api.CitizensAPI;
 
 
 public class NamedNPCTarget extends AbstractTargetType implements TargetType.Internal {
@@ -22,7 +23,7 @@ public class NamedNPCTarget extends AbstractTargetType implements TargetType.Int
     }
     @Override
     public String getPrettyString() { 
-        return "The NPC named:- " + Sentries.registry.getByUniqueId( uuid ).getName(); 
+        return "The NPC named:- " + CitizensAPI.getNPCRegistry().getByUniqueId( uuid ).getName(); 
     }   
     @Override
     public boolean equals( Object o ) {
