@@ -1,4 +1,5 @@
 # Sentry configuration
+ConfigBuildNumber: ${build.number}   ## do not change this
 
 # Server-wide options for Sentry
 Server:
@@ -6,7 +7,7 @@ Server:
   DieLikePlayers: false
   # The amount of EXP sentries drop. Only works if Drops is turned on.
   ExpValue: 5
-  # This is how often, in ticks, the Sentry performs his interal logic looking for targets, etc. Increasing this value may lighten
+  # This is how often, in ticks, a sentries performs the interal logic looking for targets, etc. Increasing this value may lighten
   # server load, but will decrease Sentries responsiveness and maximum rate of fire.
   LogicTicks: 5
   # Whether or not Sentries in bodyguard mode always deal damage regardless of other protection plugins.
@@ -64,16 +65,18 @@ UseCustomMessages: false
 # Configurable messages used by all Sentries. You can use <NPC>, <PLAYER>, <ITEM>, and <AMOUNT> as 
 # placeholders. Remove a message or set it to "" to prevent it from displaying at all.
 GlobalTexts:
- Crit3: "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage"
- Crit2: "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage"
- Crit1: "&e*** <NPC> sustains \"a mere flesh wound\" for <AMOUNT> damage"
- Hit: ""       # Message for all non-critcal hits, can get a bit spammy in chat, use with caution.
- Glance: "&f*** Your paltry blow does <AMOUNT> damage to <NPC>"
- Block: "&7*** <NPC> skillfully parries your attack!"
- Miss: "&7*** You MISSED! <NPC> thumbs their nose at you!"
+  Crit3: "&c*** You DISEMBOWEL <NPC> with your <ITEM> for <AMOUNT> damage"
+  Crit2: "&6*** You MAIM <NPC> with your <ITEM> for <AMOUNT> damage"
+  Crit1: "&e*** <NPC> sustains \"a mere flesh wound\" for <AMOUNT> damage"
+  Hit: ""       # Message for all non-critcal hits, can get a bit spammy in chat, use with caution.
+  Glance: "&f*** Your paltry blow does <AMOUNT> damage to <NPC>"
+  Block: "&7*** <NPC> skillfully parries your attack!"
+  Miss: "&7*** You MISSED! <NPC> thumbs their nose at you!"
 
 # These are the percentage chancees of doing a certain damage to a Sentry if Criticals is turned on. 
 # Whole numbers only. Set to 0 to disable a hit type.
+# Critical hits multiply the damage done to a sentry as follows:- 
+# Crit3 x2, Crit2 x1.75, Crit1 x1.5, Glance, x0.5, Miss x0, Block x0
 UseCriticalHits: true 
 HitChances:
   Crit3: 2
@@ -115,12 +118,14 @@ AttackTypes:
   PYRO2: TORCH
   PYRO3: BLAZE_ROD
   BOMBARDIER: EGG
+  GRENADIER: TNT
   ICEMAGI: SNOW_BALL
   STORMCALLER1: PAPER
   STORMCALLER2: BOOK
   STORMCALLER3: BOOK_AND_QUILL
   # Note Witch Doctors need a potion equipped to know what to throw!
-  WITCHDOCTOR: POTION
+  WITCHDOCTOR1: SPLASH_POTION
+  WITCHDOCTOR2: LINGERING_POTION
   WARLOCK1: ENDER_PEARL
   WARLOCK2: SKULL_ITEM
   CREEPER: SULPHUR
@@ -200,52 +205,53 @@ WeaponEffects:
  
   
 # The lists below control what items are equipped as armour. These should only be changed to disable 
-# specific armors or add extended items.
+# specific armors or add extended items.  Adding items that cannot be worn (for example: wool block) 
+# to the lists will not work, and is not a feature that Sentries supports.
 # If you are not changing the lists from the defaults, leave the "UseCustom..." values as false. 
  
 UseCustomHelmets: false 
 # If the value above is changed to 'true', the following items will be equipable as helmets.
 # You must use the correct Material name. The default list reflects the helmets available 
-# when UseCustomHelmets is 'false'.
+# when UseCustomHelmets is 'false'.  
 Helmets:
-   - PUMPKIN
-   - JACK_O_LANTERN
-   - LEATHER_HELMET
-   - CHAINMAIL_HELMET
-   - GOLD_HELMET
-   - IRON_HELMET
-   - DIAMOND_HELMET
+  - PUMPKIN
+  - JACK_O_LANTERN
+  - LEATHER_HELMET
+  - CHAINMAIL_HELMET
+  - GOLD_HELMET
+  - IRON_HELMET
+  - DIAMOND_HELMET
 
 UseCustomChestplates: false
 # If the value above is changed to 'true', the following items will be equipable as chestplates.
 # You must use the correct Material name. The default list reflects the chestplates available 
 # when UseCustomChestplates is 'false'.
 Chestplates:
-    - LEATHER_CHESTPLATE
-    - CHAINMAIL_CHESTPLATE
-    - GOLD_CHESTPLATE
-    - IRON_CHESTPLATE
-    - DIAMOND_CHESTPLATE
+  - LEATHER_CHESTPLATE
+  - CHAINMAIL_CHESTPLATE
+  - GOLD_CHESTPLATE
+  - IRON_CHESTPLATE
+  - DIAMOND_CHESTPLATE
 
 UseCustomLeggings: false
 # If the value above is changed to 'true', the following items will be equipable as leggings.
 # You must use the correct Material name. The default list reflects the leggings available 
 # when UseCustomLeggings is 'false'.
 Leggings:
-    - LEATHER_LEGGINGS
-    - CHAINMAIL_LEGGINGS
-    - GOLD_LEGGINGS
-    - IRON_LEGGINGS
-    - DIAMOND_LEGGINGS
+  - LEATHER_LEGGINGS
+  - CHAINMAIL_LEGGINGS
+  - GOLD_LEGGINGS
+  - IRON_LEGGINGS
+  - DIAMOND_LEGGINGS
     
 UseCustomBoots: false  
 # If the value above is changed to 'true', the following items will be equipable as boots.
 # You must use the correct Material name. The default list reflects the boots available 
 # when UseCustomBoots is 'false'.
 Boots:  
-    - LEATHER_BOOTS
-    - CHAINMAIL_BOOTS
-    - GOLD_BOOTS
-    - IRON_BOOTS
-    - DIAMOND_BOOTS
+  - LEATHER_BOOTS
+  - CHAINMAIL_BOOTS
+  - GOLD_BOOTS
+  - IRON_BOOTS
+  - DIAMOND_BOOTS
     

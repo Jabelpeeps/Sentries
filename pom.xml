@@ -8,7 +8,7 @@
 	<artifactId>sentries</artifactId>
 	<packaging>jar</packaging>
 	<version>2.1.3</version>
-	<name>sentries</name>
+	<name>Sentries</name>
 	<description>Armed Citizens</description>
 
 	<properties>
@@ -258,6 +258,4 @@
 
 		</plugins>
 	</build>
-
-	<url>http://wiki.citizensnpcs.co/Sentry</url>
 </project>

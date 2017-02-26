@@ -60,8 +60,10 @@ public class SentryListener implements Listener {
 
     @EventHandler
     public void kill( EntityDeathEvent event ) {
-
+        // This event is for handling the deaths of the victims of sentries, not the sentries themselves
+        
         LivingEntity deceased = event.getEntity();
+        if ( deceased.hasMetadata( S.SENTRIES_META ) ) return;
 
         if ( Sentries.debug ) Sentries.debugLog( event.getEventName() + " called for:- " + deceased.toString() );
 
@@ -462,7 +464,7 @@ public class SentryListener implements Listener {
                 if (    inst.getMyStatus() == SentryStatus.LOOKING
                         && damager instanceof Player
                         && !damager.hasMetadata( "NPC" )
-                        && inst.events.parallelStream().anyMatch( e -> e.includes( victim ) ) ) {
+                        && inst.events.stream().anyMatch( e -> e.includes( victim ) ) ) {
                     
                     Location npcLoc = npc.getEntity().getLocation();
                     // is the event within range of the sentry?
@@ -530,7 +532,7 @@ public class SentryListener implements Listener {
         
             if ( !inst.dropInventory ) items.clear();
         
-            items.parallelStream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );
+            items.stream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );
         
             if ( Sentries.dieLikePlayers && deceased instanceof Player )
                 deceased.setHealth( 0 );

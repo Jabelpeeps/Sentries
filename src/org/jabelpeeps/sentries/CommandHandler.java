@@ -93,7 +93,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         commandMap.put( "debuginfo",    new DebugInfoCommand() );
         
         SentriesNumberCommand command = new ArmourCommand();
-        commandMap.put( S.ARMOUR,       command );
+        commandMap.put( S.ARMOUR,       command ); 
         commandMap.put( S.ARMOR,        command );  // for people who can't spell =)
     }
     

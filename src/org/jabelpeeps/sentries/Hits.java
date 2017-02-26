@@ -13,7 +13,7 @@ enum Hits {
     Glance( 0.5, 4, "&f*** Your paltry blow does only <AMOUNT> damage to <NPC>" ), 
     Miss( 0, 4, "&7*** You MISSED! <NPC> thumbs their nose at you!" ), 
     Hit( 1.0, 0, "" ),             // represents a standard unmodified hit.
-    Block( 0, 0, "&7*** <NPC> skillfully parries your attack!" );
+    Block( 0, 2, "&7*** <NPC> skillfully parries your attack!" );
 
     double damageModifier;
     private int percentChance;
