@@ -7,6 +7,7 @@ import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
 
 import lombok.Getter;
+import net.citizensnpcs.api.npc.NPC;
 
 
 public class DropsCommand implements SentriesToggleCommand {
@@ -22,6 +23,8 @@ public class DropsCommand implements SentriesToggleCommand {
     public void call( CommandSender sender, String npcName, SentryTrait inst, Boolean set ) {
         
         inst.dropInventory = (set == null) ? !inst.dropInventory : set;
+
+        inst.getNPC().data().set( NPC.DROPS_ITEMS_METADATA, inst.dropInventory );
 
         Utils.sendMessage( sender, S.Col.GREEN, npcName, inst.dropInventory ? " will drop items and xp"
                                                                             : " will not drop items or xp" );

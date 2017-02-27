@@ -47,6 +47,7 @@ import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
+import net.citizensnpcs.api.npc.MetadataStore;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
@@ -208,8 +209,12 @@ public class SentryTrait extends Trait {
 //                && npc.hasTrait( HealthTrait.class ) )
 //            npc.removeTrait( HealthTrait.class );
 
+        MetadataStore meta = npc.data();
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
-        npc.data().set( NPC.RESPAWN_DELAY_METADATA, -1 );
+        meta.set( NPC.RESPAWN_DELAY_METADATA, -1 );
+        meta.set( NPC.TARGETABLE_METADATA, targetable );
+        npc.setProtected( invincible );
+        meta.set( NPC.DROPS_ITEMS_METADATA, dropInventory );
 
         myEntity.getAttribute( Attribute.GENERIC_MAX_HEALTH ).setBaseValue( maxHealth );
         setHealth( maxHealth );
@@ -217,9 +222,6 @@ public class SentryTrait extends Trait {
         myDamagers.clear();
         NMS.look( myEntity, myEntity.getLocation().getYaw(), 0 );
 
-        npc.setProtected( false );
-        npc.data().set( NPC.TARGETABLE_METADATA, targetable );
-        
         NavigatorParameters navigatorParams = npc.getNavigator().getDefaultParameters();
 
         navigatorParams.useNewPathfinder( true );
@@ -233,8 +235,7 @@ public class SentryTrait extends Trait {
        
         if ( tickMe == null ) {
             tickMe = Bukkit.getScheduler().scheduleSyncRepeatingTask( Sentries.plugin, 
-                    () -> {     
-                            myStatus = myStatus.update( SentryTrait.this ); 
+                    () -> { myStatus = myStatus.update( SentryTrait.this ); 
                             if ( guardeeEntity != null && !guardeeEntity.isValid() ) {
                                 guardeeEntity = null;
                             }

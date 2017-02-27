@@ -3,6 +3,7 @@ package org.jabelpeeps.sentries.commands;
 import java.util.StringJoiner;
 
 import org.bukkit.command.CommandSender;
+import org.jabelpeeps.sentries.S;
 import org.jabelpeeps.sentries.S.Col;
 import org.jabelpeeps.sentries.SentryTrait;
 import org.jabelpeeps.sentries.Utils;
@@ -13,7 +14,7 @@ import lombok.Getter;
 public class ListAllCommand implements SentriesSimpleCommand {
 
     @Getter String shortHelp = "list all targets and ignores.";
-    @Getter String perm = "";
+    @Getter String perm = S.PERM_LIST_ALL;
     @Getter String longHelp = Utils.join( "Lists all targets, events and ignores for a sentry.",
                                           System.lineSeparator(), "No further arguments are needed." );
 

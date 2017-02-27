@@ -4,7 +4,7 @@ ConfigBuildNumber: ${build.number}   ## do not change this
 # Server-wide options for Sentry
 Server:
   # If true Sentries will die like normal mobs, instead of being despawned. Player-type Sentry deaths will be announced in chat.
-  DieLikePlayers: false
+ # DieLikePlayers: false
   # The amount of EXP sentries drop. Only works if Drops is turned on.
   ExpValue: 5
   # This is how often, in ticks, a sentries performs the interal logic looking for targets, etc. Increasing this value may lighten

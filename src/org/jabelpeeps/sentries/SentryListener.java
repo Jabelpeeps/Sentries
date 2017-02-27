@@ -1,7 +1,7 @@
 package org.jabelpeeps.sentries;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -17,9 +17,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -36,8 +34,8 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.projectiles.ProjectileSource;
 import org.jabelpeeps.sentries.targets.OwnerTarget;
 
@@ -59,7 +57,7 @@ public class SentryListener implements Listener {
     SentryListener() {}
 
     @EventHandler
-    public void kill( EntityDeathEvent event ) {
+    public void onKill( EntityDeathEvent event ) {
         // This event is for handling the deaths of the victims of sentries, not the sentries themselves
         
         LivingEntity deceased = event.getEntity();
@@ -155,12 +153,13 @@ public class SentryListener implements Listener {
         SentryTrait inst = Utils.getSentryTrait( event.getNPC() );
 
         if ( inst == null ) return;
-
-        event.setCancelled( true );
         
+        event.setCancelled( true );
+        NPC npc = inst.getNPC();
+        
+        if ( npc == null || !npc.isSpawned() || inst.invincible ) return;
         if ( inst.guardeeName != null && inst.guardeeEntity == null ) return;         
         if ( inst.getMyStatus().isDeadOrDieing() ) return;
-        if ( System.currentTimeMillis() < inst.okToTakedamage ) return;
 
         if ( isNotVulnerable( inst, event.getCause() ) ) return;
         
@@ -171,13 +170,11 @@ public class SentryListener implements Listener {
                 
             default:
         }
-        NPC npc = inst.getNPC();
+        if ( System.currentTimeMillis() < inst.okToTakedamage ) return;
         
-        if ( npc == null || !npc.isSpawned() || inst.invincible ) return;
-
         inst.okToTakedamage = System.currentTimeMillis() + 500;
 
-        LivingEntity myEntity = (LivingEntity) inst.getNPC().getEntity();
+        LivingEntity myEntity = (LivingEntity) npc.getEntity();
         double finaldamage = event.getDamage();
         DamageCause cause = event.getCause();
 
@@ -329,7 +326,7 @@ public class SentryListener implements Listener {
         NPC npc = event.getNPC();
         SentryTrait instVictim = Utils.getSentryTrait( npc );
        
-        if ( instVictim == null ) return;
+        if ( instVictim == null || instVictim.invincible ) return;
             
         // stop repeated calls to this event handler for the same NPC
         if ( System.currentTimeMillis() < instVictim.okToTakedamage + 500 ) return;
@@ -495,49 +492,51 @@ public class SentryListener implements Listener {
         
         SentryTrait inst = Utils.getSentryTrait( npc );
         LivingEntity deceased = (LivingEntity) npc.getEntity();
-        
+
         if ( inst != null && deceased != null ) {
-        
+           
             if ( inst.dropInventory ) {
-                deceased.getWorld()
-                        .spawn( deceased.getLocation(), ExperienceOrb.class )
-                        .setExperience( Sentries.sentryEXP );
+                event.setDroppedExp( Sentries.sentryEXP );
+//                deceased.getWorld()
+//                        .spawn( deceased.getLocation(), ExperienceOrb.class )
+//                        .setExperience( Sentries.sentryEXP );
             }
-            List<ItemStack> items = new LinkedList<>();
+            List<ItemStack> items = new ArrayList<>();
         
-            if ( deceased instanceof HumanEntity ) {
+//            if ( deceased instanceof HumanEntity ) {
+            
+            EntityEquipment equip = deceased.getEquipment();
         
-                PlayerInventory inventory = ((HumanEntity) deceased).getInventory();
+//                PlayerInventory inventory = ((HumanEntity) deceased).getInventory();
         
-                for ( ItemStack is : inventory.getArmorContents() ) {
+                for ( ItemStack is : equip.getArmorContents() ) {
         
                     if ( is != null && is.getType() != null )
                         items.add( is );
                 }
-                ItemStack is = inventory.getItemInMainHand();
+                ItemStack is = equip.getItemInMainHand();
         
                 if ( is.getType() != null ) items.add( is );
         
-                is = inventory.getItemInOffHand();
+                is = equip.getItemInOffHand();
         
                 if ( is.getType() != null ) items.add( is );
         
-                inventory.clear();
-            }
+                equip.clear();
+//            }
         
-            if ( items.isEmpty() )
-                deceased.playEffect( EntityEffect.DEATH );
-            else
-                deceased.playEffect( EntityEffect.HURT );
+//            if ( items.isEmpty() )
+//                deceased.playEffect( EntityEffect.DEATH );
+//            else
+//                deceased.playEffect( EntityEffect.HURT );
         
-            if ( !inst.dropInventory ) items.clear();
+            if ( inst.dropInventory ) //items.clear();
+                items.stream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );
         
-            items.stream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );
-        
-            if ( Sentries.dieLikePlayers && deceased instanceof Player )
-                deceased.setHealth( 0 );
-            else
-                Bukkit.getPluginManager().callEvent( new EntityDeathEvent( deceased, items ) );            
+//            if ( Sentries.dieLikePlayers && deceased instanceof Player )
+//                deceased.setHealth( 0 );
+//            else
+//                Bukkit.getPluginManager().callEvent( new EntityDeathEvent( deceased, items ) );            
         
             
             // if the mount dies carry aggression over.

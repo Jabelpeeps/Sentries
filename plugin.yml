@@ -16,93 +16,122 @@ permissions:
   sentry.*:
     default: op
     children:
-       sentry.target: true
-       sentry.ignore: true
-       sentry.stats.*: true
-       sentry.options.*: true
-       sentry.setspawn: true
-       sentry.guard: true
-       sentry.info: true
-       sentry.warning: true
-       sentry.greeting: true
-       sentry.reload: true
-       sentry.equip: true
-       sentry.bodyguard.*: true
+      sentry.targeting: true
+      sentry.stats.*: true
+      sentry.options.*: true
+      sentry.setspawn: true
+      sentry.guard: true
+      sentry.debuginfo: true
+      sentry.info: true
+      sentry.speech: true
+      sentry.reload: true
+      sentry.equip: true
+      sentry.bodyguard.*: true
+       
   sentry.stats.*:
-     default: op
-     children:
-       sentry.stats.strength: true
-       sentry.stats.range: true
-       sentry.stats.armour: true
-       sentry.stats.speed: true
-       sentry.stats.nightvision: true
-       sentry.stats.respawn: true
-       sentry.stats.health: true
-       sentry.stats.attackrate: true
-       sentry.stats.healrate: true
-       sentry.stats.warningrange: true
-       sentry.stats.follow: true
+    default: op
+    children:
+      sentry.stats.strength: true
+      sentry.stats.range: true
+      sentry.stats.armour: true
+      sentry.stats.speed: true
+      sentry.stats.nightvision: true
+      sentry.stats.respawn: true
+      sentry.stats.health: true
+      sentry.stats.attackrate: true
+      sentry.stats.healrate: true
+      sentry.stats.warningrange: true
+      sentry.stats.follow: true
+       
   sentry.options.*:
-     default: op
-     children:
-       sentry.options.invincible: true
-       sentry.options.retaliate: true
-       sentry.options.drops: true
-       sentry.options.killdrops: true
-       sentry.options.criticals: true
-       sentry.options.mount: true
-       sentry.options.targetable: true
-  sentry.setspawn:
-     deafult: op
-  sentry.target:
-     deafult: op
-  sentry.ignore:
-     deafult: op
-  sentry.guard:
-     deafult: op
-  sentry.info:
-     deafult: op
-  sentry.warning:
-     deafult: op
-  sentry.reload:
-     deafult: op
-  sentry.greeting:
-     deafult: op
-  sentry.stats.strength:
-     default: op
-  sentry.stats.armour:
-     default: op
-  sentry.stats.speed:
-     default: op
-  sentry.stats.nightvision:
-     default: op
-  sentry.stats.range:
-     default: op
-  sentry.stats.respawn:
-     default: op
-  sentry.stats.health:
-     default: op
-  sentry.stats.warningrange:
-     default: op
-  sentry.stats.follow:
-     default: op
-  sentry.stats.attackrate:
-     default: op
-  sentry.stats.healrate:
-     default: op
-  sentry.options.invincible:
-     default: op
-  sentry.options.retaliate:
-     default: op
-  sentry.options.drops:
-     default: op
-  sentry.options.killdrops:
-     default: op
-  sentry.options.criticals:
-     default: op
+    default: op
+    children:
+      sentry.options.invincible: true
+      sentry.options.retaliate: true
+      sentry.options.drops: true
+      sentry.options.killdrops: true
+      sentry.options.criticals: true
+      sentry.options.mount: true
+      sentry.options.targetable: true
+       
   sentry.bodyguard.*:
-     default: true
+    default: true
+    
+  sentry.targeting:
+    default: op
+    children:
+      sentry.target: true
+      sentry.ignore: true
+      sentry.event: true
+      sentry.listall: true
+      sentry.stats.range: true
+      sentry.factions: true
+      sentry.scoreboardteams: true
+      sentry.simpleclans: true
+      sentry.towny: true
+      sentry.groups: true
+      sentry.warteam: true
+      
+  sentry.speech:
+    default: op
+    children:
+      sentry.warning: true
+      sentry.greeting: true
+      sentry.stats.warningrange: true
+      
+  sentry.setspawn:
+    default: op
+  sentry.target:
+    default: op
+  sentry.ignore:
+    default: op
+  sentry.event:
+    default: op
+  sentry.guard:
+    default: op
+  sentry.info:
+    default: op
+  sentry.warning:
+    default: op
+  sentry.reload:
+    default: op
+  sentry.greeting:
+    default: op
+    
+  sentry.stats.strength:
+    default: op
+  sentry.stats.armour:
+    default: op
+  sentry.stats.speed:
+    default: op
+  sentry.stats.nightvision:
+    default: op
+  sentry.stats.range:
+    default: op
+  sentry.stats.respawn:
+    default: op
+  sentry.stats.health:
+    default: op
+  sentry.stats.warningrange:
+    default: op
+  sentry.stats.follow:
+    default: op
+  sentry.stats.attackrate:
+    default: op
+  sentry.stats.healrate:
+    default: op
+    
+  sentry.options.invincible:
+    default: op
+  sentry.options.retaliate:
+    default: op
+  sentry.options.drops:
+    default: op
+  sentry.options.killdrops:
+    default: op
+  sentry.options.criticals:
+    default: op
   sentry.options.mount:
-     default: op
+    default: op
   sentry.options.targetable:
-     default: op
+    default: op

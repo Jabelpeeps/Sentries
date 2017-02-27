@@ -137,6 +137,7 @@ public abstract class S {
     public final static String PERM_TARGET = "sentry.target";
     public final static String PERM_IGNORE = "sentry.ignore";
     public final static String PERM_EVENT = "sentry.event";
+    public final static String PERM_DEBUGINFO = "sentry.debuginfo";
     public final static String PERM_INFO = "sentry.info";
     public final static String PERM_EQUIP = "sentry.equip";
     public final static String PERM_RELOAD = "sentry.reload";
@@ -144,6 +145,7 @@ public abstract class S {
     public final static String PERM_GUARD = "sentry.guard";
     public final static String PERM_WARNING = "sentry.warning";
     public final static String PERM_GREETING = "sentry.greeting";
+    public final static String PERM_LIST_ALL = "sentry.listall";
     public final static String PERM_WARNING_RANGE = "sentry.stats.warningrange";
     public final static String PERM_SPEED = "sentry.stats.speed";
     public final static String PERM_RANGE = "sentry.stats.range";

@@ -34,7 +34,7 @@ import net.citizensnpcs.api.trait.TraitInfo;
 public class Sentries extends JavaPlugin {
 
     public static boolean debug = false;
-    public static boolean dieLikePlayers, bodyguardsObeyProtection, ignoreListIsInvincible, useNewArmourCalc;
+    public static boolean /*dieLikerPlayers,*/ bodyguardsObeyProtection, ignoreListIsInvincible, useNewArmourCalc;
 
     static boolean denizenActive = false;
     static Set<PluginBridge> activePlugins = new HashSet<>();
@@ -161,7 +161,7 @@ public class Sentries extends JavaPlugin {
         AttackType.loadWeapons( config );
         Hits.loadConfig( config );
 
-        dieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
+//        dieLikePlayers = config.getBoolean( "Server.DieLikePlayers", false );
         bodyguardsObeyProtection = config.getBoolean( "Server.BodyguardsObeyProtection", true );
         ignoreListIsInvincible = config.getBoolean( "Server.IgnoreListInvincibility", true );
         useNewArmourCalc = config.getBoolean( "Server.UseNewArmourCalc", false );
