@@ -160,10 +160,12 @@ public class SentryListener implements Listener {
         if ( npc == null || !npc.isSpawned() || inst.invincible ) return;
         if ( inst.guardeeName != null && inst.guardeeEntity == null ) return;         
         if ( inst.getMyStatus().isDeadOrDieing() ) return;
-
-        if ( isNotVulnerable( inst, event.getCause() ) ) return;
         
-        switch ( event.getCause() ) { 
+        DamageCause cause = event.getCause();
+
+        if ( isNotVulnerable( inst, cause ) ) return;
+        
+        switch ( cause ) { 
             case DRAGON_BREATH: case ENTITY_ATTACK: case FALL: case FALLING_BLOCK: case FLY_INTO_WALL:
             case MELTING: case PROJECTILE: case STARVATION: case THORNS: case WITHER: case CRAMMING:
                 return;               
@@ -176,7 +178,6 @@ public class SentryListener implements Listener {
 
         LivingEntity myEntity = (LivingEntity) npc.getEntity();
         double finaldamage = event.getDamage();
-        DamageCause cause = event.getCause();
 
         if (    cause == DamageCause.CONTACT
                 || cause == DamageCause.BLOCK_EXPLOSION ) {
@@ -497,48 +498,30 @@ public class SentryListener implements Listener {
            
             if ( inst.dropInventory ) {
                 event.setDroppedExp( Sentries.sentryEXP );
-//                deceased.getWorld()
-//                        .spawn( deceased.getLocation(), ExperienceOrb.class )
-//                        .setExperience( Sentries.sentryEXP );
             }
-            List<ItemStack> items = new ArrayList<>();
-        
-//            if ( deceased instanceof HumanEntity ) {
             
+            List<ItemStack> items = new ArrayList<>();
             EntityEquipment equip = deceased.getEquipment();
         
-//                PlayerInventory inventory = ((HumanEntity) deceased).getInventory();
         
-                for ( ItemStack is : equip.getArmorContents() ) {
-        
-                    if ( is != null && is.getType() != null )
-                        items.add( is );
-                }
-                ItemStack is = equip.getItemInMainHand();
-        
-                if ( is.getType() != null ) items.add( is );
-        
-                is = equip.getItemInOffHand();
-        
-                if ( is.getType() != null ) items.add( is );
-        
-                equip.clear();
-//            }
-        
-//            if ( items.isEmpty() )
-//                deceased.playEffect( EntityEffect.DEATH );
-//            else
-//                deceased.playEffect( EntityEffect.HURT );
-        
-            if ( inst.dropInventory ) //items.clear();
-                items.stream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );
-        
-//            if ( Sentries.dieLikePlayers && deceased instanceof Player )
-//                deceased.setHealth( 0 );
-//            else
-//                Bukkit.getPluginManager().callEvent( new EntityDeathEvent( deceased, items ) );            
-        
-            
+            for ( ItemStack is : equip.getArmorContents() ) {
+    
+                if ( is != null && is.getType() != null )
+                    items.add( is );
+            }
+            ItemStack is = equip.getItemInMainHand();
+    
+            if ( is.getType() != null ) items.add( is );
+    
+            is = equip.getItemInOffHand();
+    
+            if ( is.getType() != null ) items.add( is );
+    
+            equip.clear();
+
+            if ( inst.dropInventory ) 
+                items.stream().forEach( i -> deceased.getWorld().dropItemNaturally( deceased.getLocation(), i ) );          
+                 
             // if the mount dies carry aggression over.
             
             // first we need to find out whether the dead entity was a mount.

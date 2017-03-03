@@ -204,11 +204,6 @@ public class SentryTrait extends Trait {
         if ( respawnDelay < -1 ) respawnDelay = -1;
         if ( spawnLocation == null ) onCopy();
 
-//        // Allow Denizen to handle the sentry's health if it is active.
-//        if (    DenizenHook.sentryHealthByDenizen 
-//                && npc.hasTrait( HealthTrait.class ) )
-//            npc.removeTrait( HealthTrait.class );
-
         MetadataStore meta = npc.data();
         // disable citizens respawning, because Sentries doesn't always raise EntityDeath
         meta.set( NPC.RESPAWN_DELAY_METADATA, -1 );
@@ -486,7 +481,7 @@ public class SentryTrait extends Trait {
     private static Set<AttackType> pyros = EnumSet.range( AttackType.PYRO1, AttackType.PYRO3 );
     private static Set<AttackType> stormCallers = EnumSet.range( AttackType.STORMCALLER1, AttackType.STORMCALLER3 );
     private static Set<AttackType> notFlammable = EnumSet.range( AttackType.PYRO1, AttackType.STORMCALLER3 );
-    private static Set<AttackType> lightsFires = EnumSet.of( AttackType.PYRO1, AttackType.STROMCALLER2 );
+    private static Set<AttackType> lightsFires = EnumSet.of( AttackType.PYRO1, AttackType.STORMCALLER2 );
     private static Set<AttackType> witchDoctors = EnumSet.of( AttackType.WITCHDOCTOR1, AttackType.WITCHDOCTOR2 );
 
     public boolean isPyromancer() { return pyros.contains( myAttack ); }

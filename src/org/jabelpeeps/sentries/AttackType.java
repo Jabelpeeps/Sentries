@@ -51,7 +51,7 @@ public enum AttackType implements AttackStrategy {
     PYRO2(        Material.TORCH,             SMALL_FIREBALL,   2,       Effect.BLAZE_SHOOT,       5 ),
     PYRO3(        Material.BLAZE_ROD,         FIREBALL,         2,       Effect.BLAZE_SHOOT,       6 ), 
     STORMCALLER1( Material.PAPER,                                                                  5, 20 ),
-    STROMCALLER2( Material.BOOK,                                                                  10, 20 ),
+    STORMCALLER2( Material.BOOK,                                                                  10, 20 ),
     STORMCALLER3( Material.BOOK_AND_QUILL,                                                         1, 20 ), 
     WARLOCK1(     Material.ENDER_PEARL,       ENDER_PEARL,      1, 0.03, Effect.ENDER_SIGNAL,     10 ), 
     WARLOCK2(     Material.SKULL_ITEM,        WITHER_SKULL,     2,       Effect.WITHER_SHOOT,      8 ),
@@ -172,8 +172,9 @@ public enum AttackType implements AttackStrategy {
                 sch.scheduleSyncDelayedTask( Sentries.plugin, () -> sch.cancelTask( task ), 35 );
                 return true;
                 
+            case STORMCALLER2: 
+                victim.setFireTicks( 10 );
             case STORMCALLER1: 
-            case STROMCALLER2: 
                 world.strikeLightningEffect( targetLoc );
                 victim.damage( inst.strength, myEntity );               
                 break;
@@ -238,8 +239,8 @@ public enum AttackType implements AttackStrategy {
                 fireball.setIsIncendiary( this == PYRO2 );
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector()
-                                                .subtract( myLoc.toVector() )
-                                                .normalize().multiply( v ) ); 
+                                                .subtract( myLoc.toVector() ) );
+//                                                .normalize().multiply( v ) ); 
                 
                 if ( fireball instanceof WitherSkull ) ThrownEntities.addFireball( fireball, myEntity );
                 
