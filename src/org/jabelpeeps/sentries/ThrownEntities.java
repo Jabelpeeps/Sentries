@@ -12,28 +12,29 @@ import org.bukkit.entity.TNTPrimed;
 
 abstract class ThrownEntities {
     
-    static Map<Entity, LivingEntity> thrown = new HashMap<>();
+    private ThrownEntities() {}
     
-    static boolean hasThrower( Entity ent ) {
+    final static Map<Entity, LivingEntity> thrown = new HashMap<>();
+    
+    final static boolean hasThrower( Entity ent ) {
         return thrown.containsKey( ent );
     }
-    static LivingEntity getThrower( Entity ent ) {        
+    final static LivingEntity getThrower( Entity ent ) {        
         return thrown.get( ent ); 
     }
-    
-    static void addTNT( TNTPrimed tnt, LivingEntity thrower ) {
+    final static void addTNT( TNTPrimed tnt, LivingEntity thrower ) {
         thrown.put( tnt, thrower );
         
         Bukkit.getScheduler()
               .runTaskLaterAsynchronously( Sentries.plugin, () -> thrown.remove( tnt ), tnt.getFuseTicks() + 10 );
     }
-    static void addFireball( Fireball fireball, LivingEntity thrower ) {
+    final static void addFireball( Fireball fireball, LivingEntity thrower ) {
         thrown.put( fireball, thrower );
         
         Bukkit.getScheduler()
               .runTaskLaterAsynchronously( Sentries.plugin, () -> thrown.remove( fireball ), 60 );
     }    
-    static void addEgg( Egg egg, LivingEntity thrower ) {
+    final static void addEgg( Egg egg, LivingEntity thrower ) {
         thrown.put( egg, thrower );
         
         Bukkit.getScheduler()

@@ -1,7 +1,6 @@
 package org.jabelpeeps.sentries;
 
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -92,8 +91,20 @@ public class SentryTrait extends Trait {
 
     @Persist( S.CON_GREETING ) public String greetingMsg = Sentries.defaultGreeting;
     @Persist( S.CON_WARNING ) public String warningMsg = Sentries.defaultWarning;
+       
+    static class SpokenTo {
+        private Set<Player> set = new HashSet<>();
+        
+        boolean hasPlayer( Player player ) {
+            return set.contains( player );
+        }
+        void addPlayer( Player player, int ticks ) {
+            set.add( player );            
+            Bukkit.getScheduler().runTaskLaterAsynchronously( Sentries.plugin, () -> set.remove( player ), ticks );
+        }
+    }
 
-    private Map<Player, Long> warningsGiven = new HashMap<>();
+    private SpokenTo spokenTo = new SpokenTo();
     Set<Player> myDamagers = new HashSet<>();
     List<PotionEffect> weaponSpecialEffects;
 
@@ -333,7 +344,7 @@ public class SentryTrait extends Trait {
         LivingEntity theTarget = null;
         Double distanceToBeat = 99999.0;
 
-        for ( Entity aTarget : myEntity.getNearbyEntities( combinedRange, combinedRange / 2, combinedRange ) ) {
+        for ( Entity aTarget : myEntity.getNearbyEntities( combinedRange, combinedRange, combinedRange ) ) {
 
             if  (   !(aTarget instanceof LivingEntity) 
                     || !hasLOS( aTarget ) ) 
@@ -358,7 +369,7 @@ public class SentryTrait extends Trait {
 
                         Player player = (Player) aTarget;
                         player.sendMessage( Utils.format( warningMsg, npc, player, null, null ) );
-                        warningsGiven.put( player, System.currentTimeMillis() );
+                        spokenTo.addPlayer( player, 1200 );
                         if ( !getNavigator().isNavigating() ) Util.faceEntity( myEntity, aTarget );
                     }
                     else if ( dist < distanceToBeat ) {
@@ -372,7 +383,7 @@ public class SentryTrait extends Trait {
 
                 Player player = (Player) aTarget;
                 player.sendMessage( Utils.format( greetingMsg, npc, player, null, null ) );
-                warningsGiven.put( player, System.currentTimeMillis() );
+                spokenTo.addPlayer( player, 1200 );
                 Util.faceEntity( myEntity, player );
             }
         }
@@ -383,8 +394,7 @@ public class SentryTrait extends Trait {
         return voiceRange > 0 
                 && aTarget instanceof Player
                 && !aTarget.hasMetadata( "NPC" ) 
-                && (    !warningsGiven.containsKey( aTarget ) 
-                        || System.currentTimeMillis() > warningsGiven.get( aTarget ) + 60000 );
+                && !spokenTo.hasPlayer( (Player) aTarget );
     }
     
     public double getHealth() {
@@ -830,5 +840,5 @@ public class SentryTrait extends Trait {
             return myEntity.hasLineOfSight( other );
         }
         return false;
-    }   
+    }  
 }
