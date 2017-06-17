@@ -70,11 +70,7 @@ public class EquipCommand implements SentriesComplexCommand {
         }
         
         else if ( S.CLEAR.equalsIgnoreCase( args[nextArg + 1] ) ) {
-            if ( args.length <= 2 + nextArg ) {
-                Utils.sendMessage( sender, S.ERROR, "You must specify which slot to clear ", Col.RESET, System.lineSeparator(),
-                        "Use one of:- hand, offhand, helmet, chestplate, leggings or boots");
-                return;
-            }
+
             String slotName = args[nextArg + 2];
             
             for ( Entry<String, Integer> each : equipmentSlots.entrySet() ) {

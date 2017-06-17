@@ -109,7 +109,7 @@ DenizenIntegration:
 
 # Set true to customise the items used by each type of Sentry - configured below.
 UseCustomWeapons: false 
-# Use item names only. Equipping any other item makes a Brawler (melee attack).
+# Use item names only. Remove an entry to disable that attack type. Equipping any other item makes a Brawler (melee attack).
 AttackTypes:
   ARCHER: BOW
   PYRO1: REDSTONE_TORCH_ON
@@ -158,7 +158,6 @@ ArmorValues:
 # '/sentry strength' command to set their strength to -1
 # The default values reflect the damage values in vanilla MC (with 1 = 0.5 hearts).
 WeaponStrengths:
-  - BOW 6.0
   - DIAMOND_SWORD 7.0
   - IRON_SWORD 6.0
   - STONE_SWORD 5.0

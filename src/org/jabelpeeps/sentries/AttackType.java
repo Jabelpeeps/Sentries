@@ -173,7 +173,7 @@ public enum AttackType implements AttackStrategy {
                 return true;
                 
             case STORMCALLER2: 
-                victim.setFireTicks( 20 );
+                victim.setFireTicks( 10 );
             case STORMCALLER1: 
                 world.strikeLightningEffect( targetLoc );
                 victim.damage( inst.strength, myEntity );               
@@ -218,7 +218,7 @@ public enum AttackType implements AttackStrategy {
                 
                 Projectile proj = (Projectile) world.spawn( myLoc, projectile.getEntityClass() );
               
-                if  (   ( this == WITCHDOCTOR1 || this == WITCHDOCTOR2 )
+                if  (   inst.isWitchDoctor()  
                         && inst.potionItem != null ) {
                     ((ThrownPotion) proj).setItem( inst.potionItem.clone() );
                 } 
@@ -239,9 +239,8 @@ public enum AttackType implements AttackStrategy {
                 fireball.setIsIncendiary( this == PYRO2 );
                 fireball.setShooter( myEntity );
                 fireball.setDirection( targetLoc.toVector()
-                                                .subtract( myLoc.toVector() )
-                                                .normalize() );
-//                                                .multiply( v ) ); 
+                                                .subtract( myLoc.toVector() ) );
+//                                                .normalize().multiply( v ) ); 
                 
                 if ( fireball instanceof WitherSkull ) ThrownEntities.addFireball( fireball, myEntity );
                 

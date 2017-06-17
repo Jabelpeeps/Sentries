@@ -11,7 +11,6 @@ import org.bukkit.Effect;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
@@ -418,67 +417,69 @@ public class SentryListener implements Listener {
         
         Entity victim = event.getEntity();        
         if ( !(victim instanceof LivingEntity) ) return; 
+        
+        double damage = event.getDamage();
 
-        processEventForTargets( damager, (LivingEntity) victim, event.getDamage() );
+        processEventForTargets( damager, (LivingEntity) victim, damage );
     }
     
     public static void processEventForTargets( LivingEntity damager, LivingEntity victim, double damage ) {
               
         if ( Sentries.debug ) Sentries.debugLog( "processEventForTargets() called for:- " + damager.getName() + " Vs " + victim.getName() );
         
-        if ( damager == victim || damage <= 0 ) return;
+        if (    damager != victim
+                && damage > 0 ) {
 
-        SentryTrait victimInst = Utils.getSentryTrait( victim );
-        
-        if ( victimInst != null && victimInst.iRetaliate )
-            victimInst.setAttackTarget( damager );
-        
-        World victimWorld = victim.getWorld();
-        
-        for ( NPC npc : Sentries.registry ) {
+            SentryTrait victimInst = Utils.getSentryTrait( victim );
             
-            if  (   !npc.isSpawned()
-                    || npc.getEntity().getWorld() != victimWorld ) {
-                 continue;       
-            }
-            SentryTrait inst = Utils.getSentryTrait( npc );
-
-            if ( inst == null || inst == victimInst || inst.isIgnoring( damager ) || inst.isBodyguardOnLeave() ) {
-                continue; 
-            }
-            // is the sentry guarding the victim?
-            if (    inst.guardeeEntity == victim ) {
-                inst.setAttackTarget( damager );
-                continue;
-            }
-            // is the sentry set to retaliate, and its mount was the victim?
-            if (    inst.iRetaliate
-                    && inst.hasMount()
-                    && inst.getMountNPC().getEntity() == victim ) {
-                inst.setAttackTarget( damager );
-                continue;
-            }
-            // respond to configured event targetTypes
-            if (    inst.getMyStatus() == SentryStatus.LOOKING
-                    && damager instanceof Player
-                    && !damager.hasMetadata( "NPC" )
-                    && inst.events.stream().anyMatch( e -> e.includes( victim ) ) ) {
+            if ( victimInst != null && victimInst.iRetaliate )
+                victimInst.setAttackTarget( damager );
+            
+            for ( NPC npc : Sentries.registry ) {
                 
-                Location npcLoc = npc.getEntity().getLocation();
-                // is the event within range of the sentry?
-                if (    (   npcLoc.distanceSquared( victim.getLocation() ) <= Utils.sqr( inst.range )
-                        ||  npcLoc.distanceSquared( damager.getLocation() ) <= Utils.sqr( inst.range ) )
+                if  (   !npc.isSpawned()
+                        || npc.getEntity().getWorld() != victim.getWorld() ) {
+                     continue;       
+                }
+                SentryTrait inst = Utils.getSentryTrait( npc );
 
-                    // is it light enough for the sentry to see (with night-vision)?
-                    &&  (   damager.getLocation().getBlock().getLightLevel() + inst.nightVision > 15
-                        ||  victim.getLocation().getBlock().getLightLevel() + inst.nightVision > 15 )
-
-                    // does the sentry have line-of-sight?
-                    &&  (   inst.hasLOS( damager ) || inst.hasLOS( victim ) ) ) {
+                if ( inst == null || inst == victimInst || inst.isIgnoring( damager ) || inst.isBodyguardOnLeave() ) {
+                    continue; 
+                }
+                // is the sentry guarding the victim?
+                if (    inst.guardeeEntity == victim ) {
+                    inst.setAttackTarget( damager );
+                    continue;
+                }
+                // is the sentry set to retaliate, and its mount was the victim?
+                if (    inst.iRetaliate
+                        && inst.hasMount()
+                        && inst.getMountNPC().getEntity() == victim ) {
+                    inst.setAttackTarget( damager );
+                    continue;
+                }
+                // respond to configured event targetTypes
+                if (    inst.getMyStatus() == SentryStatus.LOOKING
+                        && damager instanceof Player
+                        && !damager.hasMetadata( "NPC" )
+                        && inst.events.stream().anyMatch( e -> e.includes( victim ) ) ) {
                     
-                // phew! we made it! the event is a valid trigger. Attack the aggressor!
-                inst.setAttackTarget( damager );
-                }                  
+                    Location npcLoc = npc.getEntity().getLocation();
+                    // is the event within range of the sentry?
+                    if (    (   npcLoc.distanceSquared( victim.getLocation() ) <= Utils.sqr( inst.range )
+                            ||  npcLoc.distanceSquared( damager.getLocation() ) <= Utils.sqr( inst.range ) )
+
+                        // is it light enough for the sentry to see (with night-vision)?
+                        &&  (   damager.getLocation().getBlock().getLightLevel() + inst.nightVision > 15
+                            ||  victim.getLocation().getBlock().getLightLevel() + inst.nightVision > 15 )
+    
+                        // does the sentry have line-of-sight?
+                        &&  (   inst.hasLOS( damager ) || inst.hasLOS( victim ) ) ) {
+                        
+                    // phew! we made it! the event is a valid trigger. Attack the aggressor!
+                    inst.setAttackTarget( damager );
+                    }                  
+                }
             }
         }
     }
@@ -498,8 +499,10 @@ public class SentryListener implements Listener {
             if ( inst.dropInventory ) {
                 event.setDroppedExp( Sentries.sentryEXP );
             }
+            
             List<ItemStack> items = new ArrayList<>();
             EntityEquipment equip = deceased.getEquipment();
+        
         
             for ( ItemStack is : equip.getArmorContents() ) {
     
