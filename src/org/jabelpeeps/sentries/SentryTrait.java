@@ -129,6 +129,7 @@ public class SentryTrait extends Trait {
     @Getter @Setter private SentryAttack myAttack;
     private Integer tickMe;
 
+    @SuppressWarnings( "deprecation" )
     final static AttackStrategy mountedAttack = ( attacker, target ) -> {
 
         if ( attacker == target ) return true;
@@ -145,6 +146,7 @@ public class SentryTrait extends Trait {
         return false;
     };
     
+    @SuppressWarnings( "deprecation" )
     final static StuckAction setStuckStatus = ( npc, navigator ) -> {
 
         if ( !npc.isSpawned() ) return false;
@@ -815,7 +817,7 @@ public class SentryTrait extends Trait {
 
             if ( mount != null ) {
                 Utils.copyNavParams( mount.getNavigator().getDefaultParameters(), npc.getNavigator().getDefaultParameters() );
-                myEntity.getVehicle().setPassenger( null );
+                myEntity.getVehicle().setPassenger( myEntity );
                 mount.despawn( DespawnReason.PENDING_RESPAWN );
             }
         }

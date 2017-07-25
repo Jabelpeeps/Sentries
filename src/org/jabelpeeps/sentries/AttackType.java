@@ -275,6 +275,8 @@ public enum AttackType implements SentryAttack {
         if ( Utils.sqr( Math.min( approxRange, inst.range ) ) < myLoc.distanceSquared( targetLoc ) ) {
             // can't hit target
             inst.cancelAttack();
+            
+            if ( Sentries.debug ) Sentries.debugLog( "Can't hit target, attack cancelled." );
             return true;
         } 
         return false;

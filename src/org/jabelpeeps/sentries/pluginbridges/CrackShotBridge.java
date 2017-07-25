@@ -5,16 +5,10 @@ import java.util.StringJoiner;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LargeFireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Snowball;
-import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -100,7 +94,7 @@ public class CrackShotBridge implements PluginBridge, Listener {
         public void call( CommandSender sender, String npcName, SentryTrait inst, int nextArg, String... args ) {
 
             if ( inst.getNPC().getTrait( MobType.class ).getType() != EntityType.PLAYER ) {
-                Utils.sendMessage( sender, S.ERROR, " Only Player-type NPC's can carry Crackshot weapons." );
+                Utils.sendMessage( sender, S.ERROR, "Only Player-type NPC's can carry Crackshot weapons." );
                 return;
             }
             
@@ -124,11 +118,11 @@ public class CrackShotBridge implements PluginBridge, Listener {
                 if ( weapon != null ) {
                     equip.set( EquipmentSlot.HAND, null );
                     Utils.sendMessage( sender, Col.GREEN, weapon, " removed from ", npcName );
+                    inst.updateAttackType();
                 }
                 else
                     Utils.sendMessage( sender, Col.RED, npcName, " is not carrying a CrackShot weapon." );
                 
-                inst.updateAttackType();
                 return;             
             }
 
@@ -149,32 +143,22 @@ public class CrackShotBridge implements PluginBridge, Listener {
         @Getter private String name = "CrackShot:";
         private CSUtility crack = new CSUtility();
         private ConfigurationSection config;
-        private Weapons weapon;
-        private Class<? extends Entity> projectile;
        
         CrackShotAttack( ConfigurationSection conf ) {
             config = conf;
             name += conf.getName();
-            weapon = Weapons.valueOf( conf.getString( "Shooting.Projectile_Type" ).toUpperCase() );
-            projectile = weapon.getProjectile();
         }
        
         @Override
         public boolean handle( LivingEntity arg0, LivingEntity arg1 ) {
             
-            if ( projectile == null ) return false;
-            
-            Entity proj = arg0.getWorld().spawn( arg0.getEyeLocation(), projectile );
-
-            crack.setProjectile( (Player) arg0, (Projectile) proj, config.getName() );
-            crack.getHandle().callShootEvent( (Player) arg0, proj, config.getName() );
+            crack.getHandle().csminion.weaponInteraction( (Player) arg0, config.getName(), false );
             
             // crack.spawnMine( player, loc, weaponTitle );
             // crack.generateExplosion( player, loc, weaponTitle );
             // crack.getHandle().launchGrenade( player, parent_node, delay, vel, splitLoc, cTimes );
             // crack.getHandle().fireProjectile( player, parentNode, leftClick );
             // crack.getHandle().csminion.callAirstrike( mark, parent_node, player );
-            // crack.getHandle().csminion.weaponInteraction( shooter, parent_node, leftClick );
             return true;
         }
         
@@ -182,20 +166,5 @@ public class CrackShotBridge implements PluginBridge, Listener {
         @Override public int getDamage() { return 0; }
         // TODO find out how CrackShot records the range of its weapons.
         @Override public double getApproxRange() { return 32; }
-    }
-    
-    enum Weapons {
-        SNOWBALL, EGG, ARROW, WITHERSKULL, FIREBALL, GRENADE, FLARE, ENERGY, SPLASH;
-        
-        protected Class<? extends Entity> getProjectile() { 
-            switch ( this ) {
-                case ARROW: return Arrow.class;
-                case EGG: return Egg.class;
-                case FIREBALL: return LargeFireball.class;
-                case SNOWBALL: return Snowball.class;
-                case WITHERSKULL: return WitherSkull.class;
-                default: return null;
-            }
-        }
     }
 }
