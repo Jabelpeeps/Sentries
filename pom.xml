@@ -72,7 +72,7 @@
     
         <dependency>
             <groupId>net.citizensnpcs</groupId>
-            <artifactId>citizens-main</artifactId>
+            <artifactId>citizens</artifactId>
             <version>${citizens.version}</version>
             <type>jar</type>
             <scope>provided</scope>
